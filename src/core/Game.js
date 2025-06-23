@@ -7,6 +7,7 @@ import { AssetLoader } from '../assets/AssetLoader.js';
 import { PixelRenderer } from '../rendering/PixelRenderer.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
+import { MusicSystem } from '../audio/MusicSystem.js';
 
 export class Game {
     constructor(canvas) {
@@ -27,6 +28,7 @@ export class Game {
         this.assetLoader = new AssetLoader();
         this.renderer = new PixelRenderer(canvas);
         this.levelLoader = new LevelLoader();
+        this.musicSystem = new MusicSystem();
         
         // デバッグ用
         this.debug = false;
@@ -43,6 +45,9 @@ export class Game {
             // アセットローダーにレンダラーを設定
             this.assetLoader.setRenderer(this.renderer);
             
+            // 音楽システムの初期化は後で行う（自動再生ポリシー対応）
+            console.log('Music system will be initialized on user interaction');
+            
             // テスト用のアセットを読み込み
             console.log('Loading test assets...');
             await this.loadTestAssets();
@@ -58,6 +63,9 @@ export class Game {
             // テスト用のプレイヤーを作成（必ず実行）
             console.log('Creating test player...');
             this.createTestPlayer();
+            
+            // クリックイベントで音楽を開始（ブラウザの自動再生ポリシー対応）
+            this.setupAudioEvents();
             
             console.log('Game initialized successfully!');
             return true;
@@ -82,6 +90,7 @@ export class Game {
         // テスト用のプレイヤーを作成
         this.player = new Player(100, 300);
         this.player.setInputManager(this.inputManager);
+        this.player.setMusicSystem(this.musicSystem);
         console.log('Test player created at:', this.player.x, this.player.y);
         console.log('Player size:', this.player.width, 'x', this.player.height);
         
@@ -90,6 +99,40 @@ export class Game {
         
         // デバッグモードを有効にする
         this.renderer.setDebugMode(true);
+    }
+    
+    setupAudioEvents() {
+        // 音楽の自動再生制限対策
+        let musicStarted = false;
+        
+        const startMusic = async () => {
+            if (musicStarted) return;
+            musicStarted = true;
+            
+            try {
+                // 音楽システムが初期化されていない場合は初期化
+                if (!this.musicSystem.isInitialized) {
+                    console.log('Initializing music system on user interaction...');
+                    const initialized = await this.musicSystem.init();
+                    if (!initialized) {
+                        console.warn('Failed to initialize music system');
+                        return;
+                    }
+                }
+                
+                // タイトルBGMを再生
+                console.log('Starting title BGM...');
+                this.musicSystem.playTitleBGM();
+            } catch (error) {
+                console.error('Error starting music:', error);
+            }
+        };
+        
+        // クリックまたはキー入力で音楽を開始（once: trueで自動的にリスナーを削除）
+        document.addEventListener('click', startMusic, { once: true });
+        document.addEventListener('keydown', startMusic, { once: true });
+        
+        console.log('Audio events setup complete - waiting for user interaction');
     }
     
     start() {
@@ -130,7 +173,7 @@ export class Game {
         // プレイヤーの更新（テスト用）
         if (this.player) {
             // 地面との衝突判定（更新前に判定）
-            const willCollideGround = this.player.y + this.player.height + this.player.vy >= this.testGroundY;
+            // const willCollideGround = this.player.y + this.player.height + this.player.vy >= this.testGroundY;
             
             // プレイヤーを更新（物理演算と入力処理）
             this.player.update(this.frameTime);
@@ -192,7 +235,7 @@ export class Game {
         
         // タイトル
         this.renderer.drawText('Coin Hunter Adventure - Pixel Edition', 20, 20, '#FFFFFF', 20);
-        this.renderer.drawText('Core Systems Test - v2.0 HOT RELOAD TEST', 20, 50, '#00FF00', 16);
+        this.renderer.drawText('Core Systems Test - Music System Integrated', 20, 50, '#00FF00', 16);
         
         // システム状態
         this.renderer.drawText('=== Core Systems Status ===', 20, 90, '#FFFFFF', 14);
@@ -203,24 +246,30 @@ export class Game {
         this.renderer.drawText('✓ LevelLoader: Active', 20, 190, '#00FF00', 12);
         this.renderer.drawText('✓ Entity System: Active', 20, 210, '#00FF00', 12);
         this.renderer.drawText(`✓ Player Entity: ${this.player ? 'Active' : 'Not loaded'}`, 20, 230, this.player ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`✓ Music System: ${this.musicSystem.isInitialized ? 'Active' : 'Not initialized'}`, 20, 250, this.musicSystem.isInitialized ? '#00FF00' : '#FF0000', 12);
+        
+        // 音楽開始の案内
+        if (!this.musicSystem.isInitialized) {
+            this.renderer.drawText('Click or Press any key to start music', 250, 80, '#FFFF00', 14);
+        }
         
         // 入力状態
-        this.renderer.drawText('=== Input State ===', 20, 270, '#FFFFFF', 14);
-        this.renderer.drawText(`Left: ${input.left ? 'ON' : 'OFF'}`, 20, 290, input.left ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Right: ${input.right ? 'ON' : 'OFF'}`, 120, 290, input.right ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Jump: ${input.jump ? 'ON' : 'OFF'}`, 220, 290, input.jump ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Action: ${input.action ? 'ON' : 'OFF'}`, 320, 290, input.action ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText('=== Input State ===', 20, 290, '#FFFFFF', 14);
+        this.renderer.drawText(`Left: ${input.left ? 'ON' : 'OFF'}`, 20, 310, input.left ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Right: ${input.right ? 'ON' : 'OFF'}`, 120, 310, input.right ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Jump: ${input.jump ? 'ON' : 'OFF'}`, 220, 310, input.jump ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Action: ${input.action ? 'ON' : 'OFF'}`, 320, 310, input.action ? '#00FF00' : '#FF0000', 12);
         
         // プレイヤー状態
         if (this.player) {
             const playerState = this.player.getState();
-            this.renderer.drawText('=== Player State ===', 20, 330, '#FFFFFF', 14);
-            this.renderer.drawText(`Pos: (${Math.floor(playerState.x)}, ${Math.floor(playerState.y)})`, 20, 350, '#FFFFFF', 12);
-            this.renderer.drawText(`Vel: (${playerState.vx.toFixed(1)}, ${playerState.vy.toFixed(1)})`, 150, 350, '#FFFFFF', 12);
-            this.renderer.drawText(`Health: ${playerState.health}/${playerState.maxHealth}`, 280, 350, '#FFFFFF', 12);
-            this.renderer.drawText(`State: ${playerState.animState}`, 20, 370, '#FFFFFF', 12);
-            this.renderer.drawText(`Grounded: ${playerState.grounded ? 'Yes' : 'No'}`, 150, 370, playerState.grounded ? '#00FF00' : '#FF0000', 12);
-            this.renderer.drawText(`Jumping: ${playerState.isJumping ? 'Yes' : 'No'}`, 280, 370, '#FFFFFF', 12);
+            this.renderer.drawText('=== Player State ===', 20, 350, '#FFFFFF', 14);
+            this.renderer.drawText(`Pos: (${Math.floor(playerState.x)}, ${Math.floor(playerState.y)})`, 20, 370, '#FFFFFF', 12);
+            this.renderer.drawText(`Vel: (${playerState.vx.toFixed(1)}, ${playerState.vy.toFixed(1)})`, 150, 370, '#FFFFFF', 12);
+            this.renderer.drawText(`Health: ${playerState.health}/${playerState.maxHealth}`, 280, 370, '#FFFFFF', 12);
+            this.renderer.drawText(`State: ${playerState.animState}`, 20, 390, '#FFFFFF', 12);
+            this.renderer.drawText(`Grounded: ${playerState.grounded ? 'Yes' : 'No'}`, 150, 390, playerState.grounded ? '#00FF00' : '#FF0000', 12);
+            this.renderer.drawText(`Jumping: ${playerState.isJumping ? 'Yes' : 'No'}`, 280, 390, '#FFFFFF', 12);
         }
         
         // デバッグモード
@@ -231,10 +280,20 @@ export class Game {
         
         // 操作説明
         this.renderer.drawText('Controls: Arrow Keys/WASD = Move, Space/Up/W = Jump, Enter/E = Action', 20, 470, '#CCCCCC', 10);
-        this.renderer.drawText('Press @ to toggle debug mode', 20, 485, '#CCCCCC', 10);
+        this.renderer.drawText('Press @ to toggle debug mode | M to toggle music', 20, 485, '#CCCCCC', 10);
+        
+        // 音楽状態
+        const muteState = this.musicSystem.getMuteState();
+        this.renderer.drawText(`Music: ${muteState ? 'OFF' : 'ON'}`, 600, 20, muteState ? '#FF0000' : '#00FF00', 12);
     }
     
     stop() {
         this.running = false;
+        
+        // 音楽システムのクリーンアップ
+        if (this.musicSystem) {
+            this.musicSystem.stopBGM();
+            this.musicSystem.destroy();
+        }
     }
 }

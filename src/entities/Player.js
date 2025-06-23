@@ -75,6 +75,9 @@ export class Player extends Entity {
         
         // 入力参照
         this.inputManager = null;
+        
+        // 音楽システム参照
+        this.musicSystem = null;
     }
     
     /**
@@ -83,6 +86,14 @@ export class Player extends Entity {
      */
     setInputManager(inputManager) {
         this.inputManager = inputManager;
+    }
+    
+    /**
+     * 音楽システムを設定
+     * @param {MusicSystem} musicSystem 
+     */
+    setMusicSystem(musicSystem) {
+        this.musicSystem = musicSystem;
     }
     
     /**
@@ -177,8 +188,10 @@ export class Player extends Entity {
                 console.log('JUMP! vy after:', this.vy, 'y:', this.y);
             }
             
-            // ジャンプ音（将来的に実装）
-            // this.playSound('jump');
+            // ジャンプ音を再生
+            if (this.musicSystem) {
+                this.musicSystem.playJumpSound();
+            }
         }
         
         // ジャンプ時間をカウント
@@ -288,8 +301,10 @@ export class Player extends Entity {
             this.vy = PLAYER_CONFIG.knockbackVertical;
             this.vx = this.facing === 'right' ? -PLAYER_CONFIG.knockbackHorizontal : PLAYER_CONFIG.knockbackHorizontal;
             
-            // ダメージ音（将来的に実装）
-            // this.playSound('damage');
+            // ダメージ音を再生
+            if (this.musicSystem) {
+                this.musicSystem.playDamageSound();
+            }
         }
     }
     
@@ -309,8 +324,10 @@ export class Player extends Entity {
         this.coins += value;
         this.score += value * 100;
         
-        // コイン音（将来的に実装）
-        // this.playSound('coin');
+        // コイン音を再生
+        if (this.musicSystem) {
+            this.musicSystem.playCoinSound();
+        }
     }
     
     /**
@@ -320,8 +337,10 @@ export class Player extends Entity {
         this.isDead = true;
         this.active = false;
         
-        // 死亡エフェクト（将来的に実装）
-        // this.playSound('death');
+        // ゲームオーバー音を再生
+        if (this.musicSystem) {
+            this.musicSystem.playGameOverJingle();
+        }
         
         // ゲームオーバー処理をトリガー
         if (this.onDeath) {
