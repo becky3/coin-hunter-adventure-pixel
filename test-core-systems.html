@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Systems Test - Coin Hunter Adventure Pixel</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: monospace;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #444;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .error {
+            color: #ff6666;
+            background: rgba(0,0,0,0.9);
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <div class="info">
+        <h3>コアシステムテスト</h3>
+        <p>このページでは実装したコアシステムの動作を確認できます。</p>
+        <ul>
+            <li>InputManager: キー入力の検出</li>
+            <li>GameStateManager: 状態管理</li>
+            <li>AssetLoader: アセット読み込み</li>
+            <li>PixelRenderer: 描画システム</li>
+            <li>LevelLoader: レベル管理</li>
+        </ul>
+    </div>
+    
+    <script type="module">
+        import { Game } from './src/core/Game.js';
+        
+        const canvas = document.getElementById('gameCanvas');
+        const game = new Game(canvas);
+        
+        // エラーハンドリング
+        window.addEventListener('error', (e) => {
+            console.error('Error:', e);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `
+                <h3>エラーが発生しました</h3>
+                <p>${e.message}</p>
+                <p>ファイル: ${e.filename}</p>
+                <p>行: ${e.lineno}, 列: ${e.colno}</p>
+            `;
+            document.body.appendChild(errorDiv);
+        });
+        
+        // ゲームの初期化と開始
+        async function startGame() {
+            try {
+                console.log('Starting core systems test...');
+                const initialized = await game.initialize();
+                
+                if (initialized) {
+                    game.start();
+                    console.log('Core systems test is running!');
+                } else {
+                    console.error('Failed to initialize game');
+                }
+            } catch (error) {
+                console.error('Failed to start game:', error);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.innerHTML = `
+                    <h3>ゲームの開始に失敗しました</h3>
+                    <p>${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+                document.body.appendChild(errorDiv);
+            }
+        }
+        
+        // ページ読み込み完了後に開始
+        window.addEventListener('load', startGame);
+    </script>
+</body>
+</html>
