@@ -123,18 +123,14 @@ export class Game {
                 // タイトルBGMを再生
                 console.log('Starting title BGM...');
                 this.musicSystem.playTitleBGM();
-                
-                // イベントリスナーを削除
-                document.removeEventListener('click', startMusic);
-                document.removeEventListener('keydown', startMusic);
             } catch (error) {
                 console.error('Error starting music:', error);
             }
         };
         
-        // クリックまたはキー入力で音楽を開始
-        document.addEventListener('click', startMusic);
-        document.addEventListener('keydown', startMusic);
+        // クリックまたはキー入力で音楽を開始（once: trueで自動的にリスナーを削除）
+        document.addEventListener('click', startMusic, { once: true });
+        document.addEventListener('keydown', startMusic, { once: true });
         
         console.log('Audio events setup complete - waiting for user interaction');
     }
