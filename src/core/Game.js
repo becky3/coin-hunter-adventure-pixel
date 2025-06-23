@@ -118,9 +118,9 @@ export class Game {
         // 入力の更新
         this.inputManager.update();
         
-        // テスト用ログ - 更新確認
+        // テスト用ログ - 更新確認（デバッグモード時のみ）
         const input = this.inputManager.getInput();
-        if (input.jump) {
+        if (input.jump && this.debug) {
             console.log('===== JUMP KEY DETECTED IN GAME.JS =====');
         }
         

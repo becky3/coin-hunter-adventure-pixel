@@ -15,7 +15,26 @@ const PLAYER_CONFIG = {
     maxHealth: 3,
     invulnerabilityTime: 120,
     spawnX: 100,
-    spawnY: 300
+    spawnY: 300,
+    // ノックバック設定
+    knockbackVertical: -5,
+    knockbackHorizontal: 3
+};
+
+// アニメーション設定（定数化してメモリ効率を向上）
+const ANIMATION_CONFIG = {
+    speed: {
+        idle: 500,
+        walk: 100,
+        jump: 200,
+        fall: 200
+    },
+    frameCount: {
+        idle: 2,
+        walk: 4,
+        jump: 1,
+        fall: 1
+    }
 };
 
 export class Player extends Entity {
@@ -130,8 +149,8 @@ export class Player extends Entity {
      * @param {Object} input - 入力状態
      */
     handleJump(input) {
-        // デバッグログ
-        if (input.jump) {
+        // デバッグログ（デバッグモード時のみ）
+        if (input.jump && window.game?.debug) {
             console.log('Jump button pressed!', {
                 jumpButtonPressed: this.jumpButtonPressed,
                 grounded: this.grounded,
@@ -142,7 +161,9 @@ export class Player extends Entity {
         
         // ジャンプボタンが押された瞬間
         if (input.jump && !this.jumpButtonPressed && this.grounded) {
-            console.log('JUMP! vy before:', this.vy, 'jumpPower:', this.jumpPower);
+            if (window.game?.debug) {
+                console.log('JUMP! vy before:', this.vy, 'jumpPower:', this.jumpPower);
+            }
             this.vy = -this.jumpPower;
             this.grounded = false;
             this.isJumping = true;
@@ -152,7 +173,9 @@ export class Player extends Entity {
             this.jumpButtonHoldTime = 0;
             this.jumpMaxHeight = 0;
             this.jumpStartY = this.y;
-            console.log('JUMP! vy after:', this.vy, 'y:', this.y);
+            if (window.game?.debug) {
+                console.log('JUMP! vy after:', this.vy, 'y:', this.y);
+            }
             
             // ジャンプ音（将来的に実装）
             // this.playSound('jump');
@@ -232,28 +255,14 @@ export class Player extends Entity {
     updateAnimationFrame(deltaTime) {
         this.animTimer += deltaTime;
         
-        // アニメーション速度（ms）
-        const animSpeed = {
-            idle: 500,
-            walk: 100,
-            jump: 200,
-            fall: 200
-        };
-        
-        const speed = animSpeed[this.animState] || 200;
+        // アニメーション速度を定数から取得
+        const speed = ANIMATION_CONFIG.speed[this.animState] || 200;
         
         if (this.animTimer >= speed) {
             this.animTimer = 0;
             
-            // フレーム数
-            const frameCount = {
-                idle: 2,
-                walk: 4,
-                jump: 1,
-                fall: 1
-            };
-            
-            const frames = frameCount[this.animState] || 1;
+            // フレーム数を定数から取得
+            const frames = ANIMATION_CONFIG.frameCount[this.animState] || 1;
             this.animFrame = (this.animFrame + 1) % frames;
         }
     }
@@ -275,9 +284,9 @@ export class Player extends Entity {
             this.invulnerable = true;
             this.invulnerabilityTime = PLAYER_CONFIG.invulnerabilityTime;
             
-            // ノックバック
-            this.vy = -5;
-            this.vx = this.facing === 'right' ? -3 : 3;
+            // ノックバック（設定値を使用）
+            this.vy = PLAYER_CONFIG.knockbackVertical;
+            this.vx = this.facing === 'right' ? -PLAYER_CONFIG.knockbackHorizontal : PLAYER_CONFIG.knockbackHorizontal;
             
             // ダメージ音（将来的に実装）
             // this.playSound('damage');
