@@ -165,6 +165,9 @@ export class MenuState {
             this.drawMenuOptions(renderer);
         }
         
+        // ミュートボタン
+        this.drawMuteButton(renderer);
+        
         // バージョン情報
         renderer.drawText('v0.1.0', 10, renderer.canvas.height - 20, '#666666', 12);
     }
@@ -287,6 +290,22 @@ export class MenuState {
         
         // 戻る説明
         renderer.drawText('PRESS ESC/ENTER/SPACE TO RETURN', centerX - 128, 450, '#999999', 12);
+    }
+    
+    /**
+     * ミュートボタンの描画
+     */
+    drawMuteButton(renderer) {
+        const muteState = this.game.musicSystem?.getMuteState() || false;
+        const buttonText = muteState ? 'SOUND: OFF' : 'SOUND: ON';
+        const buttonColor = muteState ? '#FF0000' : '#00FF00';
+        
+        // 右上に配置
+        const x = renderer.canvas.width - 120;
+        const y = 20;
+        
+        renderer.drawText(buttonText, x, y, buttonColor, 10);
+        renderer.drawText('(M)', x + 20, y + 15, '#666666', 8);
     }
     
     /**

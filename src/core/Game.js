@@ -316,10 +316,6 @@ export class Game {
         // 操作説明
         this.renderer.drawText('Controls: Arrow Keys/WASD = Move, Space/Up/W = Jump, Enter/E = Action', 20, 470, '#CCCCCC', 10);
         this.renderer.drawText('Press @ to toggle debug mode | M to toggle music', 20, 485, '#CCCCCC', 10);
-        
-        // 音楽状態
-        const muteState = this.musicSystem.getMuteState();
-        this.renderer.drawText(`Music: ${muteState ? 'OFF' : 'ON'}`, 600, 20, muteState ? '#FF0000' : '#00FF00', 12);
     }
     
     stop() {

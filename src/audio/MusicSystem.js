@@ -563,6 +563,45 @@ export class MusicSystem {
     }
     
     /**
+     * ボタンクリック効果音
+     */
+    playButtonClickSound() {
+        if (!this.isInitialized || this.isMuted) return;
+        
+        this.playSoundEffect(
+            800,
+            0.05,
+            'square',
+            0.2,
+            { attack: 0.01, decayTime: 0.02, decay: 0.5, sustain: 0.3, release: 0.02 }
+        );
+    }
+    
+    /**
+     * ゲーム開始効果音
+     */
+    playGameStartSound() {
+        if (!this.isInitialized || this.isMuted) return;
+        
+        const now = this.audioContext.currentTime;
+        
+        // 上昇音階
+        const notes = [
+            { freq: this.getNoteFrequency('C4'), time: 0, duration: 0.1 },
+            { freq: this.getNoteFrequency('E4'), time: 0.1, duration: 0.1 },
+            { freq: this.getNoteFrequency('G4'), time: 0.2, duration: 0.1 },
+            { freq: this.getNoteFrequency('C5'), time: 0.3, duration: 0.3 }
+        ];
+        
+        notes.forEach(({ freq, time, duration }) => {
+            setTimeout(() => {
+                if (!this.isInitialized || this.isMuted) return;
+                this.playSoundEffect(freq, duration, 'sine', 0.6);
+            }, time * 1000);
+        });
+    }
+    
+    /**
      * 全てのアクティブノードを強制停止
      */
     stopAllActiveNodes() {
