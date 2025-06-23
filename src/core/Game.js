@@ -6,6 +6,7 @@ import { GameStateManager } from '../states/GameStateManager.js';
 import { AssetLoader } from '../assets/AssetLoader.js';
 import { PixelRenderer } from '../rendering/PixelRenderer.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
+import { Player } from '../entities/Player.js';
 
 export class Game {
     constructor(canvas) {
@@ -30,6 +31,9 @@ export class Game {
         // デバッグ用
         this.debug = false;
         window.game = this; // デバッグ用にグローバルに公開
+        
+        // エンティティ（テスト用）
+        this.player = null;
     }
     
     async initialize() {
@@ -43,9 +47,17 @@ export class Game {
             console.log('Loading test assets...');
             await this.loadTestAssets();
             
-            // レベルリストを読み込み
+            // レベルリストを読み込み（エラーが出ても続行）
             console.log('Loading stage list...');
-            await this.levelLoader.loadStageList();
+            try {
+                await this.levelLoader.loadStageList();
+            } catch (error) {
+                console.warn('Stage list loading failed, using defaults:', error);
+            }
+            
+            // テスト用のプレイヤーを作成（必ず実行）
+            console.log('Creating test player...');
+            this.createTestPlayer();
             
             console.log('Game initialized successfully!');
             return true;
@@ -64,6 +76,20 @@ export class Game {
         } catch (error) {
             console.warn('Could not load test sprite:', error);
         }
+    }
+    
+    createTestPlayer() {
+        // テスト用のプレイヤーを作成
+        this.player = new Player(100, 300);
+        this.player.setInputManager(this.inputManager);
+        console.log('Test player created at:', this.player.x, this.player.y);
+        console.log('Player size:', this.player.width, 'x', this.player.height);
+        
+        // 仮の地面を設定（y = 400）
+        this.testGroundY = 400;
+        
+        // デバッグモードを有効にする
+        this.renderer.setDebugMode(true);
     }
     
     start() {
@@ -92,16 +118,67 @@ export class Game {
         // 入力の更新
         this.inputManager.update();
         
-        // デバッグ: 入力状態を取得（将来の使用のため）
-        // const input = this.inputManager.getInput();
+        // テスト用ログ - 更新確認（デバッグモード時のみ）
+        const input = this.inputManager.getInput();
+        if (input.jump && this.debug) {
+            console.log('===== JUMP KEY DETECTED IN GAME.JS =====');
+        }
         
         // 状態管理の更新
         this.stateManager.update(this.frameTime);
+        
+        // プレイヤーの更新（テスト用）
+        if (this.player) {
+            // 地面との衝突判定（更新前に判定）
+            const willCollideGround = this.player.y + this.player.height + this.player.vy >= this.testGroundY;
+            
+            // プレイヤーを更新（物理演算と入力処理）
+            this.player.update(this.frameTime);
+            
+            // 地面との衝突処理
+            if (this.player.y + this.player.height > this.testGroundY) {
+                // 地面にめり込んでいる場合
+                this.player.y = this.testGroundY - this.player.height;
+                
+                // 下向きに移動している場合のみ着地処理
+                if (this.player.vy > 0) {
+                    this.player.vy = 0;
+                    this.player.grounded = true;
+                    this.player.isJumping = false;
+                }
+            } else if (Math.abs(this.player.y + this.player.height - this.testGroundY) < 1) {
+                // 地面にぴったり接している場合
+                this.player.grounded = true;
+            } else {
+                // 空中にいる場合
+                this.player.grounded = false;
+            }
+            
+            // 画面端の制限
+            if (this.player.x < 0) {
+                this.player.x = 0;
+                this.player.vx = 0;
+            }
+            if (this.player.x > this.canvas.width - this.player.width) {
+                this.player.x = this.canvas.width - this.player.width;
+                this.player.vx = 0;
+            }
+        }
     }
     
     render() {
         // レンダラーでクリア
         this.renderer.clear('#5C94FC');
+        
+        // テスト用の地面を描画
+        if (this.testGroundY) {
+            this.renderer.drawRect(0, this.testGroundY, this.canvas.width, this.canvas.height - this.testGroundY, '#8B4513');
+        }
+        
+        // プレイヤーを描画
+        if (this.player) {
+            this.player.render(this.renderer);
+        }
         
         // 状態管理の描画
         this.stateManager.render(this.ctx);
@@ -115,32 +192,36 @@ export class Game {
         
         // タイトル
         this.renderer.drawText('Coin Hunter Adventure - Pixel Edition', 20, 20, '#FFFFFF', 20);
-        this.renderer.drawText('Core Systems Test', 20, 50, '#FFFF00', 16);
+        this.renderer.drawText('Core Systems Test - v2.0 HOT RELOAD TEST', 20, 50, '#00FF00', 16);
         
         // システム状態
         this.renderer.drawText('=== Core Systems Status ===', 20, 90, '#FFFFFF', 14);
-        this.renderer.drawText(`✓ InputManager: Active`, 20, 110, '#00FF00', 12);
-        this.renderer.drawText(`✓ GameStateManager: Active`, 20, 130, '#00FF00', 12);
-        this.renderer.drawText(`✓ AssetLoader: Active`, 20, 150, '#00FF00', 12);
-        this.renderer.drawText(`✓ PixelRenderer: Active`, 20, 170, '#00FF00', 12);
-        this.renderer.drawText(`✓ LevelLoader: Active`, 20, 190, '#00FF00', 12);
+        this.renderer.drawText('✓ InputManager: Active', 20, 110, '#00FF00', 12);
+        this.renderer.drawText('✓ GameStateManager: Active', 20, 130, '#00FF00', 12);
+        this.renderer.drawText('✓ AssetLoader: Active', 20, 150, '#00FF00', 12);
+        this.renderer.drawText('✓ PixelRenderer: Active', 20, 170, '#00FF00', 12);
+        this.renderer.drawText('✓ LevelLoader: Active', 20, 190, '#00FF00', 12);
+        this.renderer.drawText('✓ Entity System: Active', 20, 210, '#00FF00', 12);
+        this.renderer.drawText(`✓ Player Entity: ${this.player ? 'Active' : 'Not loaded'}`, 20, 230, this.player ? '#00FF00' : '#FF0000', 12);
         
         // 入力状態
-        this.renderer.drawText('=== Input State ===', 20, 230, '#FFFFFF', 14);
-        this.renderer.drawText(`Left: ${input.left ? 'ON' : 'OFF'}`, 20, 250, input.left ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Right: ${input.right ? 'ON' : 'OFF'}`, 120, 250, input.right ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Jump: ${input.jump ? 'ON' : 'OFF'}`, 220, 250, input.jump ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Action: ${input.action ? 'ON' : 'OFF'}`, 320, 250, input.action ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText('=== Input State ===', 20, 270, '#FFFFFF', 14);
+        this.renderer.drawText(`Left: ${input.left ? 'ON' : 'OFF'}`, 20, 290, input.left ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Right: ${input.right ? 'ON' : 'OFF'}`, 120, 290, input.right ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Jump: ${input.jump ? 'ON' : 'OFF'}`, 220, 290, input.jump ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Action: ${input.action ? 'ON' : 'OFF'}`, 320, 290, input.action ? '#00FF00' : '#FF0000', 12);
         
-        // アセット情報
-        const loadProgress = this.assetLoader.getLoadingProgress();
-        this.renderer.drawText('=== Asset Loader ===', 20, 290, '#FFFFFF', 14);
-        this.renderer.drawText(`Loaded: ${loadProgress.loaded} / ${loadProgress.total}`, 20, 310, '#FFFFFF', 12);
-        
-        // レベル情報
-        const stages = this.levelLoader.getStageList();
-        this.renderer.drawText('=== Level Loader ===', 20, 350, '#FFFFFF', 14);
-        this.renderer.drawText(`Stages: ${stages.length} loaded`, 20, 370, '#FFFFFF', 12);
+        // プレイヤー状態
+        if (this.player) {
+            const playerState = this.player.getState();
+            this.renderer.drawText('=== Player State ===', 20, 330, '#FFFFFF', 14);
+            this.renderer.drawText(`Pos: (${Math.floor(playerState.x)}, ${Math.floor(playerState.y)})`, 20, 350, '#FFFFFF', 12);
+            this.renderer.drawText(`Vel: (${playerState.vx.toFixed(1)}, ${playerState.vy.toFixed(1)})`, 150, 350, '#FFFFFF', 12);
+            this.renderer.drawText(`Health: ${playerState.health}/${playerState.maxHealth}`, 280, 350, '#FFFFFF', 12);
+            this.renderer.drawText(`State: ${playerState.animState}`, 20, 370, '#FFFFFF', 12);
+            this.renderer.drawText(`Grounded: ${playerState.grounded ? 'Yes' : 'No'}`, 150, 370, playerState.grounded ? '#00FF00' : '#FF0000', 12);
+            this.renderer.drawText(`Jumping: ${playerState.isJumping ? 'Yes' : 'No'}`, 280, 370, '#FFFFFF', 12);
+        }
         
         // デバッグモード
         if (this.debug) {

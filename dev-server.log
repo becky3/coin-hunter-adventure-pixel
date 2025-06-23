@@ -2,8 +2,19 @@
 > coin-hunter-adventure-pixel@0.1.0 dev
 > vite
 
+Forced re-optimization of dependencies
+Port 3000 is in use, trying another one...
 
-  VITE v4.5.14  ready in 686 ms
+  VITE v4.5.14  ready in 562 ms
 
-  ➜  Local:   http://localhost:3000/
+  ➜  Local:   http://localhost:3001/
   ➜  Network: use --host to expose
+8:14:33 PM [vite] page reload src/core/Game.js
+8:20:06 PM [vite] page reload src/entities/Player.js
+8:20:15 PM [vite] page reload src/entities/Player.js
+8:20:26 PM [vite] page reload src/entities/Player.js
+8:20:38 PM [vite] page reload src/entities/Player.js
+8:20:46 PM [vite] page reload src/entities/Player.js
+8:20:55 PM [vite] page reload src/core/Game.js
+layer.js
+8:20:55 PM [vite] page reload src/core/Game.js
