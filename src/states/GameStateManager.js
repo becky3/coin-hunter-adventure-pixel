@@ -46,12 +46,22 @@ export class GameStateManager {
         
         // 新しい状態を開始
         this.currentState = this.states.get(name);
+        this.currentStateName = name;
         if (this.currentState.enter) {
             this.currentState.enter(params);
         }
         
         // イベントを記録
         this.recordEvent('stateChange', { from: this.previousState?.name, to: name, params });
+    }
+    
+    /**
+     * 状態を切り替え（エイリアス）
+     * @param {string} name - 切り替え先の状態名
+     * @param {Object} params - 状態に渡すパラメータ
+     */
+    setState(name, params = {}) {
+        this.changeState(name, params);
     }
     
     /**
@@ -66,11 +76,11 @@ export class GameStateManager {
     
     /**
      * 現在の状態を描画
-     * @param {CanvasRenderingContext2D} ctx - 描画コンテキスト
+     * @param {PixelRenderer} renderer - レンダラー
      */
-    render(ctx) {
+    render(renderer) {
         if (this.currentState && this.currentState.render) {
-            this.currentState.render(ctx);
+            this.currentState.render(renderer);
         }
     }
     

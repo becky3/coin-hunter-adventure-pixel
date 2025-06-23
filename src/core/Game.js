@@ -8,6 +8,7 @@ import { PixelRenderer } from '../rendering/PixelRenderer.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { MusicSystem } from '../audio/MusicSystem.js';
+import { MenuState } from '../states/MenuState.js';
 
 export class Game {
     constructor(canvas) {
@@ -67,6 +68,12 @@ export class Game {
             // クリックイベントで音楽を開始（ブラウザの自動再生ポリシー対応）
             this.setupAudioEvents();
             
+            // 状態を登録
+            this.registerStates();
+            
+            // メニュー状態から開始
+            this.stateManager.setState('menu');
+            
             console.log('Game initialized successfully!');
             return true;
         } catch (error) {
@@ -99,6 +106,15 @@ export class Game {
         
         // デバッグモードを有効にする
         this.renderer.setDebugMode(true);
+    }
+    
+    registerStates() {
+        // メニュー状態を登録
+        const menuState = new MenuState(this);
+        this.stateManager.registerState('menu', menuState);
+        
+        // TODO: PlayStateを実装後に追加
+        // this.stateManager.registerState('play', new PlayState(this));
     }
     
     setupAudioEvents() {
@@ -161,6 +177,17 @@ export class Game {
         // 入力の更新
         this.inputManager.update();
         
+        // 現在の状態に応じて処理を分岐
+        if (this.stateManager.currentStateName === 'menu') {
+            // メニュー状態の更新
+            this.stateManager.update(this.frameTime);
+        } else {
+            // ゲームプレイ状態の更新（テスト用）
+            this.updateTestMode();
+        }
+    }
+    
+    updateTestMode() {
         // テスト用ログ - 更新確認（デバッグモード時のみ）
         const input = this.inputManager.getInput();
         if (input.jump && this.debug) {
@@ -210,6 +237,17 @@ export class Game {
     }
     
     render() {
+        // 現在の状態に応じて描画を分岐
+        if (this.stateManager.currentStateName === 'menu') {
+            // メニュー状態の描画
+            this.stateManager.render(this.renderer);
+        } else {
+            // ゲームプレイ状態の描画（テスト用）
+            this.renderTestMode();
+        }
+    }
+    
+    renderTestMode() {
         // レンダラーでクリア
         this.renderer.clear('#5C94FC');
         
@@ -222,9 +260,6 @@ export class Game {
         if (this.player) {
             this.player.render(this.renderer);
         }
-        
-        // 状態管理の描画
-        this.stateManager.render(this.ctx);
         
         // デバッグ情報の表示
         this.renderDebugInfo();
