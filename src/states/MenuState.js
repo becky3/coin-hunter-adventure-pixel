@@ -23,8 +23,11 @@ export class MenuState {
         
         // タイトル画面のアニメーション
         this.titleAnimTimer = 0;
-        this.coinAnimTimer = 0;
-        this.starAnimTimer = 0;
+        
+        // キー押下状態
+        this.upPressed = false;
+        this.downPressed = false;
+        this.backPressed = false;
     }
     
     /**
@@ -59,8 +62,6 @@ export class MenuState {
     update(deltaTime) {
         // アニメーションタイマー更新
         this.titleAnimTimer += deltaTime;
-        this.coinAnimTimer += deltaTime;
-        this.starAnimTimer += deltaTime;
         
         // ロゴのアニメーション
         if (this.logoY < this.logoTargetY) {
@@ -83,45 +84,63 @@ export class MenuState {
         
         if (this.showHowTo || this.showCredits) {
             // How to Play/Credits画面での入力
-            if (this.game.inputManager.isKeyJustPressed('Escape') || 
-                this.game.inputManager.isKeyJustPressed('Enter') ||
-                this.game.inputManager.isKeyJustPressed('Space')) {
-                this.showHowTo = false;
-                this.showCredits = false;
-                if (this.game.musicSystem) {
-                    this.game.musicSystem.playButtonClickSound();
+            if (this.game.inputManager.isKeyPressed('Escape') || 
+                this.game.inputManager.isKeyPressed('Enter') ||
+                this.game.inputManager.isKeyPressed('Space')) {
+                if (!this.backPressed) {
+                    this.backPressed = true;
+                    this.showHowTo = false;
+                    this.showCredits = false;
+                    if (this.game.musicSystem) {
+                        this.game.musicSystem.playButtonClickSound();
+                    }
                 }
+            } else {
+                this.backPressed = false;
             }
         } else {
-            // メニュー選択
-            if (this.game.inputManager.isKeyJustPressed('ArrowUp') || 
-                this.game.inputManager.isKeyJustPressed('KeyW')) {
-                this.selectedOption--;
-                if (this.selectedOption < 0) {
-                    this.selectedOption = this.options.length - 1;
+            // メニュー選択（カーソルキーのコード修正）
+            if (this.game.inputManager.isKeyPressed('ArrowUp') || 
+                this.game.inputManager.isKeyPressed('KeyW')) {
+                if (!this.upPressed) {
+                    this.upPressed = true;
+                    this.selectedOption--;
+                    if (this.selectedOption < 0) {
+                        this.selectedOption = this.options.length - 1;
+                    }
+                    if (this.game.musicSystem) {
+                        this.game.musicSystem.playButtonClickSound();
+                    }
                 }
-                if (this.game.musicSystem) {
-                    this.game.musicSystem.playButtonClickSound();
-                }
+            } else {
+                this.upPressed = false;
             }
             
-            if (this.game.inputManager.isKeyJustPressed('ArrowDown') || 
-                this.game.inputManager.isKeyJustPressed('KeyS')) {
-                this.selectedOption++;
-                if (this.selectedOption >= this.options.length) {
-                    this.selectedOption = 0;
+            if (this.game.inputManager.isKeyPressed('ArrowDown') || 
+                this.game.inputManager.isKeyPressed('KeyS')) {
+                if (!this.downPressed) {
+                    this.downPressed = true;
+                    this.selectedOption++;
+                    if (this.selectedOption >= this.options.length) {
+                        this.selectedOption = 0;
+                    }
+                    if (this.game.musicSystem) {
+                        this.game.musicSystem.playButtonClickSound();
+                    }
                 }
-                if (this.game.musicSystem) {
-                    this.game.musicSystem.playButtonClickSound();
-                }
+            } else {
+                this.downPressed = false;
             }
             
             // 決定
-            if ((this.game.inputManager.isKeyJustPressed('Enter') || 
-                 this.game.inputManager.isKeyJustPressed('Space')) && 
-                 !this.enterPressed && this.optionsAlpha >= 1) {
-                this.enterPressed = true;
-                this.executeOption();
+            if ((this.game.inputManager.isKeyPressed('Enter') || 
+                 this.game.inputManager.isKeyPressed('Space')) && this.optionsAlpha >= 1) {
+                if (!this.enterPressed) {
+                    this.enterPressed = true;
+                    this.executeOption();
+                }
+            } else {
+                this.enterPressed = false;
             }
         }
     }
@@ -131,11 +150,8 @@ export class MenuState {
      * @param {PixelRenderer} renderer - レンダラー
      */
     render(renderer) {
-        // 背景
-        renderer.fillRect(0, 0, renderer.canvas.width, renderer.canvas.height, '#1a1a2e');
-        
-        // 装飾的な星背景
-        this.drawStarfield(renderer);
+        // 背景（シンプルな黒）
+        renderer.fillRect(0, 0, renderer.canvas.width, renderer.canvas.height, '#000000');
         
         if (this.showHowTo) {
             this.renderHowToPlay(renderer);
@@ -147,13 +163,10 @@ export class MenuState {
             
             // メニューオプション
             this.drawMenuOptions(renderer);
-            
-            // 装飾的なコイン
-            this.drawDecorativeCoins(renderer);
         }
         
         // バージョン情報
-        renderer.drawText('v0.1.0 - Pixel Edition', 10, renderer.canvas.height - 10, '#666666', 10);
+        renderer.drawText('v0.1.0', 10, renderer.canvas.height - 20, '#666666', 12);
     }
     
     /**
@@ -162,17 +175,10 @@ export class MenuState {
     drawTitleLogo(renderer) {
         const centerX = renderer.canvas.width / 2;
         
-        // メインタイトル
+        // メインタイトル（ピクセルフォントサイズ調整）
         const titleY = this.logoY;
-        renderer.drawText('COIN HUNTER', centerX - 120, titleY, '#FFD700', 48);
-        renderer.drawText('ADVENTURE', centerX - 90, titleY + 50, '#FF6B6B', 36);
-        
-        // Pixel Edition サブタイトル
-        renderer.drawText('- Pixel Edition -', centerX - 60, titleY + 90, '#4ECDC4', 16);
-        
-        // タイトルの影
-        renderer.drawText('COIN HUNTER', centerX - 118, titleY + 2, '#B8860B', 48);
-        renderer.drawText('ADVENTURE', centerX - 88, titleY + 52, '#CC5555', 36);
+        renderer.drawText('COIN HUNTER', centerX - 88, titleY, '#FFD700', 16);
+        renderer.drawText('ADVENTURE', centerX - 72, titleY + 30, '#FF6B6B', 16);
     }
     
     /**
@@ -182,29 +188,17 @@ export class MenuState {
         if (this.optionsAlpha <= 0) return;
         
         const centerX = renderer.canvas.width / 2;
-        const startY = 300;
-        const lineHeight = 50;
+        const startY = 250;
+        const lineHeight = 30;
         
         this.options.forEach((option, index) => {
             const y = startY + index * lineHeight;
             const isSelected = index === this.selectedOption;
             
-            // 選択中の項目の背景
-            if (isSelected) {
-                const pulse = Math.sin(this.titleAnimTimer * 0.005) * 0.3 + 0.7;
-                renderer.fillRect(
-                    centerX - 150, 
-                    y - 25, 
-                    300, 
-                    40, 
-                    `rgba(78, 205, 196, ${0.3 * pulse * this.optionsAlpha})`
-                );
-            }
-            
-            // テキスト
+            // テキスト（ピクセルフォントサイズ）
             const color = isSelected ? '#FFD700' : '#FFFFFF';
-            const size = isSelected ? 24 : 20;
-            const offsetX = option.text.length * size / 4;
+            const size = 16;
+            const offsetX = option.text.length * 8;
             
             renderer.drawText(
                 option.text, 
@@ -217,73 +211,22 @@ export class MenuState {
             
             // 選択カーソル
             if (isSelected) {
-                const cursorX = centerX - offsetX - 30;
-                renderer.drawText('▶', cursorX + Math.sin(this.titleAnimTimer * 0.01) * 5, y, '#FFD700', 20);
+                const cursorX = centerX - offsetX - 20;
+                renderer.drawText('>', cursorX, y, '#FFD700', 16);
             }
         });
         
         // 操作説明
         renderer.drawText(
-            'Arrow Keys: Select   Enter/Space: Confirm', 
-            centerX - 150, 
-            450, 
+            'ARROW KEYS: SELECT   ENTER/SPACE: CONFIRM', 
+            centerX - 168, 
+            400, 
             '#999999', 
             12,
             this.optionsAlpha
         );
     }
     
-    /**
-     * 星背景の描画
-     */
-    drawStarfield(renderer) {
-        const stars = 50;
-        for (let i = 0; i < stars; i++) {
-            const x = (i * 137) % renderer.canvas.width;
-            const y = (i * 89) % renderer.canvas.height;
-            const size = (i % 3) + 1;
-            const brightness = Math.sin(this.starAnimTimer * 0.001 + i) * 0.3 + 0.7;
-            const color = `rgba(255, 255, 255, ${brightness * 0.5})`;
-            
-            renderer.fillRect(x, y, size, size, color);
-        }
-    }
-    
-    /**
-     * 装飾的なコインの描画
-     */
-    drawDecorativeCoins(renderer) {
-        const coinPositions = [
-            { x: 100, y: 100, size: 16 },
-            { x: 700, y: 150, size: 20 },
-            { x: 150, y: 400, size: 18 },
-            { x: 650, y: 380, size: 16 }
-        ];
-        
-        coinPositions.forEach((pos, index) => {
-            const rotation = this.coinAnimTimer * 0.002 + index * Math.PI / 2;
-            const scale = Math.abs(Math.cos(rotation));
-            
-            renderer.strokeCircle(
-                pos.x, 
-                pos.y + Math.sin(this.coinAnimTimer * 0.001 + index) * 10, 
-                pos.size * scale, 
-                '#FFD700',
-                2
-            );
-            
-            // コインの中の文字
-            if (scale > 0.3) {
-                renderer.drawText(
-                    '¢', 
-                    pos.x - 5, 
-                    pos.y + 5 + Math.sin(this.coinAnimTimer * 0.001 + index) * 10, 
-                    '#FFD700', 
-                    16
-                );
-            }
-        });
-    }
     
     /**
      * How to Play画面の描画
@@ -292,30 +235,30 @@ export class MenuState {
         const centerX = renderer.canvas.width / 2;
         
         // タイトル
-        renderer.drawText('HOW TO PLAY', centerX - 80, 50, '#FFD700', 32);
+        renderer.drawText('HOW TO PLAY', centerX - 88, 50, '#FFD700', 16);
         
         // 操作説明
         const instructions = [
-            { key: '← →', desc: 'Move left/right' },
-            { key: '↑ / Space', desc: 'Jump' },
-            { key: 'Hold Jump', desc: 'Jump higher' },
-            { key: 'M', desc: 'Toggle music' },
-            { key: '@', desc: 'Debug mode' }
+            { key: 'ARROW KEYS', desc: 'MOVE LEFT/RIGHT' },
+            { key: 'UP / SPACE', desc: 'JUMP' },
+            { key: 'HOLD JUMP', desc: 'JUMP HIGHER' },
+            { key: 'M', desc: 'TOGGLE MUSIC' },
+            { key: '@', desc: 'DEBUG MODE' }
         ];
         
-        let y = 150;
+        let y = 120;
         instructions.forEach(inst => {
-            renderer.drawText(inst.key, 200, y, '#4ECDC4', 18);
-            renderer.drawText(inst.desc, 350, y, '#FFFFFF', 16);
-            y += 40;
+            renderer.drawText(inst.key, 200, y, '#4ECDC4', 12);
+            renderer.drawText(inst.desc, 350, y, '#FFFFFF', 12);
+            y += 30;
         });
         
         // ゲーム説明
-        renderer.drawText('Collect all coins and reach the goal!', centerX - 150, 400, '#FFFFFF', 18);
-        renderer.drawText('Watch out for enemies and obstacles!', centerX - 150, 430, '#FF6B6B', 16);
+        renderer.drawText('COLLECT ALL COINS AND REACH THE GOAL!', centerX - 152, 300, '#FFFFFF', 12);
+        renderer.drawText('WATCH OUT FOR ENEMIES AND OBSTACLES!', centerX - 144, 330, '#FF6B6B', 12);
         
         // 戻る説明
-        renderer.drawText('Press ESC/Enter/Space to return', centerX - 120, 500, '#999999', 14);
+        renderer.drawText('PRESS ESC/ENTER/SPACE TO RETURN', centerX - 128, 450, '#999999', 12);
     }
     
     /**
@@ -325,25 +268,25 @@ export class MenuState {
         const centerX = renderer.canvas.width / 2;
         
         // タイトル
-        renderer.drawText('CREDITS', centerX - 50, 50, '#FFD700', 32);
+        renderer.drawText('CREDITS', centerX - 56, 50, '#FFD700', 16);
         
         // クレジット内容
         const credits = [
-            { role: 'Original Concept', name: 'SVG Version Team' },
-            { role: 'Pixel Edition', name: 'Canvas Development Team' },
-            { role: 'Music System', name: 'Web Audio API' },
-            { role: 'Special Thanks', name: 'All Players!' }
+            { role: 'ORIGINAL CONCEPT', name: 'SVG VERSION TEAM' },
+            { role: 'PIXEL EDITION', name: 'CANVAS DEVELOPMENT TEAM' },
+            { role: 'MUSIC SYSTEM', name: 'WEB AUDIO API' },
+            { role: 'SPECIAL THANKS', name: 'ALL PLAYERS!' }
         ];
         
         let y = 150;
         credits.forEach(credit => {
-            renderer.drawText(credit.role, centerX - 100, y, '#4ECDC4', 16);
-            renderer.drawText(credit.name, centerX - 100, y + 25, '#FFFFFF', 14);
-            y += 70;
+            renderer.drawText(credit.role, centerX - 100, y, '#4ECDC4', 12);
+            renderer.drawText(credit.name, centerX - 100, y + 20, '#FFFFFF', 12);
+            y += 50;
         });
         
         // 戻る説明
-        renderer.drawText('Press ESC/Enter/Space to return', centerX - 120, 500, '#999999', 14);
+        renderer.drawText('PRESS ESC/ENTER/SPACE TO RETURN', centerX - 128, 450, '#999999', 12);
     }
     
     /**

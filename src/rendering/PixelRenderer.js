@@ -143,7 +143,7 @@ export class PixelRenderer {
         this.ctx.save();
         this.ctx.globalAlpha = alpha;
         this.ctx.fillStyle = color;
-        this.ctx.font = `${size}px monospace`;
+        this.ctx.font = `${size}px 'Press Start 2P', monospace`;
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
         this.ctx.fillText(text, drawX, drawY);
