@@ -36,11 +36,22 @@ export class MusicSystem {
                 return false;
             }
             
-            this.audioContext = new AudioContextClass();
+            // AudioContextの作成時にエラーが発生する可能性があるので、try-catchで囲む
+            try {
+                this.audioContext = new AudioContextClass();
+            } catch (contextError) {
+                console.info('AudioContext creation deferred - will retry on user interaction');
+                return false;
+            }
             
             // suspended状態の場合はresume
             if (this.audioContext.state === 'suspended') {
-                await this.audioContext.resume();
+                try {
+                    await this.audioContext.resume();
+                } catch (resumeError) {
+                    console.info('AudioContext resume deferred - will retry on user interaction');
+                    return false;
+                }
             }
             
             this.masterGain = this.audioContext.createGain();
@@ -48,6 +59,7 @@ export class MusicSystem {
             this.masterGain.gain.value = this.bgmVolume;
             
             this.isInitialized = true;
+            console.log('Music system initialized successfully');
             return true;
         } catch (error) {
             // 自動再生ポリシーによるエラーは警告レベルに留める

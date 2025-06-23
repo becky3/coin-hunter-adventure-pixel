@@ -45,12 +45,8 @@ export class Game {
             // アセットローダーにレンダラーを設定
             this.assetLoader.setRenderer(this.renderer);
             
-            // 音楽システムの初期化（失敗してもゲームは続行）
-            console.log('Initializing music system...');
-            const musicInitialized = await this.musicSystem.init();
-            if (!musicInitialized) {
-                console.info('音楽システムは後で初期化されます');
-            }
+            // 音楽システムの初期化は後で行う（自動再生ポリシー対応）
+            console.log('Music system will be initialized on user interaction');
             
             // テスト用のアセットを読み込み
             console.log('Loading test assets...');
@@ -113,22 +109,34 @@ export class Game {
             if (musicStarted) return;
             musicStarted = true;
             
-            // 音楽システムが初期化されていない場合は再初期化
-            if (!this.musicSystem.isInitialized) {
-                await this.musicSystem.init();
+            try {
+                // 音楽システムが初期化されていない場合は初期化
+                if (!this.musicSystem.isInitialized) {
+                    console.log('Initializing music system on user interaction...');
+                    const initialized = await this.musicSystem.init();
+                    if (!initialized) {
+                        console.warn('Failed to initialize music system');
+                        return;
+                    }
+                }
+                
+                // タイトルBGMを再生
+                console.log('Starting title BGM...');
+                this.musicSystem.playTitleBGM();
+                
+                // イベントリスナーを削除
+                document.removeEventListener('click', startMusic);
+                document.removeEventListener('keydown', startMusic);
+            } catch (error) {
+                console.error('Error starting music:', error);
             }
-            
-            // タイトルBGMを再生
-            this.musicSystem.playTitleBGM();
-            
-            // イベントリスナーを削除
-            document.removeEventListener('click', startMusic);
-            document.removeEventListener('keydown', startMusic);
         };
         
         // クリックまたはキー入力で音楽を開始
         document.addEventListener('click', startMusic);
         document.addEventListener('keydown', startMusic);
+        
+        console.log('Audio events setup complete - waiting for user interaction');
     }
     
     start() {
