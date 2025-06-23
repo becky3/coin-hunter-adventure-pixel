@@ -45,9 +45,12 @@ export class Game {
             // アセットローダーにレンダラーを設定
             this.assetLoader.setRenderer(this.renderer);
             
-            // 音楽システムの初期化
+            // 音楽システムの初期化（失敗してもゲームは続行）
             console.log('Initializing music system...');
-            await this.musicSystem.init();
+            const musicInitialized = await this.musicSystem.init();
+            if (!musicInitialized) {
+                console.info('音楽システムは後で初期化されます');
+            }
             
             // テスト用のアセットを読み込み
             console.log('Loading test assets...');

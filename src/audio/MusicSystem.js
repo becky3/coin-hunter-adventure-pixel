@@ -24,15 +24,16 @@ export class MusicSystem {
     
     /**
      * オーディオコンテキストの初期化（ユーザー操作後に呼ぶ必要がある）
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>} 初期化成功の可否
      */
     async init() {
-        if (this.isInitialized) return;
+        if (this.isInitialized) return true;
         
         try {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             if (!AudioContextClass) {
-                throw new Error('Web Audio API is not supported in this browser');
+                console.warn('Web Audio API is not supported in this browser');
+                return false;
             }
             
             this.audioContext = new AudioContextClass();
@@ -47,9 +48,16 @@ export class MusicSystem {
             this.masterGain.gain.value = this.bgmVolume;
             
             this.isInitialized = true;
+            return true;
         } catch (error) {
-            console.warn('音楽システムの初期化に失敗しました:', error);
+            // 自動再生ポリシーによるエラーは警告レベルに留める
+            if (error.name === 'NotAllowedError') {
+                console.info('音楽システムはユーザー操作後に開始されます');
+            } else {
+                console.warn('音楽システムの初期化エラー:', error);
+            }
             this.isInitialized = false;
+            return false;
         }
     }
     
