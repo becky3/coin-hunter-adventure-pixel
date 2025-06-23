@@ -26,6 +26,11 @@ export class InputManager {
         if (e.key === '@' && window.game) {
             window.game.debug = !window.game.debug;
         }
+        
+        // Mキーで音楽ミュート切り替え
+        if (e.key.toLowerCase() === 'm' && window.game?.musicSystem) {
+            window.game.musicSystem.toggleMute();
+        }
     }
     
     handleKeyup(e) {
