@@ -47,11 +47,16 @@ export class Game {
             console.log('Loading test assets...');
             await this.loadTestAssets();
             
-            // レベルリストを読み込み
+            // レベルリストを読み込み（エラーが出ても続行）
             console.log('Loading stage list...');
-            await this.levelLoader.loadStageList();
+            try {
+                await this.levelLoader.loadStageList();
+            } catch (error) {
+                console.warn('Stage list loading failed, using defaults:', error);
+            }
             
-            // テスト用のプレイヤーを作成
+            // テスト用のプレイヤーを作成（必ず実行）
+            console.log('Creating test player...');
             this.createTestPlayer();
             
             console.log('Game initialized successfully!');
@@ -75,12 +80,16 @@ export class Game {
     
     createTestPlayer() {
         // テスト用のプレイヤーを作成
-        this.player = new Player(400, 300);
+        this.player = new Player(100, 300);
         this.player.setInputManager(this.inputManager);
-        console.log('Test player created');
+        console.log('Test player created at:', this.player.x, this.player.y);
+        console.log('Player size:', this.player.width, 'x', this.player.height);
         
         // 仮の地面を設定（y = 400）
         this.testGroundY = 400;
+        
+        // デバッグモードを有効にする
+        this.renderer.setDebugMode(true);
     }
     
     start() {
@@ -109,27 +118,50 @@ export class Game {
         // 入力の更新
         this.inputManager.update();
         
+        // テスト用ログ - 更新確認
+        const input = this.inputManager.getInput();
+        if (input.jump) {
+            console.log('===== JUMP KEY DETECTED IN GAME.JS =====');
+        }
+        
         // 状態管理の更新
         this.stateManager.update(this.frameTime);
         
         // プレイヤーの更新（テスト用）
         if (this.player) {
-            // 仮の地面との衝突判定
-            if (this.player.y + this.player.height >= this.testGroundY) {
+            // 地面との衝突判定（更新前に判定）
+            const willCollideGround = this.player.y + this.player.height + this.player.vy >= this.testGroundY;
+            
+            // プレイヤーを更新（物理演算と入力処理）
+            this.player.update(this.frameTime);
+            
+            // 地面との衝突処理
+            if (this.player.y + this.player.height > this.testGroundY) {
+                // 地面にめり込んでいる場合
                 this.player.y = this.testGroundY - this.player.height;
-                this.player.vy = 0;
+                
+                // 下向きに移動している場合のみ着地処理
+                if (this.player.vy > 0) {
+                    this.player.vy = 0;
+                    this.player.grounded = true;
+                    this.player.isJumping = false;
+                }
+            } else if (Math.abs(this.player.y + this.player.height - this.testGroundY) < 1) {
+                // 地面にぴったり接している場合
                 this.player.grounded = true;
             } else {
+                // 空中にいる場合
                 this.player.grounded = false;
             }
             
-            // プレイヤーを更新
-            this.player.update(this.frameTime);
-            
             // 画面端の制限
-            if (this.player.x < 0) this.player.x = 0;
+            if (this.player.x < 0) {
+                this.player.x = 0;
+                this.player.vx = 0;
+            }
             if (this.player.x > this.canvas.width - this.player.width) {
                 this.player.x = this.canvas.width - this.player.width;
+                this.player.vx = 0;
             }
         }
     }
@@ -160,7 +192,7 @@ export class Game {
         
         // タイトル
         this.renderer.drawText('Coin Hunter Adventure - Pixel Edition', 20, 20, '#FFFFFF', 20);
-        this.renderer.drawText('Core Systems Test', 20, 50, '#FFFF00', 16);
+        this.renderer.drawText('Core Systems Test - v2.0 HOT RELOAD TEST', 20, 50, '#00FF00', 16);
         
         // システム状態
         this.renderer.drawText('=== Core Systems Status ===', 20, 90, '#FFFFFF', 14);

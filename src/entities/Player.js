@@ -6,10 +6,10 @@ import { Entity } from './Entity.js';
 
 // プレイヤー設定
 const PLAYER_CONFIG = {
-    width: 16,
-    height: 16,
+    width: 32,  // デバッグ用に一時的に大きくする
+    height: 32,
     speed: 3.5,
-    jumpPower: 12,
+    jumpPower: 15,  // デバッグ用に強くする（12→15）
     minJumpTime: 8,
     maxJumpTime: 20,
     maxHealth: 3,
@@ -130,8 +130,19 @@ export class Player extends Entity {
      * @param {Object} input - 入力状態
      */
     handleJump(input) {
+        // デバッグログ
+        if (input.jump) {
+            console.log('Jump button pressed!', {
+                jumpButtonPressed: this.jumpButtonPressed,
+                grounded: this.grounded,
+                y: this.y,
+                vy: this.vy
+            });
+        }
+        
         // ジャンプボタンが押された瞬間
         if (input.jump && !this.jumpButtonPressed && this.grounded) {
+            console.log('JUMP! vy before:', this.vy, 'jumpPower:', this.jumpPower);
             this.vy = -this.jumpPower;
             this.grounded = false;
             this.isJumping = true;
@@ -141,6 +152,7 @@ export class Player extends Entity {
             this.jumpButtonHoldTime = 0;
             this.jumpMaxHeight = 0;
             this.jumpStartY = this.y;
+            console.log('JUMP! vy after:', this.vy, 'y:', this.y);
             
             // ジャンプ音（将来的に実装）
             // this.playSound('jump');

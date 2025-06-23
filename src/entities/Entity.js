@@ -147,6 +147,16 @@ export class Entity {
             this.height,
             '#FF00FF'
         );
+        
+        // デバッグ用に大きめの枠も描画
+        renderer.drawRect(
+            this.x - 2,
+            this.y - 2,
+            this.width + 4,
+            this.height + 4,
+            '#FF00FF',
+            false
+        );
     }
     
     /**
