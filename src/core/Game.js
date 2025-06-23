@@ -45,9 +45,9 @@ export class Game {
         }
         
         requestAnimationFrame(this.gameLoop);
-    }
+    };
     
-    update(deltaTime) {
+    update() {
         // TODO: ゲームロジックの更新
     }
     

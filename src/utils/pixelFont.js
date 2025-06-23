@@ -588,7 +588,7 @@ class PixelFont {
      * @returns {boolean} 文字が存在する場合true
      */
     hasChar(char) {
-        return this.fontData.hasOwnProperty(char.toUpperCase());
+        return Object.prototype.hasOwnProperty.call(this.fontData, char.toUpperCase());
     }
     
     /**
