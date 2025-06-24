@@ -289,23 +289,23 @@ renderer.drawSprite(sprite, 10, 20);
 {
     "name": "Stage 1-1",
     "width": 3000,
-    "height": 576,
+    "height": 240,
     "timeLimit": 300,
-    "playerSpawn": { "x": 100, "y": 300 },
-    "goal": { "x": 2800, "y": 400 },
+    "playerSpawn": { "x": 100, "y": 150 },
+    "goal": { "x": 2800, "y": 150 },
     "platforms": [
-        { "x": 0, "y": 500, "width": 3000, "height": 76 }
+        { "x": 0, "y": 200, "width": 3000, "height": 40 }
     ],
     "enemies": [
-        { "type": "slime", "x": 500, "y": 450 },
-        { "type": "bird", "x": 800, "y": 200 }
+        { "type": "slime", "x": 500, "y": 180 },
+        { "type": "bird", "x": 800, "y": 100 }
     ],
     "coins": [
-        { "x": 300, "y": 400 },
-        { "x": 350, "y": 400 }
+        { "x": 300, "y": 150 },
+        { "x": 350, "y": 150 }
     ],
     "springs": [
-        { "x": 1000, "y": 460 }
+        { "x": 1000, "y": 180 }
     ]
 }
 ```
