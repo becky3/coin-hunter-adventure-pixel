@@ -289,7 +289,8 @@ const PARTICLE_EFFECTS = {
 ## フォント仕様
 
 ### ピクセルフォント
-- サイズ: 5×7ピクセル
+- サイズ: 5×7ピクセル（内部データ）
+- 表示サイズ: 8×8ピクセル（固定グリッド）
 - 文字セット: A-Z、0-9、基本記号
 - 実装: ビットマップフォント方式
 
@@ -302,6 +303,56 @@ pixelFont.drawNumber(ctx, score, 6, 10, 10, 2, '#FFFFFF');
 
 // テキスト表示
 pixelFont.drawText(ctx, 'GAME OVER', 100, 50, 3, '#FF0000');
+```
+
+## レンダリングシステム
+
+### グリッドベース配置
+すべての描画要素は8×8ピクセルグリッドに基づいて配置されます。
+
+#### テキスト描画のグリッド配置
+```javascript
+// PixelRendererでの実装
+export const FONT = {
+    SIZE: 8,     // 論理サイズ（ピクセル）
+    FAMILY: "'Press Start 2P', monospace",
+    GRID: 8      // 文字配置のグリッドサイズ
+};
+
+// テキスト描画時の自動グリッドスナップ
+drawText(text, x, y, color = '#FFFFFF', alpha = 1) {
+    // グリッドにスナップ
+    const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
+    const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
+    // ...
+}
+```
+
+#### グリッド配置の利点
+1. **一貫性のある配置**: すべてのテキストが整列
+2. **レトロゲーム風**: ファミコンのような固定幅フォント表現
+3. **読みやすさ**: 文字間隔が一定で視認性向上
+
+### スケーリングシステム
+- ゲーム解像度: 256×240ピクセル（固定）
+- 表示解像度: 768×720ピクセル（3倍スケール）
+- すべての座標は論理座標で指定し、描画時に自動スケーリング
+
+```javascript
+// 論理座標での指定
+renderer.drawText('HELLO', 16, 16);  // 16,16の位置に配置
+
+// 実際の描画座標（3倍スケール）
+// 画面上では 48,48 の位置に描画される
+```
+
+### ピクセルパーフェクト描画
+```javascript
+// アンチエイリアスを無効化
+ctx.imageSmoothingEnabled = false;
+ctx.mozImageSmoothingEnabled = false;
+ctx.webkitImageSmoothingEnabled = false;
+ctx.msImageSmoothingEnabled = false;
 ```
 
 ## ガイドライン
