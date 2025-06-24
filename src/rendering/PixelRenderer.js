@@ -140,14 +140,18 @@ export class PixelRenderer {
     /**
      * テキストを描画（ピクセルフォント対応）
      * @param {string} text - テキスト
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
+     * @param {number} x - X座標（グリッドに自動的にスナップされる）
+     * @param {number} y - Y座標（グリッドに自動的にスナップされる）
      * @param {string} color - 色
      * @param {number} alpha - アルファ値（0-1）
      */
     drawText(text, x, y, color = '#FFFFFF', alpha = 1) {
-        const drawX = Math.floor((x - this.cameraX) * this.scale);
-        const drawY = Math.floor((y - this.cameraY) * this.scale);
+        // グリッドにスナップ
+        const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
+        const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
+        
+        const drawX = Math.floor((snappedX - this.cameraX) * this.scale);
+        const drawY = Math.floor((snappedY - this.cameraY) * this.scale);
         
         // フォントサイズは固定（8x8ピクセルフォント）
         const scaledSize = FONT.SIZE * this.scale;
@@ -160,6 +164,21 @@ export class PixelRenderer {
         this.ctx.textBaseline = 'top';
         this.ctx.fillText(text, drawX, drawY);
         this.ctx.restore();
+    }
+    
+    /**
+     * 中央揃えでテキストを描画（グリッドベース）
+     * @param {string} text - テキスト
+     * @param {number} centerX - 中心X座標
+     * @param {number} y - Y座標
+     * @param {string} color - 色
+     * @param {number} alpha - アルファ値（0-1）
+     */
+    drawTextCentered(text, centerX, y, color = '#FFFFFF', alpha = 1) {
+        // テキストの文字数から幅を計算（各文字は8ピクセル）
+        const textWidth = text.length * FONT.GRID;
+        const x = centerX - Math.floor(textWidth / 2);
+        this.drawText(text, x, y, color, alpha);
     }
     
     /**

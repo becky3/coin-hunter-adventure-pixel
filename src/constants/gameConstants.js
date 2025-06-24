@@ -38,5 +38,6 @@ export const FPS = {
 export const FONT = {
     // ピクセルフォントは8x8の固定サイズ（ファミコン風）
     SIZE: 8,  // 論理サイズ（ピクセル）
-    FAMILY: "'Press Start 2P', monospace"
+    FAMILY: '\'Press Start 2P\', monospace',
+    GRID: 8   // 文字配置のグリッドサイズ
 };

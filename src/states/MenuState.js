@@ -201,8 +201,8 @@ export class MenuState {
         // ミュートボタン
         this.drawMuteButton(renderer);
         
-        // バージョン情報
-        renderer.drawText('v0.1.0', 2, GAME_RESOLUTION.HEIGHT - 10, '#666666');
+        // バージョン情報（グリッドに合わせて調整）
+        renderer.drawText('v0.1.0', 8, GAME_RESOLUTION.HEIGHT - 16, '#666666');
     }
     
     /**
@@ -211,10 +211,10 @@ export class MenuState {
     drawTitleLogo(renderer) {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         
-        // メインタイトル（ピクセルフォントサイズ調整）
+        // メインタイトル（グリッドベースの中央揃え）
         const titleY = this.logoY;
-        renderer.drawText('COIN HUNTER', centerX - 44, titleY, '#FFD700');
-        renderer.drawText('ADVENTURE', centerX - 36, titleY + 15, '#FF6B6B');
+        renderer.drawTextCentered('COIN HUNTER', centerX, titleY, '#FFD700');
+        renderer.drawTextCentered('ADVENTURE', centerX, titleY + 16, '#FF6B6B');
     }
     
     /**
@@ -224,51 +224,41 @@ export class MenuState {
         if (this.optionsAlpha <= 0) return;
         
         const centerX = GAME_RESOLUTION.WIDTH / 2;
-        const startY = 100;
-        const lineHeight = 20;
+        const startY = 104;  // グリッドに合わせて調整
+        const lineHeight = 24;  // 8ピクセルグリッドの3倍
         
         this.options.forEach((option, index) => {
             const y = startY + index * lineHeight;
             const isSelected = index === this.selectedOption;
             
-            // テキスト（ピクセルフォントサイズ）
+            // テキスト（中央揃え）
             const color = isSelected ? '#FFD700' : '#FFFFFF';
-            const size = 8;
-            const offsetX = option.text.length * 4;
             
-            renderer.drawText(
-                option.text, 
-                centerX - offsetX, 
-                y, 
-                color, 
-                size,
-                this.optionsAlpha
-            );
+            // アルファ値を考慮した描画
+            const prevAlpha = renderer.ctx.globalAlpha;
+            renderer.ctx.globalAlpha = this.optionsAlpha;
+            
+            renderer.drawTextCentered(option.text, centerX, y, color);
             
             // 選択カーソル
             if (isSelected) {
-                const cursorX = centerX - offsetX - 10;
+                // テキストの幅を計算してカーソル位置を決定
+                const textWidth = option.text.length * 8;  // 各文字8ピクセル
+                const cursorX = centerX - Math.floor(textWidth / 2) - 16;  // 2グリッド左
                 renderer.drawText('>', cursorX, y, '#FFD700');
             }
+            
+            renderer.ctx.globalAlpha = prevAlpha;
         });
         
-        // 操作説明
-        renderer.drawText(
-            'ARROWS:SELECT', 
-            centerX - 52, 
-            180, 
-            '#999999', 
-            6,
-            this.optionsAlpha
-        );
-        renderer.drawText(
-            'ENTER/SPACE:OK', 
-            centerX - 56, 
-            190, 
-            '#999999', 
-            6,
-            this.optionsAlpha
-        );
+        // 操作説明（グリッドに合わせた位置）
+        const prevAlpha = renderer.ctx.globalAlpha;
+        renderer.ctx.globalAlpha = this.optionsAlpha;
+        
+        renderer.drawTextCentered('ARROWS:SELECT', centerX, 184, '#999999');
+        renderer.drawTextCentered('ENTER/SPACE:OK', centerX, 192, '#999999');
+        
+        renderer.ctx.globalAlpha = prevAlpha;
     }
     
     
@@ -279,9 +269,9 @@ export class MenuState {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         
         // タイトル
-        renderer.drawText('HOW TO PLAY', centerX - 44, 20, '#FFD700');
+        renderer.drawTextCentered('HOW TO PLAY', centerX, 24, '#FFD700');
         
-        // 操作説明
+        // 操作説明（グリッドベース）
         const instructions = [
             { key: 'ARROWS', desc: 'MOVE' },
             { key: 'UP/SPACE', desc: 'JUMP' },
@@ -290,20 +280,20 @@ export class MenuState {
             { key: '@', desc: 'DEBUG' }
         ];
         
-        let y = 50;
+        let y = 56;  // グリッドに合わせて調整
         instructions.forEach(inst => {
             renderer.drawText(inst.key, 40, y, '#4ECDC4');
             renderer.drawText(inst.desc, 120, y, '#FFFFFF');
-            y += 20;
+            y += 16;  // 2グリッド単位
         });
         
         // ゲーム説明
-        renderer.drawText('COLLECT ALL COINS!', centerX - 72, 160, '#FFFFFF');
-        renderer.drawText('REACH THE GOAL!', centerX - 60, 175, '#FFFFFF');
-        renderer.drawText('AVOID ENEMIES!', centerX - 56, 190, '#FF6B6B');
+        renderer.drawTextCentered('COLLECT ALL COINS!', centerX, 160, '#FFFFFF');
+        renderer.drawTextCentered('REACH THE GOAL!', centerX, 176, '#FFFFFF');
+        renderer.drawTextCentered('AVOID ENEMIES!', centerX, 192, '#FF6B6B');
         
         // 戻る説明
-        renderer.drawText('ESC/ENTER TO RETURN', centerX - 76, 220, '#999999');
+        renderer.drawTextCentered('ESC/ENTER TO RETURN', centerX, 216, '#999999');
     }
     
     /**
@@ -313,7 +303,7 @@ export class MenuState {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         
         // タイトル
-        renderer.drawText('CREDITS', centerX - 28, 20, '#FFD700');
+        renderer.drawTextCentered('CREDITS', centerX, 24, '#FFD700');
         
         // クレジット内容
         const credits = [
@@ -323,15 +313,15 @@ export class MenuState {
             { role: 'THANKS', name: 'ALL PLAYERS' }
         ];
         
-        let y = 50;
+        let y = 56;  // グリッドに合わせて調整
         credits.forEach(credit => {
             renderer.drawText(credit.role, 40, y, '#4ECDC4');
-            renderer.drawText(credit.name, 40, y + 10, '#FFFFFF');
-            y += 30;
+            renderer.drawText(credit.name, 40, y + 8, '#FFFFFF');  // 1グリッド下
+            y += 32;  // 4グリッド単位
         });
         
         // 戻る説明
-        renderer.drawText('ESC/ENTER TO RETURN', centerX - 76, 220, '#999999');
+        renderer.drawTextCentered('ESC/ENTER TO RETURN', centerX, 216, '#999999');
     }
     
     /**
@@ -339,15 +329,15 @@ export class MenuState {
      */
     drawMuteButton(renderer) {
         const muteState = this.game.musicSystem?.getMuteState() || false;
-        const buttonText = muteState ? 'SOUND: OFF' : 'SOUND: ON';
+        const buttonText = muteState ? 'SOUND:OFF' : 'SOUND:ON';
         const buttonColor = muteState ? '#FF0000' : '#00FF00';
         
-        // 右上に配置
-        const x = GAME_RESOLUTION.WIDTH - 60;
-        const y = 10;
+        // 右上に配置（グリッドに合わせて調整）
+        const x = GAME_RESOLUTION.WIDTH - 80;  // 10文字分のスペース
+        const y = 8;  // 1グリッド下
         
         renderer.drawText(buttonText, x, y, buttonColor);
-        renderer.drawText('(M)', x + 10, y + 8, '#666666');
+        renderer.drawText('(M)', x + 16, y + 8, '#666666');  // 2グリッド右、1グリッド下
     }
     
     /**
