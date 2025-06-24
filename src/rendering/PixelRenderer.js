@@ -134,16 +134,20 @@ export class PixelRenderer {
      * @param {number} y - Y座標
      * @param {string} color - 色
      * @param {number} size - フォントサイズ
+     * @param {number} alpha - アルファ値（0-1）
      */
-    drawText(text, x, y, color = '#FFFFFF', size = 16) {
+    drawText(text, x, y, color = '#FFFFFF', size = 16, alpha = 1) {
         const drawX = Math.floor(x - this.cameraX);
         const drawY = Math.floor(y - this.cameraY);
         
+        this.ctx.save();
+        this.ctx.globalAlpha = alpha;
         this.ctx.fillStyle = color;
-        this.ctx.font = `${size}px monospace`;
+        this.ctx.font = `${size}px 'Press Start 2P', monospace`;
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
         this.ctx.fillText(text, drawX, drawY);
+        this.ctx.restore();
     }
     
     /**
@@ -303,5 +307,34 @@ export class PixelRenderer {
         this.ctx.mozImageSmoothingEnabled = false;
         this.ctx.webkitImageSmoothingEnabled = false;
         this.ctx.msImageSmoothingEnabled = false;
+    }
+    
+    /**
+     * 塗りつぶし矩形を描画（カメラ無視）
+     * @param {number} x - X座標
+     * @param {number} y - Y座標
+     * @param {number} width - 幅
+     * @param {number} height - 高さ
+     * @param {string} color - 色
+     */
+    fillRect(x, y, width, height, color) {
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(x, y, width, height);
+    }
+    
+    /**
+     * 円を描画（線のみ）
+     * @param {number} x - 中心X座標
+     * @param {number} y - 中心Y座標
+     * @param {number} radius - 半径
+     * @param {string} color - 線の色
+     * @param {number} lineWidth - 線の太さ
+     */
+    strokeCircle(x, y, radius, color = '#FFFFFF', lineWidth = 1) {
+        this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = lineWidth;
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+        this.ctx.stroke();
     }
 }

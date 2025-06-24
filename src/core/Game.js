@@ -1,13 +1,14 @@
 /**
  * メインゲームクラス
  */
-import { InputManager } from './InputManager.js';
+import { InputSystem } from './InputSystem.js';
 import { GameStateManager } from '../states/GameStateManager.js';
 import { AssetLoader } from '../assets/AssetLoader.js';
 import { PixelRenderer } from '../rendering/PixelRenderer.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { MusicSystem } from '../audio/MusicSystem.js';
+import { MenuState } from '../states/MenuState.js';
 
 export class Game {
     constructor(canvas) {
@@ -23,7 +24,7 @@ export class Game {
         this.frameTime = 1000 / this.targetFPS;
         
         // コアシステムの初期化
-        this.inputManager = new InputManager();
+        this.inputSystem = new InputSystem();
         this.stateManager = new GameStateManager();
         this.assetLoader = new AssetLoader();
         this.renderer = new PixelRenderer(canvas);
@@ -67,6 +68,12 @@ export class Game {
             // クリックイベントで音楽を開始（ブラウザの自動再生ポリシー対応）
             this.setupAudioEvents();
             
+            // 状態を登録
+            this.registerStates();
+            
+            // メニュー状態から開始
+            this.stateManager.setState('menu');
+            
             console.log('Game initialized successfully!');
             return true;
         } catch (error) {
@@ -89,7 +96,8 @@ export class Game {
     createTestPlayer() {
         // テスト用のプレイヤーを作成
         this.player = new Player(100, 300);
-        this.player.setInputManager(this.inputManager);
+        // TODO: Playerクラスを後でInputSystem対応に更新
+        // this.player.setInputSystem(this.inputSystem);
         this.player.setMusicSystem(this.musicSystem);
         console.log('Test player created at:', this.player.x, this.player.y);
         console.log('Player size:', this.player.width, 'x', this.player.height);
@@ -99,6 +107,15 @@ export class Game {
         
         // デバッグモードを有効にする
         this.renderer.setDebugMode(true);
+    }
+    
+    registerStates() {
+        // メニュー状態を登録
+        const menuState = new MenuState(this);
+        this.stateManager.registerState('menu', menuState);
+        
+        // TODO: PlayStateを実装後に追加
+        // this.stateManager.registerState('play', new PlayState(this));
     }
     
     setupAudioEvents() {
@@ -159,11 +176,28 @@ export class Game {
     
     update() {
         // 入力の更新
-        this.inputManager.update();
+        this.inputSystem.update();
         
+        // デバッグモードのトグル
+        if (this.inputSystem.isActionJustPressed('debug')) {
+            this.debug = !this.debug;
+            this.renderer.setDebugMode(this.debug);
+            console.log('Debug mode:', this.debug ? 'ON' : 'OFF');
+        }
+        
+        // 現在の状態に応じて処理を分岐
+        if (this.stateManager.currentStateName === 'menu') {
+            // メニュー状態の更新
+            this.stateManager.update(this.frameTime);
+        } else {
+            // ゲームプレイ状態の更新（テスト用）
+            this.updateTestMode();
+        }
+    }
+    
+    updateTestMode() {
         // テスト用ログ - 更新確認（デバッグモード時のみ）
-        const input = this.inputManager.getInput();
-        if (input.jump && this.debug) {
+        if (this.inputSystem.isActionPressed('jump') && this.debug) {
             console.log('===== JUMP KEY DETECTED IN GAME.JS =====');
         }
         
@@ -210,6 +244,22 @@ export class Game {
     }
     
     render() {
+        // 現在の状態に応じて描画を分岐
+        if (this.stateManager.currentStateName === 'menu') {
+            // メニュー状態の描画
+            this.stateManager.render(this.renderer);
+        } else {
+            // ゲームプレイ状態の描画（テスト用）
+            this.renderTestMode();
+        }
+        
+        // デバッグ情報をオーバーレイとして描画
+        if (this.debug) {
+            this.renderDebugOverlay();
+        }
+    }
+    
+    renderTestMode() {
         // レンダラーでクリア
         this.renderer.clear('#5C94FC');
         
@@ -223,15 +273,49 @@ export class Game {
             this.player.render(this.renderer);
         }
         
-        // 状態管理の描画
-        this.stateManager.render(this.ctx);
-        
         // デバッグ情報の表示
         this.renderDebugInfo();
     }
     
+    /**
+     * デバッグオーバーレイの描画（全画面共通）
+     */
+    renderDebugOverlay() {
+        // 背景（半透明）
+        this.renderer.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        this.renderer.ctx.fillRect(10, 10, 300, 150);
+        
+        // デバッグ情報
+        this.renderer.drawText('DEBUG MODE', 20, 30, '#00FF00', 14);
+        
+        // FPS
+        const fps = this.frameTime > 0 ? Math.round(1000 / this.frameTime) : 0;
+        this.renderer.drawText(`FPS: ${fps}`, 20, 50, '#FFFFFF', 12);
+        
+        // 現在の状態
+        this.renderer.drawText(`State: ${this.stateManager.currentStateName || 'none'}`, 20, 70, '#FFFFFF', 12);
+        
+        // 入力状態
+        const keys = [];
+        if (this.inputSystem.isActionPressed('left')) keys.push('←');
+        if (this.inputSystem.isActionPressed('right')) keys.push('→');
+        if (this.inputSystem.isActionPressed('up')) keys.push('↑');
+        if (this.inputSystem.isActionPressed('down')) keys.push('↓');
+        if (this.inputSystem.isActionPressed('jump')) keys.push('SPACE');
+        if (this.inputSystem.isActionPressed('action')) keys.push('ENTER');
+        
+        this.renderer.drawText(`Keys: ${keys.join(' ') || 'none'}`, 20, 90, '#FFFFFF', 12);
+        
+        // 音楽システム状態
+        const musicStatus = this.musicSystem.isInitialized ? 
+            (this.musicSystem.getMuteState() ? 'MUTED' : 'ON') : 'OFF';
+        this.renderer.drawText(`Music: ${musicStatus}`, 20, 110, '#FFFFFF', 12);
+        
+        // デバッグ切り替えの説明
+        this.renderer.drawText('Press @ to toggle debug', 20, 140, '#999999', 10);
+    }
+    
     renderDebugInfo() {
-        const input = this.inputManager.getInput();
         
         // タイトル
         this.renderer.drawText('Coin Hunter Adventure - Pixel Edition', 20, 20, '#FFFFFF', 20);
@@ -255,10 +339,10 @@ export class Game {
         
         // 入力状態
         this.renderer.drawText('=== Input State ===', 20, 290, '#FFFFFF', 14);
-        this.renderer.drawText(`Left: ${input.left ? 'ON' : 'OFF'}`, 20, 310, input.left ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Right: ${input.right ? 'ON' : 'OFF'}`, 120, 310, input.right ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Jump: ${input.jump ? 'ON' : 'OFF'}`, 220, 310, input.jump ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Action: ${input.action ? 'ON' : 'OFF'}`, 320, 310, input.action ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Left: ${this.inputSystem.isActionPressed('left') ? 'ON' : 'OFF'}`, 20, 310, this.inputSystem.isActionPressed('left') ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Right: ${this.inputSystem.isActionPressed('right') ? 'ON' : 'OFF'}`, 120, 310, this.inputSystem.isActionPressed('right') ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Jump: ${this.inputSystem.isActionPressed('jump') ? 'ON' : 'OFF'}`, 220, 310, this.inputSystem.isActionPressed('jump') ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Action: ${this.inputSystem.isActionPressed('action') ? 'ON' : 'OFF'}`, 320, 310, this.inputSystem.isActionPressed('action') ? '#00FF00' : '#FF0000', 12);
         
         // プレイヤー状態
         if (this.player) {
@@ -281,10 +365,6 @@ export class Game {
         // 操作説明
         this.renderer.drawText('Controls: Arrow Keys/WASD = Move, Space/Up/W = Jump, Enter/E = Action', 20, 470, '#CCCCCC', 10);
         this.renderer.drawText('Press @ to toggle debug mode | M to toggle music', 20, 485, '#CCCCCC', 10);
-        
-        // 音楽状態
-        const muteState = this.musicSystem.getMuteState();
-        this.renderer.drawText(`Music: ${muteState ? 'OFF' : 'ON'}`, 600, 20, muteState ? '#FF0000' : '#00FF00', 12);
     }
     
     stop() {

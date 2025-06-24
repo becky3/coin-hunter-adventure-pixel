@@ -45,10 +45,15 @@ SVGベースの「coin-hunter-adventure」をピクセルアート（Canvas）�
 
 ## 開発サーバー
 
+**重要**: サーバー起動はユーザー側で行います（トークン消費を避けるため）
+
+起動コマンド：
 ```bash
-cd coin-hunter-adventure-pixel
+cd /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel
 npm run dev
 ```
+
+アクセスURL: http://localhost:3000/
 
 ## 現在の状況
 
