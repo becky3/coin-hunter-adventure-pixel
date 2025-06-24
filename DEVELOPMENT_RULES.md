@@ -144,6 +144,29 @@ npm run dev    # Vite開発サーバー起動
 - セキュリティ、パフォーマンス、コード品質の改善提案を積極的に採用
 - 指摘が不適切な場合は、理由を明確にしてスキップ可能
 
+### Copilotコメントの確認方法
+Copilotのレビューコメントは複数の場所に表示される可能性があります：
+
+1. **通常のPRコメント確認**
+   ```bash
+   gh pr view --comments
+   ```
+
+2. **レビューコメントの確認（スレッド形式）**
+   ```bash
+   gh api repos/becky3/coin-hunter-adventure-pixel/pulls/[PR番号]/comments
+   ```
+
+3. **レビュー情報の確認**
+   ```bash
+   gh pr view [PR番号] --json reviews --jq '.reviews[]'
+   ```
+
+4. **Web UI での確認**
+   - PR画面の「Files changed」タブでインラインコメントを確認
+   - 「Conversation」タブで全体のコメントを確認
+   - 低信頼度で非表示になっているコメントも「Show resolved」で確認
+
 ### レビュー対応の優先順位
 1. **高優先度**: セキュリティ問題、バグ、メモリリーク
 2. **中優先度**: パフォーマンス最適化、コード品質
