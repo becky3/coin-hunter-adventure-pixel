@@ -178,6 +178,13 @@ export class Game {
         // 入力の更新
         this.inputSystem.update();
         
+        // デバッグモードのトグル
+        if (this.inputSystem.isActionJustPressed('debug')) {
+            this.debug = !this.debug;
+            this.renderer.setDebugMode(this.debug);
+            console.log('Debug mode:', this.debug ? 'ON' : 'OFF');
+        }
+        
         // 現在の状態に応じて処理を分岐
         if (this.stateManager.currentStateName === 'menu') {
             // メニュー状態の更新
@@ -309,12 +316,12 @@ export class Game {
         // デバッグモード
         if (this.debug) {
             this.renderer.drawText('DEBUG MODE ON', 20, 410, '#FF00FF', 16);
-            this.renderer.drawText('Press @ to toggle', 20, 430, '#FF00FF', 12);
+            this.renderer.drawText('Press 2 to toggle', 20, 430, '#FF00FF', 12);
         }
         
         // 操作説明
         this.renderer.drawText('Controls: Arrow Keys/WASD = Move, Space/Up/W = Jump, Enter/E = Action', 20, 470, '#CCCCCC', 10);
-        this.renderer.drawText('Press @ to toggle debug mode | M to toggle music', 20, 485, '#CCCCCC', 10);
+        this.renderer.drawText('Press 2 to toggle debug mode | M to toggle music', 20, 485, '#CCCCCC', 10);
     }
     
     stop() {
