@@ -42,13 +42,18 @@ export class PixelRenderer {
      * @param {string} color - 背景色（省略時は透明）
      */
     clear(color = null) {
-        // スケールを考慮して全キャンバスをクリア
+        // 物理的なキャンバス全体をクリア
+        this.ctx.save();
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0); // 変換をリセット
+        
         if (color) {
             this.ctx.fillStyle = color;
             this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
         } else {
             this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         }
+        
+        this.ctx.restore();
     }
     
     /**
