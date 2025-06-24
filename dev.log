@@ -1,0 +1,39 @@
+
+> coin-hunter-adventure-pixel@0.1.0 dev
+> vite
+
+Forced re-optimization of dependencies
+
+  VITE v4.5.14  ready in 639 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: use --host to expose
+7:16:29 PM [vite] page reload src/core/Game.js
+7:17:10 PM [vite] page reload src/core/Game.js
+7:18:38 PM [vite] page reload src/core/InputSystem.js
+7:20:28 PM [vite] page reload src/core/InputSystem.js
+7:20:58 PM [vite] page reload src/core/InputSystem.js
+7:21:50 PM [vite] page reload src/core/InputSystem.js
+7:22:05 PM [vite] page reload src/core/InputSystem.js
+7:22:16 PM [vite] page reload src/core/InputSystem.js
+7:22:24 PM [vite] page reload src/core/InputSystem.js
+7:22:33 PM [vite] page reload src/core/InputSystem.js
+7:22:44 PM [vite] page reload src/core/Game.js
+7:22:44 PM [vite] page reload src/core/Game.js
+7:24:51 PM [vite] page reload src/core/Game.js
+7:25:10 PM [vite] page reload src/core/Game.js
+7:29:48 PM [vite] page reload index.html
+7:29:48 PM [vite] page reload src/audio/MusicSystem.js
+7:29:48 PM [vite] page reload src/core/Game.js
+7:29:48 PM [vite] page reload src/core/InputSystem.js
+7:29:48 PM [vite] page reload src/states/MenuState.js
+7:29:48 PM [vite] page reload src/states/GameStateManager.js
+7:29:48 PM [vite] page reload src/rendering/PixelRenderer.js
+7:29:50 PM [vite] page reload src/core/InputManager.js
+7:29:50 PM [vite] page reload index.html
+7:29:50 PM [vite] page reload src/rendering/PixelRenderer.js
+7:29:50 PM [vite] page reload src/audio/MusicSystem.js
+7:29:50 PM [vite] page reload src/states/GameStateManager.js
+7:29:50 PM [vite] page reload src/core/Game.js
+7:29:50 PM [vite] page reload src/states/MenuState.js
+7:29:50 PM [vite] page reload src/core/InputSystem.js
