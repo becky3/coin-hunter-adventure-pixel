@@ -38,6 +38,9 @@ export class Game {
         
         // エンティティ（テスト用）
         this.player = null;
+        
+        // デバッグパネルのDOM要素キャッシュ
+        this.debugElements = null;
     }
     
     async initialize() {
@@ -283,52 +286,73 @@ export class Game {
     }
     
     /**
+     * デバッグパネルのDOM要素をキャッシュ
+     */
+    cacheDebugElements() {
+        this.debugElements = {
+            panel: document.getElementById('debugPanel'),
+            fps: document.getElementById('fps'),
+            frameTime: document.getElementById('frameTime'),
+            gameState: document.getElementById('gameState'),
+            entityCount: document.getElementById('entityCount'),
+            cameraPos: document.getElementById('cameraPos'),
+            activeKeys: document.getElementById('activeKeys'),
+            musicStatus: document.getElementById('musicStatus'),
+            playerSection: document.getElementById('playerSection'),
+            playerPos: document.getElementById('playerPos'),
+            playerVel: document.getElementById('playerVel'),
+            playerHealth: document.getElementById('playerHealth'),
+            playerGrounded: document.getElementById('playerGrounded')
+        };
+    }
+    
+    /**
      * HTMLのデバッグ情報を更新
      * @param {number} fps - 現在のFPS
      */
     updateHTMLDebugInfo(fps) {
-        const debugPanel = document.getElementById('debugPanel');
-        if (!debugPanel) return;
+        // DOM要素がキャッシュされていない場合は取得
+        if (!this.debugElements) {
+            this.cacheDebugElements();
+        }
+        
+        const { panel } = this.debugElements;
+        if (!panel) return;
         
         if (this.debug) {
-            debugPanel.classList.add('active');
+            panel.classList.add('active');
             
             // FPS更新
-            const fpsElement = document.getElementById('fps');
-            if (fpsElement) {
-                fpsElement.textContent = fps;
+            if (this.debugElements.fps) {
+                this.debugElements.fps.textContent = fps;
                 // FPSに応じて色を変更
                 if (fps >= 55) {
-                    fpsElement.className = 'debug-value success';
+                    this.debugElements.fps.className = 'debug-value success';
                 } else if (fps >= 30) {
-                    fpsElement.className = 'debug-value warning';
+                    this.debugElements.fps.className = 'debug-value warning';
                 } else {
-                    fpsElement.className = 'debug-value error';
+                    this.debugElements.fps.className = 'debug-value error';
                 }
             }
             
             // フレーム時間
-            const frameTimeElement = document.getElementById('frameTime');
-            if (frameTimeElement) {
-                frameTimeElement.textContent = `${this.frameTime.toFixed(1)}ms`;
+            if (this.debugElements.frameTime) {
+                this.debugElements.frameTime.textContent = `${this.frameTime.toFixed(1)}ms`;
             }
             
             // ゲーム状態
-            const gameStateElement = document.getElementById('gameState');
-            if (gameStateElement) {
-                gameStateElement.textContent = this.stateManager.currentStateName || 'none';
+            if (this.debugElements.gameState) {
+                this.debugElements.gameState.textContent = this.stateManager.currentStateName || 'none';
             }
             
             // エンティティ数更新
-            const entityElement = document.getElementById('entityCount');
-            if (entityElement) {
-                entityElement.textContent = this.player ? '1' : '0';
+            if (this.debugElements.entityCount) {
+                this.debugElements.entityCount.textContent = this.player ? '1' : '0';
             }
             
             // カメラ位置更新
-            const cameraElement = document.getElementById('cameraPos');
-            if (cameraElement) {
-                cameraElement.textContent = `${Math.floor(this.renderer.cameraX)}, ${Math.floor(this.renderer.cameraY)}`;
+            if (this.debugElements.cameraPos) {
+                this.debugElements.cameraPos.textContent = `${Math.floor(this.renderer.cameraX)}, ${Math.floor(this.renderer.cameraY)}`;
             }
             
             // 入力状態
@@ -340,66 +364,59 @@ export class Game {
             if (this.inputSystem.isActionPressed('jump')) keys.push('SPACE');
             if (this.inputSystem.isActionPressed('action')) keys.push('ENTER');
             
-            const activeKeysElement = document.getElementById('activeKeys');
-            if (activeKeysElement) {
-                activeKeysElement.textContent = keys.length > 0 ? keys.join(' ') : '-';
+            if (this.debugElements.activeKeys) {
+                this.debugElements.activeKeys.textContent = keys.length > 0 ? keys.join(' ') : '-';
             }
             
             // 音楽状態
-            const musicStatusElement = document.getElementById('musicStatus');
-            if (musicStatusElement) {
+            if (this.debugElements.musicStatus) {
                 if (this.musicSystem.isInitialized) {
-                    musicStatusElement.textContent = this.musicSystem.getMuteState() ? 'MUTED' : 'ON';
-                    musicStatusElement.className = this.musicSystem.getMuteState() ? 'debug-value warning' : 'debug-value success';
+                    this.debugElements.musicStatus.textContent = this.musicSystem.getMuteState() ? 'MUTED' : 'ON';
+                    this.debugElements.musicStatus.className = this.musicSystem.getMuteState() ? 'debug-value warning' : 'debug-value success';
                 } else {
-                    musicStatusElement.textContent = 'OFF';
-                    musicStatusElement.className = 'debug-value';
+                    this.debugElements.musicStatus.textContent = 'OFF';
+                    this.debugElements.musicStatus.className = 'debug-value';
                 }
             }
             
             // プレイヤー情報
-            const playerSection = document.getElementById('playerSection');
-            if (playerSection && this.player) {
-                playerSection.style.display = 'block';
+            if (this.debugElements.playerSection && this.player) {
+                this.debugElements.playerSection.style.display = 'block';
                 
                 const playerState = this.player.getState();
                 
                 // 位置
-                const playerPosElement = document.getElementById('playerPos');
-                if (playerPosElement) {
-                    playerPosElement.textContent = `${Math.floor(playerState.x)}, ${Math.floor(playerState.y)}`;
+                if (this.debugElements.playerPos) {
+                    this.debugElements.playerPos.textContent = `${Math.floor(playerState.x)}, ${Math.floor(playerState.y)}`;
                 }
                 
                 // 速度
-                const playerVelElement = document.getElementById('playerVel');
-                if (playerVelElement) {
-                    playerVelElement.textContent = `${playerState.vx.toFixed(1)}, ${playerState.vy.toFixed(1)}`;
+                if (this.debugElements.playerVel) {
+                    this.debugElements.playerVel.textContent = `${playerState.vx.toFixed(1)}, ${playerState.vy.toFixed(1)}`;
                 }
                 
                 // 体力
-                const playerHealthElement = document.getElementById('playerHealth');
-                if (playerHealthElement) {
-                    playerHealthElement.textContent = `${playerState.health}/${playerState.maxHealth}`;
+                if (this.debugElements.playerHealth) {
+                    this.debugElements.playerHealth.textContent = `${playerState.health}/${playerState.maxHealth}`;
                     if (playerState.health === playerState.maxHealth) {
-                        playerHealthElement.className = 'debug-value success';
+                        this.debugElements.playerHealth.className = 'debug-value success';
                     } else if (playerState.health > 1) {
-                        playerHealthElement.className = 'debug-value warning';
+                        this.debugElements.playerHealth.className = 'debug-value warning';
                     } else {
-                        playerHealthElement.className = 'debug-value error';
+                        this.debugElements.playerHealth.className = 'debug-value error';
                     }
                 }
                 
                 // 接地状態
-                const playerGroundedElement = document.getElementById('playerGrounded');
-                if (playerGroundedElement) {
-                    playerGroundedElement.textContent = playerState.grounded ? 'Yes' : 'No';
-                    playerGroundedElement.className = playerState.grounded ? 'debug-value success' : 'debug-value';
+                if (this.debugElements.playerGrounded) {
+                    this.debugElements.playerGrounded.textContent = playerState.grounded ? 'Yes' : 'No';
+                    this.debugElements.playerGrounded.className = playerState.grounded ? 'debug-value success' : 'debug-value';
                 }
-            } else if (playerSection) {
-                playerSection.style.display = 'none';
+            } else if (this.debugElements.playerSection) {
+                this.debugElements.playerSection.style.display = 'none';
             }
         } else {
-            debugPanel.classList.remove('active');
+            panel.classList.remove('active');
         }
     }
     
