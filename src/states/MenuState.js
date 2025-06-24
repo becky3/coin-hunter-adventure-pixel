@@ -102,7 +102,11 @@ export class MenuState {
                     !this.showHowTo && !this.showCredits && 
                     this.optionsAlpha >= 1) {
                     // 次のフレームで実行して、他のリスナーとの競合を避ける
-                    setTimeout(() => this.executeOption(), 0);
+                    setTimeout(() => {
+                        if (this.executeOption) {
+                            this.executeOption();
+                        }
+                    }, 0);
                 }
             })
         );
