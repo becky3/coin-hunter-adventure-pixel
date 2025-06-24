@@ -282,39 +282,8 @@ export class Game {
      * デバッグオーバーレイの描画（全画面共通）
      */
     renderDebugOverlay() {
-        // 背景（半透明）（グリッドに合わせて調整）
-        this.renderer.drawRect(8, 8, 96, 72, 'rgba(0, 0, 0, 0.7)');
-        
-        // デバッグ情報（グリッドベース）
-        this.renderer.drawText('DEBUG MODE', 16, 16, '#00FF00');
-        
-        // FPS
+        // HTMLのデバッグパネルを更新
         const fps = this.frameTime > 0 ? Math.round(1000 / this.frameTime) : 0;
-        this.renderer.drawText(`FPS: ${fps}`, 16, 24, '#FFFFFF');
-        
-        // 現在の状態
-        this.renderer.drawText(`State: ${this.stateManager.currentStateName || 'none'}`, 16, 32, '#FFFFFF');
-        
-        // 入力状態
-        const keys = [];
-        if (this.inputSystem.isActionPressed('left')) keys.push('L');
-        if (this.inputSystem.isActionPressed('right')) keys.push('R');
-        if (this.inputSystem.isActionPressed('up')) keys.push('U');
-        if (this.inputSystem.isActionPressed('down')) keys.push('D');
-        if (this.inputSystem.isActionPressed('jump')) keys.push('J');
-        if (this.inputSystem.isActionPressed('action')) keys.push('A');
-        
-        this.renderer.drawText(`Keys: ${keys.join('') || '-'}`, 16, 40, '#FFFFFF');
-        
-        // 音楽システム状態
-        const musicStatus = this.musicSystem.isInitialized ? 
-            (this.musicSystem.getMuteState() ? 'MUTE' : 'ON') : 'OFF';
-        this.renderer.drawText(`Mus: ${musicStatus}`, 16, 48, '#FFFFFF');
-        
-        // デバッグ切り替えの説明
-        this.renderer.drawText('@ toggle', 16, 64, '#999999');
-        
-        // HTMLのデバッグ情報も更新
         this.updateHTMLDebugInfo(fps);
     }
     
@@ -323,71 +292,133 @@ export class Game {
      * @param {number} fps - 現在のFPS
      */
     updateHTMLDebugInfo(fps) {
-        const debugElement = document.getElementById('debugInfo');
-        if (!debugElement) return;
+        const debugPanel = document.getElementById('debugPanel');
+        if (!debugPanel) return;
         
         if (this.debug) {
-            debugElement.classList.add('active');
+            debugPanel.classList.add('active');
             
             // FPS更新
             const fpsElement = document.getElementById('fps');
-            if (fpsElement) fpsElement.textContent = fps;
+            if (fpsElement) {
+                fpsElement.textContent = fps;
+                // FPSに応じて色を変更
+                if (fps >= 55) {
+                    fpsElement.className = 'debug-value success';
+                } else if (fps >= 30) {
+                    fpsElement.className = 'debug-value warning';
+                } else {
+                    fpsElement.className = 'debug-value error';
+                }
+            }
+            
+            // フレーム時間
+            const frameTimeElement = document.getElementById('frameTime');
+            if (frameTimeElement) {
+                frameTimeElement.textContent = `${this.frameTime.toFixed(1)}ms`;
+            }
+            
+            // ゲーム状態
+            const gameStateElement = document.getElementById('gameState');
+            if (gameStateElement) {
+                gameStateElement.textContent = this.stateManager.currentStateName || 'none';
+            }
             
             // エンティティ数更新
             const entityElement = document.getElementById('entityCount');
-            if (entityElement) entityElement.textContent = this.player ? '1' : '0';
+            if (entityElement) {
+                entityElement.textContent = this.player ? '1' : '0';
+            }
             
             // カメラ位置更新
             const cameraElement = document.getElementById('cameraPos');
             if (cameraElement) {
                 cameraElement.textContent = `${Math.floor(this.renderer.cameraX)}, ${Math.floor(this.renderer.cameraY)}`;
             }
+            
+            // 入力状態
+            const keys = [];
+            if (this.inputSystem.isActionPressed('left')) keys.push('←');
+            if (this.inputSystem.isActionPressed('right')) keys.push('→');
+            if (this.inputSystem.isActionPressed('up')) keys.push('↑');
+            if (this.inputSystem.isActionPressed('down')) keys.push('↓');
+            if (this.inputSystem.isActionPressed('jump')) keys.push('SPACE');
+            if (this.inputSystem.isActionPressed('action')) keys.push('ENTER');
+            
+            const activeKeysElement = document.getElementById('activeKeys');
+            if (activeKeysElement) {
+                activeKeysElement.textContent = keys.length > 0 ? keys.join(' ') : '-';
+            }
+            
+            // 音楽状態
+            const musicStatusElement = document.getElementById('musicStatus');
+            if (musicStatusElement) {
+                if (this.musicSystem.isInitialized) {
+                    musicStatusElement.textContent = this.musicSystem.getMuteState() ? 'MUTED' : 'ON';
+                    musicStatusElement.className = this.musicSystem.getMuteState() ? 'debug-value warning' : 'debug-value success';
+                } else {
+                    musicStatusElement.textContent = 'OFF';
+                    musicStatusElement.className = 'debug-value';
+                }
+            }
+            
+            // プレイヤー情報
+            const playerSection = document.getElementById('playerSection');
+            if (playerSection && this.player) {
+                playerSection.style.display = 'block';
+                
+                const playerState = this.player.getState();
+                
+                // 位置
+                const playerPosElement = document.getElementById('playerPos');
+                if (playerPosElement) {
+                    playerPosElement.textContent = `${Math.floor(playerState.x)}, ${Math.floor(playerState.y)}`;
+                }
+                
+                // 速度
+                const playerVelElement = document.getElementById('playerVel');
+                if (playerVelElement) {
+                    playerVelElement.textContent = `${playerState.vx.toFixed(1)}, ${playerState.vy.toFixed(1)}`;
+                }
+                
+                // 体力
+                const playerHealthElement = document.getElementById('playerHealth');
+                if (playerHealthElement) {
+                    playerHealthElement.textContent = `${playerState.health}/${playerState.maxHealth}`;
+                    if (playerState.health === playerState.maxHealth) {
+                        playerHealthElement.className = 'debug-value success';
+                    } else if (playerState.health > 1) {
+                        playerHealthElement.className = 'debug-value warning';
+                    } else {
+                        playerHealthElement.className = 'debug-value error';
+                    }
+                }
+                
+                // 接地状態
+                const playerGroundedElement = document.getElementById('playerGrounded');
+                if (playerGroundedElement) {
+                    playerGroundedElement.textContent = playerState.grounded ? 'Yes' : 'No';
+                    playerGroundedElement.className = playerState.grounded ? 'debug-value success' : 'debug-value';
+                }
+            } else if (playerSection) {
+                playerSection.style.display = 'none';
+            }
         } else {
-            debugElement.classList.remove('active');
+            debugPanel.classList.remove('active');
         }
     }
     
     renderDebugInfo() {
+        // デバッグ情報はHTMLパネルに移動したので、ゲーム画面には表示しない
+        // テストモード時は必要最小限の情報のみ表示
         
-        // タイトル（グリッドベース）
-        this.renderer.drawText('COIN HUNTER', 16, 16, '#FFFFFF');
-        this.renderer.drawText('PIXEL EDITION', 16, 24, '#FFFFFF');
-        this.renderer.drawText('Systems Test', 16, 40, '#00FF00');
-        
-        // システム状態
-        this.renderer.drawText('== SYSTEMS ==', 16, 56, '#FFFFFF');
-        this.renderer.drawText('Input: OK', 16, 64, '#00FF00');
-        this.renderer.drawText('State: OK', 16, 72, '#00FF00');
-        this.renderer.drawText('Assets: OK', 16, 80, '#00FF00');
-        this.renderer.drawText('Render: OK', 16, 88, '#00FF00');
-        this.renderer.drawText(`Player: ${this.player ? 'OK' : 'NO'}`, 16, 96, this.player ? '#00FF00' : '#FF0000');
-        this.renderer.drawText(`Music: ${this.musicSystem.isInitialized ? 'OK' : 'NO'}`, 16, 104, this.musicSystem.isInitialized ? '#00FF00' : '#FF0000');
-        
-        // 音楽開始の案内
         if (!this.musicSystem.isInitialized) {
-            this.renderer.drawText('PRESS KEY FOR MUSIC', 64, 40, '#FFFF00');
+            // 音楽開始の案内のみゲーム画面に表示
+            const centerX = GAME_RESOLUTION.WIDTH / 2;
+            const centerY = GAME_RESOLUTION.HEIGHT / 2;
+            this.renderer.drawTextCentered('PRESS ANY KEY', centerX, centerY - 8, '#FFFF00');
+            this.renderer.drawTextCentered('TO START MUSIC', centerX, centerY + 8, '#FFFF00');
         }
-        
-        // 入力状態
-        this.renderer.drawText('== INPUT ==', 16, 128, '#FFFFFF');
-        this.renderer.drawText(`L:${this.inputSystem.isActionPressed('left') ? 'Y' : 'N'}`, 16, 136, this.inputSystem.isActionPressed('left') ? '#00FF00' : '#FF0000');
-        this.renderer.drawText(`R:${this.inputSystem.isActionPressed('right') ? 'Y' : 'N'}`, 40, 136, this.inputSystem.isActionPressed('right') ? '#00FF00' : '#FF0000');
-        this.renderer.drawText(`J:${this.inputSystem.isActionPressed('jump') ? 'Y' : 'N'}`, 64, 136, this.inputSystem.isActionPressed('jump') ? '#00FF00' : '#FF0000');
-        this.renderer.drawText(`A:${this.inputSystem.isActionPressed('action') ? 'Y' : 'N'}`, 88, 136, this.inputSystem.isActionPressed('action') ? '#00FF00' : '#FF0000');
-        
-        // プレイヤー状態
-        if (this.player) {
-            const playerState = this.player.getState();
-            this.renderer.drawText('== PLAYER ==', 16, 160, '#FFFFFF');
-            this.renderer.drawText(`X:${Math.floor(playerState.x)} Y:${Math.floor(playerState.y)}`, 16, 168, '#FFFFFF');
-            this.renderer.drawText(`VX:${playerState.vx.toFixed(1)} VY:${playerState.vy.toFixed(1)}`, 16, 176, '#FFFFFF');
-            this.renderer.drawText(`HP:${playerState.health}/${playerState.maxHealth}`, 16, 184, '#FFFFFF');
-            this.renderer.drawText(`G:${playerState.grounded ? 'Y' : 'N'} J:${playerState.isJumping ? 'Y' : 'N'}`, 16, 192, '#FFFFFF');
-        }
-        
-        // 操作説明
-        this.renderer.drawText('ARROWS:MOVE SPACE:JUMP', 16, 216, '#CCCCCC');
-        this.renderer.drawText('@ DEBUG | M MUTE', 16, 224, '#CCCCCC');
     }
     
     stop() {
