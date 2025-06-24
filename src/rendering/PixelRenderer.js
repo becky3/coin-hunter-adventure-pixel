@@ -138,7 +138,8 @@ export class PixelRenderer {
     }
     
     /**
-     * テキストを描画（ピクセルフォント対応）
+     * テキストを描画（固定サイズピクセルフォント）
+     * 8x8ピクセルの固定サイズフォントで描画されます
      * @param {string} text - テキスト
      * @param {number} x - X座標（グリッドに自動的にスナップされる）
      * @param {number} y - Y座標（グリッドに自動的にスナップされる）
@@ -167,7 +168,8 @@ export class PixelRenderer {
     }
     
     /**
-     * 中央揃えでテキストを描画（グリッドベース）
+     * 中央揃えでテキストを描画（固定サイズピクセルフォント・グリッドベース）
+     * 8x8ピクセルの固定サイズフォントで描画されます
      * @param {string} text - テキスト
      * @param {number} centerX - 中心X座標
      * @param {number} y - Y座標
