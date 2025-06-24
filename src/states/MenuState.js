@@ -351,10 +351,10 @@ export class MenuState {
         switch (option.action) {
         case 'start':
             // PlayStateへ遷移
-            if (this.game.musicSystem) {
-                this.game.musicSystem.playGameStartSound();
-            }
             try {
+                if (this.game.musicSystem) {
+                    this.game.musicSystem.playGameStartSound();
+                }
                 this.game.stateManager.setState('play');
             } catch (error) {
                 console.error('PlayState not yet implemented:', error);
