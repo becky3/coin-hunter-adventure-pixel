@@ -202,7 +202,7 @@ export class MenuState {
         this.drawMuteButton(renderer);
         
         // バージョン情報
-        renderer.drawText('v0.1.0', 2, GAME_RESOLUTION.HEIGHT - 10, '#666666', 8);
+        renderer.drawText('v0.1.0', 2, GAME_RESOLUTION.HEIGHT - 10, '#666666');
     }
     
     /**
@@ -213,8 +213,8 @@ export class MenuState {
         
         // メインタイトル（ピクセルフォントサイズ調整）
         const titleY = this.logoY;
-        renderer.drawText('COIN HUNTER', centerX - 44, titleY, '#FFD700', 8);
-        renderer.drawText('ADVENTURE', centerX - 36, titleY + 15, '#FF6B6B', 8);
+        renderer.drawText('COIN HUNTER', centerX - 44, titleY, '#FFD700');
+        renderer.drawText('ADVENTURE', centerX - 36, titleY + 15, '#FF6B6B');
     }
     
     /**
@@ -248,7 +248,7 @@ export class MenuState {
             // 選択カーソル
             if (isSelected) {
                 const cursorX = centerX - offsetX - 10;
-                renderer.drawText('>', cursorX, y, '#FFD700', 8);
+                renderer.drawText('>', cursorX, y, '#FFD700');
             }
         });
         
@@ -279,7 +279,7 @@ export class MenuState {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         
         // タイトル
-        renderer.drawText('HOW TO PLAY', centerX - 44, 20, '#FFD700', 8);
+        renderer.drawText('HOW TO PLAY', centerX - 44, 20, '#FFD700');
         
         // 操作説明
         const instructions = [
@@ -292,18 +292,18 @@ export class MenuState {
         
         let y = 50;
         instructions.forEach(inst => {
-            renderer.drawText(inst.key, 40, y, '#4ECDC4', 6);
-            renderer.drawText(inst.desc, 120, y, '#FFFFFF', 6);
+            renderer.drawText(inst.key, 40, y, '#4ECDC4');
+            renderer.drawText(inst.desc, 120, y, '#FFFFFF');
             y += 20;
         });
         
         // ゲーム説明
-        renderer.drawText('COLLECT ALL COINS!', centerX - 72, 160, '#FFFFFF', 6);
-        renderer.drawText('REACH THE GOAL!', centerX - 60, 175, '#FFFFFF', 6);
-        renderer.drawText('AVOID ENEMIES!', centerX - 56, 190, '#FF6B6B', 6);
+        renderer.drawText('COLLECT ALL COINS!', centerX - 72, 160, '#FFFFFF');
+        renderer.drawText('REACH THE GOAL!', centerX - 60, 175, '#FFFFFF');
+        renderer.drawText('AVOID ENEMIES!', centerX - 56, 190, '#FF6B6B');
         
         // 戻る説明
-        renderer.drawText('ESC/ENTER TO RETURN', centerX - 76, 220, '#999999', 6);
+        renderer.drawText('ESC/ENTER TO RETURN', centerX - 76, 220, '#999999');
     }
     
     /**
@@ -313,7 +313,7 @@ export class MenuState {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         
         // タイトル
-        renderer.drawText('CREDITS', centerX - 28, 20, '#FFD700', 8);
+        renderer.drawText('CREDITS', centerX - 28, 20, '#FFD700');
         
         // クレジット内容
         const credits = [
@@ -325,13 +325,13 @@ export class MenuState {
         
         let y = 50;
         credits.forEach(credit => {
-            renderer.drawText(credit.role, 40, y, '#4ECDC4', 6);
-            renderer.drawText(credit.name, 40, y + 10, '#FFFFFF', 6);
+            renderer.drawText(credit.role, 40, y, '#4ECDC4');
+            renderer.drawText(credit.name, 40, y + 10, '#FFFFFF');
             y += 30;
         });
         
         // 戻る説明
-        renderer.drawText('ESC/ENTER TO RETURN', centerX - 76, 220, '#999999', 6);
+        renderer.drawText('ESC/ENTER TO RETURN', centerX - 76, 220, '#999999');
     }
     
     /**
@@ -346,8 +346,8 @@ export class MenuState {
         const x = GAME_RESOLUTION.WIDTH - 60;
         const y = 10;
         
-        renderer.drawText(buttonText, x, y, buttonColor, 6);
-        renderer.drawText('(M)', x + 10, y + 8, '#666666', 5);
+        renderer.drawText(buttonText, x, y, buttonColor);
+        renderer.drawText('(M)', x + 10, y + 8, '#666666');
     }
     
     /**

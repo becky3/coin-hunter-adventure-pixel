@@ -2,7 +2,7 @@
  * ピクセルレンダラー
  * Canvas描画を抽象化し、ピクセルアート表示に特化したレンダリングを提供
  */
-import { GAME_RESOLUTION, DISPLAY } from '../constants/gameConstants.js';
+import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants.js';
 
 export class PixelRenderer {
     constructor(canvas) {
@@ -143,20 +143,19 @@ export class PixelRenderer {
      * @param {number} x - X座標
      * @param {number} y - Y座標
      * @param {string} color - 色
-     * @param {number} size - フォントサイズ
      * @param {number} alpha - アルファ値（0-1）
      */
-    drawText(text, x, y, color = '#FFFFFF', size = 16, alpha = 1) {
+    drawText(text, x, y, color = '#FFFFFF', alpha = 1) {
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
-        // フォントサイズもスケーリング（ピクセルパーフェクトを保つため整数に丸める）
-        const scaledSize = Math.max(Math.round(size * this.scale), 1);
+        // フォントサイズは固定（8x8ピクセルフォント）
+        const scaledSize = FONT.SIZE * this.scale;
         
         this.ctx.save();
         this.ctx.globalAlpha = alpha;
         this.ctx.fillStyle = color;
-        this.ctx.font = `${scaledSize}px 'Press Start 2P', monospace`;
+        this.ctx.font = `${scaledSize}px ${FONT.FAMILY}`;
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
         this.ctx.fillText(text, drawX, drawY);

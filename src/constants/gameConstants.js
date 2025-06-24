@@ -33,3 +33,10 @@ export const FPS = {
     TARGET: 60,
     FRAME_TIME: 1000 / 60  // ミリ秒
 };
+
+// フォント設定
+export const FONT = {
+    // ピクセルフォントは8x8の固定サイズ（ファミコン風）
+    SIZE: 8,  // 論理サイズ（ピクセル）
+    FAMILY: "'Press Start 2P', monospace"
+};
