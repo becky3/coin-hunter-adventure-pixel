@@ -102,10 +102,9 @@ export class MenuState {
                     !this.showHowTo && !this.showCredits && 
                     this.optionsAlpha >= 1) {
                     // 次のフレームで実行して、他のリスナーとの競合を避ける
+                    const self = this;
                     setTimeout(() => {
-                        if (this.executeOption) {
-                            this.executeOption();
-                        }
+                        self.executeOption();
                     }, 0);
                 }
             })
@@ -351,10 +350,10 @@ export class MenuState {
         switch (option.action) {
         case 'start':
             // PlayStateへ遷移
+            if (this.game.musicSystem) {
+                this.game.musicSystem.playGameStartSound();
+            }
             try {
-                if (this.game.musicSystem) {
-                    this.game.musicSystem.playGameStartSound();
-                }
                 this.game.stateManager.setState('play');
             } catch (error) {
                 console.error('PlayState not yet implemented:', error);
