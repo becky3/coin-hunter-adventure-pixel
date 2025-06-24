@@ -150,10 +150,13 @@ export class PixelRenderer {
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
+        // フォントサイズもスケーリング（ピクセルパーフェクトを保つため整数に丸める）
+        const scaledSize = Math.max(Math.floor(size * this.scale), 1);
+        
         this.ctx.save();
         this.ctx.globalAlpha = alpha;
         this.ctx.fillStyle = color;
-        this.ctx.font = `${size}px 'Press Start 2P', monospace`;
+        this.ctx.font = `${scaledSize}px 'Press Start 2P', monospace`;
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
         this.ctx.fillText(text, drawX, drawY);
