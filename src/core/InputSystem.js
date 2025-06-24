@@ -27,7 +27,7 @@ export class InputSystem {
             'action': ['Enter', 'KeyE'],
             'escape': ['Escape'],
             'mute': ['KeyM'],
-            'debug': ['Digit2', 'At']  // 2キーまたは@キー（JISキーボード）
+            'debug': ['Digit2', 'BracketLeft']  // 2キーまたは@キー（JISキーボード）
         };
         
         // 逆引きマップを生成
@@ -60,16 +60,6 @@ export class InputSystem {
             
             const code = e.code;
             
-            // @キーの特別処理（Shift+2）
-            if (e.key === '@' || (e.shiftKey && e.code === 'Digit2')) {
-                // debugアクションを直接トリガー
-                if (!this.keys.get('At')) {
-                    this.keys.set('At', true);
-                    e.preventDefault();
-                }
-                return;
-            }
-            
             // 既に押されている場合はリピートを防ぐ
             if (this.keys.get(code)) {
                 return;
@@ -85,13 +75,6 @@ export class InputSystem {
         
         window.addEventListener('keyup', (e) => {
             const code = e.code;
-            
-            // @キーの特別処理
-            if (e.key === '@' || (e.shiftKey && e.code === 'Digit2')) {
-                this.keys.set('At', false);
-                return;
-            }
-            
             this.keys.set(code, false);
         });
         
