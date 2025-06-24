@@ -151,7 +151,7 @@ export class PixelRenderer {
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
         // フォントサイズもスケーリング（ピクセルパーフェクトを保つため整数に丸める）
-        const scaledSize = Math.max(Math.floor(size * this.scale), 1);
+        const scaledSize = Math.max(Math.round(size * this.scale), 1);
         
         this.ctx.save();
         this.ctx.globalAlpha = alpha;
