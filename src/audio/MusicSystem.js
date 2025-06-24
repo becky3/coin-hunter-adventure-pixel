@@ -583,8 +583,6 @@ export class MusicSystem {
     playGameStartSound() {
         if (!this.isInitialized || this.isMuted) return;
         
-        const now = this.audioContext.currentTime;
-        
         // 上昇音階
         const notes = [
             { freq: this.getNoteFrequency('C4'), time: 0, duration: 0.1 },

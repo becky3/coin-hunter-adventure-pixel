@@ -24,10 +24,8 @@ export class MenuState {
         // タイトル画面のアニメーション
         this.titleAnimTimer = 0;
         
-        // キー押下状態
-        this.upPressed = false;
-        this.downPressed = false;
-        this.backPressed = false;
+        // 入力イベントリスナー
+        this.inputListeners = [];
     }
     
     /**
@@ -53,6 +51,100 @@ export class MenuState {
      */
     enter() {
         this.init();
+        this.setupInputListeners();
+        
+        // カメラをリセット（メニューでは常に0,0）
+        if (this.game.renderer) {
+            this.game.renderer.setCamera(0, 0);
+        }
+    }
+    
+    /**
+     * 入力イベントリスナーの設定
+     */
+    setupInputListeners() {
+        // 既存のリスナーをクリア
+        this.removeInputListeners();
+        
+        // メニュー選択の上移動
+        this.inputListeners.push(
+            this.game.inputSystem.on('keyPress', (event) => {
+                if ((event.action === 'up' || event.action === 'down') && 
+                    !this.showHowTo && !this.showCredits) {
+                    
+                    if (event.action === 'up') {
+                        this.selectedOption--;
+                        if (this.selectedOption < 0) {
+                            this.selectedOption = this.options.length - 1;
+                        }
+                    } else {
+                        this.selectedOption++;
+                        if (this.selectedOption >= this.options.length) {
+                            this.selectedOption = 0;
+                        }
+                    }
+                    
+                    if (this.game.musicSystem) {
+                        this.game.musicSystem.playButtonClickSound();
+                    }
+                }
+            })
+        );
+        
+        // メニュー項目の決定
+        this.inputListeners.push(
+            this.game.inputSystem.on('keyPress', (event) => {
+                // jumpアクションは、Spaceキーが押された時のみ処理（ArrowUpは除外）
+                const isValidJump = event.action === 'jump' && event.key === 'Space';
+                const isValidAction = event.action === 'action';
+                
+                if ((isValidAction || isValidJump) && 
+                    !this.showHowTo && !this.showCredits && 
+                    this.optionsAlpha >= 1) {
+                    // 次のフレームで実行して、他のリスナーとの競合を避ける
+                    setTimeout(() => this.executeOption(), 0);
+                }
+            })
+        );
+        
+        // How to Play/Credits画面からの戻る
+        this.inputListeners.push(
+            this.game.inputSystem.on('keyPress', (event) => {
+                // jumpアクションは、Spaceキーが押された時のみ処理（ArrowUpは除外）
+                const isValidJump = event.action === 'jump' && event.key === 'Space';
+                const isValidAction = event.action === 'action';
+                const isEscape = event.action === 'escape';
+                
+                if ((this.showHowTo || this.showCredits) && 
+                    (isEscape || isValidAction || isValidJump)) {
+                    this.showHowTo = false;
+                    this.showCredits = false;
+                    if (this.game.musicSystem) {
+                        this.game.musicSystem.playButtonClickSound();
+                    }
+                }
+            })
+        );
+        
+        // ミュートトグル
+        this.inputListeners.push(
+            this.game.inputSystem.on('keyPress', (event) => {
+                if (event.action === 'mute') {
+                    if (this.game.musicSystem) {
+                        this.game.musicSystem.toggleMute();
+                        this.game.musicSystem.playButtonClickSound();
+                    }
+                }
+            })
+        );
+    }
+    
+    /**
+     * 入力イベントリスナーの解除
+     */
+    removeInputListeners() {
+        this.inputListeners.forEach(removeListener => removeListener());
+        this.inputListeners = [];
     }
     
     /**
@@ -60,6 +152,7 @@ export class MenuState {
      * @param {number} deltaTime - 経過時間
      */
     update(deltaTime) {
+        
         // アニメーションタイマー更新
         this.titleAnimTimer += deltaTime;
         
@@ -79,70 +172,7 @@ export class MenuState {
             }
         }
         
-        // 入力処理
-        // const input = this.game.inputManager.getInput();  // 現在は未使用
-        
-        if (this.showHowTo || this.showCredits) {
-            // How to Play/Credits画面での入力
-            if (this.game.inputManager.isKeyPressed('Escape') || 
-                this.game.inputManager.isKeyPressed('Enter') ||
-                this.game.inputManager.isKeyPressed('Space')) {
-                if (!this.backPressed) {
-                    this.backPressed = true;
-                    this.showHowTo = false;
-                    this.showCredits = false;
-                    if (this.game.musicSystem) {
-                        this.game.musicSystem.playButtonClickSound();
-                    }
-                }
-            } else {
-                this.backPressed = false;
-            }
-        } else {
-            // メニュー選択（カーソルキーのコード修正）
-            if (this.game.inputManager.isKeyPressed('ArrowUp') || 
-                this.game.inputManager.isKeyPressed('KeyW')) {
-                if (!this.upPressed) {
-                    this.upPressed = true;
-                    this.selectedOption--;
-                    if (this.selectedOption < 0) {
-                        this.selectedOption = this.options.length - 1;
-                    }
-                    if (this.game.musicSystem) {
-                        this.game.musicSystem.playButtonClickSound();
-                    }
-                }
-            } else {
-                this.upPressed = false;
-            }
-            
-            if (this.game.inputManager.isKeyPressed('ArrowDown') || 
-                this.game.inputManager.isKeyPressed('KeyS')) {
-                if (!this.downPressed) {
-                    this.downPressed = true;
-                    this.selectedOption++;
-                    if (this.selectedOption >= this.options.length) {
-                        this.selectedOption = 0;
-                    }
-                    if (this.game.musicSystem) {
-                        this.game.musicSystem.playButtonClickSound();
-                    }
-                }
-            } else {
-                this.downPressed = false;
-            }
-            
-            // 決定
-            if ((this.game.inputManager.isKeyPressed('Enter') || 
-                 this.game.inputManager.isKeyPressed('Space')) && this.optionsAlpha >= 1) {
-                if (!this.enterPressed) {
-                    this.enterPressed = true;
-                    this.executeOption();
-                }
-            } else {
-                this.enterPressed = false;
-            }
-        }
+        // 入力処理はsetupInputListenersでイベントベースに移行
     }
     
     /**
@@ -314,21 +344,31 @@ export class MenuState {
     executeOption() {
         const option = this.options[this.selectedOption];
         
-        if (this.game.musicSystem) {
-            this.game.musicSystem.playGameStartSound();
-        }
-        
         switch (option.action) {
         case 'start':
             // PlayStateへ遷移
-            this.game.stateManager.setState('play');
+            if (this.game.musicSystem) {
+                this.game.musicSystem.playGameStartSound();
+            }
+            try {
+                this.game.stateManager.setState('play');
+            } catch (error) {
+                console.error('PlayState not yet implemented:', error);
+                // For now, just log the error and stay in menu
+            }
             break;
                 
         case 'howto':
+            if (this.game.musicSystem) {
+                this.game.musicSystem.playButtonClickSound();
+            }
             this.showHowTo = true;
             break;
                 
         case 'credits':
+            if (this.game.musicSystem) {
+                this.game.musicSystem.playButtonClickSound();
+            }
             this.showCredits = true;
             break;
         }
@@ -337,7 +377,14 @@ export class MenuState {
     /**
      * 状態のクリーンアップ
      */
+    exit() {
+        this.removeInputListeners();
+    }
+    
+    /**
+     * 状態のクリーンアップ
+     */
     destroy() {
-        // 特に必要なクリーンアップはなし
+        this.removeInputListeners();
     }
 }

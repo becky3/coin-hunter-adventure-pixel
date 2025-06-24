@@ -1,7 +1,7 @@
 /**
  * メインゲームクラス
  */
-import { InputManager } from './InputManager.js';
+import { InputSystem } from './InputSystem.js';
 import { GameStateManager } from '../states/GameStateManager.js';
 import { AssetLoader } from '../assets/AssetLoader.js';
 import { PixelRenderer } from '../rendering/PixelRenderer.js';
@@ -24,7 +24,7 @@ export class Game {
         this.frameTime = 1000 / this.targetFPS;
         
         // コアシステムの初期化
-        this.inputManager = new InputManager();
+        this.inputSystem = new InputSystem();
         this.stateManager = new GameStateManager();
         this.assetLoader = new AssetLoader();
         this.renderer = new PixelRenderer(canvas);
@@ -96,7 +96,8 @@ export class Game {
     createTestPlayer() {
         // テスト用のプレイヤーを作成
         this.player = new Player(100, 300);
-        this.player.setInputManager(this.inputManager);
+        // TODO: Playerクラスを後でInputSystem対応に更新
+        // this.player.setInputSystem(this.inputSystem);
         this.player.setMusicSystem(this.musicSystem);
         console.log('Test player created at:', this.player.x, this.player.y);
         console.log('Player size:', this.player.width, 'x', this.player.height);
@@ -175,7 +176,7 @@ export class Game {
     
     update() {
         // 入力の更新
-        this.inputManager.update();
+        this.inputSystem.update();
         
         // 現在の状態に応じて処理を分岐
         if (this.stateManager.currentStateName === 'menu') {
@@ -189,8 +190,7 @@ export class Game {
     
     updateTestMode() {
         // テスト用ログ - 更新確認（デバッグモード時のみ）
-        const input = this.inputManager.getInput();
-        if (input.jump && this.debug) {
+        if (this.inputSystem.isActionPressed('jump') && this.debug) {
             console.log('===== JUMP KEY DETECTED IN GAME.JS =====');
         }
         
@@ -266,7 +266,6 @@ export class Game {
     }
     
     renderDebugInfo() {
-        const input = this.inputManager.getInput();
         
         // タイトル
         this.renderer.drawText('Coin Hunter Adventure - Pixel Edition', 20, 20, '#FFFFFF', 20);
@@ -290,10 +289,10 @@ export class Game {
         
         // 入力状態
         this.renderer.drawText('=== Input State ===', 20, 290, '#FFFFFF', 14);
-        this.renderer.drawText(`Left: ${input.left ? 'ON' : 'OFF'}`, 20, 310, input.left ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Right: ${input.right ? 'ON' : 'OFF'}`, 120, 310, input.right ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Jump: ${input.jump ? 'ON' : 'OFF'}`, 220, 310, input.jump ? '#00FF00' : '#FF0000', 12);
-        this.renderer.drawText(`Action: ${input.action ? 'ON' : 'OFF'}`, 320, 310, input.action ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Left: ${this.inputSystem.isActionPressed('left') ? 'ON' : 'OFF'}`, 20, 310, this.inputSystem.isActionPressed('left') ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Right: ${this.inputSystem.isActionPressed('right') ? 'ON' : 'OFF'}`, 120, 310, this.inputSystem.isActionPressed('right') ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Jump: ${this.inputSystem.isActionPressed('jump') ? 'ON' : 'OFF'}`, 220, 310, this.inputSystem.isActionPressed('jump') ? '#00FF00' : '#FF0000', 12);
+        this.renderer.drawText(`Action: ${this.inputSystem.isActionPressed('action') ? 'ON' : 'OFF'}`, 320, 310, this.inputSystem.isActionPressed('action') ? '#00FF00' : '#FF0000', 12);
         
         // プレイヤー状態
         if (this.player) {
