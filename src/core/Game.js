@@ -316,12 +316,12 @@ export class Game {
         // デバッグモード
         if (this.debug) {
             this.renderer.drawText('DEBUG MODE ON', 20, 410, '#FF00FF', 16);
-            this.renderer.drawText('Press 2 to toggle', 20, 430, '#FF00FF', 12);
+            this.renderer.drawText('Press @ to toggle', 20, 430, '#FF00FF', 12);
         }
         
         // 操作説明
         this.renderer.drawText('Controls: Arrow Keys/WASD = Move, Space/Up/W = Jump, Enter/E = Action', 20, 470, '#CCCCCC', 10);
-        this.renderer.drawText('Press 2 to toggle debug mode | M to toggle music', 20, 485, '#CCCCCC', 10);
+        this.renderer.drawText('Press @ to toggle debug mode | M to toggle music', 20, 485, '#CCCCCC', 10);
     }
     
     stop() {

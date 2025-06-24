@@ -277,7 +277,7 @@ export class MenuState {
             { key: 'UP / SPACE', desc: 'JUMP' },
             { key: 'HOLD JUMP', desc: 'JUMP HIGHER' },
             { key: 'M', desc: 'TOGGLE MUSIC' },
-            { key: '2', desc: 'DEBUG MODE' }
+            { key: '@', desc: 'DEBUG MODE' }
         ];
         
         let y = 120;
