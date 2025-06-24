@@ -29,6 +29,26 @@ main                    # 本番環境
 └── release/v1.0       # リリース準備
 ```
 
+### ブランチ作成のルール
+**重要**: mainブランチへの直接プッシュは禁止です。
+
+1. **必ずfeatureブランチを作成してから作業を開始**
+   ```bash
+   git checkout -b feature/機能名
+   ```
+
+2. **作業の流れ**
+   - featureブランチで開発・コミット
+   - プッシュしてPull Requestを作成
+   - レビューを受ける
+   - 承認後にマージ
+
+3. **ブランチ名の規則**
+   - `feature/` - 新機能開発
+   - `bugfix/` - バグ修正
+   - `hotfix/` - 緊急修正
+   - 小文字、ハイフン区切りを使用
+
 ### コミットメッセージ規約
 ```
 <type>: <subject>
@@ -123,6 +143,29 @@ npm run dev    # Vite開発サーバー起動
 - 妥当な指摘については修正を実施
 - セキュリティ、パフォーマンス、コード品質の改善提案を積極的に採用
 - 指摘が不適切な場合は、理由を明確にしてスキップ可能
+
+### Copilotコメントの確認方法
+Copilotのレビューコメントは複数の場所に表示される可能性があります：
+
+1. **通常のPRコメント確認**
+   ```bash
+   gh pr view --comments
+   ```
+
+2. **レビューコメントの確認（スレッド形式）**
+   ```bash
+   gh api repos/becky3/coin-hunter-adventure-pixel/pulls/[PR番号]/comments
+   ```
+
+3. **レビュー情報の確認**
+   ```bash
+   gh pr view [PR番号] --json reviews --jq '.reviews[]'
+   ```
+
+4. **Web UI での確認**
+   - PR画面の「Files changed」タブでインラインコメントを確認
+   - 「Conversation」タブで全体のコメントを確認
+   - 低信頼度で非表示になっているコメントも「Show resolved」で確認
 
 ### レビュー対応の優先順位
 1. **高優先度**: セキュリティ問題、バグ、メモリリーク

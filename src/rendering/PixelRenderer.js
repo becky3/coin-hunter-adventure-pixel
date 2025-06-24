@@ -2,6 +2,8 @@
  * ピクセルレンダラー
  * Canvas描画を抽象化し、ピクセルアート表示に特化したレンダリングを提供
  */
+import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants.js';
+
 export class PixelRenderer {
     constructor(canvas) {
         this.canvas = canvas;
@@ -13,9 +15,16 @@ export class PixelRenderer {
         this.ctx.webkitImageSmoothingEnabled = false;
         this.ctx.msImageSmoothingEnabled = false;
         
-        // キャンバスサイズ
-        this.width = canvas.width;
-        this.height = canvas.height;
+        // ゲーム画面サイズ（論理的なサイズ）
+        this.width = GAME_RESOLUTION.WIDTH;
+        this.height = GAME_RESOLUTION.HEIGHT;
+        
+        // 実際のキャンバスサイズ
+        this.canvasWidth = canvas.width;
+        this.canvasHeight = canvas.height;
+        
+        // スケール計算
+        this.scale = DISPLAY.SCALE;
         
         // カメラオフセット
         this.cameraX = 0;
@@ -33,11 +42,12 @@ export class PixelRenderer {
      * @param {string} color - 背景色（省略時は透明）
      */
     clear(color = null) {
+        // スケールを考慮して全キャンバスをクリア
         if (color) {
             this.ctx.fillStyle = color;
-            this.ctx.fillRect(0, 0, this.width, this.height);
+            this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
         } else {
-            this.ctx.clearRect(0, 0, this.width, this.height);
+            this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         }
     }
     
@@ -60,21 +70,21 @@ export class PixelRenderer {
      * @param {boolean} flipX - 水平反転
      */
     drawSprite(sprite, x, y, scale = 1, flipX = false) {
-        // 整数座標に丸める
-        const drawX = Math.floor(x - this.cameraX);
-        const drawY = Math.floor(y - this.cameraY);
+        // 整数座標に丸めて、スケールを適用
+        const drawX = Math.floor((x - this.cameraX) * this.scale);
+        const drawY = Math.floor((y - this.cameraY) * this.scale);
         
-        // 画面外は描画しない
-        if (drawX + sprite.width * scale < 0 || drawX > this.width ||
-            drawY + sprite.height * scale < 0 || drawY > this.height) {
+        // 画面外は描画しない（実際のキャンバスサイズで判定）
+        if (drawX + sprite.width * scale * this.scale < 0 || drawX > this.canvasWidth ||
+            drawY + sprite.height * scale * this.scale < 0 || drawY > this.canvasHeight) {
             return;
         }
         
         this.ctx.save();
         
         if (flipX) {
-            // 水平反転
-            this.ctx.translate(drawX + sprite.width * scale, drawY);
+            // 水平反転（スケールを考慮）
+            this.ctx.translate(drawX + sprite.width * scale * this.scale, drawY);
             this.ctx.scale(-1, 1);
             this.ctx.translate(-drawX, -drawY);
         }
@@ -85,14 +95,14 @@ export class PixelRenderer {
             this.ctx.drawImage(
                 tempCanvas,
                 0, 0, sprite.width, sprite.height,
-                drawX, drawY, sprite.width * scale, sprite.height * scale
+                drawX, drawY, sprite.width * scale * this.scale, sprite.height * scale * this.scale
             );
         } else {
             // Canvas要素の場合はそのまま描画
             this.ctx.drawImage(
                 sprite,
                 0, 0, sprite.width, sprite.height,
-                drawX, drawY, sprite.width * scale, sprite.height * scale
+                drawX, drawY, sprite.width * scale * this.scale, sprite.height * scale * this.scale
             );
         }
         
@@ -100,7 +110,7 @@ export class PixelRenderer {
         
         // デバッグ時は当たり判定ボックスを表示
         if (this.debug) {
-            this.drawDebugBox(drawX, drawY, sprite.width * scale, sprite.height * scale);
+            this.drawDebugBox(drawX, drawY, sprite.width * scale * this.scale, sprite.height * scale * this.scale);
         }
     }
     
@@ -114,40 +124,63 @@ export class PixelRenderer {
      * @param {boolean} fill - 塗りつぶし
      */
     drawRect(x, y, width, height, color, fill = true) {
-        const drawX = Math.floor(x - this.cameraX);
-        const drawY = Math.floor(y - this.cameraY);
+        const drawX = Math.floor((x - this.cameraX) * this.scale);
+        const drawY = Math.floor((y - this.cameraY) * this.scale);
         
         this.ctx.fillStyle = color;
         this.ctx.strokeStyle = color;
         
         if (fill) {
-            this.ctx.fillRect(drawX, drawY, width, height);
+            this.ctx.fillRect(drawX, drawY, width * this.scale, height * this.scale);
         } else {
-            this.ctx.strokeRect(drawX, drawY, width, height);
+            this.ctx.strokeRect(drawX, drawY, width * this.scale, height * this.scale);
         }
     }
     
     /**
-     * テキストを描画（ピクセルフォント対応）
+     * テキストを描画（固定サイズピクセルフォント）
+     * 8x8ピクセルの固定サイズフォントで描画されます
      * @param {string} text - テキスト
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
+     * @param {number} x - X座標（グリッドに自動的にスナップされる）
+     * @param {number} y - Y座標（グリッドに自動的にスナップされる）
      * @param {string} color - 色
-     * @param {number} size - フォントサイズ
      * @param {number} alpha - アルファ値（0-1）
      */
-    drawText(text, x, y, color = '#FFFFFF', size = 16, alpha = 1) {
-        const drawX = Math.floor(x - this.cameraX);
-        const drawY = Math.floor(y - this.cameraY);
+    drawText(text, x, y, color = '#FFFFFF', alpha = 1) {
+        // グリッドにスナップ
+        const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
+        const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
+        
+        const drawX = Math.floor((snappedX - this.cameraX) * this.scale);
+        const drawY = Math.floor((snappedY - this.cameraY) * this.scale);
+        
+        // フォントサイズは固定（8x8ピクセルフォント）
+        const scaledSize = FONT.SIZE * this.scale;
         
         this.ctx.save();
         this.ctx.globalAlpha = alpha;
         this.ctx.fillStyle = color;
-        this.ctx.font = `${size}px 'Press Start 2P', monospace`;
+        this.ctx.font = `${scaledSize}px ${FONT.FAMILY}`;
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
         this.ctx.fillText(text, drawX, drawY);
         this.ctx.restore();
+    }
+    
+    /**
+     * 中央揃えでテキストを描画（固定サイズピクセルフォント・グリッドベース）
+     * 8x8ピクセルの固定サイズフォントで描画されます
+     * @param {string} text - テキスト
+     * @param {number} centerX - 中心X座標
+     * @param {number} y - Y座標
+     * @param {string} color - 色
+     * @param {number} alpha - アルファ値（0-1）
+     */
+    drawTextCentered(text, centerX, y, color = '#FFFFFF', alpha = 1) {
+        // テキストの文字数から幅を計算（各文字は8ピクセル）
+        const textWidth = text.length * FONT.GRID;
+        const x = centerX - Math.floor(textWidth / 2);
+        this.drawText(text, x, y, color, alpha);
     }
     
     /**
@@ -160,13 +193,13 @@ export class PixelRenderer {
      * @param {number} width - 線幅
      */
     drawLine(x1, y1, x2, y2, color = '#FFFFFF', width = 1) {
-        const drawX1 = Math.floor(x1 - this.cameraX);
-        const drawY1 = Math.floor(y1 - this.cameraY);
-        const drawX2 = Math.floor(x2 - this.cameraX);
-        const drawY2 = Math.floor(y2 - this.cameraY);
+        const drawX1 = Math.floor((x1 - this.cameraX) * this.scale);
+        const drawY1 = Math.floor((y1 - this.cameraY) * this.scale);
+        const drawX2 = Math.floor((x2 - this.cameraX) * this.scale);
+        const drawY2 = Math.floor((y2 - this.cameraY) * this.scale);
         
         this.ctx.strokeStyle = color;
-        this.ctx.lineWidth = width;
+        this.ctx.lineWidth = width * this.scale;
         this.ctx.beginPath();
         this.ctx.moveTo(drawX1, drawY1);
         this.ctx.lineTo(drawX2, drawY2);
@@ -244,8 +277,8 @@ export class PixelRenderer {
      */
     worldToScreen(worldX, worldY) {
         return {
-            x: Math.floor(worldX - this.cameraX),
-            y: Math.floor(worldY - this.cameraY)
+            x: Math.floor((worldX - this.cameraX) * this.scale),
+            y: Math.floor((worldY - this.cameraY) * this.scale)
         };
     }
     
@@ -257,8 +290,8 @@ export class PixelRenderer {
      */
     screenToWorld(screenX, screenY) {
         return {
-            x: screenX + this.cameraX,
-            y: screenY + this.cameraY
+            x: (screenX / this.scale) + this.cameraX,
+            y: (screenY / this.scale) + this.cameraY
         };
     }
     
@@ -297,10 +330,17 @@ export class PixelRenderer {
      * @param {number} height - 新しい高さ
      */
     resize(width, height) {
+        this.canvasWidth = width;
+        this.canvasHeight = height;
         this.canvas.width = width;
         this.canvas.height = height;
-        this.width = width;
-        this.height = height;
+        
+        // ゲーム画面サイズは固定
+        this.width = GAME_RESOLUTION.WIDTH;
+        this.height = GAME_RESOLUTION.HEIGHT;
+        
+        // スケール再計算
+        this.scale = Math.min(width / GAME_RESOLUTION.WIDTH, height / GAME_RESOLUTION.HEIGHT);
         
         // アンチエイリアスを再度無効化
         this.ctx.imageSmoothingEnabled = false;

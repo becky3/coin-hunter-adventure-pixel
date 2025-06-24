@@ -189,6 +189,99 @@ function isInView(entity, camera) {
 }
 ```
 
+## レンダリングシステム
+
+### 画面解像度
+```javascript
+// ゲーム画面の解像度設定
+export const GAME_RESOLUTION = {
+    WIDTH: 256,  // ゲーム画面の幅（ピクセル）
+    HEIGHT: 240  // ゲーム画面の高さ（ピクセル）
+};
+
+// 表示設定
+export const DISPLAY = {
+    SCALE: 3,  // 3倍に拡大表示（768x720）
+    OUTER_FRAME: {
+        ENABLED: true,
+        BACKGROUND_COLOR: '#1a1a1a',
+        BORDER_COLOR: '#333333',
+        BORDER_WIDTH: 2
+    }
+};
+```
+
+### PixelRenderer
+ピクセルパーフェクトな描画を実現するレンダリングクラス:
+
+```javascript
+class PixelRenderer {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        
+        // ピクセルアートのためアンチエイリアスを無効化
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.mozImageSmoothingEnabled = false;
+        this.ctx.webkitImageSmoothingEnabled = false;
+        this.ctx.msImageSmoothingEnabled = false;
+    }
+}
+```
+
+### グリッドベーステキストシステム
+すべてのテキストは8×8ピクセルグリッドに配置:
+
+```javascript
+// フォント設定
+export const FONT = {
+    SIZE: 8,     // 論理サイズ（ピクセル）
+    FAMILY: "'Press Start 2P', monospace",
+    GRID: 8      // 文字配置のグリッドサイズ
+};
+
+// テキスト描画（自動グリッドスナップ）
+drawText(text, x, y, color = '#FFFFFF', alpha = 1) {
+    // グリッドにスナップ
+    const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
+    const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
+    
+    const drawX = Math.floor((snappedX - this.cameraX) * this.scale);
+    const drawY = Math.floor((snappedY - this.cameraY) * this.scale);
+    
+    // フォントサイズは固定（8x8ピクセルフォント）
+    const scaledSize = FONT.SIZE * this.scale;
+    
+    this.ctx.save();
+    this.ctx.globalAlpha = alpha;
+    this.ctx.fillStyle = color;
+    this.ctx.font = `${scaledSize}px ${FONT.FAMILY}`;
+    this.ctx.textAlign = 'left';
+    this.ctx.textBaseline = 'top';
+    this.ctx.fillText(text, drawX, drawY);
+    this.ctx.restore();
+}
+
+// 中央揃えテキスト描画（グリッドベース）
+drawTextCentered(text, centerX, y, color = '#FFFFFF', alpha = 1) {
+    // テキストの文字数から幅を計算（各文字は8ピクセル）
+    const textWidth = text.length * FONT.GRID;
+    const x = centerX - Math.floor(textWidth / 2);
+    this.drawText(text, x, y, color, alpha);
+}
+```
+
+### 座標系とスケーリング
+- **論理座標**: 256×240ピクセルのゲーム内座標
+- **物理座標**: 768×720ピクセルの実際の描画座標
+- すべての座標計算は論理座標で行い、描画時に自動的にスケーリング
+
+```javascript
+// 例: 論理座標 (10, 20) に描画
+renderer.drawSprite(sprite, 10, 20);
+// → 実際には (30, 60) の位置に3倍サイズで描画される
+```
+
 ## ステージデータ構造
 
 ### JSONフォーマット
@@ -196,23 +289,23 @@ function isInView(entity, camera) {
 {
     "name": "Stage 1-1",
     "width": 3000,
-    "height": 576,
+    "height": 240,
     "timeLimit": 300,
-    "playerSpawn": { "x": 100, "y": 300 },
-    "goal": { "x": 2800, "y": 400 },
+    "playerSpawn": { "x": 100, "y": 150 },
+    "goal": { "x": 2800, "y": 150 },
     "platforms": [
-        { "x": 0, "y": 500, "width": 3000, "height": 76 }
+        { "x": 0, "y": 200, "width": 3000, "height": 40 }
     ],
     "enemies": [
-        { "type": "slime", "x": 500, "y": 450 },
-        { "type": "bird", "x": 800, "y": 200 }
+        { "type": "slime", "x": 500, "y": 180 },
+        { "type": "bird", "x": 800, "y": 100 }
     ],
     "coins": [
-        { "x": 300, "y": 400 },
-        { "x": 350, "y": 400 }
+        { "x": 300, "y": 150 },
+        { "x": 350, "y": 150 }
     ],
     "springs": [
-        { "x": 1000, "y": 460 }
+        { "x": 1000, "y": 180 }
     ]
 }
 ```

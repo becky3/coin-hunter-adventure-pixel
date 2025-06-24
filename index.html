@@ -10,24 +10,108 @@
         
         body {
             margin: 0;
-            padding: 0;
-            background-color: #222;
+            padding: 20px;
+            background-color: #0a0a0a;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Press Start 2P', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ccc;
+            box-sizing: border-box;
+        }
+        
+        #mainContainer {
+            position: relative;
+        }
+        
+        #outerFrame {
+            background-color: #1a1a1a;
+            border: 2px solid #333;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
         }
         
         #gameContainer {
             position: relative;
+            background-color: #000;
         }
         
         #gameCanvas {
-            background-color: #000;
+            display: block;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
-            border: 2px solid #444;
+            background-color: #000;
+        }
+        
+        #metaInfo {
+            margin-top: 15px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #666;
+            text-align: center;
+        }
+        
+        #debugPanel {
+            position: absolute;
+            left: -240px;
+            top: 0;
+            background-color: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 4px;
+            padding: 15px;
+            width: 200px;
+            display: none;
+            font-size: 13px;
+            line-height: 1.6;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+        
+        #debugPanel.active {
+            display: block;
+        }
+        
+        #debugPanel h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #00ff00;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        
+        #debugPanel .debug-section {
+            margin-bottom: 15px;
+        }
+        
+        #debugPanel .debug-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        #debugPanel .debug-label {
+            color: #999;
+        }
+        
+        #debugPanel .debug-value {
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        #debugPanel .debug-value.warning {
+            color: #ffaa00;
+        }
+        
+        #debugPanel .debug-value.error {
+            color: #ff4444;
+        }
+        
+        #debugPanel .debug-value.success {
+            color: #44ff44;
         }
         
         #loadingScreen {
@@ -41,14 +125,96 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="576"></canvas>
-        <div id="loadingScreen">Loading...</div>
+    <div id="mainContainer">
+        <div id="outerFrame">
+            <div id="debugPanel">
+                <h3>Debug Info</h3>
+            <div class="debug-section">
+                <div class="debug-row">
+                    <span class="debug-label">FPS:</span>
+                    <span class="debug-value" id="fps">60</span>
+                </div>
+                <div class="debug-row">
+                    <span class="debug-label">Frame Time:</span>
+                    <span class="debug-value" id="frameTime">16.7ms</span>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <h4 style="margin: 0 0 8px 0; color: #888; font-size: 12px;">Game State</h4>
+                <div class="debug-row">
+                    <span class="debug-label">State:</span>
+                    <span class="debug-value" id="gameState">menu</span>
+                </div>
+                <div class="debug-row">
+                    <span class="debug-label">Entities:</span>
+                    <span class="debug-value" id="entityCount">0</span>
+                </div>
+                <div class="debug-row">
+                    <span class="debug-label">Camera:</span>
+                    <span class="debug-value" id="cameraPos">0, 0</span>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <h4 style="margin: 0 0 8px 0; color: #888; font-size: 12px;">Input</h4>
+                <div class="debug-row">
+                    <span class="debug-label">Keys:</span>
+                    <span class="debug-value" id="activeKeys">-</span>
+                </div>
+                <div class="debug-row">
+                    <span class="debug-label">Mouse:</span>
+                    <span class="debug-value" id="mousePos">-, -</span>
+                </div>
+            </div>
+            
+            <div class="debug-section">
+                <h4 style="margin: 0 0 8px 0; color: #888; font-size: 12px;">Audio</h4>
+                <div class="debug-row">
+                    <span class="debug-label">Music:</span>
+                    <span class="debug-value" id="musicStatus">OFF</span>
+                </div>
+                <div class="debug-row">
+                    <span class="debug-label">SFX Volume:</span>
+                    <span class="debug-value" id="sfxVolume">100%</span>
+                </div>
+            </div>
+            
+            <div class="debug-section" id="playerSection" style="display: none;">
+                <h4 style="margin: 0 0 8px 0; color: #888; font-size: 12px;">Player</h4>
+                <div class="debug-row">
+                    <span class="debug-label">Position:</span>
+                    <span class="debug-value" id="playerPos">0, 0</span>
+                </div>
+                <div class="debug-row">
+                    <span class="debug-label">Velocity:</span>
+                    <span class="debug-value" id="playerVel">0, 0</span>
+                </div>
+                <div class="debug-row">
+                    <span class="debug-label">Health:</span>
+                    <span class="debug-value" id="playerHealth">-</span>
+                </div>
+                <div class="debug-row">
+                    <span class="debug-label">Grounded:</span>
+                    <span class="debug-value" id="playerGrounded">-</span>
+                </div>
+            </div>
+            </div>
+            
+            <div id="gameContainer">
+                <canvas id="gameCanvas" width="768" height="720"></canvas>
+                <div id="loadingScreen">Loading...</div>
+            </div>
+            <div id="metaInfo">
+                <div>Press [F11] for fullscreen</div>
+                <div>Press [@] for debug mode</div>
+            </div>
+        </div>
     </div>
     <script type="module" src="/src/index.js"></script>
 </body>
