@@ -11,23 +11,55 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #222;
+            background-color: #1a1a1a;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             font-family: 'Press Start 2P', monospace;
+            color: #ccc;
+        }
+        
+        #outerFrame {
+            background-color: #1a1a1a;
+            border: 2px solid #333;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
         }
         
         #gameContainer {
             position: relative;
+            background-color: #000;
         }
         
         #gameCanvas {
-            background-color: #000;
+            display: block;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
-            border: 2px solid #444;
+            background-color: #000;
+        }
+        
+        #metaInfo {
+            margin-top: 15px;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #666;
+            text-align: center;
+        }
+        
+        #debugInfo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 8px;
+            color: #555;
+            text-align: right;
+            display: none;
+        }
+        
+        #debugInfo.active {
+            display: block;
         }
         
         #loadingScreen {
@@ -41,14 +73,25 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="576"></canvas>
-        <div id="loadingScreen">Loading...</div>
+    <div id="outerFrame">
+        <div id="gameContainer">
+            <canvas id="gameCanvas" width="768" height="720"></canvas>
+            <div id="loadingScreen">Loading...</div>
+        </div>
+        <div id="metaInfo">
+            <div>Press [F11] for fullscreen</div>
+            <div>Press [@] for debug mode</div>
+        </div>
+        <div id="debugInfo">
+            <div>FPS: <span id="fps">0</span></div>
+            <div>Entities: <span id="entityCount">0</span></div>
+            <div>Camera: <span id="cameraPos">0, 0</span></div>
+        </div>
     </div>
     <script type="module" src="/src/index.js"></script>
 </body>

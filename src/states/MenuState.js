@@ -1,6 +1,8 @@
 /**
  * メニュー画面の状態管理クラス
  */
+import { GAME_RESOLUTION } from '../constants/gameConstants.js';
+
 export class MenuState {
     constructor(game) {
         this.game = game;
@@ -13,7 +15,7 @@ export class MenuState {
         
         // アニメーション用
         this.logoY = -100;
-        this.logoTargetY = 80;
+        this.logoTargetY = 40;
         this.optionsAlpha = 0;
         
         // How to Play画面の状態
@@ -182,7 +184,7 @@ export class MenuState {
      */
     render(renderer) {
         // 背景（シンプルな黒）
-        renderer.fillRect(0, 0, renderer.canvas.width, renderer.canvas.height, '#000000');
+        renderer.clear('#000000');
         
         if (this.showHowTo) {
             this.renderHowToPlay(renderer);
@@ -200,19 +202,19 @@ export class MenuState {
         this.drawMuteButton(renderer);
         
         // バージョン情報
-        renderer.drawText('v0.1.0', 10, renderer.canvas.height - 20, '#666666', 12);
+        renderer.drawText('v0.1.0', 2, GAME_RESOLUTION.HEIGHT - 10, '#666666', 8);
     }
     
     /**
      * タイトルロゴの描画
      */
     drawTitleLogo(renderer) {
-        const centerX = renderer.canvas.width / 2;
+        const centerX = GAME_RESOLUTION.WIDTH / 2;
         
         // メインタイトル（ピクセルフォントサイズ調整）
         const titleY = this.logoY;
-        renderer.drawText('COIN HUNTER', centerX - 88, titleY, '#FFD700', 16);
-        renderer.drawText('ADVENTURE', centerX - 72, titleY + 30, '#FF6B6B', 16);
+        renderer.drawText('COIN HUNTER', centerX - 44, titleY, '#FFD700', 8);
+        renderer.drawText('ADVENTURE', centerX - 36, titleY + 15, '#FF6B6B', 8);
     }
     
     /**
@@ -221,9 +223,9 @@ export class MenuState {
     drawMenuOptions(renderer) {
         if (this.optionsAlpha <= 0) return;
         
-        const centerX = renderer.canvas.width / 2;
-        const startY = 250;
-        const lineHeight = 30;
+        const centerX = GAME_RESOLUTION.WIDTH / 2;
+        const startY = 100;
+        const lineHeight = 20;
         
         this.options.forEach((option, index) => {
             const y = startY + index * lineHeight;
@@ -231,8 +233,8 @@ export class MenuState {
             
             // テキスト（ピクセルフォントサイズ）
             const color = isSelected ? '#FFD700' : '#FFFFFF';
-            const size = 16;
-            const offsetX = option.text.length * 8;
+            const size = 8;
+            const offsetX = option.text.length * 4;
             
             renderer.drawText(
                 option.text, 
@@ -245,18 +247,26 @@ export class MenuState {
             
             // 選択カーソル
             if (isSelected) {
-                const cursorX = centerX - offsetX - 20;
-                renderer.drawText('>', cursorX, y, '#FFD700', 16);
+                const cursorX = centerX - offsetX - 10;
+                renderer.drawText('>', cursorX, y, '#FFD700', 8);
             }
         });
         
         // 操作説明
         renderer.drawText(
-            'ARROW KEYS: SELECT   ENTER/SPACE: CONFIRM', 
-            centerX - 168, 
-            400, 
+            'ARROWS:SELECT', 
+            centerX - 52, 
+            180, 
             '#999999', 
-            12,
+            6,
+            this.optionsAlpha
+        );
+        renderer.drawText(
+            'ENTER/SPACE:OK', 
+            centerX - 56, 
+            190, 
+            '#999999', 
+            6,
             this.optionsAlpha
         );
     }
@@ -266,61 +276,62 @@ export class MenuState {
      * How to Play画面の描画
      */
     renderHowToPlay(renderer) {
-        const centerX = renderer.canvas.width / 2;
+        const centerX = GAME_RESOLUTION.WIDTH / 2;
         
         // タイトル
-        renderer.drawText('HOW TO PLAY', centerX - 88, 50, '#FFD700', 16);
+        renderer.drawText('HOW TO PLAY', centerX - 44, 20, '#FFD700', 8);
         
         // 操作説明
         const instructions = [
-            { key: 'ARROW KEYS', desc: 'MOVE LEFT/RIGHT' },
-            { key: 'UP / SPACE', desc: 'JUMP' },
-            { key: 'HOLD JUMP', desc: 'JUMP HIGHER' },
-            { key: 'M', desc: 'TOGGLE MUSIC' },
-            { key: '@', desc: 'DEBUG MODE' }
+            { key: 'ARROWS', desc: 'MOVE' },
+            { key: 'UP/SPACE', desc: 'JUMP' },
+            { key: 'HOLD JUMP', desc: 'JUMP HIGH' },
+            { key: 'M', desc: 'MUTE' },
+            { key: '@', desc: 'DEBUG' }
         ];
         
-        let y = 120;
+        let y = 50;
         instructions.forEach(inst => {
-            renderer.drawText(inst.key, 200, y, '#4ECDC4', 12);
-            renderer.drawText(inst.desc, 350, y, '#FFFFFF', 12);
-            y += 30;
+            renderer.drawText(inst.key, 40, y, '#4ECDC4', 6);
+            renderer.drawText(inst.desc, 120, y, '#FFFFFF', 6);
+            y += 20;
         });
         
         // ゲーム説明
-        renderer.drawText('COLLECT ALL COINS AND REACH THE GOAL!', centerX - 152, 300, '#FFFFFF', 12);
-        renderer.drawText('WATCH OUT FOR ENEMIES AND OBSTACLES!', centerX - 144, 330, '#FF6B6B', 12);
+        renderer.drawText('COLLECT ALL COINS!', centerX - 72, 160, '#FFFFFF', 6);
+        renderer.drawText('REACH THE GOAL!', centerX - 60, 175, '#FFFFFF', 6);
+        renderer.drawText('AVOID ENEMIES!', centerX - 56, 190, '#FF6B6B', 6);
         
         // 戻る説明
-        renderer.drawText('PRESS ESC/ENTER/SPACE TO RETURN', centerX - 128, 450, '#999999', 12);
+        renderer.drawText('ESC/ENTER TO RETURN', centerX - 76, 220, '#999999', 6);
     }
     
     /**
      * Credits画面の描画
      */
     renderCredits(renderer) {
-        const centerX = renderer.canvas.width / 2;
+        const centerX = GAME_RESOLUTION.WIDTH / 2;
         
         // タイトル
-        renderer.drawText('CREDITS', centerX - 56, 50, '#FFD700', 16);
+        renderer.drawText('CREDITS', centerX - 28, 20, '#FFD700', 8);
         
         // クレジット内容
         const credits = [
-            { role: 'ORIGINAL CONCEPT', name: 'SVG VERSION TEAM' },
-            { role: 'PIXEL EDITION', name: 'CANVAS DEVELOPMENT TEAM' },
-            { role: 'MUSIC SYSTEM', name: 'WEB AUDIO API' },
-            { role: 'SPECIAL THANKS', name: 'ALL PLAYERS!' }
+            { role: 'ORIGINAL', name: 'SVG TEAM' },
+            { role: 'PIXEL VER', name: 'CANVAS TEAM' },
+            { role: 'MUSIC', name: 'WEB AUDIO' },
+            { role: 'THANKS', name: 'ALL PLAYERS' }
         ];
         
-        let y = 150;
+        let y = 50;
         credits.forEach(credit => {
-            renderer.drawText(credit.role, centerX - 100, y, '#4ECDC4', 12);
-            renderer.drawText(credit.name, centerX - 100, y + 20, '#FFFFFF', 12);
-            y += 50;
+            renderer.drawText(credit.role, 40, y, '#4ECDC4', 6);
+            renderer.drawText(credit.name, 40, y + 10, '#FFFFFF', 6);
+            y += 30;
         });
         
         // 戻る説明
-        renderer.drawText('PRESS ESC/ENTER/SPACE TO RETURN', centerX - 128, 450, '#999999', 12);
+        renderer.drawText('ESC/ENTER TO RETURN', centerX - 76, 220, '#999999', 6);
     }
     
     /**
@@ -332,11 +343,11 @@ export class MenuState {
         const buttonColor = muteState ? '#FF0000' : '#00FF00';
         
         // 右上に配置
-        const x = renderer.canvas.width - 120;
-        const y = 20;
+        const x = GAME_RESOLUTION.WIDTH - 60;
+        const y = 10;
         
-        renderer.drawText(buttonText, x, y, buttonColor, 10);
-        renderer.drawText('(M)', x + 20, y + 15, '#666666', 8);
+        renderer.drawText(buttonText, x, y, buttonColor, 6);
+        renderer.drawText('(M)', x + 10, y + 8, '#666666', 5);
     }
     
     /**
