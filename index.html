@@ -22,9 +22,7 @@
         }
         
         #mainContainer {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
+            position: relative;
         }
         
         #outerFrame {
@@ -57,11 +55,14 @@
         }
         
         #debugPanel {
+            position: absolute;
+            left: -240px;
+            top: 0;
             background-color: #1a1a1a;
             border: 2px solid #333;
             border-radius: 4px;
             padding: 15px;
-            width: 220px;
+            width: 200px;
             display: none;
             font-size: 13px;
             line-height: 1.6;
@@ -130,8 +131,9 @@
 </head>
 <body>
     <div id="mainContainer">
-        <div id="debugPanel">
-            <h3>Debug Info</h3>
+        <div id="outerFrame">
+            <div id="debugPanel">
+                <h3>Debug Info</h3>
             <div class="debug-section">
                 <div class="debug-row">
                     <span class="debug-label">FPS:</span>
@@ -202,9 +204,8 @@
                     <span class="debug-value" id="playerGrounded">-</span>
                 </div>
             </div>
-        </div>
-        
-        <div id="outerFrame">
+            </div>
+            
             <div id="gameContainer">
                 <canvas id="gameCanvas" width="768" height="720"></canvas>
                 <div id="loadingScreen">Loading...</div>

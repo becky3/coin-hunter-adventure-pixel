@@ -105,9 +105,6 @@ export class Game {
         
         // 仮の地面を設定（画面の下から40ピクセル上）
         this.testGroundY = GAME_RESOLUTION.HEIGHT - 40;
-        
-        // デバッグモードを有効にする
-        this.renderer.setDebugMode(true);
     }
     
     registerStates() {
@@ -254,10 +251,8 @@ export class Game {
             this.renderTestMode();
         }
         
-        // デバッグ情報をオーバーレイとして描画
-        if (this.debug) {
-            this.renderDebugOverlay();
-        }
+        // デバッグ情報を更新（表示/非表示の切り替えも含む）
+        this.renderDebugOverlay();
     }
     
     renderTestMode() {
