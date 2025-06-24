@@ -9,6 +9,8 @@ import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { MusicSystem } from '../audio/MusicSystem.js';
 import { MenuState } from '../states/MenuState.js';
+// import { PlayState } from '../states/PlayState.js';
+import { TestPlayState } from '../states/TestPlayState.js';
 import { FPS, GAME_RESOLUTION } from '../constants/gameConstants.js';
 
 export class Game {
@@ -115,8 +117,13 @@ export class Game {
         const menuState = new MenuState(this);
         this.stateManager.registerState('menu', menuState);
         
-        // TODO: PlayStateを実装後に追加
-        // this.stateManager.registerState('play', new PlayState(this));
+        // プレイ状態を登録
+        // const playState = new PlayState(this);
+        // this.stateManager.registerState('play', playState);
+        
+        // テスト用のシンプルなPlayStateを使用
+        const testPlayState = new TestPlayState(this);
+        this.stateManager.registerState('play', testPlayState);
     }
     
     setupAudioEvents() {
@@ -186,14 +193,8 @@ export class Game {
             console.log('Debug mode:', this.debug ? 'ON' : 'OFF');
         }
         
-        // 現在の状態に応じて処理を分岐
-        if (this.stateManager.currentStateName === 'menu') {
-            // メニュー状態の更新
-            this.stateManager.update(this.frameTime);
-        } else {
-            // ゲームプレイ状態の更新（テスト用）
-            this.updateTestMode();
-        }
+        // StateManagerに更新を委譲
+        this.stateManager.update(this.frameTime);
     }
     
     updateTestMode() {
@@ -245,14 +246,8 @@ export class Game {
     }
     
     render() {
-        // 現在の状態に応じて描画を分岐
-        if (this.stateManager.currentStateName === 'menu') {
-            // メニュー状態の描画
-            this.stateManager.render(this.renderer);
-        } else {
-            // ゲームプレイ状態の描画（テスト用）
-            this.renderTestMode();
-        }
+        // StateManagerに描画を委譲
+        this.stateManager.render(this.renderer);
         
         // デバッグ情報を更新（表示/非表示の切り替えも含む）
         this.renderDebugOverlay();

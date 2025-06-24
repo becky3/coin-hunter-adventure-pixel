@@ -2,11 +2,16 @@
 // Entry point
 
 import { Game } from './core/Game.js';
+import { CANVAS_SIZE } from './constants/gameConstants.js';
 
 // ゲームの初期化
 window.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('gameCanvas');
     const loadingScreen = document.getElementById('loadingScreen');
+    
+    // キャンバスサイズを設定
+    canvas.width = CANVAS_SIZE.WIDTH;
+    canvas.height = CANVAS_SIZE.HEIGHT;
     
     // ゲームインスタンスの作成
     const game = new Game(canvas);

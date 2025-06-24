@@ -41,3 +41,6 @@ export const FONT = {
     FAMILY: '\'Press Start 2P\', monospace',
     GRID: 8   // 文字配置のグリッドサイズ
 };
+
+// タイルサイズ
+export const TILE_SIZE = 16;  // タイルの基本サイズ（16x16ピクセル）
