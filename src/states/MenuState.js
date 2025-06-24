@@ -15,7 +15,6 @@ export class MenuState {
         this.logoY = -100;
         this.logoTargetY = 80;
         this.optionsAlpha = 0;
-        this.enterPressed = false;
         
         // How to Play画面の状態
         this.showHowTo = false;
@@ -36,7 +35,6 @@ export class MenuState {
         this.logoY = -100;
         this.optionsAlpha = 0;
         this.selectedOption = 0;
-        this.enterPressed = false;
         this.showHowTo = false;
         this.showCredits = false;
         
@@ -279,7 +277,7 @@ export class MenuState {
             { key: 'UP / SPACE', desc: 'JUMP' },
             { key: 'HOLD JUMP', desc: 'JUMP HIGHER' },
             { key: 'M', desc: 'TOGGLE MUSIC' },
-            { key: '@', desc: 'DEBUG MODE' }
+            { key: '2', desc: 'DEBUG MODE' }
         ];
         
         let y = 120;
@@ -378,16 +376,17 @@ export class MenuState {
     }
     
     /**
-     * 状態のクリーンアップ
+     * 状態から出る時の処理
      */
     exit() {
         this.removeInputListeners();
     }
     
     /**
-     * 状態のクリーンアップ
+     * 状態の破棄時の処理
      */
     destroy() {
-        this.removeInputListeners();
+        // exit()を呼び出してクリーンアップを統一
+        this.exit();
     }
 }
