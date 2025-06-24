@@ -252,6 +252,11 @@ export class Game {
             // ゲームプレイ状態の描画（テスト用）
             this.renderTestMode();
         }
+        
+        // デバッグ情報をオーバーレイとして描画
+        if (this.debug) {
+            this.renderDebugOverlay();
+        }
     }
     
     renderTestMode() {
@@ -270,6 +275,44 @@ export class Game {
         
         // デバッグ情報の表示
         this.renderDebugInfo();
+    }
+    
+    /**
+     * デバッグオーバーレイの描画（全画面共通）
+     */
+    renderDebugOverlay() {
+        // 背景（半透明）
+        this.renderer.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        this.renderer.ctx.fillRect(10, 10, 300, 150);
+        
+        // デバッグ情報
+        this.renderer.drawText('DEBUG MODE', 20, 30, '#00FF00', 14);
+        
+        // FPS
+        const fps = this.frameTime > 0 ? Math.round(1000 / this.frameTime) : 0;
+        this.renderer.drawText(`FPS: ${fps}`, 20, 50, '#FFFFFF', 12);
+        
+        // 現在の状態
+        this.renderer.drawText(`State: ${this.stateManager.currentStateName || 'none'}`, 20, 70, '#FFFFFF', 12);
+        
+        // 入力状態
+        const keys = [];
+        if (this.inputSystem.isActionPressed('left')) keys.push('←');
+        if (this.inputSystem.isActionPressed('right')) keys.push('→');
+        if (this.inputSystem.isActionPressed('up')) keys.push('↑');
+        if (this.inputSystem.isActionPressed('down')) keys.push('↓');
+        if (this.inputSystem.isActionPressed('jump')) keys.push('SPACE');
+        if (this.inputSystem.isActionPressed('action')) keys.push('ENTER');
+        
+        this.renderer.drawText(`Keys: ${keys.join(' ') || 'none'}`, 20, 90, '#FFFFFF', 12);
+        
+        // 音楽システム状態
+        const musicStatus = this.musicSystem.isInitialized ? 
+            (this.musicSystem.getMuteState() ? 'MUTED' : 'ON') : 'OFF';
+        this.renderer.drawText(`Music: ${musicStatus}`, 20, 110, '#FFFFFF', 12);
+        
+        // デバッグ切り替えの説明
+        this.renderer.drawText('Press @ to toggle debug', 20, 140, '#999999', 10);
     }
     
     renderDebugInfo() {

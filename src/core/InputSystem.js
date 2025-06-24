@@ -10,6 +10,12 @@ export class InputSystem {
         // キーの前フレームの状態
         this.previousKeys = new Map();
         
+        // 今フレームで押されたキー
+        this.justPressedKeys = new Set();
+        
+        // 今フレームで離されたキー
+        this.justReleasedKeys = new Set();
+        
         // イベントリスナー
         this.listeners = {
             keyPress: [],      // キーが押された瞬間
@@ -91,23 +97,38 @@ export class InputSystem {
         // イベントキューをクリア
         this.eventQueue = [];
         
+        // 今フレームのキー状態をクリア
+        this.justPressedKeys.clear();
+        this.justReleasedKeys.clear();
+        
         // 各キーの状態をチェック
         for (const [key, currentState] of this.keys) {
             const previousState = this.previousKeys.get(key) || false;
             
             // キーが押された瞬間
             if (currentState && !previousState) {
+                this.justPressedKeys.add(key);
                 this.triggerKeyPress(key);
             }
             
             // キーが離された瞬間
             if (!currentState && previousState) {
+                this.justReleasedKeys.add(key);
                 this.triggerKeyRelease(key);
             }
             
             // キーが押され続けている
             if (currentState && previousState) {
                 this.triggerKeyHold(key);
+            }
+        }
+        
+        // 離されたキーもチェック（previousKeysにあってkeysにないもの）
+        for (const [key, previousState] of this.previousKeys) {
+            const currentState = this.keys.get(key) || false;
+            if (!currentState && previousState) {
+                this.justReleasedKeys.add(key);
+                this.triggerKeyRelease(key);
             }
         }
         
@@ -247,11 +268,7 @@ export class InputSystem {
         const keys = this.keyMap[action];
         if (!keys) return false;
         
-        return keys.some(key => {
-            const current = this.keys.get(key) || false;
-            const previous = this.previousKeys.get(key) || false;
-            return current && !previous;
-        });
+        return keys.some(key => this.justPressedKeys.has(key));
     }
     
     /**
@@ -263,11 +280,7 @@ export class InputSystem {
         const keys = this.keyMap[action];
         if (!keys) return false;
         
-        return keys.some(key => {
-            const current = this.keys.get(key) || false;
-            const previous = this.previousKeys.get(key) || false;
-            return !current && previous;
-        });
+        return keys.some(key => this.justReleasedKeys.has(key));
     }
     
     /**
