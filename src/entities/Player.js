@@ -445,7 +445,8 @@ export class Player extends Entity {
             
             // アニメーションの場合
             if (this.animState === 'walk' || this.animState === 'jump') {
-                const animation = renderer.pixelArtRenderer.animations.get(this.spriteKey + '_anim');
+                const animKey = this.animState === 'walk' ? 'player/walk_anim' : 'player/jump_anim';
+                const animation = renderer.pixelArtRenderer.animations.get(animKey);
                 if (animation) {
                     animation.update(Date.now());
                     animation.draw(
@@ -455,6 +456,8 @@ export class Player extends Entity {
                         this.flipX
                     );
                     return;
+                } else if (window.game?.debug) {
+                    console.warn('Animation not found:', animKey);
                 }
             }
             
@@ -468,6 +471,8 @@ export class Player extends Entity {
                     this.flipX
                 );
                 return;
+            } else if (window.game?.debug) {
+                console.warn('Sprite not found:', this.spriteKey);
             }
         }
         
