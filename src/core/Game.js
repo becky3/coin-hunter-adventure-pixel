@@ -5,6 +5,7 @@ import { InputSystem } from './InputSystem.js';
 import { GameStateManager } from '../states/GameStateManager.js';
 import { AssetLoader } from '../assets/AssetLoader.js';
 import { PixelRenderer } from '../rendering/PixelRenderer.js';
+import { PixelArtRenderer } from '../utils/pixelArt.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { MusicSystem } from '../audio/MusicSystem.js';
@@ -34,6 +35,10 @@ export class Game {
         this.levelLoader = new LevelLoader();
         this.musicSystem = new MusicSystem();
         
+        // PixelArtRendererの初期化と設定
+        this.pixelArtRenderer = new PixelArtRenderer(canvas);
+        this.renderer.pixelArtRenderer = this.pixelArtRenderer;
+        
         // デバッグ用
         this.debug = false;
         window.game = this; // デバッグ用にグローバルに公開
@@ -49,8 +54,8 @@ export class Game {
         console.log('Initializing game...');
         
         try {
-            // アセットローダーにレンダラーを設定
-            this.assetLoader.setRenderer(this.renderer);
+            // アセットローダーにPixelArtRendererを設定
+            this.assetLoader.setRenderer(this.pixelArtRenderer);
             
             // 音楽システムの初期化は後で行う（自動再生ポリシー対応）
             console.log('Music system will be initialized on user interaction');
@@ -89,22 +94,23 @@ export class Game {
     }
     
     async loadTestAssets() {
-        // テスト用に最小限のアセットを読み込み
+        // ゲームアセットを読み込み
         try {
-            // プレイヤーアイドルスプライトをテスト
-            await this.assetLoader.loadSprite('player', 'player_idle');
-            console.log('Test sprite loaded successfully');
+            await this.assetLoader.preloadGameAssets((loaded, total) => {
+                console.log(`Loading assets: ${loaded}/${total}`);
+            });
+            console.log('All game assets loaded successfully');
         } catch (error) {
-            console.warn('Could not load test sprite:', error);
+            console.warn('Could not load some assets:', error);
         }
     }
     
     createTestPlayer() {
         // テスト用のプレイヤーを作成
         this.player = new Player(50, 150);
-        // TODO: Playerクラスを後でInputSystem対応に更新
-        // this.player.setInputSystem(this.inputSystem);
+        this.player.setInputManager(this.inputSystem);
         this.player.setMusicSystem(this.musicSystem);
+        this.player.setAssetLoader(this.assetLoader);
         console.log('Test player created at:', this.player.x, this.player.y);
         console.log('Player size:', this.player.width, 'x', this.player.height);
         

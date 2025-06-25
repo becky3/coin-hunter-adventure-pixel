@@ -3,6 +3,7 @@
  * スプライトデータの読み込みとキャッシュ管理を行う
  */
 import { SpriteLoader } from '../utils/spriteLoader.js';
+import { getColorPalette } from '../utils/pixelArtPalette.js';
 
 export class AssetLoader {
     constructor() {
@@ -99,9 +100,9 @@ export class AssetLoader {
     async preloadGameAssets(progressCallback) {
         const assetsToLoad = [
             // プレイヤー
-            { type: 'sprite', category: 'player', name: 'player_idle' },
-            { type: 'animation', category: 'player', baseName: 'player_walk', frameCount: 4 },
-            { type: 'animation', category: 'player', baseName: 'player_jump', frameCount: 2 },
+            { type: 'sprite', category: 'player', name: 'idle' },
+            { type: 'animation', category: 'player', baseName: 'walk', frameCount: 4 },
+            { type: 'animation', category: 'player', baseName: 'jump', frameCount: 2 },
             
             // 敵
             { type: 'animation', category: 'enemies', baseName: 'slime', frameCount: 2 },
@@ -157,10 +158,11 @@ export class AssetLoader {
         if (this.renderer) {
             // RendererにもスプライトをSpriteとして登録
             const paletteName = this._getPaletteForCategory(category);
+            const colors = getColorPalette(paletteName);
             this.renderer.addSprite(
                 `${category}/${name}`,
                 spriteData.data,
-                paletteName,
+                colors,
                 scale
             );
         }
@@ -187,10 +189,11 @@ export class AssetLoader {
         if (this.renderer) {
             // Rendererにアニメーションを登録
             const paletteName = this._getPaletteForCategory(category);
+            const colors = getColorPalette(paletteName);
             this.renderer.addAnimation(
                 `${category}/${baseName}`,
                 frames,
-                paletteName,
+                colors,
                 scale,
                 frameDuration
             );

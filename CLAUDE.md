@@ -58,21 +58,37 @@ npm run dev
 
 ## 作業開始時の手順
 
+**重要: 以下の手順を必ず順番通りに実行してください**
+
 ### 1. 最新の状態を取得
 ```bash
 git checkout main
 git pull origin main
 ```
 
-### 2. GitHub Issueの確認
+### 2. GitHub Issueの確認と選択
 ```bash
 gh issue list
+gh issue view [選択したIssue番号]
 ```
 
-### 3. TodoListの確認
-作業開始時に必ずTodoReadツールで現在のタスクを確認してください。
+### 3. 作業ブランチの作成
+```bash
+git checkout -b feature/[機能名]
+# または
+git checkout -b bugfix/[バグ名]
+```
 
-### 4. プロジェクト状況の確認
+### 4. Issueに作業開始をコメント
+```bash
+gh issue comment [Issue番号] --body "作業を開始します。
+ブランチ: feature/[機能名]"
+```
+
+### 5. TodoListの作成
+作業内容に基づいてTodoWriteツールで作業計画を作成してください。
+
+### 6. プロジェクト状況の確認
 - `docs/PROJECT_STATUS.md` - 現在の実装状況と次の作業
 - `docs/IMPLEMENTATION_ROADMAP.md` - 全体の実装計画
 - `handover-docs/` - 過去の作業履歴と引き継ぎ事項

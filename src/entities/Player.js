@@ -45,6 +45,10 @@ export class Player extends Entity {
         this.speed = PLAYER_CONFIG.speed;
         this.jumpPower = PLAYER_CONFIG.jumpPower;
         
+        // スプライト設定
+        this.spriteKey = null;
+        this.currentSprite = null;
+        
         // 体力
         this.health = PLAYER_CONFIG.maxHealth;
         this.maxHealth = PLAYER_CONFIG.maxHealth;
@@ -78,6 +82,9 @@ export class Player extends Entity {
         
         // 音楽システム参照
         this.musicSystem = null;
+        
+        // アセットローダー参照
+        this.assetLoader = null;
     }
     
     /**
@@ -94,6 +101,14 @@ export class Player extends Entity {
      */
     setMusicSystem(musicSystem) {
         this.musicSystem = musicSystem;
+    }
+    
+    /**
+     * アセットローダーを設定
+     * @param {AssetLoader} assetLoader 
+     */
+    setAssetLoader(assetLoader) {
+        this.assetLoader = assetLoader;
     }
     
     /**
@@ -248,6 +263,8 @@ export class Player extends Entity {
      * アニメーション状態の更新
      */
     updateAnimationState() {
+        let prevState = this.animState;
+        
         if (!this.grounded) {
             if (this.vy < 0) {
                 this.animState = 'jump';
@@ -258,6 +275,11 @@ export class Player extends Entity {
             this.animState = 'walk';
         } else {
             this.animState = 'idle';
+        }
+        
+        // アニメーション状態が変わったらスプライトを更新
+        if (prevState !== this.animState) {
+            this.updateSprite();
         }
     }
     
@@ -366,6 +388,29 @@ export class Player extends Entity {
     }
     
     /**
+     * スプライトを更新
+     */
+    updateSprite() {
+        if (!this.assetLoader) return;
+        
+        // アニメーション状態に基づいてスプライトキーを決定
+        switch (this.animState) {
+        case 'idle':
+            this.spriteKey = 'player/idle';
+            break;
+        case 'walk':
+            this.spriteKey = 'player/walk';
+            break;
+        case 'jump':
+        case 'fall':
+            this.spriteKey = 'player/jump';
+            break;
+        default:
+            this.spriteKey = 'player/idle';
+        }
+    }
+    
+    /**
      * 描画処理のオーバーライド
      * @param {PixelRenderer} renderer 
      */
@@ -377,7 +422,44 @@ export class Player extends Entity {
             return;
         }
         
-        // 基底クラスの描画を呼び出し
+        // スプライトが設定されていない場合は初期化
+        if (!this.spriteKey) {
+            this.updateSprite();
+        }
+        
+        // ピクセルアートスプライトの描画
+        if (this.spriteKey && renderer.pixelArtRenderer) {
+            const screenPos = renderer.worldToScreen(this.x, this.y);
+            
+            // アニメーションの場合
+            if (this.animState === 'walk' || this.animState === 'jump') {
+                const animation = renderer.pixelArtRenderer.animations.get(this.spriteKey + '_anim');
+                if (animation) {
+                    animation.update(Date.now());
+                    animation.draw(
+                        renderer.ctx,
+                        screenPos.x,
+                        screenPos.y,
+                        this.flipX
+                    );
+                    return;
+                }
+            }
+            
+            // 単一スプライトの場合
+            const sprite = renderer.pixelArtRenderer.sprites.get(this.spriteKey);
+            if (sprite) {
+                sprite.draw(
+                    renderer.ctx,
+                    screenPos.x,
+                    screenPos.y,
+                    this.flipX
+                );
+                return;
+            }
+        }
+        
+        // スプライトが見つからない場合は基底クラスの描画を使用
         super.render(renderer);
         
         // デバッグ情報の追加描画
