@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "stages": [
+    {
+      "id": "tutorial",
+      "name": "TUTORIAL",
+      "description": "Learn basic controls",
+      "filename": "tutorial.json",
+      "unlocked": true,
+      "cleared": false
+    },
+    {
+      "id": "level1",
+      "name": "GRASSLAND 1-1",
+      "description": "The adventure begins",
+      "filename": "level1.json",
+      "unlocked": false,
+      "cleared": false
+    },
+    {
+      "id": "level2",
+      "name": "GRASSLAND 1-2",
+      "description": "Master the jump",
+      "filename": "level2.json",
+      "unlocked": false,
+      "cleared": false
+    },
+    {
+      "id": "level3",
+      "name": "GRASSLAND 1-3",
+      "description": "First enemies",
+      "filename": "level3.json",
+      "unlocked": false,
+      "cleared": false
+    }
+  ],
+  "currentStage": "tutorial"
+}

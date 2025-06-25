@@ -2,6 +2,7 @@
  * プレイ状態クラス - メインゲームプレイの管理
  */
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants.js';
+import { LevelLoader } from '../levels/LevelLoader.js';
 
 export class PlayState {
     constructor(game) {
@@ -21,9 +22,12 @@ export class PlayState {
         this.platforms = [];
         
         // レベル関連
+        this.levelLoader = new LevelLoader();
         this.currentLevel = null;
         this.levelData = null;
         this.tileMap = [];
+        this.levelWidth = 0;
+        this.levelHeight = 0;
         
         // カメラ
         this.camera = {
@@ -44,12 +48,19 @@ export class PlayState {
      * 状態開始時の処理
      * @param {Object} params - レベル情報等のパラメータ
      */
-    enter(params = {}) {
+    async enter(params = {}) {
         console.log('Entering PlayState', params);
         
+        // ステージリストを読み込む
+        try {
+            await this.levelLoader.loadStageList();
+        } catch (error) {
+            console.error('Failed to load stage list:', error);
+        }
+        
         // レベルの読み込み
-        this.currentLevel = params.level || 'level1';
-        this.loadLevel(this.currentLevel);
+        this.currentLevel = params.level || 'tutorial';
+        await this.loadLevel(this.currentLevel);
         
         // プレイヤーの初期化
         this.initializePlayer();
@@ -153,13 +164,10 @@ export class PlayState {
      */
     render(renderer) {
         // 背景色でクリア
-        renderer.clear('#5C94FC'); // 空の色
+        renderer.clear(this.backgroundColor || '#5C94FC'); // レベルの背景色または空の色
         
-        // カメラ変換の保存
-        renderer.ctx.save();
-        
-        // カメラのオフセットを適用
-        renderer.ctx.translate(-Math.floor(this.camera.x), -Math.floor(this.camera.y));
+        // カメラの設定
+        renderer.setCamera(this.camera.x, this.camera.y);
         
         // タイルマップの描画
         this.renderTileMap(renderer);
@@ -170,17 +178,17 @@ export class PlayState {
         
         // プレイヤーの描画
         if (this.player) {
-            renderer.ctx.fillStyle = '#FF0000';
-            renderer.ctx.fillRect(
-                Math.floor(this.player.x),
-                Math.floor(this.player.y),
+            renderer.drawRect(
+                this.player.x,
+                this.player.y,
                 this.player.width,
-                this.player.height
+                this.player.height,
+                '#FF0000'
             );
         }
         
-        // カメラ変換を戻す
-        renderer.ctx.restore();
+        // カメラをリセット
+        renderer.setCamera(0, 0);
         
         // UI（HUD）の描画
         this.renderHUD(renderer);
@@ -216,11 +224,41 @@ export class PlayState {
      * レベルの読み込み
      * @param {string} levelName - レベル名
      */
-    loadLevel(levelName) {
+    async loadLevel(levelName) {
         console.log(`Loading level: ${levelName}`);
         
-        // テスト用のダミーデータを使用
-        this.createTestLevel();
+        try {
+            // レベルデータを読み込む
+            const levelData = await this.levelLoader.loadStage(levelName);
+            this.levelData = levelData;
+            
+            // タイルマップを設定
+            this.tileMap = this.levelLoader.createTileMap(levelData);
+            this.levelWidth = levelData.width * levelData.tileSize;
+            this.levelHeight = levelData.height * levelData.tileSize;
+            
+            // 背景色を設定
+            this.backgroundColor = this.levelLoader.getBackgroundColor(levelData);
+            
+            // タイムリミットを設定
+            this.time = this.levelLoader.getTimeLimit(levelData);
+            
+            // プレイヤーの初期位置を設定
+            const spawn = this.levelLoader.getPlayerSpawn(levelData);
+            if (this.player) {
+                this.player.x = spawn.x * TILE_SIZE;
+                this.player.y = spawn.y * TILE_SIZE;
+            }
+            
+            // エンティティを生成（後で実装）
+            const entities = this.levelLoader.getEntities(levelData);
+            console.log(`Level loaded: ${entities.length} entities found`);
+            
+        } catch (error) {
+            console.error('Failed to load level:', error);
+            // フォールバックとしてテストレベルを使用
+            this.createTestLevel();
+        }
     }
     
     /**
@@ -339,12 +377,12 @@ export class PlayState {
                 
                 if (tile === 1) {
                     // 地面タイル（緑）
-                    renderer.ctx.fillStyle = '#228B22';
-                    renderer.ctx.fillRect(
+                    renderer.drawRect(
                         col * TILE_SIZE,
                         row * TILE_SIZE,
                         TILE_SIZE,
-                        TILE_SIZE
+                        TILE_SIZE,
+                        '#228B22'
                     );
                 }
             }
@@ -357,8 +395,7 @@ export class PlayState {
      */
     renderHUD(renderer) {
         // 上部のHUD背景
-        renderer.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        renderer.ctx.fillRect(0, 0, GAME_RESOLUTION.WIDTH, 24);
+        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, 24, 'rgba(0, 0, 0, 0.5)');
         
         // スコア
         renderer.drawText(`SCORE: ${this.score}`, 8, 8, '#FFFFFF');
@@ -379,8 +416,7 @@ export class PlayState {
      */
     renderPauseScreen(renderer) {
         // 半透明のオーバーレイ
-        renderer.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        renderer.ctx.fillRect(0, 0, GAME_RESOLUTION.WIDTH, GAME_RESOLUTION.HEIGHT);
+        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, GAME_RESOLUTION.HEIGHT, 'rgba(0, 0, 0, 0.7)');
         
         // ポーズテキスト
         renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 16, '#FFFFFF');

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LevelLoader Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #333;
+            background-color: #222;
+        }
+        .success {
+            color: #00ff00;
+        }
+        .error {
+            color: #ff0000;
+        }
+        .info {
+            color: #ffff00;
+        }
+        pre {
+            background-color: #000;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>LevelLoader Test</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        import { LevelLoader } from './src/levels/LevelLoader.js';
+
+        const results = document.getElementById('results');
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        function logObject(obj, title) {
+            const div = document.createElement('div');
+            div.className = 'test-result';
+            div.innerHTML = `<strong>${title}:</strong><pre>${JSON.stringify(obj, null, 2)}</pre>`;
+            results.appendChild(div);
+        }
+
+        async function runTests() {
+            log('=== LevelLoader Test Started ===');
+            
+            const loader = new LevelLoader();
+            
+            // Test 1: Load stage list
+            log('\nTest 1: Loading stage list...');
+            try {
+                const stageList = await loader.loadStageList();
+                log('✓ Stage list loaded successfully', 'success');
+                logObject(stageList, 'Stage List');
+            } catch (error) {
+                log(`✗ Failed to load stage list: ${error.message}`, 'error');
+            }
+
+            // Test 2: Load specific stage
+            log('\nTest 2: Loading tutorial stage...');
+            try {
+                const tutorialData = await loader.loadStage('tutorial');
+                log('✓ Tutorial stage loaded successfully', 'success');
+                logObject(tutorialData, 'Tutorial Stage Data');
+                
+                // Test helper methods
+                log('\nTesting helper methods...');
+                const tileMap = loader.createTileMap(tutorialData);
+                log(`✓ Tilemap size: ${tileMap[0].length}x${tileMap.length}`, 'success');
+                
+                const playerSpawn = loader.getPlayerSpawn(tutorialData);
+                log(`✓ Player spawn: (${playerSpawn.x}, ${playerSpawn.y})`, 'success');
+                
+                const goal = loader.getGoalPosition(tutorialData);
+                log(`✓ Goal position: (${goal.x}, ${goal.y})`, 'success');
+                
+                const timeLimit = loader.getTimeLimit(tutorialData);
+                log(`✓ Time limit: ${timeLimit} seconds`, 'success');
+                
+                const bgColor = loader.getBackgroundColor(tutorialData);
+                log(`✓ Background color: ${bgColor}`, 'success');
+                
+                const entities = loader.getEntities(tutorialData);
+                log(`✓ Entity count: ${entities.length}`, 'success');
+                if (entities.length > 0) {
+                    logObject(entities, 'Entities');
+                }
+            } catch (error) {
+                log(`✗ Failed to load tutorial stage: ${error.message}`, 'error');
+            }
+
+            // Test 3: Progress management
+            log('\nTest 3: Testing progress management...');
+            try {
+                // Update stage clear info
+                loader.updateStageClearInfo('tutorial', {
+                    score: 1000,
+                    time: 120,
+                    coins: 5,
+                    deaths: 0
+                });
+                log('✓ Stage clear info updated', 'success');
+                
+                // Check if next stage is unlocked
+                const stageInfo = loader.getStageInfo('level1');
+                log(`✓ Level 1 unlocked: ${stageInfo.unlocked}`, 'success');
+                
+                // Test navigation
+                const hasNext = loader.hasNextStage();
+                log(`✓ Has next stage: ${hasNext}`, 'success');
+                
+                if (hasNext) {
+                    const nextId = loader.getNextStageId();
+                    log(`✓ Next stage ID: ${nextId}`, 'success');
+                }
+            } catch (error) {
+                log(`✗ Progress management error: ${error.message}`, 'error');
+            }
+
+            // Test 4: Error handling
+            log('\nTest 4: Testing error handling...');
+            try {
+                await loader.loadStage('nonexistent');
+                log('✗ Should have thrown error for nonexistent stage', 'error');
+            } catch (error) {
+                log('✓ Correctly handled nonexistent stage error', 'success');
+            }
+
+            log('\n=== All tests completed ===');
+        }
+
+        // Run tests
+        runTests().catch(error => {
+            log(`Unexpected error: ${error.message}`, 'error');
+            console.error(error);
+        });
+    </script>
+</body>
+</html>
