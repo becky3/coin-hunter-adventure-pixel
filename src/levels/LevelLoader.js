@@ -7,7 +7,7 @@ export class LevelLoader {
         this.stages = null;
         this.currentStageData = null;
         this.currentStageId = null;
-        this.basePath = 'levels/data/';
+        this.basePath = '/src/levels/data/';
     }
     
     /**
@@ -37,15 +37,15 @@ export class LevelLoader {
                 stages: [
                     {
                         id: 'tutorial',
-                        name: 'チュートリアル',
-                        description: '基本操作を学ぼう',
+                        name: 'TUTORIAL',
+                        description: 'LEARN BASIC CONTROLS',
                         filename: 'tutorial.json',
                         unlocked: true
                     },
                     {
                         id: 'level1',
-                        name: 'グラスランド 1-1',
-                        description: '冒険の始まり',
+                        name: 'GRASSLAND 1-1',
+                        description: 'THE ADVENTURE BEGINS',
                         filename: 'level1.json',
                         unlocked: false
                     }
@@ -300,5 +300,75 @@ export class LevelLoader {
      */
     getStageInfo(stageId) {
         return this.stages?.find(s => s.id === stageId) || null;
+    }
+    
+    /**
+     * レベルデータからタイルマップを生成
+     * @param {Object} levelData - レベルデータ
+     * @returns {Array} 2次元配列のタイルマップ
+     */
+    createTileMap(levelData) {
+        if (!levelData || !levelData.tilemap) {
+            throw new Error('Invalid level data: missing tilemap');
+        }
+        return levelData.tilemap;
+    }
+    
+    /**
+     * レベルデータからエンティティ情報を取得
+     * @param {Object} levelData - レベルデータ
+     * @returns {Array} エンティティ情報の配列
+     */
+    getEntities(levelData) {
+        if (!levelData) return [];
+        return levelData.entities || [];
+    }
+    
+    /**
+     * プレイヤーのスポーン位置を取得
+     * @param {Object} levelData - レベルデータ
+     * @returns {Object} {x, y} タイル座標
+     */
+    getPlayerSpawn(levelData) {
+        if (!levelData || !levelData.playerSpawn) {
+            return { x: 2, y: 10 }; // デフォルト位置
+        }
+        return levelData.playerSpawn;
+    }
+    
+    /**
+     * ゴール位置を取得
+     * @param {Object} levelData - レベルデータ
+     * @returns {Object|null} {x, y} タイル座標
+     */
+    getGoalPosition(levelData) {
+        if (!levelData || !levelData.goal) {
+            return null;
+        }
+        return levelData.goal;
+    }
+    
+    /**
+     * タイムリミットを取得
+     * @param {Object} levelData - レベルデータ
+     * @returns {number} 秒単位のタイムリミット
+     */
+    getTimeLimit(levelData) {
+        if (!levelData || !levelData.timeLimit) {
+            return 300; // デフォルト5分
+        }
+        return levelData.timeLimit;
+    }
+    
+    /**
+     * 背景色を取得
+     * @param {Object} levelData - レベルデータ
+     * @returns {string} 背景色のカラーコード
+     */
+    getBackgroundColor(levelData) {
+        if (!levelData || !levelData.backgroundColor) {
+            return '#5C94FC'; // デフォルトの空色
+        }
+        return levelData.backgroundColor;
     }
 }
