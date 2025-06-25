@@ -166,11 +166,8 @@ export class PlayState {
         // 背景色でクリア
         renderer.clear(this.backgroundColor || '#5C94FC'); // レベルの背景色または空の色
         
-        // カメラ変換の保存
-        renderer.ctx.save();
-        
-        // カメラのオフセットを適用
-        renderer.ctx.translate(-Math.floor(this.camera.x), -Math.floor(this.camera.y));
+        // カメラの設定
+        renderer.setCamera(this.camera.x, this.camera.y);
         
         // タイルマップの描画
         this.renderTileMap(renderer);
@@ -181,17 +178,17 @@ export class PlayState {
         
         // プレイヤーの描画
         if (this.player) {
-            renderer.ctx.fillStyle = '#FF0000';
-            renderer.ctx.fillRect(
-                Math.floor(this.player.x),
-                Math.floor(this.player.y),
+            renderer.drawRect(
+                this.player.x,
+                this.player.y,
                 this.player.width,
-                this.player.height
+                this.player.height,
+                '#FF0000'
             );
         }
         
-        // カメラ変換を戻す
-        renderer.ctx.restore();
+        // カメラをリセット
+        renderer.setCamera(0, 0);
         
         // UI（HUD）の描画
         this.renderHUD(renderer);
@@ -380,12 +377,12 @@ export class PlayState {
                 
                 if (tile === 1) {
                     // 地面タイル（緑）
-                    renderer.ctx.fillStyle = '#228B22';
-                    renderer.ctx.fillRect(
+                    renderer.drawRect(
                         col * TILE_SIZE,
                         row * TILE_SIZE,
                         TILE_SIZE,
-                        TILE_SIZE
+                        TILE_SIZE,
+                        '#228B22'
                     );
                 }
             }
@@ -398,8 +395,7 @@ export class PlayState {
      */
     renderHUD(renderer) {
         // 上部のHUD背景
-        renderer.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        renderer.ctx.fillRect(0, 0, GAME_RESOLUTION.WIDTH, 24);
+        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, 24, 'rgba(0, 0, 0, 0.5)');
         
         // スコア
         renderer.drawText(`SCORE: ${this.score}`, 8, 8, '#FFFFFF');
@@ -420,8 +416,7 @@ export class PlayState {
      */
     renderPauseScreen(renderer) {
         // 半透明のオーバーレイ
-        renderer.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        renderer.ctx.fillRect(0, 0, GAME_RESOLUTION.WIDTH, GAME_RESOLUTION.HEIGHT);
+        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, GAME_RESOLUTION.HEIGHT, 'rgba(0, 0, 0, 0.7)');
         
         // ポーズテキスト
         renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 16, '#FFFFFF');
