@@ -427,6 +427,18 @@ export class Player extends Entity {
             this.updateSprite();
         }
         
+        // デバッグ: 最初の描画時のみログ
+        if (!this._firstRenderLogged) {
+            console.log('Player render:', {
+                spriteKey: this.spriteKey,
+                pixelArtRenderer: !!renderer.pixelArtRenderer,
+                x: this.x,
+                y: this.y,
+                animState: this.animState
+            });
+            this._firstRenderLogged = true;
+        }
+        
         // ピクセルアートスプライトの描画
         if (this.spriteKey && renderer.pixelArtRenderer) {
             const screenPos = renderer.worldToScreen(this.x, this.y);
