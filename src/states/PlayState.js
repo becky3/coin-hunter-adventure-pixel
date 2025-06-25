@@ -2,6 +2,7 @@
  * プレイ状態クラス - メインゲームプレイの管理
  */
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants.js';
+import { LevelLoader } from '../levels/LevelLoader.js';
 
 export class PlayState {
     constructor(game) {
@@ -21,9 +22,12 @@ export class PlayState {
         this.platforms = [];
         
         // レベル関連
+        this.levelLoader = new LevelLoader();
         this.currentLevel = null;
         this.levelData = null;
         this.tileMap = [];
+        this.levelWidth = 0;
+        this.levelHeight = 0;
         
         // カメラ
         this.camera = {
@@ -44,12 +48,19 @@ export class PlayState {
      * 状態開始時の処理
      * @param {Object} params - レベル情報等のパラメータ
      */
-    enter(params = {}) {
+    async enter(params = {}) {
         console.log('Entering PlayState', params);
         
+        // ステージリストを読み込む
+        try {
+            await this.levelLoader.loadStageList();
+        } catch (error) {
+            console.error('Failed to load stage list:', error);
+        }
+        
         // レベルの読み込み
-        this.currentLevel = params.level || 'level1';
-        this.loadLevel(this.currentLevel);
+        this.currentLevel = params.level || 'tutorial';
+        await this.loadLevel(this.currentLevel);
         
         // プレイヤーの初期化
         this.initializePlayer();
@@ -153,7 +164,7 @@ export class PlayState {
      */
     render(renderer) {
         // 背景色でクリア
-        renderer.clear('#5C94FC'); // 空の色
+        renderer.clear(this.backgroundColor || '#5C94FC'); // レベルの背景色または空の色
         
         // カメラ変換の保存
         renderer.ctx.save();
@@ -216,11 +227,41 @@ export class PlayState {
      * レベルの読み込み
      * @param {string} levelName - レベル名
      */
-    loadLevel(levelName) {
+    async loadLevel(levelName) {
         console.log(`Loading level: ${levelName}`);
         
-        // テスト用のダミーデータを使用
-        this.createTestLevel();
+        try {
+            // レベルデータを読み込む
+            const levelData = await this.levelLoader.loadStage(levelName);
+            this.levelData = levelData;
+            
+            // タイルマップを設定
+            this.tileMap = this.levelLoader.createTileMap(levelData);
+            this.levelWidth = levelData.width * levelData.tileSize;
+            this.levelHeight = levelData.height * levelData.tileSize;
+            
+            // 背景色を設定
+            this.backgroundColor = this.levelLoader.getBackgroundColor(levelData);
+            
+            // タイムリミットを設定
+            this.time = this.levelLoader.getTimeLimit(levelData);
+            
+            // プレイヤーの初期位置を設定
+            const spawn = this.levelLoader.getPlayerSpawn(levelData);
+            if (this.player) {
+                this.player.x = spawn.x * TILE_SIZE;
+                this.player.y = spawn.y * TILE_SIZE;
+            }
+            
+            // エンティティを生成（後で実装）
+            const entities = this.levelLoader.getEntities(levelData);
+            console.log(`Level loaded: ${entities.length} entities found`);
+            
+        } catch (error) {
+            console.error('Failed to load level:', error);
+            // フォールバックとしてテストレベルを使用
+            this.createTestLevel();
+        }
     }
     
     /**
