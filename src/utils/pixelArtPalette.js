@@ -190,4 +190,47 @@ const STAGE_PALETTES = {
     }
 };
 
-export { PaletteSystem, STAGE_PALETTES, SPRITE_DEFINITIONS };
+/**
+ * カテゴリに対応する色パレットを取得
+ * @param {string} paletteName - パレット名（character, enemy, items, grassland, ui）
+ * @returns {Object} 色パレット（0:透明, 1-3:色）
+ */
+function getColorPalette(paletteName) {
+    // シンプルなパレット定義
+    const palettes = {
+        character: {
+            0: null,           // 透明
+            1: '#4169E1',     // 青（服）
+            2: '#FFB6C1',     // ピンク（肌）
+            3: '#8B4513'      // 茶色（靴）
+        },
+        enemy: {
+            0: null,           // 透明
+            1: '#228B22',     // 緑
+            2: '#90EE90',     // ライトグリーン
+            3: '#006400'      // ダークグリーン
+        },
+        items: {
+            0: null,           // 透明
+            1: '#FFD700',     // ゴールド
+            2: '#FFA500',     // オレンジ
+            3: '#FF8C00'      // ダークオレンジ
+        },
+        grassland: {
+            0: null,           // 透明
+            1: '#228B22',     // 緑（草）
+            2: '#8B4513',     // 茶色（土）
+            3: '#87CEEB'      // 空色
+        },
+        ui: {
+            0: null,           // 透明
+            1: '#FF0000',     // 赤
+            2: '#FFFFFF',     // 白
+            3: '#000000'      // 黒
+        }
+    };
+    
+    return palettes[paletteName] || palettes.character;
+}
+
+export { PaletteSystem, STAGE_PALETTES, SPRITE_DEFINITIONS, getColorPalette };
