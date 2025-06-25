@@ -72,31 +72,12 @@ gh issue list
 ### 3. TodoListの確認
 作業開始時に必ずTodoReadツールで現在のタスクを確認してください。
 
-### 4. 実装状況の確認
-以下のドキュメントで現在の実装状況を確認：
+### 4. プロジェクト状況の確認
+- `docs/PROJECT_STATUS.md` - 現在の実装状況と次の作業
 - `docs/IMPLEMENTATION_ROADMAP.md` - 全体の実装計画
 - `handover-docs/` - 過去の作業履歴と引き継ぎ事項
 
-## 現在の実装状況（2025-06-25時点）
-
-### ✅ 実装済み
-- コアシステム（Game, InputSystem, GameStateManager）
-- レンダリングシステム（PixelRenderer）
-- 音楽システム（MusicSystem）
-- アセットローダー（AssetLoader）
-- 基本的なエンティティ（Player）
-- メニュー画面（MenuState）
-- プレイ画面の基本実装（PlayState）
-- レベルローダー（LevelLoader）
-
-### 🚧 実装中・未実装
-- 物理・衝突判定システム
-- タイルマップシステム（レンダリングのみ実装済み）
-- 敵システム（Enemy, Slime, Bird）
-- アイテム・収集物（Coin, Spring, GoalFlag）
-- HUD/UIシステム（基本表示のみ実装済み）
-
-## 重要な制限事項
+## システムの重要な制限事項
 
 ### テキスト表示
 - **大文字英語のみ対応**（A-Z, 0-9, 一部記号）
@@ -109,7 +90,9 @@ gh issue list
 
 ## トラブルシューティング
 
-### よくある問題
+### よくある問題と解決方法
+詳細は `docs/PROJECT_STATUS.md` の「既知の問題」セクションを参照してください。
+
 1. **ゲームが小さく表示される**
    - 原因：直接ctx操作をしている
    - 解決：PixelRendererのメソッドを使用
@@ -121,10 +104,3 @@ gh issue list
 3. **レベルが読み込まれない**
    - 原因：パスの問題
    - 解決：basePathを確認（`/src/levels/data/`）
-
-## 次の作業候補
-1. 物理・衝突判定システムの実装（最優先）
-2. エンティティシステムの完成
-3. ゲームプレイの実装
-
-詳細はTodoListとGitHub Issueを確認してください。
