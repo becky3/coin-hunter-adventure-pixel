@@ -9,7 +9,7 @@ import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { MusicSystem } from '../audio/MusicSystem.js';
 import { MenuState } from '../states/MenuState.js';
-// import { PlayState } from '../states/PlayState.js';
+import { PlayState } from '../states/PlayState.js';
 import { TestPlayState } from '../states/TestPlayState.js';
 import { FPS, GAME_RESOLUTION } from '../constants/gameConstants.js';
 
@@ -118,12 +118,12 @@ export class Game {
         this.stateManager.registerState('menu', menuState);
         
         // プレイ状態を登録
-        // const playState = new PlayState(this);
-        // this.stateManager.registerState('play', playState);
+        const playState = new PlayState(this);
+        this.stateManager.registerState('play', playState);
         
-        // テスト用のシンプルなPlayStateを使用
+        // テスト用のシンプルなPlayStateも登録（デバッグ用）
         const testPlayState = new TestPlayState(this);
-        this.stateManager.registerState('play', testPlayState);
+        this.stateManager.registerState('testplay', testPlayState);
     }
     
     setupAudioEvents() {
