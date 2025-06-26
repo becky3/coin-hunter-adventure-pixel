@@ -68,6 +68,12 @@ export class PlayState {
         this.currentLevel = params.level || 'tutorial';
         await this.loadLevel(this.currentLevel);
         
+        // デバッグ情報
+        console.log('After loadLevel:');
+        console.log('- tileMap:', this.tileMap ? `${this.tileMap.length}x${this.tileMap[0]?.length}` : 'null');
+        console.log('- levelWidth:', this.levelWidth);
+        console.log('- levelHeight:', this.levelHeight);
+        
         // プレイヤーの初期化
         this.initializePlayer();
         
@@ -403,6 +409,11 @@ export class PlayState {
      * @param {PixelRenderer} renderer - レンダラー
      */
     renderTileMap(renderer) {
+        if (!this.tileMap) {
+            console.warn('No tileMap available');
+            return;
+        }
+        
         const startCol = Math.floor(this.camera.x / TILE_SIZE);
         const endCol = Math.ceil((this.camera.x + this.camera.width) / TILE_SIZE);
         const startRow = Math.floor(this.camera.y / TILE_SIZE);

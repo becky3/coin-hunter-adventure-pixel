@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug State Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #222;
+            color: #fff;
+        }
+        #controls {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px;
+            margin-right: 10px;
+            font-family: monospace;
+        }
+        #log {
+            white-space: pre-wrap;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #444;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .error { color: #ff6666; }
+        .warning { color: #ffaa00; }
+        .info { color: #66ff66; }
+        .debug { color: #8888ff; }
+        #gameContainer {
+            border: 2px solid #444;
+            display: inline-block;
+        }
+        #stats {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border: 1px solid #444;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug State Test</h1>
+    
+    <div id="controls">
+        <button onclick="logGameState()">Log Current State</button>
+        <button onclick="toggleDebugMode()">Toggle Debug Mode</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div id="log"></div>
+    <div id="gameContainer"></div>
+    
+    <div id="stats">
+        <div>FPS: <span id="fps">0</span></div>
+        <div>DeltaTime: <span id="deltaTime">0</span>ms</div>
+        <div>Enemies: <span id="enemyCount">0</span></div>
+        <div>Player: <span id="playerPos">0, 0</span></div>
+        <div>TileMap: <span id="tileMapStatus">unknown</span></div>
+    </div>
+    
+    <script type="module">
+        const log = document.getElementById('log');
+        let frameCount = 0;
+        let lastFpsUpdate = Date.now();
+        let fps = 0;
+        
+        window.logGameState = function() {
+            if (!window.game) {
+                addLog('Game not initialized', 'error');
+                return;
+            }
+            
+            const state = game.currentState;
+            if (!state) {
+                addLog('No current state', 'error');
+                return;
+            }
+            
+            addLog('=== GAME STATE DEBUG ===', 'debug');
+            addLog(`State: ${state.constructor.name}`, 'debug');
+            addLog(`TileMap: ${state.tileMap ? state.tileMap.length + 'x' + state.tileMap[0].length : 'null'}`, 'debug');
+            addLog(`Level: ${state.levelWidth}x${state.levelHeight}`, 'debug');
+            addLog(`Camera: ${state.camera.x}, ${state.camera.y}`, 'debug');
+            
+            if (state.player) {
+                addLog(`Player: (${state.player.x.toFixed(1)}, ${state.player.y.toFixed(1)}) vel:(${state.player.vx.toFixed(1)}, ${state.player.vy.toFixed(1)})`, 'debug');
+            }
+            
+            if (state.enemies) {
+                state.enemies.forEach((enemy, i) => {
+                    addLog(`Enemy ${i}: ${enemy.constructor.name} at (${enemy.x.toFixed(1)}, ${enemy.y.toFixed(1)}) vel:(${enemy.vx.toFixed(1)}, ${enemy.vy.toFixed(1)})`, 'debug');
+                });
+            }
+            
+            // Check Physics System
+            if (game.physicsSystem) {
+                addLog(`Physics entities: ${game.physicsSystem.entities.size}`, 'debug');
+                addLog(`Physics tileMap: ${game.physicsSystem.tileMap ? 'loaded' : 'null'}`, 'debug');
+            }
+            
+            addLog('=== END DEBUG ===', 'debug');
+        };
+        
+        window.toggleDebugMode = function() {
+            if (window.game && window.game.renderer) {
+                window.game.renderer.debug = !window.game.renderer.debug;
+                addLog(`Debug mode: ${window.game.renderer.debug ? 'ON' : 'OFF'}`, 'info');
+            }
+        };
+        
+        window.clearLog = function() {
+            log.innerHTML = '';
+        };
+        
+        function addLog(msg, type = 'info') {
+            const time = new Date().toISOString().substr(11, 8);
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `[${time}] ${msg}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Capture console
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = (...args) => {
+            addLog(args.join(' '), 'info');
+            originalLog.apply(console, args);
+        };
+        
+        console.error = (...args) => {
+            addLog(args.join(' '), 'error');
+            originalError.apply(console, args);
+        };
+        
+        console.warn = (...args) => {
+            addLog(args.join(' '), 'warning');
+            originalWarn.apply(console, args);
+        };
+
+        // Import and start game
+        import('/src/core/Game.js').then(({ Game }) => {
+            addLog('Game module loaded');
+            
+            // Canvas要素を作成
+            const canvas = document.createElement('canvas');
+            canvas.id = 'gameCanvas';
+            canvas.width = 768;
+            canvas.height = 240;
+            document.getElementById('gameContainer').appendChild(canvas);
+            
+            const game = new Game(canvas);
+            window.game = game;
+            
+            // Override update to track deltaTime
+            const originalUpdate = game.update.bind(game);
+            game.update = function(deltaTime) {
+                // Update stats
+                frameCount++;
+                const now = Date.now();
+                if (now - lastFpsUpdate > 1000) {
+                    fps = frameCount;
+                    frameCount = 0;
+                    lastFpsUpdate = now;
+                    document.getElementById('fps').textContent = fps;
+                }
+                
+                document.getElementById('deltaTime').textContent = deltaTime.toFixed(1);
+                
+                // Update game info
+                const state = game.currentState;
+                if (state && state.constructor.name === 'PlayState') {
+                    document.getElementById('enemyCount').textContent = state.enemies ? state.enemies.length : 0;
+                    
+                    if (state.player) {
+                        document.getElementById('playerPos').textContent = 
+                            `${Math.floor(state.player.x)}, ${Math.floor(state.player.y)}`;
+                    }
+                    
+                    document.getElementById('tileMapStatus').textContent = 
+                        state.tileMap ? `${state.tileMap.length}x${state.tileMap[0]?.length}` : 'null';
+                }
+                
+                originalUpdate(deltaTime);
+            };
+            
+            // Override render to detect rendering issues
+            const originalRender = game.renderer.drawRect.bind(game.renderer);
+            let tileRenderCount = 0;
+            game.renderer.drawRect = function(x, y, width, height, color, filled) {
+                if (color === '#228B22' && width === 16 && height === 16) {
+                    tileRenderCount++;
+                }
+                originalRender(x, y, width, height, color, filled);
+            };
+            
+            // Log tile rendering periodically
+            setInterval(() => {
+                if (tileRenderCount > 0) {
+                    addLog(`Tiles rendered: ${tileRenderCount}`, 'debug');
+                    tileRenderCount = 0;
+                }
+            }, 2000);
+            
+            game.init().then(() => {
+                addLog('Game initialized');
+                
+                // Force start PlayState
+                import('/src/states/PlayState.js').then(({ PlayState }) => {
+                    addLog('Switching to PlayState...');
+                    game.setState(new PlayState(game));
+                    addLog('PlayState active');
+                    
+                    // Initial state log
+                    setTimeout(() => {
+                        logGameState();
+                    }, 1000);
+                });
+            }).catch(err => {
+                addLog(`Init error: ${err.message}`, 'error');
+                console.error(err);
+            });
+        }).catch(err => {
+            addLog(`Module load error: ${err.message}`, 'error');
+        });
+    </script>
+</body>
+</html>

@@ -104,9 +104,8 @@ export class Slime extends Enemy {
         super.onGroundCollision();
         
         // スライムは着地時に少し弾む
-        if (this.vy > 50) {
-            this.vy = -this.vy * this.bounceHeight;
-        }
+        // 注: この処理は現在無効化（物理システムとの競合を避けるため）
+        // TODO: PhysicsSystemでバウンス処理を実装
     }
     
     /**
