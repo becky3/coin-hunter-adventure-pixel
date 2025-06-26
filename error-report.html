@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error Report Generator</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #report {
+            background: #222;
+            border: 1px solid #444;
+            padding: 15px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .error {
+            color: #ff5555;
+        }
+        .warning {
+            color: #ffaa55;
+        }
+        .info {
+            color: #55aaff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Error Report Generator</h1>
+    <p>Click the button to generate an error report from the game.</p>
+    
+    <button onclick="generateReport()">Generate Error Report</button>
+    <button onclick="copyReport()">Copy Report to Clipboard</button>
+    
+    <div id="report"></div>
+    
+    <script>
+        let lastReport = '';
+        
+        function generateReport() {
+            const reportDiv = document.getElementById('report');
+            reportDiv.innerHTML = 'Generating report...';
+            
+            // 新しいウィンドウでゲームを開く
+            const gameWindow = window.open('/', 'game', 'width=800,height=600');
+            
+            if (!gameWindow) {
+                reportDiv.innerHTML = '<span class="error">Failed to open game window. Please disable popup blocker.</span>';
+                return;
+            }
+            
+            const errors = [];
+            const warnings = [];
+            const logs = [];
+            let gameInfo = {};
+            
+            // エラーを収集
+            gameWindow.addEventListener('error', (e) => {
+                errors.push({
+                    message: e.message,
+                    filename: e.filename,
+                    line: e.lineno,
+                    column: e.colno,
+                    stack: e.error?.stack
+                });
+            });
+            
+            // ゲームが読み込まれるまで待つ
+            gameWindow.addEventListener('load', () => {
+                setTimeout(() => {
+                    // コンソールメソッドをオーバーライド
+                    const originalError = gameWindow.console.error;
+                    const originalWarn = gameWindow.console.warn;
+                    
+                    gameWindow.console.error = function(...args) {
+                        errors.push({ message: args.join(' '), type: 'console.error' });
+                        originalError.apply(gameWindow.console, args);
+                    };
+                    
+                    gameWindow.console.warn = function(...args) {
+                        warnings.push({ message: args.join(' '), type: 'console.warn' });
+                        originalWarn.apply(gameWindow.console, args);
+                    };
+                    
+                    // ゲーム情報を収集
+                    try {
+                        gameInfo = {
+                            gameExists: typeof gameWindow.game !== 'undefined',
+                            gameState: gameWindow.game?.stateManager?.currentState?.constructor.name,
+                            renderer: {
+                                exists: !!gameWindow.game?.renderer,
+                                pixelArtRenderer: !!gameWindow.game?.pixelArtRenderer
+                            },
+                            assets: {
+                                loaded: gameWindow.game?.assetLoader?.loadedAssets?.size || 0,
+                                sprites: gameWindow.game?.pixelArtRenderer?.sprites?.size || 0,
+                                animations: gameWindow.game?.pixelArtRenderer?.animations?.size || 0
+                            }
+                        };
+                    } catch (e) {
+                        gameInfo.error = e.message;
+                    }
+                    
+                    // レポート生成
+                    setTimeout(() => {
+                        generateFinalReport(errors, warnings, gameInfo);
+                        gameWindow.close();
+                    }, 3000);
+                    
+                }, 2000);
+            });
+        }
+        
+        function generateFinalReport(errors, warnings, gameInfo) {
+            const reportDiv = document.getElementById('report');
+            
+            let report = `=== ERROR REPORT ===
+Generated: ${new Date().toISOString()}
+
+`;
+            
+            // エラー
+            if (errors.length > 0) {
+                report += `ERRORS (${errors.length}):\n`;
+                errors.forEach((err, i) => {
+                    report += `\n${i + 1}. ${err.message || err.type}\n`;
+                    if (err.filename) {
+                        report += `   File: ${err.filename}:${err.line}:${err.column}\n`;
+                    }
+                    if (err.stack) {
+                        report += `   Stack:\n${err.stack.split('\n').map(line => '   ' + line).join('\n')}\n`;
+                    }
+                });
+            } else {
+                report += 'NO ERRORS FOUND ✓\n';
+            }
+            
+            // 警告
+            if (warnings.length > 0) {
+                report += `\nWARNINGS (${warnings.length}):\n`;
+                warnings.forEach((warn, i) => {
+                    report += `${i + 1}. ${warn.message}\n`;
+                });
+            }
+            
+            // ゲーム情報
+            report += '\nGAME INFO:\n';
+            report += JSON.stringify(gameInfo, null, 2);
+            
+            lastReport = report;
+            reportDiv.innerHTML = report.replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
+        }
+        
+        function copyReport() {
+            if (!lastReport) {
+                alert('Generate a report first!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(lastReport).then(() => {
+                alert('Report copied to clipboard!');
+            }).catch(err => {
+                alert('Failed to copy: ' + err);
+            });
+        }
+    </script>
+</body>
+</html>

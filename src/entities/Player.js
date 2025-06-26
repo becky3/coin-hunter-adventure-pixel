@@ -118,8 +118,13 @@ export class Player extends Entity {
     onUpdate(deltaTime) {
         if (this.isDead) return;
         
-        // 入力を取得
-        const input = this.inputManager ? this.inputManager.getInput() : {};
+        // 入力状態を取得
+        const input = {
+            left: this.inputManager ? this.inputManager.isActionPressed('left') : false,
+            right: this.inputManager ? this.inputManager.isActionPressed('right') : false,
+            jump: this.inputManager ? this.inputManager.isActionPressed('jump') : false,
+            jumpJustPressed: this.inputManager ? this.inputManager.isActionJustPressed('jump') : false
+        };
         
         // 移動処理
         this.handleMovement(input);
@@ -186,7 +191,7 @@ export class Player extends Entity {
         }
         
         // ジャンプボタンが押された瞬間
-        if (input.jump && !this.jumpButtonPressed && this.grounded) {
+        if (input.jumpJustPressed && this.grounded) {
             if (window.game?.debug) {
                 console.log('JUMP! vy before:', this.vy, 'jumpPower:', this.jumpPower);
             }

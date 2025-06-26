@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error Collector</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .error {
+            background: #300;
+            border: 1px solid #f00;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #330;
+            border: 1px solid #ff0;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .log {
+            background: #222;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Error Collector</h1>
+    <p>This page will collect errors from the game. Open this in a browser tab, then open the game in another tab.</p>
+    
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        const errors = [];
+        const logs = [];
+        
+        // オリジナルのコンソールメソッドを保存
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        const originalLog = console.log;
+        
+        // エラーハンドラ
+        window.addEventListener('error', (event) => {
+            const error = {
+                type: 'error',
+                message: event.message,
+                filename: event.filename,
+                line: event.lineno,
+                column: event.colno,
+                stack: event.error?.stack,
+                timestamp: new Date().toISOString()
+            };
+            
+            errors.push(error);
+            displayError(error);
+        });
+        
+        // 未処理のPromiseエラー
+        window.addEventListener('unhandledrejection', (event) => {
+            const error = {
+                type: 'unhandledRejection',
+                reason: event.reason,
+                promise: event.promise,
+                timestamp: new Date().toISOString()
+            };
+            
+            errors.push(error);
+            displayError(error);
+        });
+        
+        function displayError(error) {
+            const div = document.createElement('div');
+            div.className = 'error';
+            div.innerHTML = `
+                <strong>${error.type}</strong><br>
+                <pre>${error.message || error.reason}</pre>
+                ${error.filename ? `<br>File: ${error.filename}:${error.line}:${error.column}` : ''}
+                ${error.stack ? `<br><pre>${error.stack}</pre>` : ''}
+                <br><small>${error.timestamp}</small>
+            `;
+            output.appendChild(div);
+        }
+        
+        // テスト用にゲームページをiframeで読み込む
+        const iframe = document.createElement('iframe');
+        iframe.src = '/';
+        iframe.style.width = '100%';
+        iframe.style.height = '600px';
+        iframe.style.border = '1px solid #666';
+        iframe.style.marginTop = '20px';
+        
+        iframe.onload = () => {
+            console.log('Game loaded in iframe');
+            
+            // iframeのエラーを監視
+            try {
+                const iframeWindow = iframe.contentWindow;
+                
+                iframeWindow.addEventListener('error', (event) => {
+                    displayError({
+                        type: 'iframe-error',
+                        message: event.message,
+                        filename: event.filename,
+                        line: event.lineno,
+                        column: event.colno,
+                        timestamp: new Date().toISOString()
+                    });
+                });
+                
+                // iframeのコンソールを監視
+                const originalIframeError = iframeWindow.console.error;
+                iframeWindow.console.error = function(...args) {
+                    displayError({
+                        type: 'console.error',
+                        message: args.join(' '),
+                        timestamp: new Date().toISOString()
+                    });
+                    originalIframeError.apply(iframeWindow.console, args);
+                };
+                
+            } catch (e) {
+                console.log('Cannot access iframe content:', e);
+            }
+        };
+        
+        document.body.appendChild(iframe);
+    </script>
+</body>
+</html>
