@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Entities</title>
+    <style>
+        body {
+            margin: 20px;
+            background: #222;
+            color: #fff;
+            font-family: monospace;
+        }
+        #gameCanvas {
+            border: 2px solid #444;
+            image-rendering: pixelated;
+            display: block;
+            margin: 20px 0;
+        }
+        #debug {
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Entities</h1>
+    
+    <div>
+        <button onclick="startGame()">Start Game</button>
+        <button onclick="updateDebug()">Update Debug Info</button>
+        <button onclick="testRender()">Test Render</button>
+    </div>
+    
+    <canvas id="gameCanvas" width="256" height="240"></canvas>
+    
+    <div id="debug">Debug info will appear here...</div>
+    
+    <script type="module">
+        import { Game } from './src/core/Game.js';
+        
+        let game;
+        
+        async function init() {
+            const canvas = document.getElementById('gameCanvas');
+            
+            try {
+                game = new Game(canvas);
+                window.game = game;
+                
+                await game.init();
+                game.start();
+                
+                updateDebug();
+                
+            } catch (error) {
+                console.error('Failed to initialize:', error);
+                document.getElementById('debug').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        window.startGame = function() {
+            if (game?.stateManager?.currentState?.startGame) {
+                game.stateManager.currentState.startGame();
+                setTimeout(updateDebug, 1000);
+            }
+        };
+        
+        window.updateDebug = function() {
+            if (!game) return;
+            
+            const state = game.stateManager.currentState;
+            const info = {
+                stateName: state?.constructor.name,
+                player: null,
+                enemies: [],
+                physicsEntities: [],
+                renderer: {
+                    cameraX: game.pixelRenderer?.cameraX,
+                    cameraY: game.pixelRenderer?.cameraY,
+                    scale: game.pixelRenderer?.scale
+                }
+            };
+            
+            if (state?.player) {
+                info.player = {
+                    x: Math.floor(state.player.x),
+                    y: Math.floor(state.player.y),
+                    vx: Math.floor(state.player.vx),
+                    vy: Math.floor(state.player.vy),
+                    width: state.player.width,
+                    height: state.player.height,
+                    active: state.player.active,
+                    health: state.player.health
+                };
+            }
+            
+            if (state?.enemies) {
+                info.enemies = state.enemies.map(e => ({
+                    type: e.constructor.name,
+                    x: Math.floor(e.x),
+                    y: Math.floor(e.y),
+                    width: e.width,
+                    height: e.height,
+                    active: e.active,
+                    health: e.health
+                }));
+            }
+            
+            if (game.physicsSystem?.entities) {
+                info.physicsEntities = Array.from(game.physicsSystem.entities).map(e => ({
+                    type: e.constructor.name,
+                    layer: e.physicsLayer,
+                    active: e.active
+                }));
+            }
+            
+            document.getElementById('debug').textContent = JSON.stringify(info, null, 2);
+        };
+        
+        window.testRender = function() {
+            if (!game?.pixelRenderer) return;
+            
+            const renderer = game.pixelRenderer;
+            
+            // テスト描画
+            renderer.clear('#5C94FC');
+            
+            // テスト四角形
+            renderer.drawRect(50, 50, 50, 50, '#FF0000');
+            renderer.drawRect(150, 50, 50, 50, '#00FF00');
+            
+            // テキスト
+            renderer.drawText('TEST RENDER', 10, 10, '#FFFFFF');
+            
+            console.log('Test render complete');
+        };
+        
+        init();
+    </script>
+</body>
+</html>

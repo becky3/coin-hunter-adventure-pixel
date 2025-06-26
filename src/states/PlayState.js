@@ -320,12 +320,8 @@ export class PlayState {
         this.enemies.push(slime2);
         this.game.physicsSystem.addEntity(slime2, this.game.physicsSystem.layers.ENEMY);
         
-        // スライムのスプライトを読み込む
-        if (this.game.assetLoader) {
-            this.game.assetLoader.loadSprite('enemies', 'slime', 1).catch(err => {
-                console.warn('Failed to load slime sprite:', err);
-            });
-        }
+        // スプライトの読み込みはPixelArtRenderer統合後に実装
+        // TODO: PixelArtRendererを使用してスプライトを読み込む
     }
     
     /**

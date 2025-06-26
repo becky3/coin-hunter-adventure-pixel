@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enemy System Quick Test</title>
+    <style>
+        body {
+            margin: 0;
+            background: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #gameCanvas {
+            border: 2px solid #444;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="256" height="240"></canvas>
+    
+    <script type="module">
+        import { Game } from './src/core/Game.js';
+        
+        async function init() {
+            const canvas = document.getElementById('gameCanvas');
+            
+            try {
+                console.log('Initializing game...');
+                const game = new Game(canvas);
+                
+                // グローバルに公開（デバッグ用）
+                window.game = game;
+                
+                console.log('Starting game...');
+                await game.init();
+                game.start();
+                
+                console.log('Game started successfully!');
+                
+                // ゲーム開始を数秒後に実行
+                setTimeout(() => {
+                    console.log('Starting from menu...');
+                    if (game.stateManager.currentState?.startGame) {
+                        game.stateManager.currentState.startGame();
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Failed to initialize game:', error);
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>
