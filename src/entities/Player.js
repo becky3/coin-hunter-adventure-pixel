@@ -9,7 +9,7 @@ const PLAYER_CONFIG = {
     width: 16,  // スプライトと同じサイズに修正
     height: 16,
     speed: 3.5,
-    jumpPower: 12,  // 適切なジャンプ力に戻す
+    jumpPower: 8,  // ジャンプ力を下げる
     minJumpTime: 8,
     maxJumpTime: 20,
     maxHealth: 3,
