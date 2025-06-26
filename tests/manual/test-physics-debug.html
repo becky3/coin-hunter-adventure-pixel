@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Debug Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #gameCanvas {
+            background-color: #000;
+            image-rendering: pixelated;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .debug-log {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.9);
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #0f0;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px;
+            border-bottom: 1px solid #333;
+        }
+        .log-time {
+            color: #888;
+            margin-right: 10px;
+        }
+        .log-error {
+            color: #f00;
+        }
+        .log-warn {
+            color: #ff0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="1024" height="576"></canvas>
+    <div id="debugLog" class="debug-log">
+        <h3>Physics Debug Log</h3>
+        <div id="logContent"></div>
+    </div>
+
+    <script type="module">
+        import { Game } from '../../src/core/Game.js';
+        
+        // デバッグログ機能
+        const logContent = document.getElementById('logContent');
+        let logId = 0;
+        
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span class="log-time">${time}</span>${message}`;
+            
+            logContent.appendChild(entry);
+            logContent.scrollTop = logContent.scrollHeight;
+            
+            // 最大100件のログを保持
+            if (logContent.children.length > 100) {
+                logContent.removeChild(logContent.firstChild);
+            }
+        }
+        
+        // コンソールをフック
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+        
+        // ゲーム初期化
+        async function startGame() {
+            try {
+                const canvas = document.getElementById('gameCanvas');
+                const game = new Game(canvas);
+                
+                // デバッグモードを有効化
+                game.debug = true;
+                
+                // 物理システムのデバッグ用フック
+                const originalPhysicsUpdate = game.physicsSystem.update.bind(game.physicsSystem);
+                game.physicsSystem.update = function() {
+                    const entityCount = this.entities.size;
+                    if (entityCount > 0) {
+                        console.log(`Physics update: ${entityCount} entities`);
+                        
+                        // 各エンティティの状態をログ
+                        for (const entity of this.entities) {
+                            if (entity.constructor.name === 'Player') {
+                                console.log(`Player: pos(${entity.x.toFixed(1)}, ${entity.y.toFixed(1)}) vel(${entity.vx.toFixed(1)}, ${entity.vy.toFixed(1)}) grounded=${entity.grounded}`);
+                            }
+                        }
+                    }
+                    
+                    originalPhysicsUpdate();
+                };
+                
+                // タイル衝突判定のデバッグ
+                const originalCheckTile = game.physicsSystem.checkTileCollisions.bind(game.physicsSystem);
+                game.physicsSystem.checkTileCollisions = function(entity, axis) {
+                    const bounds = entity.getBounds();
+                    const tileInfo = `Checking tiles for ${entity.constructor.name} ${axis} at (${bounds.left}-${bounds.right}, ${bounds.top}-${bounds.bottom})`;
+                    
+                    originalCheckTile(entity, axis);
+                    
+                    if (entity.constructor.name === 'Player' && entity.grounded && axis === 'vertical') {
+                        console.log('Player grounded after tile check');
+                    }
+                };
+                
+                const initialized = await game.initialize();
+                if (initialized) {
+                    console.log('Game initialized successfully');
+                    game.start();
+                    
+                    // 物理システムの状態を定期的にログ
+                    setInterval(() => {
+                        if (game.physicsSystem.tileMap) {
+                            console.log(`TileMap: ${game.physicsSystem.tileMap.length}x${game.physicsSystem.tileMap[0].length}`);
+                        }
+                    }, 5000);
+                } else {
+                    console.error('Failed to initialize game');
+                }
+            } catch (error) {
+                console.error('Error starting game:', error);
+            }
+        }
+        
+        // ゲーム開始
+        startGame();
+    </script>
+</body>
+</html>

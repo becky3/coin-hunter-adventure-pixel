@@ -226,7 +226,7 @@ export class Player extends Entity {
                 // 最大保持時間内なら重力を少し軽減（完全に相殺しない）
                 if (this.jumpTime < PLAYER_CONFIG.maxJumpTime && this.vy < 0) {
                     // 重力の影響を軽減するだけ（加速はしない）
-                    this.vy += this.gravityStrength * 0.3; // 通常の30%の重力
+                    this.vy -= this.gravityStrength * 0.5; // 重力の50%を相殺
                 } else if (this.jumpTime >= PLAYER_CONFIG.maxJumpTime) {
                     // 最大時間に達したら通常の重力に戻す
                     this.canVariableJump = false;

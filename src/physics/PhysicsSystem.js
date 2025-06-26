@@ -52,6 +52,11 @@ export class PhysicsSystem {
     addEntity(entity, layer = this.layers.TILE) {
         entity.physicsLayer = layer;
         this.entities.add(entity);
+        
+        // 初期接地判定
+        if (entity.gravity) {
+            entity.grounded = false;
+        }
     }
     
     /**
@@ -90,6 +95,13 @@ export class PhysicsSystem {
         
         // エンティティ間の衝突判定
         this.checkEntityCollisions();
+        
+        // 全エンティティの接地判定を更新
+        for (const entity of this.entities) {
+            if (entity.active) {
+                this.updateGroundedState(entity);
+            }
+        }
     }
     
     /**

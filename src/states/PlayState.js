@@ -92,7 +92,7 @@ export class PlayState {
         this.updateTimer();
         
         // 物理システムの更新（プレイヤーの物理演算と衝突判定を含む）
-        this.game.physicsSystem.update(deltaTime);
+        this.game.physicsSystem.update();
         
         // プレイヤーの更新（入力処理など）
         if (this.player) {
@@ -184,6 +184,12 @@ export class PlayState {
         // BGMの停止
         if (this.game.musicSystem) {
             this.game.musicSystem.stopBGM();
+        }
+        
+        // 物理システムのクリア
+        if (this.game.physicsSystem) {
+            this.game.physicsSystem.entities.clear();
+            this.game.physicsSystem.tileMap = null;
         }
         
         // エンティティのクリーンアップ
