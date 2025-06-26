@@ -67,15 +67,16 @@ export class Entity {
      * @param {number} deltaTime - 経過時間
      */
     updatePhysics(deltaTime) {
-        const dt = deltaTime / 1000; // 秒に変換
+        // deltaTimeをフレーム数に変換（60FPS基準）
+        const frames = deltaTime / (1000 / 60);
         
         // 加速度を速度に適用
-        this.vx += this.ax * dt;
-        this.vy += this.ay * dt;
+        this.vx += this.ax * frames;
+        this.vy += this.ay * frames;
         
         // 重力を適用
         if (this.gravity && !this.grounded) {
-            this.vy += this.gravityStrength;
+            this.vy += this.gravityStrength * frames;
             
             // 最大落下速度を制限
             if (this.vy > this.maxFallSpeed) {
@@ -85,7 +86,7 @@ export class Entity {
         
         // 摩擦を適用
         if (this.grounded) {
-            this.vx *= this.friction;
+            this.vx *= Math.pow(this.friction, frames);
             
             // 小さな速度は0にする
             if (Math.abs(this.vx) < 0.1) {
@@ -94,8 +95,8 @@ export class Entity {
         }
         
         // 位置を更新
-        this.x += this.vx;
-        this.y += this.vy;
+        this.x += this.vx * frames;
+        this.y += this.vy * frames;
     }
     
     /**
