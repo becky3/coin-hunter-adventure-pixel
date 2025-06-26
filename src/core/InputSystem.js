@@ -146,11 +146,29 @@ export class InputSystem {
     triggerKeyPress(key) {
         const actions = this.reverseKeyMap.get(key) || [];
         
+        // アクションがマップされている場合
         for (const action of actions) {
             const event = {
                 type: 'keyPress',
                 key: key,
                 action: action,
+                timestamp: Date.now()
+            };
+            
+            this.eventQueue.push(event);
+            
+            // リスナーに通知
+            for (const listener of this.listeners.keyPress) {
+                listener(event);
+            }
+        }
+        
+        // アクションがない場合でも生のキーイベントを送る
+        if (actions.length === 0) {
+            const event = {
+                type: 'keyPress',
+                key: key,
+                action: null,
                 timestamp: Date.now()
             };
             

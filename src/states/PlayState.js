@@ -43,6 +43,7 @@ export class PlayState {
         
         // 入力リスナー
         this.inputListeners = [];
+        
     }
     
     /**
@@ -51,6 +52,9 @@ export class PlayState {
      */
     async enter(params = {}) {
         console.log('Entering PlayState', params);
+        
+        // 物理システムをクリア
+        this.game.physicsSystem.entities.clear();
         
         // ステージリストを読み込む
         try {
@@ -88,12 +92,12 @@ export class PlayState {
         // タイマーの更新
         this.updateTimer();
         
-        // プレイヤーの更新
+        // 物理システムの更新（プレイヤーの物理演算と衝突判定を含む）
+        this.game.physicsSystem.update();
+        
+        // プレイヤーの更新（入力処理など）
         if (this.player) {
             this.player.update(deltaTime);
-            
-            // 簡易的な衝突判定（後で物理システムに置き換え）
-            this.checkTileCollisions();
             
             // レベル境界チェック
             if (this.player.x < 0) this.player.x = 0;
@@ -116,7 +120,11 @@ export class PlayState {
         }
         
         // エネミーの更新
-        this.enemies.forEach(enemy => enemy.update && enemy.update(deltaTime));
+        this.enemies.forEach(enemy => {
+            if (enemy.update) {
+                enemy.update(deltaTime);
+            }
+        });
         
         // アイテムの更新
         this.items.forEach(item => item.update && item.update(deltaTime));
@@ -171,12 +179,21 @@ export class PlayState {
     exit() {
         console.log('Exiting PlayState');
         
+        // ポーズ状態をリセット
+        this.isPaused = false;
+        
         // 入力リスナーの削除
         this.removeInputListeners();
         
         // BGMの停止
         if (this.game.musicSystem) {
             this.game.musicSystem.stopBGM();
+        }
+        
+        // 物理システムのクリア
+        if (this.game.physicsSystem) {
+            this.game.physicsSystem.entities.clear();
+            this.game.physicsSystem.tileMap = null;
         }
         
         // エンティティのクリーンアップ
@@ -202,6 +219,9 @@ export class PlayState {
             this.tileMap = this.levelLoader.createTileMap(levelData);
             this.levelWidth = levelData.width * levelData.tileSize;
             this.levelHeight = levelData.height * levelData.tileSize;
+            
+            // 物理システムにタイルマップを設定
+            this.game.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
             
             // 背景色を設定
             this.backgroundColor = this.levelLoader.getBackgroundColor(levelData);
@@ -253,6 +273,9 @@ export class PlayState {
         // レベルサイズ
         this.levelWidth = this.tileMap[0].length * TILE_SIZE;
         this.levelHeight = this.tileMap.length * TILE_SIZE;
+        
+        // 物理システムにタイルマップを設定
+        this.game.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
     }
     
     /**
@@ -272,6 +295,9 @@ export class PlayState {
         this.player.setInputManager(this.game.inputSystem);
         this.player.setMusicSystem(this.game.musicSystem);
         this.player.setAssetLoader(this.game.assetLoader);
+        
+        // プレイヤーを物理システムに追加
+        this.game.physicsSystem.addEntity(this.player, this.game.physicsSystem.layers.PLAYER);
     }
     
     /**
@@ -283,6 +309,15 @@ export class PlayState {
             this.game.inputSystem.on('keyPress', (event) => {
                 if (event.action === 'escape') {
                     this.togglePause();
+                }
+            })
+        );
+        
+        // ポーズ中のQキーでタイトルに戻る
+        this.inputListeners.push(
+            this.game.inputSystem.on('keyPress', (event) => {
+                if (this.isPaused && event.key === 'KeyQ') {
+                    this.gameOver();
                 }
             })
         );
@@ -332,34 +367,11 @@ export class PlayState {
     }
     
     /**
-     * タイルとの衝突判定（簡易版）
+     * タイルとの衝突判定（PhysicsSystemに移行済み）
+     * @deprecated PhysicsSystemを使用してください
      */
     checkTileCollisions() {
-        if (!this.player) return;
-        
-        // プレイヤーの足元のタイルをチェック（下方向に少し余裕を持たせる）
-        const tileY = Math.floor((this.player.y + this.player.height + 1) / TILE_SIZE);
-        const tileX = Math.floor(this.player.x / TILE_SIZE);
-        const tileXRight = Math.floor((this.player.x + this.player.width - 1) / TILE_SIZE);
-        
-        // 初期値として地面にいないと仮定
-        let isOnGround = false;
-        
-        // タイルマップの範囲内かチェック
-        if (tileY >= 0 && tileY < this.tileMap.length) {
-            if ((this.tileMap[tileY] && this.tileMap[tileY][tileX] === 1) ||
-                (this.tileMap[tileY] && this.tileMap[tileY][tileXRight] === 1)) {
-                // 地面タイルの上に立っている（落下中の場合のみ位置を補正）
-                if (this.player.vy >= 0) {
-                    this.player.y = (tileY * TILE_SIZE) - this.player.height;
-                    this.player.vy = 0;
-                    isOnGround = true;
-                }
-            }
-        }
-        
-        // groundedフラグを更新
-        this.player.grounded = isOnGround;
+        // PhysicsSystemに移行済み
     }
     
     /**
@@ -395,16 +407,29 @@ export class PlayState {
      * @param {PixelRenderer} renderer - レンダラー
      */
     renderHUD(renderer) {
-        // 上部のHUD背景
-        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, 24, 'rgba(0, 0, 0, 0.5)');
+        const blackPattern = [
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1]
+        ];
         
-        // スコア
+        for (let y = 0; y < 24; y += 8) {
+            for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
+                this.drawPatternTile(renderer, x, y, blackPattern, '#000000');
+            }
+        }
+        
+        this.renderHorizontalBorder(renderer, 24);
+        
+        // ゲーム情報表示
         renderer.drawText(`SCORE: ${this.score}`, 8, 8, '#FFFFFF');
-        
-        // ライフ
         renderer.drawText(`LIVES: ${this.lives}`, 88, 8, '#FFFFFF');
         
-        // 時間
         const minutes = Math.floor(this.time / 60);
         const seconds = this.time % 60;
         const timeStr = `TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -416,12 +441,35 @@ export class PlayState {
      * @param {PixelRenderer} renderer - レンダラー
      */
     renderPauseScreen(renderer) {
-        // 半透明のオーバーレイ
-        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, GAME_RESOLUTION.HEIGHT, 'rgba(0, 0, 0, 0.7)');
+        // メニューボックス
+        const menuWidth = 200;
+        const menuHeight = 100;
+        const menuX = (GAME_RESOLUTION.WIDTH - menuWidth) / 2;
+        const menuY = (GAME_RESOLUTION.HEIGHT - menuHeight) / 2;
         
-        // ポーズテキスト
-        renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 16, '#FFFFFF');
-        renderer.drawTextCentered('PRESS ESC TO RESUME', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 8, '#FFFFFF');
+        const blackPattern = [
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1]
+        ];
+        
+        for (let y = menuY; y < menuY + menuHeight; y += 8) {
+            for (let x = menuX; x < menuX + menuWidth; x += 8) {
+                this.drawPatternTile(renderer, x, y, blackPattern, '#000000');
+            }
+        }
+        
+        this.renderBoxBorder(renderer, menuX - 8, menuY - 8, menuWidth + 16, menuHeight + 16);
+        
+        // メニューテキスト
+        renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 32, '#FFFFFF');
+        renderer.drawTextCentered('PRESS ESC TO RESUME', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 8, '#FFFFFF');
+        renderer.drawTextCentered('PRESS Q TO QUIT', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 16, '#FFFFFF');
     }
     
     /**
@@ -432,11 +480,11 @@ export class PlayState {
         
         if (this.isPaused) {
             if (this.game.musicSystem) {
-                this.game.musicSystem.stopBGM();
+                this.game.musicSystem.pauseBGM();
             }
         } else {
             if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
-                this.game.musicSystem.playGameBGM();
+                this.game.musicSystem.resumeBGM();
             }
         }
     }
@@ -449,4 +497,117 @@ export class PlayState {
         // メニューに戻る
         this.game.stateManager.setState('menu');
     }
+    
+    /**
+     * UIスプライトの読み込み
+     */
+    async loadUISprites() {
+        try {
+            if (this.game.assetLoader) {
+                await this.game.assetLoader.loadSprite('ui', 'border_horizontal', 1);
+                await this.game.assetLoader.loadSprite('ui', 'border_vertical', 1);
+                await this.game.assetLoader.loadSprite('ui', 'border_corner', 1);
+            }
+        } catch (error) {
+            console.warn('UI sprites loading error:', error);
+        }
+    }
+    
+    /**
+     * 水平ボーダーの描画
+     * @param {PixelRenderer} renderer - レンダラー
+     * @param {number} y - Y座標
+     */
+    renderHorizontalBorder(renderer, y) {
+        const blackPattern = [
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1]
+        ];
+        
+        for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
+            this.drawPatternTile(renderer, x, y - 2, blackPattern, '#000000');
+        }
+    }
+    
+    /**
+     * ボックスボーダーの描画
+     * @param {PixelRenderer} renderer - レンダラー
+     * @param {number} x - X座標
+     * @param {number} y - Y座標  
+     * @param {number} width - 幅
+     * @param {number} height - 高さ
+     */
+    renderBoxBorder(renderer, x, y, width, height) {
+        const blackPattern = [
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1]
+        ];
+        
+        // 上辺
+        for (let i = x; i < x + width; i += 8) {
+            this.drawPatternTile(renderer, i, y, blackPattern, '#000000');
+        }
+        
+        // 下辺  
+        for (let i = x; i < x + width; i += 8) {
+            this.drawPatternTile(renderer, i, y + height - 8, blackPattern, '#000000');
+        }
+        
+        // 左辺
+        for (let i = y + 8; i < y + height - 8; i += 8) {
+            this.drawPatternTile(renderer, x, i, blackPattern, '#000000');
+        }
+        
+        // 右辺
+        for (let i = y + 8; i < y + height - 8; i += 8) {
+            this.drawPatternTile(renderer, x + width - 8, i, blackPattern, '#000000');
+        }
+    }
+    
+    /**
+     * パターンタイルの描画
+     */
+    drawPatternTile(renderer, x, y, pattern, color) {
+        const tileSize = 8;
+        const imageData = new ImageData(tileSize, tileSize);
+        const data = imageData.data;
+        
+        // カラーコードをRGBに変換
+        let r = 255, g = 255, b = 255;
+        if (color && color.startsWith('#')) {
+            const hex = color.slice(1);
+            r = parseInt(hex.substr(0, 2), 16);
+            g = parseInt(hex.substr(2, 2), 16);
+            b = parseInt(hex.substr(4, 2), 16);
+        }
+        
+        for (let py = 0; py < tileSize; py++) {
+            for (let px = 0; px < tileSize; px++) {
+                const idx = (py * tileSize + px) * 4;
+                if (pattern[py][px] === 1) {
+                    data[idx] = r;
+                    data[idx + 1] = g;
+                    data[idx + 2] = b;
+                    data[idx + 3] = 255;
+                } else {
+                    data[idx + 3] = 0;
+                }
+            }
+        }
+        
+        renderer.drawSprite(imageData, x, y, 1, false);
+    }
+    
 }

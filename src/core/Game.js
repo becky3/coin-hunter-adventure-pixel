@@ -9,6 +9,7 @@ import { PixelArtRenderer } from '../utils/pixelArt.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { MusicSystem } from '../audio/MusicSystem.js';
+import { PhysicsSystem } from '../physics/PhysicsSystem.js';
 import { MenuState } from '../states/MenuState.js';
 import { PlayState } from '../states/PlayState.js';
 import { TestPlayState } from '../states/TestPlayState.js';
@@ -34,6 +35,7 @@ export class Game {
         this.renderer = new PixelRenderer(canvas);
         this.levelLoader = new LevelLoader();
         this.musicSystem = new MusicSystem();
+        this.physicsSystem = new PhysicsSystem();
         
         // PixelArtRendererの初期化と設定
         this.pixelArtRenderer = new PixelArtRenderer(canvas);

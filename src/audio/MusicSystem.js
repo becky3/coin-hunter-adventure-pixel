@@ -13,6 +13,10 @@ export class MusicSystem {
         this.currentBGM = null;
         this.bgmLoopInterval = null;
         
+        // 一時停止状態
+        this.isPaused = false;
+        this.pausedBGM = null;
+        
         // アクティブなオーディオノードを追跡
         this.activeNodes = [];
         
@@ -624,6 +628,55 @@ export class MusicSystem {
     }
     
     /**
+     * BGMを一時停止
+     */
+    pauseBGM() {
+        // 一時停止中の場合はスキップ
+        if (this.isPaused) {
+            return;
+        }
+        
+        // 現在のBGMタイプを保存
+        this.pausedBGM = this.currentBGM;
+        
+        // ループを停止
+        if (this.bgmLoopInterval) {
+            clearInterval(this.bgmLoopInterval);
+            this.bgmLoopInterval = null;
+        }
+        
+        // 全てのアクティブノードを強制停止
+        this.stopAllActiveNodes();
+        
+        this.isPaused = true;
+    }
+    
+    /**
+     * BGMを再開
+     */
+    resumeBGM() {
+        // 一時停止中でない場合はスキップ
+        if (!this.isPaused) {
+            return;
+        }
+        
+        this.isPaused = false;
+        
+        // 保存されたBGMタイプを復元
+        const bgmToResume = this.pausedBGM;
+        this.currentBGM = null; // 再生メソッドが正しく動作するように一旦null
+        
+        // BGMを再開
+        if (bgmToResume === 'title') {
+            this.playTitleBGM();
+        } else if (bgmToResume === 'game') {
+            this.playGameBGM();
+        }
+        
+        this.pausedBGM = null;
+    }
+    
+    /**
      * BGMを停止
      */
     stopBGM() {
@@ -643,6 +696,8 @@ export class MusicSystem {
         
         // 現在のBGMを無効化
         this.currentBGM = null;
+        this.isPaused = false;
+        this.pausedBGM = null;
     }
     
     /**
