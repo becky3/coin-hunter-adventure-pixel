@@ -3,6 +3,7 @@
  * メニューからゲームを開始してエラーを確認
  */
 import puppeteer from 'puppeteer';
+import { takeScreenshot } from './utils/screenshot.js';
 
 async function testGameplay() {
     console.log('🎮 Testing gameplay screen...\n');

@@ -448,9 +448,8 @@ export class Player extends Entity {
             const screenPos = renderer.worldToScreen(this.x, this.y);
             
             // アニメーションの場合
-            if (this.animState === 'walk' || this.animState === 'jump') {
-                const animKey = this.animState === 'walk' ? 'player/walk' : 'player/jump';
-                const animation = renderer.pixelArtRenderer.animations.get(animKey);
+            if (this.animState === 'walk') {
+                const animation = renderer.pixelArtRenderer.animations.get('player/walk');
                 if (animation) {
                     animation.update(Date.now());
                     animation.draw(
@@ -460,9 +459,23 @@ export class Player extends Entity {
                         this.flipX
                     );
                     return;
-                } else if (window.game?.debug) {
-                    console.warn('Animation not found:', animKey);
                 }
+            }
+            
+            // ジャンプ・落下の場合はアニメーションを使用
+            if (this.animState === 'jump' || this.animState === 'fall') {
+                const animation = renderer.pixelArtRenderer.animations.get('player/jump');
+                if (animation) {
+                    animation.update(Date.now());
+                    animation.draw(
+                        renderer.ctx,
+                        screenPos.x,
+                        screenPos.y,
+                        this.flipX
+                    );
+                    return;
+                }
+                // アニメーションが見つからない場合は単体スプライトにフォールバック
             }
             
             // 単一スプライトの場合
