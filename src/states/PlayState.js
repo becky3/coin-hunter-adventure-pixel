@@ -337,21 +337,29 @@ export class PlayState {
     checkTileCollisions() {
         if (!this.player) return;
         
-        // プレイヤーの足元のタイルをチェック
-        const tileY = Math.floor((this.player.y + this.player.height) / TILE_SIZE);
+        // プレイヤーの足元のタイルをチェック（下方向に少し余裕を持たせる）
+        const tileY = Math.floor((this.player.y + this.player.height + 1) / TILE_SIZE);
         const tileX = Math.floor(this.player.x / TILE_SIZE);
         const tileXRight = Math.floor((this.player.x + this.player.width - 1) / TILE_SIZE);
+        
+        // 初期値として地面にいないと仮定
+        let isOnGround = false;
         
         // タイルマップの範囲内かチェック
         if (tileY >= 0 && tileY < this.tileMap.length) {
             if ((this.tileMap[tileY] && this.tileMap[tileY][tileX] === 1) ||
                 (this.tileMap[tileY] && this.tileMap[tileY][tileXRight] === 1)) {
-                // 地面タイルの上に立っている
-                this.player.y = (tileY * TILE_SIZE) - this.player.height;
-                this.player.vy = 0;
-                this.player.grounded = true;
+                // 地面タイルの上に立っている（落下中の場合のみ位置を補正）
+                if (this.player.vy >= 0) {
+                    this.player.y = (tileY * TILE_SIZE) - this.player.height;
+                    this.player.vy = 0;
+                    isOnGround = true;
+                }
             }
         }
+        
+        // groundedフラグを更新
+        this.player.grounded = isOnGround;
     }
     
     /**

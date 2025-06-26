@@ -6,10 +6,10 @@ import { Entity } from './Entity.js';
 
 // プレイヤー設定
 const PLAYER_CONFIG = {
-    width: 32,  // デバッグ用に一時的に大きくする
-    height: 32,
+    width: 16,  // スプライトと同じサイズに修正
+    height: 16,
     speed: 3.5,
-    jumpPower: 15,  // デバッグ用に強くする（12→15）
+    jumpPower: 12,  // 適切なジャンプ力に戻す
     minJumpTime: 8,
     maxJumpTime: 20,
     maxHealth: 3,
@@ -450,7 +450,7 @@ export class Player extends Entity {
             
             // アニメーションの場合
             if (this.animState === 'walk' || this.animState === 'jump') {
-                const animKey = this.animState === 'walk' ? 'player/walk_anim' : 'player/jump_anim';
+                const animKey = this.animState === 'walk' ? 'player/walk' : 'player/jump';
                 const animation = renderer.pixelArtRenderer.animations.get(animKey);
                 if (animation) {
                     animation.update(Date.now());
@@ -480,9 +480,6 @@ export class Player extends Entity {
                 console.warn('Sprite not found:', this.spriteKey);
             }
         }
-        
-        // スプライトが見つからない場合は基底クラスの描画を使用
-        super.render(renderer);
         
         // デバッグ情報の追加描画
         if (renderer.debug) {
