@@ -67,13 +67,12 @@ export class Entity {
      * @param {number} deltaTime - 経過時間
      */
     updatePhysics(deltaTime) {
-        const dt = deltaTime / 1000; // 秒に変換
+        // deltaTimeが適切でない場合のフェールセーフ
+        if (!deltaTime || deltaTime <= 0 || deltaTime > 100) {
+            deltaTime = 16.67; // 60FPSのデフォルト値
+        }
         
-        // 加速度を速度に適用
-        this.vx += this.ax * dt;
-        this.vy += this.ay * dt;
-        
-        // 重力を適用
+        // 重力を適用（フレームレート非依存）
         if (this.gravity && !this.grounded) {
             this.vy += this.gravityStrength;
             
@@ -93,7 +92,7 @@ export class Entity {
             }
         }
         
-        // 位置を更新
+        // 位置を更新（速度は既にピクセル/フレーム単位）
         this.x += this.vx;
         this.y += this.vy;
     }

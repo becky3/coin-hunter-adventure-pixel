@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Player Render Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #333;
+            color: white;
+            font-family: monospace;
+        }
+        #game-canvas {
+            border: 2px solid #666;
+            display: block;
+            margin: 20px auto;
+        }
+        .info {
+            text-align: center;
+            margin: 10px;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>Player Pixel Art Test</h1>
+        <p>Use Arrow Keys to move, Space to jump</p>
+    </div>
+    <canvas id="game-canvas"></canvas>
+    <div class="controls">
+        <button onclick="location.reload()">Reload</button>
+        <button onclick="game.debug = !game.debug">Toggle Debug</button>
+    </div>
+    
+    <script type="module">
+        import { Game } from './src/core/Game.js';
+        import { GAME_RESOLUTION, DISPLAY } from './src/constants/gameConstants.js';
+        
+        // キャンバスセットアップ
+        const canvas = document.getElementById('game-canvas');
+        canvas.width = GAME_RESOLUTION.WIDTH * DISPLAY.SCALE;
+        canvas.height = GAME_RESOLUTION.HEIGHT * DISPLAY.SCALE;
+        
+        // ゲーム初期化
+        window.game = new Game(canvas);
+        
+        async function init() {
+            const initialized = await game.initialize();
+            if (initialized) {
+                console.log('Game initialized successfully');
+                // テストプレイ状態に遷移
+                game.stateManager.setState('testplay');
+                game.start();
+            } else {
+                console.error('Failed to initialize game');
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -3,6 +3,7 @@
  */
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
+import { Player } from '../entities/Player.js';
 
 export class PlayState {
     constructor(game) {
@@ -87,59 +88,30 @@ export class PlayState {
         // タイマーの更新
         this.updateTimer();
         
-        // 入力処理とプレイヤーの更新
+        // プレイヤーの更新
         if (this.player) {
-            // 左右移動
-            this.player.vx = 0;
-            if (this.game.inputSystem.isActionPressed('left')) {
-                this.player.vx = -2;
-            }
-            if (this.game.inputSystem.isActionPressed('right')) {
-                this.player.vx = 2;
-            }
+            this.player.update(deltaTime);
             
-            // ジャンプ
-            if (this.game.inputSystem.isActionJustPressed('jump') && this.player.grounded) {
-                this.player.vy = -10;
-                this.player.grounded = false;
-                if (this.game.musicSystem) {
-                    this.game.musicSystem.playJumpSound();
-                }
-            }
-            
-            // 物理演算
-            this.player.vy += 0.5; // 重力
-            if (this.player.vy > 15) this.player.vy = 15; // 最大落下速度
-            
-            // 位置更新
-            this.player.x += this.player.vx;
-            this.player.y += this.player.vy;
-            
-            // 簡易的な地面判定（タイルマップベース）
-            const tileY = Math.floor((this.player.y + this.player.height) / TILE_SIZE);
-            const tileX = Math.floor(this.player.x / TILE_SIZE);
-            const tileXRight = Math.floor((this.player.x + this.player.width - 1) / TILE_SIZE);
-            
-            if (tileY >= 0 && tileY < this.tileMap.length) {
-                if ((this.tileMap[tileY] && this.tileMap[tileY][tileX] === 1) ||
-                    (this.tileMap[tileY] && this.tileMap[tileY][tileXRight] === 1)) {
-                    // 地面に着地
-                    this.player.y = (tileY * TILE_SIZE) - this.player.height;
-                    this.player.vy = 0;
-                    this.player.grounded = true;
-                }
-            }
+            // 簡易的な衝突判定（後で物理システムに置き換え）
+            this.checkTileCollisions();
             
             // レベル境界チェック
             if (this.player.x < 0) this.player.x = 0;
             if (this.player.x + this.player.width > this.levelWidth) {
                 this.player.x = this.levelWidth - this.player.width;
             }
+            
+            // 穴に落ちた場合
             if (this.player.y > this.levelHeight) {
-                // 落下死
-                this.player.y = 160; // リスポーン
-                this.player.x = 64;
-                this.lives--;
+                this.player.takeDamage(this.player.maxHealth);
+                this.lives = this.player.health;
+                
+                if (this.lives > 0) {
+                    this.player.respawn(
+                        this.levelData.spawnPoint.x * TILE_SIZE,
+                        this.levelData.spawnPoint.y * TILE_SIZE
+                    );
+                }
             }
         }
         
@@ -178,13 +150,7 @@ export class PlayState {
         
         // プレイヤーの描画
         if (this.player) {
-            renderer.drawRect(
-                this.player.x,
-                this.player.y,
-                this.player.width,
-                this.player.height,
-                '#FF0000'
-            );
+            this.player.render(renderer);
         }
         
         // カメラをリセット
@@ -293,15 +259,19 @@ export class PlayState {
      * プレイヤーの初期化
      */
     initializePlayer() {
-        this.player = {
-            x: 64,
-            y: 160,
-            width: 16,
-            height: 16,
-            vx: 0,
-            vy: 0,
-            grounded: false
-        };
+        // レベルデータからスポーン位置を取得
+        let spawnX = 64;
+        let spawnY = 160;
+        
+        if (this.levelData && this.levelData.spawnPoint) {
+            spawnX = this.levelData.spawnPoint.x * TILE_SIZE;
+            spawnY = this.levelData.spawnPoint.y * TILE_SIZE;
+        }
+        
+        this.player = new Player(spawnX, spawnY);
+        this.player.setInputManager(this.game.inputSystem);
+        this.player.setMusicSystem(this.game.musicSystem);
+        this.player.setAssetLoader(this.game.assetLoader);
     }
     
     /**
@@ -359,6 +329,37 @@ export class PlayState {
         if (this.camera.y + this.camera.height > this.levelHeight) {
             this.camera.y = this.levelHeight - this.camera.height;
         }
+    }
+    
+    /**
+     * タイルとの衝突判定（簡易版）
+     */
+    checkTileCollisions() {
+        if (!this.player) return;
+        
+        // プレイヤーの足元のタイルをチェック（下方向に少し余裕を持たせる）
+        const tileY = Math.floor((this.player.y + this.player.height + 1) / TILE_SIZE);
+        const tileX = Math.floor(this.player.x / TILE_SIZE);
+        const tileXRight = Math.floor((this.player.x + this.player.width - 1) / TILE_SIZE);
+        
+        // 初期値として地面にいないと仮定
+        let isOnGround = false;
+        
+        // タイルマップの範囲内かチェック
+        if (tileY >= 0 && tileY < this.tileMap.length) {
+            if ((this.tileMap[tileY] && this.tileMap[tileY][tileX] === 1) ||
+                (this.tileMap[tileY] && this.tileMap[tileY][tileXRight] === 1)) {
+                // 地面タイルの上に立っている（落下中の場合のみ位置を補正）
+                if (this.player.vy >= 0) {
+                    this.player.y = (tileY * TILE_SIZE) - this.player.height;
+                    this.player.vy = 0;
+                    isOnGround = true;
+                }
+            }
+        }
+        
+        // groundedフラグを更新
+        this.player.grounded = isOnGround;
     }
     
     /**

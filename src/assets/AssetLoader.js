@@ -3,6 +3,7 @@
  * スプライトデータの読み込みとキャッシュ管理を行う
  */
 import { SpriteLoader } from '../utils/spriteLoader.js';
+import { getColorPalette } from '../utils/pixelArtPalette.js';
 
 export class AssetLoader {
     constructor() {
@@ -98,26 +99,20 @@ export class AssetLoader {
      */
     async preloadGameAssets(progressCallback) {
         const assetsToLoad = [
-            // プレイヤー
-            { type: 'sprite', category: 'player', name: 'player_idle' },
-            { type: 'animation', category: 'player', baseName: 'player_walk', frameCount: 4 },
-            { type: 'animation', category: 'player', baseName: 'player_jump', frameCount: 2 },
+            // プレイヤー（実装済み）
+            { type: 'sprite', category: 'player', name: 'idle' },
+            { type: 'animation', category: 'player', baseName: 'walk', frameCount: 4 },
+            { type: 'animation', category: 'player', baseName: 'jump', frameCount: 2 },
             
-            // 敵
-            { type: 'animation', category: 'enemies', baseName: 'slime', frameCount: 2 },
-            
-            // アイテム
-            { type: 'animation', category: 'items', baseName: 'coin', frameCount: 4 },
-            { type: 'sprite', category: 'items', name: 'spring' },
-            
-            // 地形
-            { type: 'sprite', category: 'terrain', name: 'grass_block' },
-            { type: 'sprite', category: 'terrain', name: 'dirt_block' },
-            { type: 'sprite', category: 'terrain', name: 'stone_block' },
-            
-            // UI
-            { type: 'sprite', category: 'ui', name: 'heart_full' },
-            { type: 'sprite', category: 'ui', name: 'heart_empty' }
+            // 以下は後で実装予定（一旦コメントアウト）
+            // { type: 'animation', category: 'enemies', baseName: 'slime', frameCount: 2 },
+            // { type: 'animation', category: 'items', baseName: 'coin', frameCount: 4 },
+            // { type: 'sprite', category: 'items', name: 'spring' },
+            // { type: 'sprite', category: 'terrain', name: 'grass_block' },
+            // { type: 'sprite', category: 'terrain', name: 'dirt_block' },
+            // { type: 'sprite', category: 'terrain', name: 'stone_block' },
+            // { type: 'sprite', category: 'ui', name: 'heart_full' },
+            // { type: 'sprite', category: 'ui', name: 'heart_empty' }
         ];
         
         this.totalAssets = assetsToLoad.length;
@@ -157,10 +152,11 @@ export class AssetLoader {
         if (this.renderer) {
             // RendererにもスプライトをSpriteとして登録
             const paletteName = this._getPaletteForCategory(category);
+            const colors = getColorPalette(paletteName);
             this.renderer.addSprite(
                 `${category}/${name}`,
                 spriteData.data,
-                paletteName,
+                colors,
                 scale
             );
         }
@@ -187,10 +183,11 @@ export class AssetLoader {
         if (this.renderer) {
             // Rendererにアニメーションを登録
             const paletteName = this._getPaletteForCategory(category);
+            const colors = getColorPalette(paletteName);
             this.renderer.addAnimation(
                 `${category}/${baseName}`,
                 frames,
-                paletteName,
+                colors,
                 scale,
                 frameDuration
             );

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+    <style>
+        body { background: #222; color: white; font-family: monospace; padding: 20px; }
+        canvas { border: 1px solid #666; display: block; margin: 20px 0; }
+        .log { background: #333; padding: 10px; margin: 10px 0; height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Player Sprite Debug Test</h1>
+    <canvas id="test-canvas" width="320" height="240"></canvas>
+    <div id="log" class="log"></div>
+    
+    <script type="module">
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        try {
+            // Import needed modules
+            const { PixelArtRenderer } = await import('./src/utils/pixelArt.js');
+            const { getColorPalette } = await import('./src/utils/pixelArtPalette.js');
+            const { SpriteLoader } = await import('./src/utils/spriteLoader.js');
+            
+            log('Modules loaded successfully');
+            
+            // Load a sprite
+            const spriteLoader = new SpriteLoader();
+            const spriteData = await spriteLoader.loadSprite('player', 'idle');
+            log('Sprite data loaded: ' + JSON.stringify({ width: spriteData.width, height: spriteData.height }));
+            
+            // Get palette
+            const colors = getColorPalette('character');
+            log('Palette loaded: ' + Object.keys(colors).length + ' colors');
+            
+            // Create renderer
+            const canvas = document.getElementById('test-canvas');
+            const renderer = new PixelArtRenderer(canvas);
+            log('PixelArtRenderer created');
+            
+            // Add sprite
+            renderer.addSprite('test-sprite', spriteData.data, colors, 4);
+            log('Sprite added to renderer');
+            
+            // Draw sprite
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#444';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const sprite = renderer.sprites.get('test-sprite');
+            if (sprite) {
+                sprite.draw(ctx, 50, 50, false);
+                log('Sprite drawn at 50, 50');
+            } else {
+                log('ERROR: Sprite not found in renderer');
+            }
+            
+        } catch (error) {
+            log('ERROR: ' + error.message);
+            console.error(error);
+        }
+    </script>
+</body>
+</html>
