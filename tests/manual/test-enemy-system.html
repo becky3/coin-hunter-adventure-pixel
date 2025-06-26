@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enemy System Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #222;
+            color: #fff;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #444;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .controls {
+            margin: 20px;
+            text-align: center;
+        }
+        
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .stats {
+            margin-top: 10px;
+        }
+        
+        .stat-item {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enemy System Test</h1>
+    
+    <canvas id="gameCanvas" width="256" height="240"></canvas>
+    
+    <div class="controls">
+        <h3>操作方法</h3>
+        <p>矢印キー: 移動</p>
+        <p>スペース: ジャンプ</p>
+        <p>D: デバッグ表示切り替え</p>
+        <p>R: リセット</p>
+    </div>
+    
+    <div class="debug-info" id="debugInfo">
+        <h4>Debug Info</h4>
+        <div class="stats">
+            <div class="stat-item">Player: <span id="playerPos">-</span></div>
+            <div class="stat-item">Health: <span id="playerHealth">-</span></div>
+            <div class="stat-item">Enemies: <span id="enemyCount">-</span></div>
+            <div class="stat-item">FPS: <span id="fps">-</span></div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { Game } from '../../src/core/Game.js';
+        import { PhysicsSystem } from '../../src/physics/PhysicsSystem.js';
+        import { Player } from '../../src/entities/Player.js';
+        import { Slime } from '../../src/entities/enemies/Slime.js';
+        import { PixelRenderer } from '../../src/rendering/PixelRenderer.js';
+        import { InputSystem } from '../../src/core/InputSystem.js';
+        import { TILE_SIZE } from '../../src/constants/gameConstants.js';
+        
+        // ゲーム初期化
+        const canvas = document.getElementById('gameCanvas');
+        const renderer = new PixelRenderer(canvas);
+        const physicsSystem = new PhysicsSystem();
+        const inputSystem = new InputSystem(canvas);
+        
+        let player;
+        let enemies = [];
+        let debug = false;
+        
+        // テストマップ
+        const testMap = [
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,1,1,0,0,0,0,0,1,1,1,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+        
+        // 初期化
+        function init() {
+            // 物理システム設定
+            physicsSystem.setTileMap(testMap, TILE_SIZE);
+            
+            // プレイヤー作成
+            player = new Player(50, 150);
+            player.setInputManager(inputSystem);
+            physicsSystem.addEntity(player, physicsSystem.layers.PLAYER);
+            
+            // 敵作成
+            enemies = [];
+            
+            // スライム配置
+            const slime1 = new Slime(150, 180);
+            enemies.push(slime1);
+            physicsSystem.addEntity(slime1, physicsSystem.layers.ENEMY);
+            
+            const slime2 = new Slime(200, 100);
+            enemies.push(slime2);
+            physicsSystem.addEntity(slime2, physicsSystem.layers.ENEMY);
+            
+            const slime3 = new Slime(80, 120);
+            slime3.direction = -1; // 左向きスタート
+            enemies.push(slime3);
+            physicsSystem.addEntity(slime3, physicsSystem.layers.ENEMY);
+        }
+        
+        // 更新処理
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let fpsTime = 0;
+        
+        function update(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            
+            // FPS計算
+            frameCount++;
+            fpsTime += deltaTime;
+            if (fpsTime >= 1000) {
+                document.getElementById('fps').textContent = frameCount;
+                frameCount = 0;
+                fpsTime = 0;
+            }
+            
+            // 物理システム更新
+            physicsSystem.update();
+            
+            // プレイヤー更新
+            player.update(deltaTime);
+            
+            // 敵更新
+            enemies.forEach(enemy => enemy.update(deltaTime));
+            
+            // デバッグ情報更新
+            updateDebugInfo();
+            
+            requestAnimationFrame(update);
+        }
+        
+        // 描画処理
+        function render() {
+            // クリア
+            renderer.clear('#5C94FC');
+            
+            // マップ描画
+            renderMap();
+            
+            // 敵描画
+            enemies.forEach(enemy => enemy.render(renderer));
+            
+            // プレイヤー描画
+            player.render(renderer);
+            
+            // デバッグ描画
+            if (debug) {
+                renderer.debug = true;
+                enemies.forEach(enemy => enemy.renderDebug(renderer));
+                player.renderDebug(renderer);
+                renderer.debug = false;
+            }
+            
+            requestAnimationFrame(render);
+        }
+        
+        // マップ描画
+        function renderMap() {
+            for (let y = 0; y < testMap.length; y++) {
+                for (let x = 0; x < testMap[y].length; x++) {
+                    if (testMap[y][x] === 1) {
+                        renderer.drawRect(
+                            x * TILE_SIZE,
+                            y * TILE_SIZE,
+                            TILE_SIZE,
+                            TILE_SIZE,
+                            '#228B22'
+                        );
+                    }
+                }
+            }
+        }
+        
+        // デバッグ情報更新
+        function updateDebugInfo() {
+            document.getElementById('playerPos').textContent = 
+                `(${Math.floor(player.x)}, ${Math.floor(player.y)})`;
+            document.getElementById('playerHealth').textContent = 
+                `${player.health}/${player.maxHealth}`;
+            document.getElementById('enemyCount').textContent = 
+                enemies.filter(e => e.active).length;
+        }
+        
+        // キー入力
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'd' || e.key === 'D') {
+                debug = !debug;
+            } else if (e.key === 'r' || e.key === 'R') {
+                // リセット
+                physicsSystem.entities.clear();
+                init();
+            }
+        });
+        
+        // 開始
+        init();
+        update(performance.now());
+        render();
+    </script>
+</body>
+</html>

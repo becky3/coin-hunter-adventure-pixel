@@ -4,6 +4,7 @@
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
+import { Slime } from '../entities/enemies/Slime.js';
 
 export class PlayState {
     constructor(game) {
@@ -69,6 +70,9 @@ export class PlayState {
         
         // プレイヤーの初期化
         this.initializePlayer();
+        
+        // 敵の初期化（テスト用）
+        this.initializeEnemies();
         
         // 入力の設定
         this.setupInputListeners();
@@ -298,6 +302,30 @@ export class PlayState {
         
         // プレイヤーを物理システムに追加
         this.game.physicsSystem.addEntity(this.player, this.game.physicsSystem.layers.PLAYER);
+    }
+    
+    /**
+     * 敵の初期化
+     */
+    initializeEnemies() {
+        // 既存の敵をクリア
+        this.enemies = [];
+        
+        // テスト用にスライムを配置
+        const slime1 = new Slime(150, 180);
+        this.enemies.push(slime1);
+        this.game.physicsSystem.addEntity(slime1, this.game.physicsSystem.layers.ENEMY);
+        
+        const slime2 = new Slime(200, 100);
+        this.enemies.push(slime2);
+        this.game.physicsSystem.addEntity(slime2, this.game.physicsSystem.layers.ENEMY);
+        
+        // スライムのスプライトを読み込む
+        if (this.game.assetLoader) {
+            this.game.assetLoader.loadSprite('enemies', 'slime', 1).catch(err => {
+                console.warn('Failed to load slime sprite:', err);
+            });
+        }
     }
     
     /**

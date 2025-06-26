@@ -528,4 +528,19 @@ export class Player extends Entity {
             isJumping: this.isJumping
         };
     }
+    
+    /**
+     * 衝突ハンドラ（PhysicsSystemから呼ばれる）
+     * @param {Object} collisionInfo - 衝突情報
+     */
+    onCollision(collisionInfo) {
+        // 敵との衝突
+        if (collisionInfo.other.constructor.name === 'Enemy' || 
+            collisionInfo.other.constructor.name === 'Slime') {
+            // 敵のonCollisionWithPlayerメソッドを呼ぶ
+            if (collisionInfo.other.onCollisionWithPlayer) {
+                collisionInfo.other.onCollisionWithPlayer(this);
+            }
+        }
+    }
 }
