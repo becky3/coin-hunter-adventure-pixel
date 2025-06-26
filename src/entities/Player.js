@@ -47,7 +47,6 @@ export class Player extends Entity {
         
         // スプライト設定
         this.spriteKey = null;
-        this.currentSprite = null;
         
         // 体力
         this.health = PLAYER_CONFIG.maxHealth;

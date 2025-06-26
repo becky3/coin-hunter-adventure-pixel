@@ -4,6 +4,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import fs from 'fs';
 
 // 現在のファイルのディレクトリを取得
 const __filename = fileURLToPath(import.meta.url);
@@ -11,6 +12,8 @@ const __dirname = dirname(__filename);
 
 // スクリーンショット出力先ディレクトリ
 const SCREENSHOT_DIR = path.resolve(__dirname, '../../screenshots');
+// ディレクトリが存在しない場合は作成
+fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
 /**
  * スクリーンショットを撮影して保存
