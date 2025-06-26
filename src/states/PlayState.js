@@ -44,8 +44,6 @@ export class PlayState {
         // 入力リスナー
         this.inputListeners = [];
         
-        // UIタイルスプライト読み込み
-        this.loadUISprites();
     }
     
     /**
