@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enemy Movement Log Test</title>
+    <style>
+        body {
+            margin: 0;
+            background: #222;
+            color: #fff;
+            font-family: monospace;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+        #gameCanvas {
+            border: 2px solid #444;
+            image-rendering: pixelated;
+        }
+        #logPanel {
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
+            width: 400px;
+            height: 500px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px;
+            font-size: 12px;
+        }
+        .warning { color: #ffcc00; }
+        .error { color: #ff6666; }
+        .info { color: #66ccff; }
+        button {
+            margin: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h2>Enemy Movement Analysis</h2>
+        <div>
+            <button onclick="startLogging()">Start Logging</button>
+            <button onclick="stopLogging()">Stop Logging</button>
+            <button onclick="analyzeLog()">Analyze</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+        <canvas id="gameCanvas" width="256" height="240"></canvas>
+    </div>
+    
+    <div id="logPanel">
+        <h3>Movement Log</h3>
+        <div id="log"></div>
+    </div>
+    
+    <script type="module">
+        import { Game } from '../../src/core/Game.js';
+        
+        let game;
+        let logging = false;
+        let movementLog = [];
+        let frameCount = 0;
+        
+        async function init() {
+            const canvas = document.getElementById('gameCanvas');
+            game = new Game(canvas);
+            window.game = game;
+            
+            await game.init();
+            game.start();
+            
+            // ゲーム開始
+            setTimeout(() => {
+                if (game.stateManager.currentState?.startGame) {
+                    game.stateManager.currentState.startGame();
+                    addLog('Game started', 'info');
+                }
+            }, 1000);
+        }
+        
+        // ログ記録用のupdate拡張
+        function hookUpdate() {
+            const originalUpdate = game.update.bind(game);
+            game.update = function(deltaTime) {
+                originalUpdate(deltaTime);
+                
+                if (logging && game.stateManager.currentState?.enemies) {
+                    frameCount++;
+                    
+                    game.stateManager.currentState.enemies.forEach((enemy, index) => {
+                        const entry = {
+                            frame: frameCount,
+                            enemyIndex: index,
+                            type: enemy.constructor.name,
+                            x: enemy.x,
+                            y: enemy.y,
+                            vx: enemy.vx,
+                            vy: enemy.vy,
+                            grounded: enemy.grounded,
+                            direction: enemy.direction,
+                            active: enemy.active
+                        };
+                        
+                        movementLog.push(entry);
+                        
+                        // 異常値検出
+                        if (Math.abs(enemy.vx) > 100) {
+                            addLog(`Frame ${frameCount}: Enemy ${index} high vx: ${enemy.vx}`, 'warning');
+                        }
+                        if (Math.abs(enemy.vy) > 300) {
+                            addLog(`Frame ${frameCount}: Enemy ${index} high vy: ${enemy.vy}`, 'warning');
+                        }
+                        if (enemy.x < -100 || enemy.x > 400) {
+                            addLog(`Frame ${frameCount}: Enemy ${index} out of bounds: x=${enemy.x}`, 'error');
+                        }
+                    });
+                }
+            };
+        }
+        
+        window.startLogging = function() {
+            logging = true;
+            movementLog = [];
+            frameCount = 0;
+            addLog('Logging started', 'info');
+        };
+        
+        window.stopLogging = function() {
+            logging = false;
+            addLog(`Logging stopped. ${movementLog.length} entries recorded`, 'info');
+        };
+        
+        window.analyzeLog = function() {
+            if (movementLog.length === 0) {
+                addLog('No log data to analyze', 'warning');
+                return;
+            }
+            
+            // 敵ごとの分析
+            const enemyData = {};
+            
+            movementLog.forEach(entry => {
+                const key = `enemy_${entry.enemyIndex}`;
+                if (!enemyData[key]) {
+                    enemyData[key] = {
+                        positions: [],
+                        velocities: [],
+                        maxVx: 0,
+                        maxVy: 0,
+                        avgVx: 0,
+                        avgVy: 0
+                    };
+                }
+                
+                const data = enemyData[key];
+                data.positions.push({ x: entry.x, y: entry.y });
+                data.velocities.push({ vx: entry.vx, vy: entry.vy });
+                data.maxVx = Math.max(data.maxVx, Math.abs(entry.vx));
+                data.maxVy = Math.max(data.maxVy, Math.abs(entry.vy));
+            });
+            
+            // 統計計算と異常検出
+            Object.entries(enemyData).forEach(([key, data]) => {
+                const vxSum = data.velocities.reduce((sum, v) => sum + Math.abs(v.vx), 0);
+                const vySum = data.velocities.reduce((sum, v) => sum + Math.abs(v.vy), 0);
+                data.avgVx = vxSum / data.velocities.length;
+                data.avgVy = vySum / data.velocities.length;
+                
+                addLog(`\n=== ${key} Analysis ===`, 'info');
+                addLog(`Max velocity: vx=${data.maxVx.toFixed(2)}, vy=${data.maxVy.toFixed(2)}`);
+                addLog(`Avg velocity: vx=${data.avgVx.toFixed(2)}, vy=${data.avgVy.toFixed(2)}`);
+                
+                // 移動パターン検出
+                const xPositions = data.positions.map(p => p.x);
+                const xMin = Math.min(...xPositions);
+                const xMax = Math.max(...xPositions);
+                const xRange = xMax - xMin;
+                
+                addLog(`Position range: x=[${xMin.toFixed(0)}, ${xMax.toFixed(0)}] (range: ${xRange.toFixed(0)})`);
+                
+                // 異常な加速を検出
+                for (let i = 1; i < data.velocities.length; i++) {
+                    const dvx = Math.abs(data.velocities[i].vx - data.velocities[i-1].vx);
+                    const dvy = Math.abs(data.velocities[i].vy - data.velocities[i-1].vy);
+                    
+                    if (dvx > 50) {
+                        addLog(`Frame ${i}: Sudden vx change: ${dvx.toFixed(2)}`, 'warning');
+                    }
+                    if (dvy > 100) {
+                        addLog(`Frame ${i}: Sudden vy change: ${dvy.toFixed(2)}`, 'warning');
+                    }
+                }
+            });
+            
+            // CSVエクスポート用データ
+            console.log('Full log data:', movementLog);
+        };
+        
+        window.clearLog = function() {
+            document.getElementById('log').innerHTML = '';
+        };
+        
+        function addLog(message, type = '') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        init().then(() => {
+            hookUpdate();
+            addLog('System ready', 'info');
+        });
+    </script>
+</body>
+</html>

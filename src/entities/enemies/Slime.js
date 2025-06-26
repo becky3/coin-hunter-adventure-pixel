@@ -60,10 +60,11 @@ export class Slime extends Enemy {
             this.animState = 'jump';
         }
         
-        // 崖や壁の検知
-        if (this.checkWallAhead() || this.checkCliffAhead()) {
-            this.onCollisionWithWall();
-        }
+        // 崖や壁の検知は現在無効化
+        // TODO: PhysicsSystemのレイキャスト実装後に有効化
+        // if (this.checkWallAhead() || this.checkCliffAhead()) {
+        //     this.onCollisionWithWall();
+        // }
     }
     
     /**
@@ -82,8 +83,8 @@ export class Slime extends Enemy {
      */
     checkWallAhead() {
         // TODO: PhysicsSystemのレイキャストを使用
-        // 仮実装: 横方向の速度が0になったら壁があると判断
-        return Math.abs(this.vx) < 1 && this.grounded;
+        // 仮実装: 現在は常にfalseを返す
+        return false;
     }
     
     /**
