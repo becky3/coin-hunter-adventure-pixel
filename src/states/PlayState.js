@@ -43,6 +43,9 @@ export class PlayState {
         
         // 入力リスナー
         this.inputListeners = [];
+        
+        // UIタイルスプライト読み込み
+        this.loadUISprites();
     }
     
     /**
@@ -178,6 +181,9 @@ export class PlayState {
     exit() {
         console.log('Exiting PlayState');
         
+        // ポーズ状態をリセット
+        this.isPaused = false;
+        
         // 入力リスナーの削除
         this.removeInputListeners();
         
@@ -312,7 +318,7 @@ export class PlayState {
         // ポーズ中のQキーでタイトルに戻る
         this.inputListeners.push(
             this.game.inputSystem.on('keyPress', (event) => {
-                if (this.isPaused && (event.key === 'q' || event.key === 'Q')) {
+                if (this.isPaused && event.key === 'KeyQ') {
                     this.gameOver();
                 }
             })
@@ -403,9 +409,24 @@ export class PlayState {
      * @param {PixelRenderer} renderer - レンダラー
      */
     renderHUD(renderer) {
-        // HUD背景
-        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, 24, '#000000');
-        renderer.drawRect(0, 24, GAME_RESOLUTION.WIDTH, 1, '#FFFFFF');
+        const blackPattern = [
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1]
+        ];
+        
+        for (let y = 0; y < 24; y += 8) {
+            for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
+                this.drawPatternTile(renderer, x, y, blackPattern, '#000000');
+            }
+        }
+        
+        this.renderHorizontalBorder(renderer, 24);
         
         // ゲーム情報表示
         renderer.drawText(`SCORE: ${this.score}`, 8, 8, '#FFFFFF');
@@ -428,8 +449,24 @@ export class PlayState {
         const menuX = (GAME_RESOLUTION.WIDTH - menuWidth) / 2;
         const menuY = (GAME_RESOLUTION.HEIGHT - menuHeight) / 2;
         
-        renderer.drawRect(menuX, menuY, menuWidth, menuHeight, '#000000');
-        renderer.drawRect(menuX - 1, menuY - 1, menuWidth + 2, menuHeight + 2, '#FFFFFF', false);
+        const blackPattern = [
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1]
+        ];
+        
+        for (let y = menuY; y < menuY + menuHeight; y += 8) {
+            for (let x = menuX; x < menuX + menuWidth; x += 8) {
+                this.drawPatternTile(renderer, x, y, blackPattern, '#000000');
+            }
+        }
+        
+        this.renderBoxBorder(renderer, menuX - 8, menuY - 8, menuWidth + 16, menuHeight + 16);
         
         // メニューテキスト
         renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 32, '#FFFFFF');
@@ -445,11 +482,11 @@ export class PlayState {
         
         if (this.isPaused) {
             if (this.game.musicSystem) {
-                this.game.musicSystem.stopBGM();
+                this.game.musicSystem.pauseBGM();
             }
         } else {
             if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
-                this.game.musicSystem.playGameBGM();
+                this.game.musicSystem.resumeBGM();
             }
         }
     }
@@ -462,4 +499,117 @@ export class PlayState {
         // メニューに戻る
         this.game.stateManager.setState('menu');
     }
+    
+    /**
+     * UIスプライトの読み込み
+     */
+    async loadUISprites() {
+        try {
+            if (this.game.assetLoader) {
+                await this.game.assetLoader.loadSprite('ui', 'border_horizontal', 1);
+                await this.game.assetLoader.loadSprite('ui', 'border_vertical', 1);
+                await this.game.assetLoader.loadSprite('ui', 'border_corner', 1);
+            }
+        } catch (error) {
+            console.warn('UI sprites loading error:', error);
+        }
+    }
+    
+    /**
+     * 水平ボーダーの描画
+     * @param {PixelRenderer} renderer - レンダラー
+     * @param {number} y - Y座標
+     */
+    renderHorizontalBorder(renderer, y) {
+        const blackPattern = [
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1]
+        ];
+        
+        for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
+            this.drawPatternTile(renderer, x, y - 2, blackPattern, '#000000');
+        }
+    }
+    
+    /**
+     * ボックスボーダーの描画
+     * @param {PixelRenderer} renderer - レンダラー
+     * @param {number} x - X座標
+     * @param {number} y - Y座標  
+     * @param {number} width - 幅
+     * @param {number} height - 高さ
+     */
+    renderBoxBorder(renderer, x, y, width, height) {
+        const blackPattern = [
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1]
+        ];
+        
+        // 上辺
+        for (let i = x; i < x + width; i += 8) {
+            this.drawPatternTile(renderer, i, y, blackPattern, '#000000');
+        }
+        
+        // 下辺  
+        for (let i = x; i < x + width; i += 8) {
+            this.drawPatternTile(renderer, i, y + height - 8, blackPattern, '#000000');
+        }
+        
+        // 左辺
+        for (let i = y + 8; i < y + height - 8; i += 8) {
+            this.drawPatternTile(renderer, x, i, blackPattern, '#000000');
+        }
+        
+        // 右辺
+        for (let i = y + 8; i < y + height - 8; i += 8) {
+            this.drawPatternTile(renderer, x + width - 8, i, blackPattern, '#000000');
+        }
+    }
+    
+    /**
+     * パターンタイルの描画
+     */
+    drawPatternTile(renderer, x, y, pattern, color) {
+        const tileSize = 8;
+        const imageData = new ImageData(tileSize, tileSize);
+        const data = imageData.data;
+        
+        // カラーコードをRGBに変換
+        let r = 255, g = 255, b = 255;
+        if (color && color.startsWith('#')) {
+            const hex = color.slice(1);
+            r = parseInt(hex.substr(0, 2), 16);
+            g = parseInt(hex.substr(2, 2), 16);
+            b = parseInt(hex.substr(4, 2), 16);
+        }
+        
+        for (let py = 0; py < tileSize; py++) {
+            for (let px = 0; px < tileSize; px++) {
+                const idx = (py * tileSize + px) * 4;
+                if (pattern[py][px] === 1) {
+                    data[idx] = r;
+                    data[idx + 1] = g;
+                    data[idx + 2] = b;
+                    data[idx + 3] = 255;
+                } else {
+                    data[idx + 3] = 0;
+                }
+            }
+        }
+        
+        renderer.drawSprite(imageData, x, y, 1, false);
+    }
+    
 }
