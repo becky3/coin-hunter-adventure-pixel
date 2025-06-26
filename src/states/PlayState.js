@@ -308,6 +308,15 @@ export class PlayState {
                 }
             })
         );
+        
+        // ポーズ中のQキーでタイトルに戻る
+        this.inputListeners.push(
+            this.game.inputSystem.on('keyPress', (event) => {
+                if (this.isPaused && (event.key === 'q' || event.key === 'Q')) {
+                    this.gameOver();
+                }
+            })
+        );
     }
     
     /**
@@ -394,16 +403,14 @@ export class PlayState {
      * @param {PixelRenderer} renderer - レンダラー
      */
     renderHUD(renderer) {
-        // 上部のHUD背景
-        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, 24, 'rgba(0, 0, 0, 0.5)');
+        // HUD背景
+        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, 24, '#000000');
+        renderer.drawRect(0, 24, GAME_RESOLUTION.WIDTH, 1, '#FFFFFF');
         
-        // スコア
+        // ゲーム情報表示
         renderer.drawText(`SCORE: ${this.score}`, 8, 8, '#FFFFFF');
-        
-        // ライフ
         renderer.drawText(`LIVES: ${this.lives}`, 88, 8, '#FFFFFF');
         
-        // 時間
         const minutes = Math.floor(this.time / 60);
         const seconds = this.time % 60;
         const timeStr = `TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -415,12 +422,19 @@ export class PlayState {
      * @param {PixelRenderer} renderer - レンダラー
      */
     renderPauseScreen(renderer) {
-        // 半透明のオーバーレイ
-        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, GAME_RESOLUTION.HEIGHT, 'rgba(0, 0, 0, 0.7)');
+        // メニューボックス
+        const menuWidth = 200;
+        const menuHeight = 100;
+        const menuX = (GAME_RESOLUTION.WIDTH - menuWidth) / 2;
+        const menuY = (GAME_RESOLUTION.HEIGHT - menuHeight) / 2;
         
-        // ポーズテキスト
-        renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 16, '#FFFFFF');
-        renderer.drawTextCentered('PRESS ESC TO RESUME', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 8, '#FFFFFF');
+        renderer.drawRect(menuX, menuY, menuWidth, menuHeight, '#000000');
+        renderer.drawRect(menuX - 1, menuY - 1, menuWidth + 2, menuHeight + 2, '#FFFFFF', false);
+        
+        // メニューテキスト
+        renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 32, '#FFFFFF');
+        renderer.drawTextCentered('PRESS ESC TO RESUME', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 8, '#FFFFFF');
+        renderer.drawTextCentered('PRESS Q TO QUIT', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 16, '#FFFFFF');
     }
     
     /**
