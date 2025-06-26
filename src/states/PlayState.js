@@ -216,6 +216,9 @@ export class PlayState {
             this.levelWidth = levelData.width * levelData.tileSize;
             this.levelHeight = levelData.height * levelData.tileSize;
             
+            // 物理システムにタイルマップを設定
+            this.game.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
+            
             // 背景色を設定
             this.backgroundColor = this.levelLoader.getBackgroundColor(levelData);
             

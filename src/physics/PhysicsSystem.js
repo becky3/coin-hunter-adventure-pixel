@@ -42,6 +42,7 @@ export class PhysicsSystem {
     setTileMap(tileMap, tileSize = 16) {
         this.tileMap = tileMap;
         this.tileSize = tileSize;
+        // console.log('PhysicsSystem: TileMap set', tileMap ? `${tileMap.length}x${tileMap[0]?.length}` : 'null', 'tileSize:', tileSize);
     }
     
     /**
@@ -57,6 +58,8 @@ export class PhysicsSystem {
         if (entity.gravity) {
             entity.grounded = false;
         }
+        
+        // console.log(`PhysicsSystem: Added ${entity.constructor.name} at (${entity.x}, ${entity.y}) layer:${layer}`);
     }
     
     /**
@@ -162,6 +165,14 @@ export class PhysicsSystem {
         const endCol = Math.floor(bounds.right / this.tileSize);
         const startRow = Math.floor(bounds.top / this.tileSize);
         const endRow = Math.floor(bounds.bottom / this.tileSize);
+        
+        // デバッグ：最初のフレームのみログ出力
+        // if (!this._firstCheckDone) {
+        //     console.log(`PhysicsSystem: Checking tiles for ${entity.constructor.name} ${axis}`);
+        //     console.log(`  Bounds: (${bounds.left}, ${bounds.top}) to (${bounds.right}, ${bounds.bottom})`);
+        //     console.log(`  Tile range: cols ${startCol}-${endCol}, rows ${startRow}-${endRow}`);
+        //     this._firstCheckDone = true;
+        // }
         
         // 範囲を制限
         const clampedStartCol = Math.max(0, startCol);
