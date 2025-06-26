@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics System Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        #gameCanvas {
+            background-color: #000;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            width: 768px;
+            height: 720px;
+        }
+        .info {
+            color: white;
+            margin: 10px;
+            font-family: monospace;
+            text-align: center;
+        }
+        .controls {
+            color: #aaa;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 300px;
+            border: 1px solid #0f0;
+        }
+        .debug-item {
+            margin: 2px 0;
+        }
+        .debug-label {
+            color: #0f0;
+            display: inline-block;
+            width: 120px;
+        }
+        .debug-value {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>Physics System Test</h1>
+        <div class="controls">
+            矢印キー: 移動 | スペース: ジャンプ | D: デバッグ表示
+        </div>
+    </div>
+    <canvas id="gameCanvas" width="256" height="240"></canvas>
+    
+    <div id="debugPanel" class="debug-panel" style="display: none;">
+        <h3>Physics Debug</h3>
+        <div class="debug-item">
+            <span class="debug-label">Position:</span>
+            <span class="debug-value" id="debugPos">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Velocity:</span>
+            <span class="debug-value" id="debugVel">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Grounded:</span>
+            <span class="debug-value" id="debugGrounded">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">FPS:</span>
+            <span class="debug-value" id="debugFPS">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Entities:</span>
+            <span class="debug-value" id="debugEntities">-</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">Physics Time:</span>
+            <span class="debug-value" id="debugPhysicsTime">-</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import { PhysicsSystem } from '../../src/physics/PhysicsSystem.js';
+        import { Entity } from '../../src/entities/Entity.js';
+        
+        class TestGame {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.ctx.imageSmoothingEnabled = false;
+                
+                // フィジックスシステム
+                this.physicsSystem = new PhysicsSystem();
+                
+                // 入力管理
+                this.keys = {};
+                this.setupInput();
+                
+                // デバッグ
+                this.debug = false;
+                this.fps = 0;
+                this.lastTime = 0;
+                this.frameCount = 0;
+                this.fpsUpdateTime = 0;
+                this.physicsTime = 0;
+                
+                // テストレベル作成
+                this.createTestLevel();
+                
+                // テストプレイヤー作成
+                this.createTestPlayer();
+            }
+            
+            createTestLevel() {
+                // 簡単なレベル (16x15タイル)
+                this.tileMap = [
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,1,1,1,0,0,0,0,1,1,1,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,1,1,1,0,0,0,1,1,0,0,0,1,1,1,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ];
+                
+                // タイルマップをフィジックスシステムに設定
+                this.physicsSystem.setTileMap(this.tileMap, 16);
+            }
+            
+            createTestPlayer() {
+                // テスト用プレイヤー
+                this.player = new Entity(50, 50, 14, 14);
+                this.player.gravity = true;
+                this.player.gravityStrength = 0.65;
+                this.player.jumpPower = 10;
+                this.player.speed = 3.5;
+                
+                // フィジックスシステムに追加
+                this.physicsSystem.addEntity(this.player, this.physicsSystem.layers.PLAYER);
+            }
+            
+            setupInput() {
+                window.addEventListener('keydown', (e) => {
+                    this.keys[e.key] = true;
+                    
+                    if (e.key === 'd' || e.key === 'D') {
+                        this.debug = !this.debug;
+                        document.getElementById('debugPanel').style.display = 
+                            this.debug ? 'block' : 'none';
+                    }
+                });
+                
+                window.addEventListener('keyup', (e) => {
+                    this.keys[e.key] = false;
+                });
+            }
+            
+            update(deltaTime) {
+                // 入力処理
+                if (this.keys['ArrowLeft']) {
+                    this.player.vx = -this.player.speed;
+                } else if (this.keys['ArrowRight']) {
+                    this.player.vx = this.player.speed;
+                } else {
+                    // 摩擦を適用
+                    if (this.player.grounded) {
+                        this.player.vx *= 0.8;
+                        if (Math.abs(this.player.vx) < 0.1) {
+                            this.player.vx = 0;
+                        }
+                    }
+                }
+                
+                // ジャンプ
+                if (this.keys[' '] && this.player.grounded) {
+                    this.player.vy = -this.player.jumpPower;
+                    this.player.grounded = false;
+                }
+                
+                // 物理演算の更新
+                const startPhysics = performance.now();
+                this.physicsSystem.update(deltaTime);
+                this.physicsTime = performance.now() - startPhysics;
+                
+                // 画面端の制限
+                if (this.player.x < 0) {
+                    this.player.x = 0;
+                    this.player.vx = 0;
+                }
+                if (this.player.x + this.player.width > 256) {
+                    this.player.x = 256 - this.player.width;
+                    this.player.vx = 0;
+                }
+                
+                // FPS計算
+                this.frameCount++;
+                const now = performance.now();
+                if (now - this.fpsUpdateTime > 1000) {
+                    this.fps = this.frameCount;
+                    this.frameCount = 0;
+                    this.fpsUpdateTime = now;
+                }
+            }
+            
+            render() {
+                // クリア
+                this.ctx.fillStyle = '#5C94FC';
+                this.ctx.fillRect(0, 0, 256, 240);
+                
+                // タイルマップ描画
+                this.ctx.fillStyle = '#228B22';
+                for (let row = 0; row < this.tileMap.length; row++) {
+                    for (let col = 0; col < this.tileMap[row].length; col++) {
+                        if (this.tileMap[row][col] === 1) {
+                            this.ctx.fillRect(col * 16, row * 16, 16, 16);
+                        }
+                    }
+                }
+                
+                // プレイヤー描画
+                this.ctx.fillStyle = '#FF0000';
+                this.ctx.fillRect(
+                    Math.floor(this.player.x),
+                    Math.floor(this.player.y),
+                    this.player.width,
+                    this.player.height
+                );
+                
+                // デバッグ描画
+                if (this.debug) {
+                    // フィジックスシステムのデバッグ描画
+                    this.renderPhysicsDebug();
+                    
+                    // デバッグ情報更新
+                    this.updateDebugInfo();
+                }
+            }
+            
+            renderPhysicsDebug() {
+                this.ctx.save();
+                
+                // 衝突ボックス
+                this.ctx.strokeStyle = this.player.grounded ? '#00FF00' : '#FF0000';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(
+                    Math.floor(this.player.x),
+                    Math.floor(this.player.y),
+                    this.player.width,
+                    this.player.height
+                );
+                
+                // 速度ベクトル
+                if (this.player.vx !== 0 || this.player.vy !== 0) {
+                    this.ctx.strokeStyle = '#FFFF00';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(
+                        this.player.x + this.player.width / 2,
+                        this.player.y + this.player.height / 2
+                    );
+                    this.ctx.lineTo(
+                        this.player.x + this.player.width / 2 + this.player.vx * 5,
+                        this.player.y + this.player.height / 2 + this.player.vy * 5
+                    );
+                    this.ctx.stroke();
+                }
+                
+                this.ctx.restore();
+            }
+            
+            updateDebugInfo() {
+                document.getElementById('debugPos').textContent = 
+                    `${Math.floor(this.player.x)}, ${Math.floor(this.player.y)}`;
+                document.getElementById('debugVel').textContent = 
+                    `${this.player.vx.toFixed(2)}, ${this.player.vy.toFixed(2)}`;
+                document.getElementById('debugGrounded').textContent = 
+                    this.player.grounded ? 'Yes' : 'No';
+                document.getElementById('debugFPS').textContent = this.fps;
+                document.getElementById('debugEntities').textContent = 
+                    this.physicsSystem.entities.size;
+                document.getElementById('debugPhysicsTime').textContent = 
+                    `${this.physicsTime.toFixed(2)}ms`;
+            }
+            
+            start() {
+                this.lastTime = performance.now();
+                this.loop();
+            }
+            
+            loop = (currentTime) => {
+                const deltaTime = currentTime - this.lastTime;
+                
+                if (deltaTime >= 16.67) { // 60 FPS
+                    this.update(deltaTime);
+                    this.render();
+                    this.lastTime = currentTime - (deltaTime % 16.67);
+                }
+                
+                requestAnimationFrame(this.loop);
+            };
+        }
+        
+        // ゲーム開始
+        const canvas = document.getElementById('gameCanvas');
+        const game = new TestGame(canvas);
+        game.start();
+        
+        console.log('Physics System Test Started');
+        console.log('Controls:');
+        console.log('- Arrow Keys: Move');
+        console.log('- Space: Jump');
+        console.log('- D: Toggle Debug');
+    </script>
+</body>
+</html>

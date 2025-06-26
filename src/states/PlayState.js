@@ -52,6 +52,9 @@ export class PlayState {
     async enter(params = {}) {
         console.log('Entering PlayState', params);
         
+        // 物理システムをクリア
+        this.game.physicsSystem.entities.clear();
+        
         // ステージリストを読み込む
         try {
             await this.levelLoader.loadStageList();
@@ -88,12 +91,12 @@ export class PlayState {
         // タイマーの更新
         this.updateTimer();
         
-        // プレイヤーの更新
+        // 物理システムの更新（プレイヤーの物理演算と衝突判定を含む）
+        this.game.physicsSystem.update(deltaTime);
+        
+        // プレイヤーの更新（入力処理など）
         if (this.player) {
             this.player.update(deltaTime);
-            
-            // 簡易的な衝突判定（後で物理システムに置き換え）
-            this.checkTileCollisions();
             
             // レベル境界チェック
             if (this.player.x < 0) this.player.x = 0;
@@ -116,7 +119,11 @@ export class PlayState {
         }
         
         // エネミーの更新
-        this.enemies.forEach(enemy => enemy.update && enemy.update(deltaTime));
+        this.enemies.forEach(enemy => {
+            if (enemy.update) {
+                enemy.update(deltaTime);
+            }
+        });
         
         // アイテムの更新
         this.items.forEach(item => item.update && item.update(deltaTime));
@@ -253,6 +260,9 @@ export class PlayState {
         // レベルサイズ
         this.levelWidth = this.tileMap[0].length * TILE_SIZE;
         this.levelHeight = this.tileMap.length * TILE_SIZE;
+        
+        // 物理システムにタイルマップを設定
+        this.game.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
     }
     
     /**
@@ -272,6 +282,9 @@ export class PlayState {
         this.player.setInputManager(this.game.inputSystem);
         this.player.setMusicSystem(this.game.musicSystem);
         this.player.setAssetLoader(this.game.assetLoader);
+        
+        // プレイヤーを物理システムに追加
+        this.game.physicsSystem.addEntity(this.player, this.game.physicsSystem.layers.PLAYER);
     }
     
     /**
@@ -332,34 +345,11 @@ export class PlayState {
     }
     
     /**
-     * タイルとの衝突判定（簡易版）
+     * タイルとの衝突判定（PhysicsSystemに移行済み）
+     * @deprecated PhysicsSystemを使用してください
      */
     checkTileCollisions() {
-        if (!this.player) return;
-        
-        // プレイヤーの足元のタイルをチェック（下方向に少し余裕を持たせる）
-        const tileY = Math.floor((this.player.y + this.player.height + 1) / TILE_SIZE);
-        const tileX = Math.floor(this.player.x / TILE_SIZE);
-        const tileXRight = Math.floor((this.player.x + this.player.width - 1) / TILE_SIZE);
-        
-        // 初期値として地面にいないと仮定
-        let isOnGround = false;
-        
-        // タイルマップの範囲内かチェック
-        if (tileY >= 0 && tileY < this.tileMap.length) {
-            if ((this.tileMap[tileY] && this.tileMap[tileY][tileX] === 1) ||
-                (this.tileMap[tileY] && this.tileMap[tileY][tileXRight] === 1)) {
-                // 地面タイルの上に立っている（落下中の場合のみ位置を補正）
-                if (this.player.vy >= 0) {
-                    this.player.y = (tileY * TILE_SIZE) - this.player.height;
-                    this.player.vy = 0;
-                    isOnGround = true;
-                }
-            }
-        }
-        
-        // groundedフラグを更新
-        this.player.grounded = isOnGround;
+        // PhysicsSystemに移行済み
     }
     
     /**

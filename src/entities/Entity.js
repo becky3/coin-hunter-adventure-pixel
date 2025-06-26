@@ -52,8 +52,8 @@ export class Entity {
     update(deltaTime) {
         if (!this.active) return;
         
-        // 物理演算
-        this.updatePhysics(deltaTime);
+        // 物理演算はPhysicsSystemに任せる
+        // this.updatePhysics(deltaTime);
         
         // アニメーション更新
         this.updateAnimation(deltaTime);
@@ -341,10 +341,10 @@ export class Entity {
     
     /**
      * 衝突時の処理（子クラスで実装）
-     * @param {Entity} other - 衝突相手
+     * @param {Object} collisionInfo - 衝突情報 {other: Entity, side: string}
      */
     onCollision() {
         // 子クラスで実装
-        // otherが必要な場合は子クラスで引数を追加
+        // collisionInfoが必要な場合は子クラスで引数を追加
     }
 }
