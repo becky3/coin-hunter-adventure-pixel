@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/puppeteer/test-automation-lite.js",
+    "test": "node tests/puppeteer/test-automation.js",
     "test:jest": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

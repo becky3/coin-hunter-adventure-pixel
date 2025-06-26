@@ -53,7 +53,6 @@ export class Entity {
         if (!this.active) return;
         
         // 物理演算はPhysicsSystemに任せる
-        // this.updatePhysics(deltaTime);
         
         // アニメーション更新
         this.updateAnimation(deltaTime);
