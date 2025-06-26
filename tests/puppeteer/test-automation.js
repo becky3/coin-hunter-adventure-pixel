@@ -201,7 +201,7 @@ async function runTests() {
         console.log('\n🎨 Testing player rendering...');
         if (playState.hasPlayer) {
             // スクリーンショットを撮影（描画前）
-            await page.screenshot({ path: 'test-before-render.png' });
+            await page.screenshot({ path: '../screenshots/test-before-render.png' });
             
             // 描画が行われているか確認
             const renderCheck = await page.evaluate(() => {
@@ -277,7 +277,7 @@ async function runTests() {
                 `Y velocity: ${afterJump.vy}`);
             
             // 最終スクリーンショット
-            await page.screenshot({ path: 'test-final.png' });
+            await page.screenshot({ path: '../screenshots/test-final.png' });
             console.log('  Screenshots saved: test-before-render.png, test-final.png');
         }
         

@@ -95,7 +95,7 @@ async function checkErrors() {
         }
         
         // スクリーンショット
-        await page.screenshot({ path: 'error-check-screenshot.png' });
+        await page.screenshot({ path: '../screenshots/error-check-screenshot.png' });
         console.log('\n📸 Screenshot saved: error-check-screenshot.png');
         
     } catch (error) {

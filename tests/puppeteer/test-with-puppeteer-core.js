@@ -80,7 +80,7 @@ async function testWithSystemChrome() {
         }
         
         // スクリーンショット
-        await page.screenshot({ path: 'test-screenshot.png' });
+        await page.screenshot({ path: '../screenshots/test-screenshot.png' });
         console.log('\n📸 Screenshot saved: test-screenshot.png');
         
     } catch (error) {

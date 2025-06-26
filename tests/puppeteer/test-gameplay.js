@@ -131,10 +131,10 @@ async function testGameplay() {
         }
         
         // スクリーンショット
-        await page.screenshot({ path: 'test-menu.png' });
+        await page.screenshot({ path: '../screenshots/test-menu.png' });
         console.log('\n📸 Screenshot saved: test-menu.png (before start)');
         
-        await page.screenshot({ path: 'test-gameplay.png' });
+        await page.screenshot({ path: '../screenshots/test-gameplay.png' });
         console.log('📸 Screenshot saved: test-gameplay.png (after start)');
         
         // エラーレポート

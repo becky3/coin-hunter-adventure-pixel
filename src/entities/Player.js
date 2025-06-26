@@ -9,7 +9,7 @@ const PLAYER_CONFIG = {
     width: 16,  // スプライトと同じサイズに修正
     height: 16,
     speed: 3.5,
-    jumpPower: 8,  // ジャンプ力を下げる
+    jumpPower: 10,  // 適切なジャンプ力
     minJumpTime: 8,
     maxJumpTime: 20,
     maxHealth: 3,
@@ -224,20 +224,19 @@ export class Player extends Entity {
             if (input.jump) {
                 this.jumpButtonHoldTime++;
                 
-                // 最大保持時間内なら継続的な上昇力を付与
+                // 最大保持時間内なら重力を少し軽減（完全に相殺しない）
                 if (this.jumpTime < PLAYER_CONFIG.maxJumpTime && this.vy < 0) {
-                    // 重力を相殺して上昇を維持
-                    this.vy -= this.gravityStrength * 1.8;
-                } else if (this.jumpTime >= PLAYER_CONFIG.maxJumpTime && this.vy < 0) {
-                    // 最大時間に達したら上昇を停止
-                    this.vy = 0;
+                    // 重力の影響を軽減するだけ（加速はしない）
+                    this.vy += this.gravityStrength * 0.3; // 通常の30%の重力
+                } else if (this.jumpTime >= PLAYER_CONFIG.maxJumpTime) {
+                    // 最大時間に達したら通常の重力に戻す
                     this.canVariableJump = false;
                 }
             } else {
                 // ボタンが離された時
                 if (this.jumpTime >= PLAYER_CONFIG.minJumpTime && this.vy < 0) {
-                    // 最小時間経過後なら上昇を即座に停止
-                    this.vy = 0;
+                    // 最小時間経過後なら上昇力を半減
+                    this.vy *= 0.5;
                 }
                 this.jumpButtonPressed = false;
                 this.canVariableJump = false;
