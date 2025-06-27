@@ -8,8 +8,7 @@
 handover-docs/
 ├── README.md                 # このファイル
 ├── templates/               # 引き継ぎテンプレート
-│   ├── handover-template.md # 標準引き継ぎテンプレート
-│   └── review-template.md   # レビュー用テンプレート
+│   └── handover-template.md # 標準引き継ぎテンプレート
 ├── claude-to-gemini/        # Claude → Gemini への引き継ぎ
 │   └── YYYY-MM-DD_機能名.md
 ├── gemini-to-claude/        # Gemini → Claude への引き継ぎ
@@ -26,10 +25,9 @@ handover-docs/
 4. Geminiがレビュー・テストを実施
 
 ### 2. Gemini → Claude（レビュー結果 → 修正）
-1. Geminiがレビュー・テスト結果をまとめる
-2. `gemini-to-claude/YYYY-MM-DD_機能名_review.md`を作成
-3. 問題点、改善案、次のアクションを記載
-4. Claudeが修正・改善を実施
+1. GeminiがPRに直接レビューコメントを記載
+2. 必要に応じて`gemini-to-claude/YYYY-MM-DD_機能名_review.md`を作成
+3. Claudeが修正・改善を実施
 
 ## ファイル命名規則
 
@@ -48,11 +46,9 @@ handover-docs/
 - テスト手順
 - 既知の問題
 
-### レビュー引き継ぎ（review-template.md）
-- テスト結果
-- 発見した問題
-- 改善提案
-- 次のアクション
+### レビュー結果
+- GeminiはPRに直接コメントを記載
+- 詳細な引き継ぎが必要な場合のみ、別途ドキュメントを作成
 
 ## 過去の引き継ぎファイル
 

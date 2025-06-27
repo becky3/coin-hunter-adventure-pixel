@@ -187,8 +187,7 @@ gh issue comment [Issue番号] --body "作業を開始します。
 handover-docs/
 ├── README.md                 # 引き継ぎ管理の説明
 ├── templates/               # テンプレート
-│   ├── handover-template.md # 実装引き継ぎ用
-│   └── review-template.md   # レビュー結果用
+│   └── handover-template.md # 実装引き継ぎ用
 ├── claude-to-gemini/        # Claude → Gemini
 └── gemini-to-claude/        # Gemini → Claude
 ```
@@ -201,8 +200,8 @@ handover-docs/
    - 実装内容、テスト手順、レビュー依頼事項を明記
 
 2. **Gemini → Claude（レビュー完了時）**
-   - `gemini-to-claude/YYYY-MM-DD_機能名_review.md` を作成
-   - `review-template.md` を使用して記載
+   - PRに直接レビューコメントを記載
+   - 必要に応じて `gemini-to-claude/YYYY-MM-DD_機能名_review.md` を作成
    - テスト結果、問題点、改善案を明記
 
 #### 重要なポイント
