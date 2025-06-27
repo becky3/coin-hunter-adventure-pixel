@@ -108,7 +108,7 @@
                 frameCount++;
                 updateStat('frame', frameCount);
                 
-                const state = game.currentState;
+                const state = game.stateManager.currentState;
                 if (state && state.constructor.name === 'PlayState') {
                     // Update counts
                     updateStat('enemyCount', state.enemies ? state.enemies.length : 0);
@@ -172,12 +172,12 @@
             };
             
             // Initialize game
-            game.init().then(() => {
+            game.initialize().then(() => {
                 updateStat('status', 'Game initialized', 'ok');
                 
                 // Start PlayState directly
                 import('/src/states/PlayState.js').then(({ PlayState }) => {
-                    game.setState(new PlayState(game));
+                    game.stateManager.setState('play');
                     updateStat('status', 'PlayState active', 'ok');
                 });
             }).catch(err => {

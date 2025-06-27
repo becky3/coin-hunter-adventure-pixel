@@ -336,36 +336,33 @@ export class PhysicsSystem {
      * @param {Entity} entity - エンティティ
      */
     updateGroundedState(entity) {
-        // すでに接地している場合は、まだ接地しているかチェック
-        if (entity.grounded) {
-            const testBounds = {
-                left: entity.x,
-                top: entity.y + entity.height + 1, // 1ピクセル下をチェック
-                right: entity.x + entity.width,
-                bottom: entity.y + entity.height + 2,
-                width: entity.width,
-                height: 1
-            };
+        // 毎フレーム接地状態をリセットして再チェック
+        entity.grounded = false;
+        
+        // 足元のタイルをチェック
+        const testBounds = {
+            left: entity.x,
+            top: entity.y + entity.height + 1, // 1ピクセル下をチェック
+            right: entity.x + entity.width,
+            bottom: entity.y + entity.height + 2,
+            width: entity.width,
+            height: 1
+        };
+        
+        // タイルマップチェック
+        if (this.tileMap) {
+            const row = Math.floor(testBounds.top / this.tileSize);
+            const startCol = Math.floor(testBounds.left / this.tileSize);
+            const endCol = Math.floor(testBounds.right / this.tileSize);
             
-            let stillGrounded = false;
-            
-            // タイルマップチェック
-            if (this.tileMap) {
-                const row = Math.floor(testBounds.top / this.tileSize);
-                const startCol = Math.floor(testBounds.left / this.tileSize);
-                const endCol = Math.floor(testBounds.right / this.tileSize);
-                
-                if (row >= 0 && row < this.tileMap.length) {
-                    for (let col = startCol; col <= endCol; col++) {
-                        if (col >= 0 && col < this.tileMap[row].length && this.tileMap[row][col] === 1) {
-                            stillGrounded = true;
-                            break;
-                        }
+            if (row >= 0 && row < this.tileMap.length) {
+                for (let col = startCol; col <= endCol; col++) {
+                    if (col >= 0 && col < this.tileMap[row].length && this.tileMap[row][col] === 1) {
+                        entity.grounded = true;
+                        break;
                     }
                 }
             }
-            
-            entity.grounded = stillGrounded;
         }
     }
     

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manual Enemy Check</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #222;
+            color: #fff;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        #status {
+            background: #000;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #444;
+            white-space: pre-wrap;
+        }
+        .error { color: #ff6666; }
+        .ok { color: #66ff66; }
+    </style>
+</head>
+<body>
+    <h1>Manual Enemy Check</h1>
+    
+    <div>
+        <button onclick="checkEnemies()">Check Enemies</button>
+        <button onclick="watchEnemies()">Watch for 10s</button>
+        <button onclick="location.reload()">Reload</button>
+    </div>
+    
+    <div id="status">Ready. Click "Check Enemies" after starting the game.</div>
+    
+    <iframe 
+        src="http://localhost:3000" 
+        width="800" 
+        height="300"
+        style="border: 2px solid #444; margin-top: 20px;">
+    </iframe>
+    
+    <script>
+        const status = document.getElementById('status');
+        
+        function log(msg, className = '') {
+            const line = document.createElement('div');
+            if (className) line.className = className;
+            line.textContent = msg;
+            status.appendChild(line);
+        }
+        
+        function clear() {
+            status.innerHTML = '';
+        }
+        
+        async function checkEnemies() {
+            clear();
+            const iframe = document.querySelector('iframe');
+            const game = iframe.contentWindow.game;
+            
+            if (!game) {
+                log('Game not found!', 'error');
+                return;
+            }
+            
+            const state = game.currentState;
+            if (!state) {
+                log('No current state!', 'error');
+                return;
+            }
+            
+            log(`State: ${state.constructor.name}`, 'ok');
+            
+            if (state.enemies) {
+                log(`Enemies: ${state.enemies.length}`, 'ok');
+                state.enemies.forEach((enemy, i) => {
+                    log(`\nEnemy ${i}: ${enemy.constructor.name}`);
+                    log(`  Position: (${enemy.x.toFixed(1)}, ${enemy.y.toFixed(1)})`);
+                    log(`  Velocity: (${enemy.vx.toFixed(1)}, ${enemy.vy.toFixed(1)})`);
+                    log(`  Grounded: ${enemy.grounded}`);
+                    log(`  Direction: ${enemy.direction}`);
+                    log(`  PhysicsEnabled: ${enemy.physicsEnabled}`);
+                    
+                    // Check for problems
+                    if (Math.abs(enemy.x) > 500 || Math.abs(enemy.y) > 500) {
+                        log(`  ⚠️ POSITION OUT OF BOUNDS!`, 'error');
+                    }
+                    if (Math.abs(enemy.vx) > 50 || Math.abs(enemy.vy) > 50) {
+                        log(`  ⚠️ HIGH VELOCITY!`, 'error');
+                    }
+                });
+            } else {
+                log('No enemies array!', 'error');
+            }
+            
+            // Check physics system
+            if (game.physicsSystem) {
+                log(`\nPhysics entities: ${game.physicsSystem.entities.size}`);
+            }
+        }
+        
+        async function watchEnemies() {
+            clear();
+            log('Watching enemies for 10 seconds...');
+            
+            const iframe = document.querySelector('iframe');
+            const game = iframe.contentWindow.game;
+            
+            if (!game || !game.currentState) {
+                log('Game not ready!', 'error');
+                return;
+            }
+            
+            let count = 0;
+            const interval = setInterval(() => {
+                count++;
+                const state = game.currentState;
+                
+                if (state && state.enemies && state.enemies[0]) {
+                    const enemy = state.enemies[0];
+                    log(`${count}s: Enemy0 at (${enemy.x.toFixed(1)}, ${enemy.y.toFixed(1)}) vel (${enemy.vx.toFixed(1)}, ${enemy.vy.toFixed(1)})`);
+                    
+                    if (Math.abs(enemy.x) > 500 || Math.abs(enemy.y) > 500) {
+                        log('⚠️ ENEMY FLEW OFF!', 'error');
+                        clearInterval(interval);
+                    }
+                }
+                
+                if (count >= 10) {
+                    clearInterval(interval);
+                    log('\nWatch complete.');
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
