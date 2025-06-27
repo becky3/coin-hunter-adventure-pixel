@@ -75,43 +75,7 @@ http://localhost:3000/tests/manual-enemy-check.html
 - 「Check Enemies」ボタンで状態確認
 - 「Watch for 10s」で継続監視
 
-## 4. ブラウザでの手動確認
-
-### 確認手順
-1. http://localhost:3000 にアクセス
-2. F12でDevToolsを開く
-3. Consoleタブでエラーを確認
-4. 以下のコマンドを実行：
-
-```javascript
-// ゲーム状態の確認
-console.log('Game exists:', !!window.game);
-console.log('Current state:', game.stateManager.currentState?.constructor.name);
-
-// プレイヤーの確認
-const player = game.stateManager.currentState?.player;
-console.log('Player:', player ? {
-    position: { x: player.x, y: player.y },
-    animation: player.animState,
-    sprite: player.spriteKey
-} : 'Not found');
-
-// レンダラーの確認
-console.log('Sprites loaded:', game.pixelArtRenderer?.sprites.size || 0);
-console.log('Animations loaded:', game.pixelArtRenderer?.animations.size || 0);
-```
-
-### 動作テスト
-1. **表示確認**
-   - プレイヤーがピクセルアートで表示されているか
-   - 赤い四角ではなく、キャラクターが見えるか
-
-2. **操作確認**
-   - 矢印キー左右: 歩行アニメーション
-   - スペースキー: ジャンプアニメーション
-   - 何もしない: 待機アニメーション
-
-## 5. テストの実行タイミング
+## 4. テストの実行タイミング
 
 ### 開発中（推奨）
 - 機能実装後すぐにテスト
@@ -130,7 +94,7 @@ console.log('Animations loaded:', game.pixelArtRenderer?.animations.size || 0);
 - 新機能の場合は対応するテストを追加
 - テスト結果をPRコメントに記載
 
-## 6. よくある問題と対処法
+## 5. よくある問題と対処法
 
 ### プレイヤーが赤い四角で表示される
 ```javascript
@@ -180,7 +144,7 @@ game.stateManager.setState('play');
 2. ポート3000が使用可能か確認
 3. node_modulesを削除して再インストール
 
-## 7. テスト結果の記録
+## 6. テスト結果の記録
 
 ### チェックリスト
 実装後は必ず以下を確認：
@@ -204,7 +168,7 @@ game.stateManager.setState('play');
 - 問題: なし
 ```
 
-## 8. 新しいテストの作成方法
+## 7. 新しいテストの作成方法
 
 ### テストツールのテンプレート
 ```javascript
