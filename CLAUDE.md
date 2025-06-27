@@ -176,6 +176,42 @@ gh issue comment [Issue番号] --body "作業を開始します。
 - `docs/PROJECT_STATUS.md` - 既知の問題と対処法
 - `handover-docs/` - 過去に発生した問題と解決履歴
 
+## ClaudeとGeminiの協業ルール
+
+### 引き継ぎドキュメントの運用
+
+作業の引き継ぎは `handover-docs/` ディレクトリで管理します。
+
+#### ディレクトリ構成
+```
+handover-docs/
+├── README.md                 # 引き継ぎ管理の説明
+├── templates/               # テンプレート
+│   ├── handover-template.md # 実装引き継ぎ用
+│   └── review-template.md   # レビュー結果用
+├── claude-to-gemini/        # Claude → Gemini
+└── gemini-to-claude/        # Gemini → Claude
+```
+
+#### 引き継ぎフロー
+
+1. **Claude → Gemini（実装完了時）**
+   - `claude-to-gemini/YYYY-MM-DD_機能名.md` を作成
+   - `handover-template.md` を使用して記載
+   - 実装内容、テスト手順、レビュー依頼事項を明記
+
+2. **Gemini → Claude（レビュー完了時）**
+   - `gemini-to-claude/YYYY-MM-DD_機能名_review.md` を作成
+   - `review-template.md` を使用して記載
+   - テスト結果、問題点、改善案を明記
+
+#### 重要なポイント
+
+- **日付の確認**: ファイル作成前に `date` コマンドで現在日付を確認
+- **詳細な記載**: 次の作業者がスムーズに作業できるよう詳細に記載
+- **問題の共有**: 発見した問題は優先度を付けて明確に記載
+- **学びの共有**: 技術的な発見や改善案は積極的に共有
+
 ## 継続的改善のルール
 
 ### 積極的な提案を歓迎します
