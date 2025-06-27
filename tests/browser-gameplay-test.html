@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gameplay Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #222;
+            color: #fff;
+        }
+        #log {
+            white-space: pre-wrap;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #444;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .error { color: #ff6666; }
+        .warning { color: #ffaa00; }
+        .info { color: #66ff66; }
+        #gameContainer {
+            border: 2px solid #444;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gameplay Test - Direct to PlayState</h1>
+    <div id="log"></div>
+    <div id="gameContainer"></div>
+    
+    <script type="module">
+        const log = document.getElementById('log');
+        
+        function addLog(msg, type = 'info') {
+            const time = new Date().toISOString().substr(11, 8);
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `[${time}] ${msg}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Capture console errors
+        window.addEventListener('error', (e) => {
+            addLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`, 'error');
+        });
+
+        // Override console methods
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = (...args) => {
+            addLog(args.join(' '), 'info');
+            originalLog.apply(console, args);
+        };
+        
+        console.error = (...args) => {
+            addLog(args.join(' '), 'error');
+            originalError.apply(console, args);
+        };
+        
+        console.warn = (...args) => {
+            addLog(args.join(' '), 'warning');
+            originalWarn.apply(console, args);
+        };
+
+        // Import constants and create canvas
+        import('/src/constants/gameConstants.js').then(({ CANVAS_SIZE }) => {
+            // Create canvas element
+            const canvas = document.createElement('canvas');
+            canvas.width = CANVAS_SIZE.WIDTH;
+            canvas.height = CANVAS_SIZE.HEIGHT;
+            canvas.id = 'gameCanvas';
+            document.getElementById('gameContainer').appendChild(canvas);
+            addLog(`Canvas created: ${canvas.width}x${canvas.height}`);
+            
+            // Import and start game
+            import('/src/core/Game.js').then(({ Game }) => {
+                addLog('Game module loaded');
+                
+                const game = new Game(canvas);
+                window.game = game; // For debugging
+                
+                // Initialize game
+                game.initialize().then(() => {
+                    addLog('Game initialized');
+                    
+                    // Register and start PlayState
+                    import('/src/states/PlayState.js').then(({ PlayState }) => {
+                        addLog('Registering PlayState...');
+                        const playState = new PlayState(game);
+                        game.stateManager.registerState('play', playState);
+                        
+                        addLog('Switching to PlayState...');
+                        game.stateManager.setState('play');
+                        addLog('PlayState active');
+                        
+                        // Start game loop
+                        game.start();
+                        addLog('Game loop started');
+                        
+                        // Log entity counts
+                        setTimeout(() => {
+                            const state = game.stateManager.currentState;
+                            if (state && state.enemies) {
+                                addLog(`Enemies: ${state.enemies.length}`);
+                                state.enemies.forEach((enemy, i) => {
+                                    addLog(`Enemy ${i}: ${enemy.constructor.name} at (${enemy.x}, ${enemy.y})`);
+                                });
+                            }
+                            if (state && state.player) {
+                                addLog(`Player at (${state.player.x}, ${state.player.y})`);
+                            }
+                        }, 1000);
+                    });
+                }).catch(err => {
+                    addLog(`Init error: ${err.message}`, 'error');
+                    console.error(err);
+                });
+            }).catch(err => {
+                addLog(`Game module load error: ${err.message}`, 'error');
+            });
+        }).catch(err => {
+            addLog(`Constants load error: ${err.message}`, 'error');
+        });
+    </script>
+</body>
+</html>

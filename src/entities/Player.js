@@ -13,7 +13,7 @@ const PLAYER_CONFIG = {
     minJumpTime: 8,
     maxJumpTime: 20,
     maxHealth: 3,
-    invulnerabilityTime: 120,
+    invulnerabilityTime: 2000, // 2秒（ミリ秒）
     spawnX: 100,
     spawnY: 300,
     // ノックバック設定
@@ -139,9 +139,10 @@ export class Player extends Entity {
         
         // 無敵時間の更新
         if (this.invulnerable) {
-            this.invulnerabilityTime--;
+            this.invulnerabilityTime -= deltaTime;
             if (this.invulnerabilityTime <= 0) {
                 this.invulnerable = false;
+                this.invulnerabilityTime = 0; // 負の値にならないようにリセット
             }
         }
         
@@ -383,7 +384,7 @@ export class Player extends Entity {
         this.health = this.maxHealth;
         this.isDead = false;
         this.invulnerable = true;
-        this.invulnerabilityTime = 60; // 短い無敵時間
+        this.invulnerabilityTime = 1000; // 1秒の無敵時間（ミリ秒）
         this.animState = 'idle';
         this.animFrame = 0;
         this.facing = 'right';
@@ -420,8 +421,8 @@ export class Player extends Entity {
     render(renderer) {
         if (!this.visible) return;
         
-        // 無敵時間中は点滅
-        if (this.invulnerable && Math.floor(this.invulnerabilityTime / 4) % 2 === 0) {
+        // 無敵時間中は点滅（100ミリ秒ごとに切り替え）
+        if (this.invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 0) {
             return;
         }
         
@@ -527,5 +528,20 @@ export class Player extends Entity {
             grounded: this.grounded,
             isJumping: this.isJumping
         };
+    }
+    
+    /**
+     * 衝突ハンドラ（PhysicsSystemから呼ばれる）
+     * @param {Object} collisionInfo - 衝突情報
+     */
+    onCollision(collisionInfo) {
+        // 敵との衝突
+        if (collisionInfo.other.constructor.name === 'Enemy' || 
+            collisionInfo.other.constructor.name === 'Slime') {
+            // 敵のonCollisionWithPlayerメソッドを呼ぶ
+            if (collisionInfo.other.onCollisionWithPlayer) {
+                collisionInfo.other.onCollisionWithPlayer(this);
+            }
+        }
     }
 }

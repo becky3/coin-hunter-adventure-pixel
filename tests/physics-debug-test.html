@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Physics Debug Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #222;
+            color: #fff;
+        }
+        #info {
+            background: #000;
+            padding: 10px;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+        }
+        .stat { margin: 5px 0; }
+        .warning { color: #ffaa00; }
+        .error { color: #ff6666; }
+        .ok { color: #66ff66; }
+        #gameContainer {
+            border: 2px solid #444;
+            display: inline-block;
+            position: relative;
+        }
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Physics Debug Test</h1>
+    <div id="info">
+        <div class="stat">Status: <span id="status">Loading...</span></div>
+        <div class="stat">Frame: <span id="frame">0</span></div>
+        <div class="stat">Enemy Count: <span id="enemyCount">0</span></div>
+        <div class="stat">Physics Entities: <span id="physicsCount">0</span></div>
+        <div class="stat">Tile Map: <span id="tileMap">Unknown</span></div>
+        <div class="stat">
+            <h3>Enemy 0:</h3>
+            <div>Position: <span id="enemy0Pos">-</span></div>
+            <div>Velocity: <span id="enemy0Vel">-</span></div>
+            <div>Grounded: <span id="enemy0Ground">-</span></div>
+            <div>Physics: <span id="enemy0Physics">-</span></div>
+        </div>
+        <div class="stat">
+            <h3>Enemy 1:</h3>
+            <div>Position: <span id="enemy1Pos">-</span></div>
+            <div>Velocity: <span id="enemy1Vel">-</span></div>
+            <div>Grounded: <span id="enemy1Ground">-</span></div>
+            <div>Physics: <span id="enemy1Physics">-</span></div>
+        </div>
+        <div class="stat" id="warnings"></div>
+    </div>
+    <div id="gameContainer">
+        <canvas id="overlay"></canvas>
+    </div>
+    
+    <script type="module">
+        let frameCount = 0;
+        let warnings = new Set();
+        
+        function updateStat(id, value, className = '') {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+                el.className = className;
+            }
+        }
+        
+        function addWarning(msg) {
+            warnings.add(msg);
+            document.getElementById('warnings').innerHTML = 
+                '<h3>Warnings:</h3>' + Array.from(warnings).map(w => `<div class="error">${w}</div>`).join('');
+        }
+
+        // Import and start game
+        import('/src/core/Game.js').then(({ Game }) => {
+            updateStat('status', 'Creating canvas...', 'warning');
+            
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 768;
+            canvas.height = 240;
+            document.getElementById('gameContainer').appendChild(canvas);
+            
+            // Create overlay canvas
+            const overlay = document.getElementById('overlay');
+            overlay.width = 768;
+            overlay.height = 240;
+            const overlayCtx = overlay.getContext('2d');
+            
+            const game = new Game(canvas);
+            window.game = game;
+            
+            updateStat('status', 'Game created', 'ok');
+            
+            // Monitor game state
+            const originalUpdate = game.update.bind(game);
+            game.update = function(deltaTime) {
+                originalUpdate(deltaTime);
+                
+                frameCount++;
+                updateStat('frame', frameCount);
+                
+                const state = game.stateManager.currentState;
+                if (state && state.constructor.name === 'PlayState') {
+                    // Update counts
+                    updateStat('enemyCount', state.enemies ? state.enemies.length : 0);
+                    updateStat('physicsCount', game.physicsSystem.entities.size);
+                    updateStat('tileMap', state.tileMap ? `${state.tileMap.length}x${state.tileMap[0].length}` : 'null');
+                    
+                    // Monitor enemies
+                    if (state.enemies) {
+                        state.enemies.forEach((enemy, i) => {
+                            const pos = `(${enemy.x.toFixed(1)}, ${enemy.y.toFixed(1)})`;
+                            const vel = `(${enemy.vx.toFixed(1)}, ${enemy.vy.toFixed(1)})`;
+                            
+                            updateStat(`enemy${i}Pos`, pos);
+                            updateStat(`enemy${i}Vel`, vel);
+                            updateStat(`enemy${i}Ground`, enemy.grounded ? 'Yes' : 'No', enemy.grounded ? 'ok' : 'warning');
+                            updateStat(`enemy${i}Physics`, enemy.physicsEnabled ? 'Enabled' : 'Disabled');
+                            
+                            // Check for issues
+                            if (Math.abs(enemy.x) > 500) {
+                                addWarning(`Enemy ${i} X position out of bounds: ${enemy.x.toFixed(1)}`);
+                            }
+                            if (Math.abs(enemy.y) > 500) {
+                                addWarning(`Enemy ${i} Y position out of bounds: ${enemy.y.toFixed(1)}`);
+                            }
+                            if (Math.abs(enemy.vx) > 50) {
+                                addWarning(`Enemy ${i} X velocity too high: ${enemy.vx.toFixed(1)}`);
+                            }
+                            if (Math.abs(enemy.vy) > 50 && enemy.vy > 0) {
+                                addWarning(`Enemy ${i} Y velocity too high: ${enemy.vy.toFixed(1)}`);
+                            }
+                        });
+                    }
+                }
+                
+                // Draw debug overlay
+                overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
+                if (state && state.enemies && state.camera) {
+                    overlayCtx.save();
+                    overlayCtx.translate(-state.camera.x * 3, -state.camera.y * 3);
+                    
+                    state.enemies.forEach((enemy, i) => {
+                        // Draw velocity vector
+                        overlayCtx.strokeStyle = '#ff0000';
+                        overlayCtx.lineWidth = 2;
+                        overlayCtx.beginPath();
+                        overlayCtx.moveTo(enemy.x * 3 + enemy.width * 1.5, enemy.y * 3 + enemy.height * 1.5);
+                        overlayCtx.lineTo(
+                            enemy.x * 3 + enemy.width * 1.5 + enemy.vx * 3,
+                            enemy.y * 3 + enemy.height * 1.5 + enemy.vy * 3
+                        );
+                        overlayCtx.stroke();
+                        
+                        // Label
+                        overlayCtx.fillStyle = '#ffffff';
+                        overlayCtx.font = '12px monospace';
+                        overlayCtx.fillText(`E${i}`, enemy.x * 3, enemy.y * 3 - 5);
+                    });
+                    
+                    overlayCtx.restore();
+                }
+            };
+            
+            // Initialize game
+            game.initialize().then(() => {
+                updateStat('status', 'Game initialized', 'ok');
+                
+                // Start PlayState directly
+                import('/src/states/PlayState.js').then(({ PlayState }) => {
+                    game.stateManager.setState('play');
+                    updateStat('status', 'PlayState active', 'ok');
+                });
+            }).catch(err => {
+                updateStat('status', `Error: ${err.message}`, 'error');
+                console.error(err);
+            });
+        }).catch(err => {
+            updateStat('status', `Module error: ${err.message}`, 'error');
+        });
+    </script>
+</body>
+</html>

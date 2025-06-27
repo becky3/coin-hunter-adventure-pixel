@@ -1,0 +1,21 @@
+Opening test page...
+[DEBUG] [vite] connecting...
+Waiting for game to initialize...
+[DEBUG] [vite] connected.
+Canvas exists: false
+Game state: {
+  "hasGame": false
+}
+Gameplay status: {
+  "error": "No current state found"
+}
+
+--- Page Logs ---
+[23:30:21] Game module loaded
+[23:30:21] Module load error: canvas.getContext is not a function
+
+Screenshot saved as gameplay-test-screenshot.png
+
+--- SUMMARY ---
+Total console messages: 2
+Errors found: 0

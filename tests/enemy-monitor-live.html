@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enemy Monitor - Live</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #222;
+            color: #fff;
+        }
+        #log {
+            white-space: pre-wrap;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #444;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+        .error { color: #ff6666; }
+        .warning { color: #ffaa00; }
+        .info { color: #66ff66; }
+        .debug { color: #8888ff; }
+        #gameContainer {
+            border: 2px solid #444;
+            display: inline-block;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enemy Movement Monitor</h1>
+    <div>
+        <button onclick="startMonitoring()">Start Monitoring</button>
+        <button onclick="stopMonitoring()">Stop Monitoring</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    <div id="log"></div>
+    <div id="gameContainer"></div>
+    
+    <script type="module">
+        const log = document.getElementById('log');
+        let monitorInterval = null;
+        let frameCount = 0;
+        
+        function addLog(msg, type = 'info') {
+            const time = new Date().toISOString().substr(11, 12);
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `[${time}] ${msg}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        window.clearLog = () => {
+            log.innerHTML = '';
+            frameCount = 0;
+        };
+        
+        window.startMonitoring = () => {
+            if (monitorInterval) return;
+            
+            addLog('Starting enemy monitoring...', 'info');
+            frameCount = 0;
+            
+            monitorInterval = setInterval(() => {
+                if (!window.game || !window.game.currentState) {
+                    addLog('Game not ready', 'warning');
+                    return;
+                }
+                
+                const state = window.game.currentState;
+                if (state.constructor.name !== 'PlayState') {
+                    addLog(`Not in PlayState (current: ${state.constructor.name})`, 'warning');
+                    return;
+                }
+                
+                frameCount++;
+                
+                if (state.enemies && state.enemies.length > 0) {
+                    addLog(`\n=== Frame ${frameCount} ===`, 'debug');
+                    
+                    state.enemies.forEach((enemy, i) => {
+                        const posStr = `pos(${enemy.x.toFixed(1)}, ${enemy.y.toFixed(1)})`;
+                        const velStr = `vel(${enemy.vx.toFixed(1)}, ${enemy.vy.toFixed(1)})`;
+                        const stateStr = `grounded=${enemy.grounded} active=${enemy.active} physics=${enemy.physicsEnabled}`;
+                        
+                        addLog(`Enemy${i}: ${posStr} ${velStr} ${stateStr}`);
+                        
+                        // Check for problems
+                        if (Math.abs(enemy.x) > 500) {
+                            addLog(`  ⚠️ Enemy${i} X position out of bounds!`, 'error');
+                        }
+                        if (Math.abs(enemy.y) > 300) {
+                            addLog(`  ⚠️ Enemy${i} Y position out of bounds!`, 'error');
+                        }
+                        if (Math.abs(enemy.vx) > 50) {
+                            addLog(`  ⚠️ Enemy${i} X velocity too high!`, 'error');
+                        }
+                        if (Math.abs(enemy.vy) > 50) {
+                            addLog(`  ⚠️ Enemy${i} Y velocity too high!`, 'error');
+                        }
+                    });
+                }
+                
+                // Also check physics system
+                if (window.game.physicsSystem) {
+                    const physicsEntities = Array.from(window.game.physicsSystem.entities);
+                    const enemyEntities = physicsEntities.filter(e => e.constructor.name.includes('Enemy') || e.constructor.name.includes('Slime'));
+                    addLog(`Physics system: ${enemyEntities.length} enemy entities`);
+                }
+                
+            }, 100); // Check every 100ms
+        };
+        
+        window.stopMonitoring = () => {
+            if (monitorInterval) {
+                clearInterval(monitorInterval);
+                monitorInterval = null;
+                addLog('Monitoring stopped', 'info');
+            }
+        };
+
+        // Import and setup game
+        import('/src/constants/gameConstants.js').then(({ CANVAS_SIZE }) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = CANVAS_SIZE.WIDTH;
+            canvas.height = CANVAS_SIZE.HEIGHT;
+            canvas.id = 'gameCanvas';
+            document.getElementById('gameContainer').appendChild(canvas);
+            addLog(`Canvas created: ${canvas.width}x${canvas.height}`);
+            
+            import('/src/core/Game.js').then(({ Game }) => {
+                addLog('Game module loaded');
+                
+                const game = new Game(canvas);
+                window.game = game;
+                
+                game.initialize().then(() => {
+                    addLog('Game initialized');
+                    
+                    import('/src/states/PlayState.js').then(({ PlayState }) => {
+                        const playState = new PlayState(game);
+                        game.stateManager.registerState('play', playState);
+                        
+                        addLog('Starting game in PlayState...');
+                        game.stateManager.setState('play');
+                        game.start();
+                        
+                        addLog('Game started! Click "Start Monitoring" to begin tracking enemies.');
+                        
+                        // Initial enemy check after 1 second
+                        setTimeout(() => {
+                            const state = game.stateManager.currentState;
+                            if (state && state.enemies) {
+                                addLog(`\nInitial state: ${state.enemies.length} enemies loaded`);
+                                state.enemies.forEach((enemy, i) => {
+                                    addLog(`Enemy ${i}: ${enemy.constructor.name} at (${enemy.x}, ${enemy.y})`);
+                                });
+                            }
+                        }, 1000);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

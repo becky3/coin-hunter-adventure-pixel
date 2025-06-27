@@ -74,37 +74,37 @@ export class PhysicsSystem {
      * 物理演算の更新
      * @param {number} deltaTime - 経過時間
      */
-    update() {
-        // 各エンティティの物理演算を更新
-        for (const entity of this.entities) {
-            if (!entity.active) continue;
-            
-            // 重力適用
-            this.applyGravity(entity);
-            
-            // 速度による位置更新（衝突判定前）
-            
-            // X軸の移動と衝突判定
-            entity.x += entity.vx;
-            this.checkCollisionsForEntity(entity, 'horizontal');
-            
-            // Y軸の移動と衝突判定
-            entity.y += entity.vy;
-            this.checkCollisionsForEntity(entity, 'vertical');
-            
-            // 摩擦適用
-            this.applyFriction(entity);
-        }
-        
-        // エンティティ間の衝突判定
-        this.checkEntityCollisions();
-        
-        // 全エンティティの接地判定を更新
+    update(deltaTime) {
+        // 最初に接地判定を更新（前フレームの位置で）
         for (const entity of this.entities) {
             if (entity.active) {
                 this.updateGroundedState(entity);
             }
         }
+        
+        // 各エンティティの物理演算を更新
+        for (const entity of this.entities) {
+            if (!entity.active) continue;
+            
+            // 重力適用
+            this.applyGravity(entity, deltaTime);
+            
+            // 速度による位置更新（衝突判定前）
+            
+            // X軸の移動と衝突判定
+            entity.x += entity.vx * (deltaTime / 16.67);
+            this.checkCollisionsForEntity(entity, 'horizontal');
+            
+            // Y軸の移動と衝突判定
+            entity.y += entity.vy * (deltaTime / 16.67);
+            this.checkCollisionsForEntity(entity, 'vertical');
+            
+            // 摩擦適用
+            this.applyFriction(entity, deltaTime);
+        }
+        
+        // エンティティ間の衝突判定
+        this.checkEntityCollisions();
     }
     
     /**
@@ -112,10 +112,10 @@ export class PhysicsSystem {
      * @param {Entity} entity - エンティティ
      * @param {number} deltaTime - 経過時間
      */
-    applyGravity(entity) {
+    applyGravity(entity, deltaTime) {
         if (!entity.gravity || entity.grounded) return;
         
-        entity.vy += this.gravity;
+        entity.vy += this.gravity * (deltaTime / 16.67);
         
         // 最大落下速度制限
         if (entity.vy > this.maxFallSpeed) {
@@ -127,10 +127,11 @@ export class PhysicsSystem {
      * 摩擦を適用
      * @param {Entity} entity - エンティティ
      */
-    applyFriction(entity) {
+    applyFriction(entity, deltaTime) {
         if (!entity.grounded) return;
         
-        entity.vx *= entity.friction || this.friction;
+        const frictionFactor = Math.pow(entity.friction || this.friction, deltaTime / 16.67);
+        entity.vx *= frictionFactor;
         
         // 小さな速度は0にする
         if (Math.abs(entity.vx) < 0.1) {
@@ -335,36 +336,33 @@ export class PhysicsSystem {
      * @param {Entity} entity - エンティティ
      */
     updateGroundedState(entity) {
-        // すでに接地している場合は、まだ接地しているかチェック
-        if (entity.grounded) {
-            const testBounds = {
-                left: entity.x,
-                top: entity.y + entity.height + 1, // 1ピクセル下をチェック
-                right: entity.x + entity.width,
-                bottom: entity.y + entity.height + 2,
-                width: entity.width,
-                height: 1
-            };
+        // 毎フレーム接地状態をリセットして再チェック
+        entity.grounded = false;
+        
+        // 足元のタイルをチェック
+        const testBounds = {
+            left: entity.x,
+            top: entity.y + entity.height + 1, // 1ピクセル下をチェック
+            right: entity.x + entity.width,
+            bottom: entity.y + entity.height + 2,
+            width: entity.width,
+            height: 1
+        };
+        
+        // タイルマップチェック
+        if (this.tileMap) {
+            const row = Math.floor(testBounds.top / this.tileSize);
+            const startCol = Math.floor(testBounds.left / this.tileSize);
+            const endCol = Math.floor(testBounds.right / this.tileSize);
             
-            let stillGrounded = false;
-            
-            // タイルマップチェック
-            if (this.tileMap) {
-                const row = Math.floor(testBounds.top / this.tileSize);
-                const startCol = Math.floor(testBounds.left / this.tileSize);
-                const endCol = Math.floor(testBounds.right / this.tileSize);
-                
-                if (row >= 0 && row < this.tileMap.length) {
-                    for (let col = startCol; col <= endCol; col++) {
-                        if (col >= 0 && col < this.tileMap[row].length && this.tileMap[row][col] === 1) {
-                            stillGrounded = true;
-                            break;
-                        }
+            if (row >= 0 && row < this.tileMap.length) {
+                for (let col = startCol; col <= endCol; col++) {
+                    if (col >= 0 && col < this.tileMap[row].length && this.tileMap[row][col] === 1) {
+                        entity.grounded = true;
+                        break;
                     }
                 }
             }
-            
-            entity.grounded = stillGrounded;
         }
     }
     

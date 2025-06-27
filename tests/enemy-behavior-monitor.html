@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enemy Behavior Monitor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        
+        iframe {
+            border: 2px solid #0f0;
+            margin-bottom: 20px;
+        }
+        
+        #monitor {
+            background: #000;
+            padding: 10px;
+            border: 1px solid #0f0;
+            white-space: pre;
+            height: 400px;
+            overflow-y: auto;
+        }
+        
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #0a0;
+        }
+        
+        .warning {
+            color: #ff0;
+        }
+        
+        .error {
+            color: #f00;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enemy Behavior Monitor</h1>
+    
+    <iframe id="gameFrame" src="http://localhost:3000" width="800" height="600"></iframe>
+    
+    <div>
+        <button onclick="startMonitoring()">Start Monitoring</button>
+        <button onclick="stopMonitoring()">Stop Monitoring</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div id="monitor"></div>
+    
+    <script>
+        let monitorInterval = null;
+        let startTime = null;
+        let initialPositions = null;
+        
+        function log(message, type = '') {
+            const monitor = document.getElementById('monitor');
+            const timestamp = startTime ? `[${((Date.now() - startTime) / 1000).toFixed(1)}s]` : '[--.-s]';
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `${timestamp} ${message}`;
+            monitor.appendChild(line);
+            monitor.scrollTop = monitor.scrollHeight;
+        }
+        
+        function getGameState() {
+            try {
+                const gameWindow = document.getElementById('gameFrame').contentWindow;
+                return gameWindow.gameState;
+            } catch (e) {
+                log('Error accessing game state: ' + e.message, 'error');
+                return null;
+            }
+        }
+        
+        function analyzeEnemies() {
+            const gameState = getGameState();
+            if (!gameState || !gameState.enemies) {
+                log('No enemies found in game state', 'warning');
+                return;
+            }
+            
+            const enemies = gameState.enemies;
+            log(`Found ${enemies.length} enemies`);
+            
+            if (!initialPositions) {
+                initialPositions = enemies.map(e => ({ x: e.x, y: e.y }));
+                log('Captured initial positions');
+            }
+            
+            enemies.forEach((enemy, index) => {
+                const initial = initialPositions[index];
+                const deltaX = enemy.x - initial.x;
+                const deltaY = enemy.y - initial.y;
+                
+                // Log enemy state
+                log(`Enemy ${index}: x=${enemy.x.toFixed(0)}, y=${enemy.y.toFixed(0)}, ` +
+                    `vX=${(enemy.velocityX || 0).toFixed(2)}, vY=${(enemy.velocityY || 0).toFixed(2)}, ` +
+                    `grounded=${enemy.grounded || false}, movingRight=${enemy.movingRight || false}`);
+                
+                // Check for issues
+                if (enemy.y < -50 || enemy.y > 700) {
+                    log(`⚠️ Enemy ${index} is OUT OF BOUNDS! Y position: ${enemy.y}`, 'error');
+                }
+                
+                if (Math.abs(enemy.velocityY || 0) > 10) {
+                    log(`⚠️ Enemy ${index} has EXCESSIVE Y velocity: ${enemy.velocityY}`, 'warning');
+                }
+                
+                if (Math.abs(deltaY) > 100) {
+                    log(`⚠️ Enemy ${index} has moved ${deltaY.toFixed(0)} pixels vertically!`, 'warning');
+                }
+                
+                if (!enemy.grounded && Math.abs(enemy.velocityY || 0) < 0.1) {
+                    log(`⚠️ Enemy ${index} appears to be FLOATING!`, 'warning');
+                }
+            });
+            
+            log('---');
+        }
+        
+        function startMonitoring() {
+            if (monitorInterval) {
+                log('Monitoring already active', 'warning');
+                return;
+            }
+            
+            startTime = Date.now();
+            initialPositions = null;
+            log('=== STARTING ENEMY BEHAVIOR MONITORING ===');
+            log('Press Enter in the game window to start the game');
+            
+            // Monitor every 2 seconds
+            monitorInterval = setInterval(analyzeEnemies, 2000);
+            
+            // Initial check
+            setTimeout(analyzeEnemies, 500);
+        }
+        
+        function stopMonitoring() {
+            if (monitorInterval) {
+                clearInterval(monitorInterval);
+                monitorInterval = null;
+                log('=== MONITORING STOPPED ===');
+                
+                // Final summary
+                const gameState = getGameState();
+                if (gameState && gameState.enemies && initialPositions) {
+                    log('\nFINAL SUMMARY:');
+                    gameState.enemies.forEach((enemy, index) => {
+                        const initial = initialPositions[index];
+                        const deltaX = enemy.x - initial.x;
+                        const deltaY = enemy.y - initial.y;
+                        const status = enemy.grounded ? 'ON PLATFORM' : 'AIRBORNE';
+                        log(`Enemy ${index}: Moved ${deltaX.toFixed(0)}px horizontally, ${deltaY.toFixed(0)}px vertically - ${status}`);
+                    });
+                }
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('monitor').innerHTML = '';
+            log('Log cleared');
+        }
+        
+        // Instructions
+        log('INSTRUCTIONS:');
+        log('1. Click "Start Monitoring" to begin');
+        log('2. Press Enter in the game window to start the game');
+        log('3. Observe enemy behavior for 10+ seconds');
+        log('4. Click "Stop Monitoring" to see final summary');
+        log('');
+        log('WHAT TO LOOK FOR:');
+        log('- Enemies should stay on platforms');
+        log('- Enemies should move slowly left/right');
+        log('- No excessive vertical movement');
+        log('- No flying or floating enemies');
+        log('');
+    </script>
+</body>
+</html>

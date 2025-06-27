@@ -25,6 +25,7 @@ export class Entity {
         this.gravityStrength = 0.65;
         this.maxFallSpeed = 15;
         this.friction = 0.8;
+        this.physicsEnabled = true; // PhysicsSystemで管理されているか
         
         // 状態
         this.active = true;
@@ -91,9 +92,15 @@ export class Entity {
             }
         }
         
-        // 位置を更新（速度は既にピクセル/フレーム単位）
-        this.x += this.vx;
-        this.y += this.vy;
+        // 位置更新はPhysicsSystemで行うため、ここでは行わない
+        // PhysicsSystemを使用しない場合のみ位置を更新
+        if (!this.physicsEnabled) {
+            // 位置を更新（deltaTimeを考慮）
+            // 60FPSを基準として、deltaTimeで調整
+            const frameFactor = deltaTime / 16.67; // 16.67ms = 60FPS
+            this.x += this.vx * frameFactor;
+            this.y += this.vy * frameFactor;
+        }
     }
     
     /**

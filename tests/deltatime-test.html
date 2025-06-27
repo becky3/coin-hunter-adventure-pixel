@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DeltaTime Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #222;
+            color: #fff;
+        }
+        #log {
+            white-space: pre-wrap;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #444;
+            height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .header { color: #ffff00; font-weight: bold; }
+        .error { color: #ff6666; }
+        .ok { color: #66ff66; }
+    </style>
+</head>
+<body>
+    <h1>DeltaTime Flow Test</h1>
+    <div id="log"></div>
+    
+    <script type="module">
+        const log = document.getElementById('log');
+        
+        function addLog(msg, className = '') {
+            const line = document.createElement('div');
+            if (className) line.className = className;
+            line.textContent = msg;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Import and start game
+        import('/src/core/Game.js').then(({ Game }) => {
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 768;
+            canvas.height = 240;
+            document.body.appendChild(canvas);
+            
+            const game = new Game(canvas);
+            window.game = game;
+            
+            let frameCount = 0;
+            
+            // Track deltaTime flow
+            const originalGameLoop = game.gameLoop;
+            game.gameLoop = function(currentTime) {
+                frameCount++;
+                
+                if (frameCount <= 5) {  // Log first 5 frames
+                    addLog(`\n=== FRAME ${frameCount} ===`, 'header');
+                    addLog(`currentTime: ${currentTime.toFixed(2)}ms`);
+                }
+                
+                // Call original with tracking
+                const result = originalGameLoop.call(this, currentTime);
+                
+                return result;
+            };
+            
+            // Track Game.update
+            const originalUpdate = game.update.bind(game);
+            game.update = function(deltaTime) {
+                if (frameCount <= 5) {
+                    addLog(`Game.update(deltaTime: ${deltaTime ? deltaTime.toFixed(2) : 'undefined'})`);
+                }
+                originalUpdate(deltaTime);
+            };
+            
+            // Track StateManager.update
+            const originalStateUpdate = game.stateManager.update.bind(game.stateManager);
+            game.stateManager.update = function(deltaTime) {
+                if (frameCount <= 5) {
+                    addLog(`StateManager.update(deltaTime: ${deltaTime ? deltaTime.toFixed(2) : 'undefined'})`);
+                }
+                originalStateUpdate(deltaTime);
+            };
+            
+            // Track PhysicsSystem.update
+            const originalPhysicsUpdate = game.physicsSystem.update.bind(game.physicsSystem);
+            game.physicsSystem.update = function(deltaTime) {
+                if (frameCount <= 5) {
+                    addLog(`PhysicsSystem.update(deltaTime: ${deltaTime ? deltaTime.toFixed(2) : 'undefined'})`);
+                }
+                
+                // Track entity updates
+                for (const entity of this.entities) {
+                    if (entity.constructor.name === 'Slime' && frameCount <= 5) {
+                        addLog(`  Before: Slime pos(${entity.x.toFixed(1)}, ${entity.y.toFixed(1)}) vel(${entity.vx.toFixed(1)}, ${entity.vy.toFixed(1)})`);
+                    }
+                }
+                
+                originalPhysicsUpdate(deltaTime);
+                
+                for (const entity of this.entities) {
+                    if (entity.constructor.name === 'Slime' && frameCount <= 5) {
+                        addLog(`  After:  Slime pos(${entity.x.toFixed(1)}, ${entity.y.toFixed(1)}) vel(${entity.vx.toFixed(1)}, ${entity.vy.toFixed(1)})`);
+                    }
+                }
+            };
+            
+            // Initialize and start
+            game.init().then(() => {
+                import('/src/states/PlayState.js').then(({ PlayState }) => {
+                    game.setState(new PlayState(game));
+                    addLog('\nGame started. Tracking deltaTime flow...', 'ok');
+                    
+                    // Also track Entity updates
+                    setTimeout(() => {
+                        if (game.currentState && game.currentState.enemies) {
+                            const enemy = game.currentState.enemies[0];
+                            if (enemy) {
+                                const originalEnemyUpdate = enemy.update.bind(enemy);
+                                enemy.update = function(deltaTime) {
+                                    if (frameCount >= 10 && frameCount <= 15) {
+                                        addLog(`\nEnemy.update(deltaTime: ${deltaTime ? deltaTime.toFixed(2) : 'undefined'})`);
+                                    }
+                                    originalEnemyUpdate(deltaTime);
+                                };
+                            }
+                        }
+                    }, 1000);
+                });
+            });
+        }).catch(err => {
+            addLog(`Error: ${err.message}`, 'error');
+        });
+    </script>
+</body>
+</html>

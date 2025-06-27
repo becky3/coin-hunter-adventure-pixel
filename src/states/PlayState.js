@@ -4,6 +4,7 @@
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
+import { Slime } from '../entities/enemies/Slime.js';
 
 export class PlayState {
     constructor(game) {
@@ -67,8 +68,17 @@ export class PlayState {
         this.currentLevel = params.level || 'tutorial';
         await this.loadLevel(this.currentLevel);
         
+        // デバッグ情報
+        console.log('After loadLevel:');
+        console.log('- tileMap:', this.tileMap ? `${this.tileMap.length}x${this.tileMap[0]?.length}` : 'null');
+        console.log('- levelWidth:', this.levelWidth);
+        console.log('- levelHeight:', this.levelHeight);
+        
         // プレイヤーの初期化
         this.initializePlayer();
+        
+        // 敵の初期化（テスト用）
+        this.initializeEnemies();
         
         // 入力の設定
         this.setupInputListeners();
@@ -93,11 +103,14 @@ export class PlayState {
         this.updateTimer();
         
         // 物理システムの更新（プレイヤーの物理演算と衝突判定を含む）
-        this.game.physicsSystem.update();
+        this.game.physicsSystem.update(deltaTime);
         
         // プレイヤーの更新（入力処理など）
         if (this.player) {
             this.player.update(deltaTime);
+            
+            // ライフをプレイヤーのhealthと同期
+            this.lives = this.player.health;
             
             // レベル境界チェック
             if (this.player.x < 0) this.player.x = 0;
@@ -108,9 +121,8 @@ export class PlayState {
             // 穴に落ちた場合
             if (this.player.y > this.levelHeight) {
                 this.player.takeDamage(this.player.maxHealth);
-                this.lives = this.player.health;
                 
-                if (this.lives > 0) {
+                if (this.player.health > 0) {
                     this.player.respawn(
                         this.levelData.spawnPoint.x * TILE_SIZE,
                         this.levelData.spawnPoint.y * TILE_SIZE
@@ -301,6 +313,28 @@ export class PlayState {
     }
     
     /**
+     * 敵の初期化
+     */
+    initializeEnemies() {
+        // 既存の敵をクリア
+        this.enemies = [];
+        
+        // テスト用にスライムを配置
+        const slime1 = new Slime(150, 180);
+        slime1.direction = -1; // 左向きに設定
+        this.enemies.push(slime1);
+        this.game.physicsSystem.addEntity(slime1, this.game.physicsSystem.layers.ENEMY);
+        
+        const slime2 = new Slime(200, 100);
+        slime2.direction = -1; // 左向きに設定
+        this.enemies.push(slime2);
+        this.game.physicsSystem.addEntity(slime2, this.game.physicsSystem.layers.ENEMY);
+        
+        // スプライトの読み込みはPixelArtRenderer統合後に実装
+        // TODO: PixelArtRendererを使用してスプライトを読み込む
+    }
+    
+    /**
      * 入力リスナーの設定
      */
     setupInputListeners() {
@@ -379,6 +413,11 @@ export class PlayState {
      * @param {PixelRenderer} renderer - レンダラー
      */
     renderTileMap(renderer) {
+        if (!this.tileMap) {
+            console.warn('No tileMap available');
+            return;
+        }
+        
         const startCol = Math.floor(this.camera.x / TILE_SIZE);
         const endCol = Math.ceil((this.camera.x + this.camera.width) / TILE_SIZE);
         const startRow = Math.floor(this.camera.y / TILE_SIZE);
