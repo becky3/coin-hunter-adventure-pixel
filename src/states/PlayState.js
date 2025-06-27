@@ -326,7 +326,7 @@ export class PlayState {
         this.game.physicsSystem.addEntity(slime1, this.game.physicsSystem.layers.ENEMY);
         
         const slime2 = new Slime(200, 100);
-        slime2.direction = 1; // 右向きに設定（デフォルト）
+        slime2.direction = -1; // 左向きに設定
         this.enemies.push(slime2);
         this.game.physicsSystem.addEntity(slime2, this.game.physicsSystem.layers.ENEMY);
         

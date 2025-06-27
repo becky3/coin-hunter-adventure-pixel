@@ -120,8 +120,8 @@ export class Enemy extends Entity {
         if (player.vy > 0 && player.y + player.height <= this.y + this.height / 2) {
             // 敵がダメージを受ける
             this.takeDamage(1, player);
-            // プレイヤーはバウンド（適切な値に調整）
-            player.vy = -150;
+            // プレイヤーはバウンド（ジャンプ力の半分程度）
+            player.vy = -5;
         } else {
             // プレイヤーがダメージを受ける
             if (player.takeDamage) {
