@@ -109,6 +109,9 @@ export class PlayState {
         if (this.player) {
             this.player.update(deltaTime);
             
+            // ライフをプレイヤーのhealthと同期
+            this.lives = this.player.health;
+            
             // レベル境界チェック
             if (this.player.x < 0) this.player.x = 0;
             if (this.player.x + this.player.width > this.levelWidth) {
@@ -118,9 +121,8 @@ export class PlayState {
             // 穴に落ちた場合
             if (this.player.y > this.levelHeight) {
                 this.player.takeDamage(this.player.maxHealth);
-                this.lives = this.player.health;
                 
-                if (this.lives > 0) {
+                if (this.player.health > 0) {
                     this.player.respawn(
                         this.levelData.spawnPoint.x * TILE_SIZE,
                         this.levelData.spawnPoint.y * TILE_SIZE
@@ -319,10 +321,12 @@ export class PlayState {
         
         // テスト用にスライムを配置
         const slime1 = new Slime(150, 180);
+        slime1.direction = -1; // 左向きに設定
         this.enemies.push(slime1);
         this.game.physicsSystem.addEntity(slime1, this.game.physicsSystem.layers.ENEMY);
         
         const slime2 = new Slime(200, 100);
+        slime2.direction = 1; // 右向きに設定（デフォルト）
         this.enemies.push(slime2);
         this.game.physicsSystem.addEntity(slime2, this.game.physicsSystem.layers.ENEMY);
         

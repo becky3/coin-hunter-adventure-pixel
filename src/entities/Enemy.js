@@ -117,11 +117,11 @@ export class Enemy extends Entity {
      */
     onCollisionWithPlayer(player) {
         // プレイヤーが上から踏んでいる場合
-        if (player.vy > 0 && player.y < this.y) {
+        if (player.vy > 0 && player.y + player.height <= this.y + this.height / 2) {
             // 敵がダメージを受ける
             this.takeDamage(1, player);
-            // プレイヤーはバウンド
-            player.vy = -200;
+            // プレイヤーはバウンド（適切な値に調整）
+            player.vy = -150;
         } else {
             // プレイヤーがダメージを受ける
             if (player.takeDamage) {
