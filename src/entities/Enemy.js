@@ -116,8 +116,20 @@ export class Enemy extends Entity {
      * @param {Player} player - プレイヤー
      */
     onCollisionWithPlayer(player) {
-        // プレイヤーが上から踏んでいる場合
-        if (player.vy > 0 && player.y + player.height <= this.y + this.height / 2) {
+        // 死亡中またはプレイヤーが無敵中はスキップ
+        if (this.state === 'dead' || !this.active || player.invulnerable) return;
+        
+        // プレイヤーが上から踏んでいる場合（より正確な判定）
+        const playerBottom = player.y + player.height;
+        const playerPrevBottom = player.y + player.height - player.vy; // 前フレームの位置
+        const enemyTop = this.y;
+        
+        // 前フレームでプレイヤーが敵の上にいて、現在下向きに移動している
+        const wasAbove = playerPrevBottom <= enemyTop + 4;
+        const isNowColliding = playerBottom >= enemyTop;
+        const isFalling = player.vy >= 0; // 0も含む（着地時）
+        
+        if (wasAbove && isNowColliding && isFalling) {
             // 敵がダメージを受ける
             this.takeDamage(1, player);
             // プレイヤーはバウンド（ジャンプ力の半分程度）
