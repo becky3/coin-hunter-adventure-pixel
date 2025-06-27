@@ -74,26 +74,26 @@ export class PhysicsSystem {
      * 物理演算の更新
      * @param {number} deltaTime - 経過時間
      */
-    update() {
+    update(deltaTime) {
         // 各エンティティの物理演算を更新
         for (const entity of this.entities) {
             if (!entity.active) continue;
             
             // 重力適用
-            this.applyGravity(entity);
+            this.applyGravity(entity, deltaTime);
             
             // 速度による位置更新（衝突判定前）
             
             // X軸の移動と衝突判定
-            entity.x += entity.vx;
+            entity.x += entity.vx * (deltaTime / 16.67);
             this.checkCollisionsForEntity(entity, 'horizontal');
             
             // Y軸の移動と衝突判定
-            entity.y += entity.vy;
+            entity.y += entity.vy * (deltaTime / 16.67);
             this.checkCollisionsForEntity(entity, 'vertical');
             
             // 摩擦適用
-            this.applyFriction(entity);
+            this.applyFriction(entity, deltaTime);
         }
         
         // エンティティ間の衝突判定
@@ -112,10 +112,10 @@ export class PhysicsSystem {
      * @param {Entity} entity - エンティティ
      * @param {number} deltaTime - 経過時間
      */
-    applyGravity(entity) {
+    applyGravity(entity, deltaTime) {
         if (!entity.gravity || entity.grounded) return;
         
-        entity.vy += this.gravity;
+        entity.vy += this.gravity * (deltaTime / 16.67);
         
         // 最大落下速度制限
         if (entity.vy > this.maxFallSpeed) {
@@ -127,10 +127,11 @@ export class PhysicsSystem {
      * 摩擦を適用
      * @param {Entity} entity - エンティティ
      */
-    applyFriction(entity) {
+    applyFriction(entity, deltaTime) {
         if (!entity.grounded) return;
         
-        entity.vx *= entity.friction || this.friction;
+        const frictionFactor = Math.pow(entity.friction || this.friction, deltaTime / 16.67);
+        entity.vx *= frictionFactor;
         
         // 小さな速度は0にする
         if (Math.abs(entity.vx) < 0.1) {

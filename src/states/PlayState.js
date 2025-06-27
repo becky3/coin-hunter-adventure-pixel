@@ -103,7 +103,7 @@ export class PlayState {
         this.updateTimer();
         
         // 物理システムの更新（プレイヤーの物理演算と衝突判定を含む）
-        this.game.physicsSystem.update();
+        this.game.physicsSystem.update(deltaTime);
         
         // プレイヤーの更新（入力処理など）
         if (this.player) {
