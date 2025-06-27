@@ -11,10 +11,10 @@ export class Slime extends Enemy {
         this.maxHealth = 1;
         this.health = this.maxHealth;
         this.damage = 1;
-        this.moveSpeed = 20;  // ゆっくり移動
+        this.moveSpeed = 0.5;  // ゆっくり移動（ピクセル/フレーム）
         
         // スライム固有の設定
-        this.jumpHeight = 30;  // 小さくジャンプしながら移動
+        this.jumpHeight = 5;  // 小さくジャンプしながら移動
         this.jumpCooldown = 0;
         this.jumpInterval = 1000;  // 1秒ごとにジャンプ
         

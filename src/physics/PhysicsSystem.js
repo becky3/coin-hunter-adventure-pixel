@@ -75,6 +75,13 @@ export class PhysicsSystem {
      * @param {number} deltaTime - 経過時間
      */
     update(deltaTime) {
+        // 最初に接地判定を更新（前フレームの位置で）
+        for (const entity of this.entities) {
+            if (entity.active) {
+                this.updateGroundedState(entity);
+            }
+        }
+        
         // 各エンティティの物理演算を更新
         for (const entity of this.entities) {
             if (!entity.active) continue;
@@ -98,13 +105,6 @@ export class PhysicsSystem {
         
         // エンティティ間の衝突判定
         this.checkEntityCollisions();
-        
-        // 全エンティティの接地判定を更新
-        for (const entity of this.entities) {
-            if (entity.active) {
-                this.updateGroundedState(entity);
-            }
-        }
     }
     
     /**

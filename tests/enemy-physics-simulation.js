@@ -13,9 +13,9 @@ class MockEntity {
         this.grounded = false;
         this.active = true;
         this.physicsEnabled = true;
-        this.moveSpeed = 20;
+        this.moveSpeed = 0.5;
         this.direction = 1;
-        this.jumpHeight = 30;
+        this.jumpHeight = 5;
     }
 }
 
