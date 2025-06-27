@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enemy Position Logger</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #222;
+            color: #fff;
+        }
+        #log {
+            white-space: pre-wrap;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #444;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            font-size: 11px;
+        }
+        .frame { color: #8888ff; }
+        .pos { color: #66ff66; }
+        .vel { color: #ffaa00; }
+        .error { color: #ff6666; }
+        #gameContainer {
+            border: 2px solid #444;
+            display: inline-block;
+        }
+        button {
+            padding: 10px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enemy Position Logger</h1>
+    <button onclick="startLogging()">Start Logging</button>
+    <button onclick="stopLogging()">Stop Logging</button>
+    <button onclick="clearLog()">Clear Log</button>
+    <div id="log"></div>
+    <div id="gameContainer"></div>
+    
+    <script type="module">
+        const log = document.getElementById('log');
+        let logging = false;
+        let frameCount = 0;
+        let logInterval;
+        
+        window.startLogging = () => {
+            logging = true;
+            frameCount = 0;
+            addLog('=== LOGGING STARTED ===', 'frame');
+        };
+        
+        window.stopLogging = () => {
+            logging = false;
+            addLog('=== LOGGING STOPPED ===', 'frame');
+        };
+        
+        window.clearLog = () => {
+            log.innerHTML = '';
+            frameCount = 0;
+        };
+        
+        function addLog(msg, className = '') {
+            const line = document.createElement('div');
+            if (className) line.className = className;
+            line.textContent = msg;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Import and start game
+        import('/src/core/Game.js').then(({ Game }) => {
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            canvas.id = 'gameCanvas';
+            canvas.width = 768;
+            canvas.height = 240;
+            document.getElementById('gameContainer').appendChild(canvas);
+            
+            const game = new Game(canvas);
+            window.game = game;
+            
+            // Hook into game update
+            const originalUpdate = game.update.bind(game);
+            game.update = function(deltaTime) {
+                originalUpdate(deltaTime);
+                
+                if (logging && game.currentState && game.currentState.enemies) {
+                    frameCount++;
+                    
+                    // Log every 10 frames to avoid spam
+                    if (frameCount % 10 === 0) {
+                        addLog(`Frame ${frameCount} (dt: ${deltaTime.toFixed(1)}ms)`, 'frame');
+                        
+                        game.currentState.enemies.forEach((enemy, i) => {
+                            const pos = `  Enemy${i}: pos(${enemy.x.toFixed(2)}, ${enemy.y.toFixed(2)})`;
+                            const vel = `vel(${enemy.vx.toFixed(2)}, ${enemy.vy.toFixed(2)})`;
+                            const state = `grounded=${enemy.grounded} active=${enemy.active}`;
+                            
+                            addLog(`${pos} ${vel} ${state}`);
+                            
+                            // Detect abnormal positions
+                            if (Math.abs(enemy.x) > 1000 || Math.abs(enemy.y) > 1000) {
+                                addLog(`  ⚠️ ABNORMAL POSITION DETECTED!`, 'error');
+                            }
+                            
+                            // Detect abnormal velocities
+                            if (Math.abs(enemy.vx) > 100 || Math.abs(enemy.vy) > 100) {
+                                addLog(`  ⚠️ ABNORMAL VELOCITY DETECTED!`, 'error');
+                            }
+                        });
+                    }
+                }
+            };
+            
+            // Also log physics system updates
+            game.init().then(() => {
+                // Hook into physics system
+                if (game.physicsSystem) {
+                    const originalPhysicsUpdate = game.physicsSystem.update.bind(game.physicsSystem);
+                    game.physicsSystem.update = function() {
+                        const beforePositions = new Map();
+                        
+                        // Record positions before update
+                        if (logging && game.currentState && game.currentState.enemies) {
+                            game.currentState.enemies.forEach((enemy, i) => {
+                                beforePositions.set(i, { x: enemy.x, y: enemy.y, vx: enemy.vx, vy: enemy.vy });
+                            });
+                        }
+                        
+                        // Run original update
+                        originalPhysicsUpdate();
+                        
+                        // Check for large position changes
+                        if (logging && game.currentState && game.currentState.enemies) {
+                            game.currentState.enemies.forEach((enemy, i) => {
+                                const before = beforePositions.get(i);
+                                if (before) {
+                                    const dx = enemy.x - before.x;
+                                    const dy = enemy.y - before.y;
+                                    
+                                    if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
+                                        addLog(`  ⚠️ PHYSICS: Enemy${i} jumped from (${before.x.toFixed(1)}, ${before.y.toFixed(1)}) to (${enemy.x.toFixed(1)}, ${enemy.y.toFixed(1)})`, 'error');
+                                        addLog(`    Delta: (${dx.toFixed(1)}, ${dy.toFixed(1)}) Vel was: (${before.vx.toFixed(1)}, ${before.vy.toFixed(1)})`, 'error');
+                                    }
+                                }
+                            });
+                        }
+                    };
+                }
+                
+                // Start in PlayState
+                import('/src/states/PlayState.js').then(({ PlayState }) => {
+                    game.setState(new PlayState(game));
+                    addLog('PlayState loaded - Click "Start Logging" to begin');
+                });
+            });
+        }).catch(err => {
+            addLog(`Error: ${err.message}`, 'error');
+        });
+    </script>
+</body>
+</html>

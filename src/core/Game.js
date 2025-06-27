@@ -190,7 +190,7 @@ export class Game {
         requestAnimationFrame(this.gameLoop);
     };
     
-    update() {
+    update(deltaTime) {
         // 入力の更新
         this.inputSystem.update();
         
@@ -202,7 +202,7 @@ export class Game {
         }
         
         // StateManagerに更新を委譲
-        this.stateManager.update(this.frameTime);
+        this.stateManager.update(deltaTime);
     }
     
     updateTestMode() {
