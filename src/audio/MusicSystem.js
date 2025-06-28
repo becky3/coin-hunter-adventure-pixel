@@ -604,6 +604,38 @@ export class MusicSystem {
     }
     
     /**
+     * ゴール到達効果音
+     */
+    playGoalSound() {
+        if (!this.isInitialized || this.isMuted) return;
+        
+        // 勝利のファンファーレ
+        const notes = [
+            { freq: this.getNoteFrequency('G4'), time: 0, duration: 0.15 },
+            { freq: this.getNoteFrequency('G4'), time: 0.15, duration: 0.15 },
+            { freq: this.getNoteFrequency('G4'), time: 0.3, duration: 0.15 },
+            { freq: this.getNoteFrequency('D5'), time: 0.45, duration: 0.4 },
+            { freq: this.getNoteFrequency('E5'), time: 0.85, duration: 0.15 },
+            { freq: this.getNoteFrequency('D5'), time: 1.0, duration: 0.15 },
+            { freq: this.getNoteFrequency('C5'), time: 1.15, duration: 0.15 },
+            { freq: this.getNoteFrequency('G5'), time: 1.3, duration: 0.6 }
+        ];
+        
+        notes.forEach(({ freq, time, duration }) => {
+            setTimeout(() => {
+                if (!this.isInitialized || this.isMuted) return;
+                this.playSoundEffect(freq, duration, 'square', 0.4, {
+                    attack: 0.01,
+                    decayTime: 0.1,
+                    decay: 0.7,
+                    sustain: 0.5,
+                    release: 0.2
+                });
+            }, time * 1000);
+        });
+    }
+    
+    /**
      * 全てのアクティブノードを強制停止
      */
     stopAllActiveNodes() {

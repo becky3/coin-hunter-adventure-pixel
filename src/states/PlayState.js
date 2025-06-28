@@ -6,6 +6,8 @@ import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { Slime } from '../entities/enemies/Slime.js';
 import { Coin } from '../entities/Coin.js';
+import { Spring } from '../entities/Spring.js';
+import { GoalFlag } from '../entities/GoalFlag.js';
 
 export class PlayState {
     constructor(game) {
@@ -348,27 +350,51 @@ export class PlayState {
         // 既存のアイテムをクリア
         this.items = [];
         
-        // レベルデータからコインを配置
+        // レベルデータからアイテムを配置
         if (this.levelData && this.levelData.entities) {
             this.levelData.entities.forEach(entity => {
-                if (entity.type === 'coin') {
-                    const coin = new Coin(
+                let item = null;
+                
+                switch (entity.type) {
+                case 'coin':
+                    item = new Coin(
                         entity.x * TILE_SIZE,
                         entity.y * TILE_SIZE
                     );
-                    this.items.push(coin);
+                    break;
+                        
+                case 'spring':
+                    item = new Spring(
+                        entity.x * TILE_SIZE,
+                        entity.y * TILE_SIZE
+                    );
+                    // スプリングは物理システムに追加
+                    this.game.physicsSystem.addEntity(item, this.game.physicsSystem.layers.ITEM);
+                    break;
+                        
+                case 'goal':
+                    item = new GoalFlag(
+                        entity.x * TILE_SIZE,
+                        entity.y * TILE_SIZE
+                    );
+                    break;
+                }
+                
+                if (item) {
+                    this.items.push(item);
                 }
             });
         }
     }
     
     /**
-     * コイン収集のチェック
+     * アイテムの衝突チェック
      */
-    checkCoinCollection() {
+    checkItemCollisions() {
         if (!this.player) return;
         
         this.items.forEach((item) => {
+            // コインの処理
             if (item.constructor.name === 'Coin' && !item.collected) {
                 if (item.collidesWith(this.player)) {
                     // コインを収集
@@ -384,6 +410,25 @@ export class PlayState {
                     console.log(`Coin collected! Score: ${this.score}, Total coins: ${this.coinsCollected}`);
                 }
             }
+            
+            // ゴールフラグの処理
+            else if (item.constructor.name === 'GoalFlag' && !item.cleared) {
+                if (item.collidesWith(this.player)) {
+                    // ゴール処理
+                    item.clear();
+                    
+                    // 効果音を再生
+                    if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
+                        this.game.musicSystem.playGoalSound();
+                    }
+                    
+                    console.log('Stage Clear!');
+                    
+                    // ステージクリア処理（仮実装）
+                    // TODO: リザルト画面への遷移を実装
+                    this.stageClear();
+                }
+            }
         });
         
         // 収集済みのアイテムを配列から削除
@@ -393,6 +438,13 @@ export class PlayState {
             }
             return true;
         });
+    }
+    
+    /**
+     * コイン収集のチェック（互換性のため残す）
+     */
+    checkCoinCollection() {
+        this.checkItemCollisions();
     }
     
     /**
@@ -595,6 +647,16 @@ export class PlayState {
     gameOver() {
         console.log('Game Over!');
         // メニューに戻る
+        this.game.stateManager.setState('menu');
+    }
+    
+    /**
+     * ステージクリア処理
+     */
+    stageClear() {
+        console.log('Stage Clear!');
+        // TODO: リザルト画面への遷移を実装
+        // 現在は仮実装としてメニューに戻る
         this.game.stateManager.setState('menu');
     }
     
