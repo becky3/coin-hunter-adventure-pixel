@@ -140,22 +140,22 @@ async function runStableSpringGoalTest() {
             console.log('✗ Spring test failed');
         }
         
-        // ゲームの状態をリセット（GoalFlagテストのため）
-        await page.reload();
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // GoalFlagテストは同じゲームセッション内で実行
+        // （reloadせずに続行）
+        console.log('\n--- Continuing in same session for GoalFlag test ---');
         
-        // ゲームが初期化されているか確認
-        const gameReloaded = await page.evaluate(() => {
-            return !!window.game && !!window.game.stateManager;
+        // プレイヤーをリセット位置に戻す
+        await page.evaluate(() => {
+            const game = window.game;
+            const state = game.stateManager.currentState;
+            if (state && state.player) {
+                state.player.x = 200;  // GoalFlagから離れた位置
+                state.player.y = 160;
+                state.player.vx = 0;
+                state.player.vy = 0;
+                state.player.grounded = true;
+            }
         });
-        
-        if (!gameReloaded) {
-            console.log('Game not initialized after reload, waiting more...');
-            await new Promise(resolve => setTimeout(resolve, 3000));
-        }
-        
-        await page.keyboard.press('Space');
-        await new Promise(resolve => setTimeout(resolve, 2000));
         
         // GoalFlag機能のテスト
         console.log('\n=== Testing GoalFlag Functionality ===');
