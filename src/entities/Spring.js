@@ -89,17 +89,22 @@ export class Spring extends Entity {
     
     /**
      * プレイヤーとの衝突時の処理
-     * @param {Entity} other - 衝突したエンティティ
-     * @param {Object} collisionInfo - 衝突情報
+     * @param {Object} collisionInfo - 衝突情報（PhysicsSystemから渡される）
      */
-    onCollision(other, collisionInfo) {
+    onCollision(collisionInfo) {
+        const other = collisionInfo.other;
+        
         // プレイヤーとの衝突時のみ処理
-        if (other.constructor.name === 'Player') {
+        if (other && other.constructor.name === 'Player') {
+            // 衝突の方向を判定（PhysicsSystemのside情報を使用）
+            const fromTop = collisionInfo.side === 'top' || 
+                          (other.y + other.height <= this.y + 5 && other.vy >= 0);
+            
             // 上から接触している場合のみ発動
-            if (collisionInfo && collisionInfo.fromTop && other.velY >= 0) {
+            if (fromTop && other.vy >= 0) {
                 // 大ジャンプ
-                other.velY = -this.bouncePower;
-                other.onGround = false;
+                other.vy = -this.bouncePower;
+                other.grounded = false;
                 
                 // スプリング発動
                 this.compression = 1;

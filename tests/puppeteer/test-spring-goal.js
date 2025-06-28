@@ -147,30 +147,57 @@ async function runSpringGoalTests() {
         });
         console.log('Player position on spring:', finalPosition);
         
-        // Spring発動後のプレイヤーのY座標と速度を確認
+        // Springのトリガーを直接テスト（より安定した方法）
         const springJumpData = await page.evaluate(() => {
             const game = window.game;
-            if (game && game.stateManager && game.stateManager.currentState) {
-                const state = game.stateManager.currentState;
-                if (state.player) {
-                    return {
-                        y: state.player.y,
-                        velY: state.player.velY,
-                        springTriggered: state.items.some(item => 
-                            item.constructor.name === 'Spring' && item.triggered
-                        )
-                    };
-                }
+            const state = game.stateManager.currentState;
+            
+            if (!state || !state.player) return { error: 'No game state or player' };
+            
+            // Springを探す
+            const spring = state.items?.find(item => item.constructor.name === 'Spring');
+            if (!spring) return { error: 'No spring found' };
+            
+            console.log('Debug: Spring position:', { x: spring.x, y: spring.y });
+            console.log('Debug: Player position:', { x: state.player.x, y: state.player.y });
+            
+            // プレイヤーの初期状態を記録
+            const beforeVelY = state.player.vy;
+            const beforeY = state.player.y;
+            
+            // プレイヤーをSpringの真上に配置（デバッグ用に位置を調整）
+            state.player.x = spring.x + spring.width / 2 - state.player.width / 2;
+            state.player.y = spring.y - state.player.height - 5;
+            state.player.vy = 5; // 下向きの速度を設定
+            
+            // 物理システムの更新を1フレーム実行
+            if (game.physicsSystem) {
+                game.physicsSystem.update(16.67); // 1フレーム分（60FPS）
             }
-            return null;
+            
+            // 結果を記録
+            const afterVelY = state.player.vy;
+            const afterY = state.player.y;
+            
+            return {
+                beforeVelY,
+                afterVelY,
+                beforeY,
+                afterY,
+                springTriggered: spring.triggered,
+                springCompression: spring.compression,
+                springBouncePower: spring.bouncePower,
+                playerBounced: afterVelY < -20
+            };
         });
         
-        console.log('After spring interaction:', springJumpData);
+        console.log('Spring test data:', springJumpData);
         
-        if (springJumpData && springJumpData.velY < -20) {
-            console.log('✓ Spring test passed: Player jumped high (velY:', springJumpData.velY, ')');
+        if (springJumpData && springJumpData.playerBounced) {
+            console.log('✓ Spring test passed: Player jumped high (velY:', springJumpData.afterVelY, ')');
         } else {
             console.log('✗ Spring test failed: Player did not jump high enough');
+            console.log('Debug info:', springJumpData);
         }
         
         // Springから離れるまで待つ
@@ -277,7 +304,7 @@ async function runSpringGoalTests() {
         }
         
         console.log('\n=== Test Summary ===');
-        console.log('Spring Test:', springJumpData && springJumpData.velY < -20 ? 'PASS' : 'FAIL');
+        console.log('Spring Test:', springJumpData && springJumpData.playerBounced ? 'PASS' : 'FAIL');
         console.log('GoalFlag Test:', afterGoalState && (afterGoalState.currentStateName === 'menu' || afterGoalState.goalCleared) ? 'PASS' : 'FAIL');
         console.log('No Errors:', errors.length === 0 ? 'PASS' : 'FAIL');
         
