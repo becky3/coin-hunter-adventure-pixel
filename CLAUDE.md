@@ -195,14 +195,46 @@ handover-docs/
 #### 引き継ぎフロー
 
 1. **Claude → Gemini（実装完了時）**
-   - `claude-to-gemini/YYYY-MM-DD_機能名.md` を作成
+   - 実装完了後、**必ず基本的なテストを実施**
+   - テスト完了後に `claude-to-gemini/YYYY-MM-DD_機能名.md` を作成
    - `handover-template.md` を使用して記載
    - 実装内容、テスト手順、レビュー依頼事項を明記
 
 2. **Gemini → Claude（レビュー完了時）**
-   - PRに直接レビューコメントを記載
+   - PRに直接レビューコメントを記載（ID: GEMINI-REVIEW-YYYYMMDD-XX形式を推奨）
    - 必要に応じて `gemini-to-claude/YYYY-MM-DD_機能名_review.md` を作成
    - テスト結果、問題点、改善案を明記
+
+#### 実装後の必須テスト
+
+**重要**: レビュー依頼前に以下のテストを必ず実施してください。
+
+1. **自動テスト**
+   ```bash
+   # 基本的なチェック
+   npm run test:simple
+   
+   # ゲームプレイテスト（Puppeteer）
+   node tests/puppeteer/test-gameplay.js
+   ```
+
+2. **手動テスト**
+   - 開発サーバーを起動（`npm run dev`）
+   - ブラウザで動作確認
+   - 実装した機能が正常に動作することを確認
+   - コンソールにエラーがないことを確認
+
+3. **品質チェック**
+   ```bash
+   # lintチェック
+   npm run lint
+   ```
+
+4. **テスト失敗時の対応**
+   - エラー内容を記録
+   - 修正を実施
+   - 再度すべてのテストを実行
+   - 正常動作を確認してから引き継ぎ
 
 #### 重要なポイント
 

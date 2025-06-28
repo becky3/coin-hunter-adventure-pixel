@@ -48,7 +48,34 @@
 // 重要なコードスニペット
 ```
 
-## テスト手順
+## 実施済みテスト
+
+### 自動テスト結果
+```bash
+# 基本チェック
+npm run test:simple
+結果: [PASS/FAIL]
+
+# Puppeteerテスト
+node tests/puppeteer/test-gameplay.js
+結果: [PASS/FAIL]
+エラー: [あれば記載]
+```
+
+### 手動テスト結果
+- [ ] 開発サーバーでの動作確認
+- [ ] 実装機能の正常動作
+- [ ] コンソールエラーなし
+- [ ] 期待通りの表示
+
+### 品質チェック
+```bash
+# lintチェック
+npm run lint
+結果: [PASS/FAIL]
+```
+
+## レビュー用テスト手順
 
 ### 前提条件
 1. [必要な環境設定]
@@ -68,9 +95,6 @@
 
 ### 動作確認コマンド
 ```bash
-# lintチェック
-npm run lint
-
 # 開発サーバー起動
 npm run dev
 ```
