@@ -105,7 +105,7 @@ export class AssetLoader {
             { type: 'animation', category: 'player', baseName: 'jump', frameCount: 2 },
             
             // アイテム
-            { type: 'animation', category: 'items', baseName: 'coin_spin', frameCount: 4 },
+            { type: 'animation', category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 200 }, // フレーム持続時間を200msに
             
             // 以下は後で実装予定（一旦コメントアウト）
             // { type: 'animation', category: 'enemies', baseName: 'slime', frameCount: 2 },

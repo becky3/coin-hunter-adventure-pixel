@@ -25,10 +25,10 @@ export class Coin extends Entity {
         this.animationTime = 0;
         this.flipX = false;
         
-        // 浮遊アニメーション
+        // 浮遊アニメーション（速度を遅く調整）
         this.floatOffset = 0;
-        this.floatSpeed = 0.05;
-        this.floatAmplitude = 3;
+        this.floatSpeed = 0.002; // 0.05から0.002に減速（約25分の1）
+        this.floatAmplitude = 2; // 振幅も少し小さく
         this.baseY = y;
         
         // スコア値

@@ -32,6 +32,14 @@
       "filename": "level3.json",
       "unlocked": false,
       "cleared": false
+    },
+    {
+      "id": "performance-test",
+      "name": "PERFORMANCE TEST",
+      "description": "Test with many coins",
+      "filename": "performance-test.json",
+      "unlocked": true,
+      "cleared": false
     }
   ],
   "currentStage": "tutorial"
