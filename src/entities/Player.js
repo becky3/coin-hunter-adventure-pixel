@@ -4,24 +4,21 @@
  */
 import { Entity } from './Entity.js';
 
-// プレイヤー設定
 const PLAYER_CONFIG = {
-    width: 16,  // スプライトと同じサイズに修正
+    width: 16,
     height: 16,
     speed: 3.5,
-    jumpPower: 10,  // 適切なジャンプ力
+    jumpPower: 10,
     minJumpTime: 8,
     maxJumpTime: 20,
     maxHealth: 3,
-    invulnerabilityTime: 2000, // 2秒（ミリ秒）
+    invulnerabilityTime: 2000,
     spawnX: 100,
     spawnY: 300,
-    // ノックバック設定
     knockbackVertical: -5,
     knockbackHorizontal: 3
 };
 
-// アニメーション設定（定数化してメモリ効率を向上）
 const ANIMATION_CONFIG = {
     speed: {
         idle: 500,
@@ -41,29 +38,23 @@ export class Player extends Entity {
     constructor(x = PLAYER_CONFIG.spawnX, y = PLAYER_CONFIG.spawnY) {
         super(x, y, PLAYER_CONFIG.width, PLAYER_CONFIG.height);
         
-        // プレイヤー固有のプロパティ
         this.speed = PLAYER_CONFIG.speed;
         this.jumpPower = PLAYER_CONFIG.jumpPower;
         
-        // スプライト設定
         this.spriteKey = null;
         
-        // 体力
         this.health = PLAYER_CONFIG.maxHealth;
         this.maxHealth = PLAYER_CONFIG.maxHealth;
         this.isDead = false;
         this.invulnerable = false;
         this.invulnerabilityTime = 0;
         
-        // 向き
         this.facing = 'right';
         
-        // アニメーション
-        this.animState = 'idle'; // idle, walk, jump, fall
+        this.animState = 'idle';
         this.animFrame = 0;
         this.animTimer = 0;
         
-        // ジャンプ制御
         this.isJumping = false;
         this.jumpButtonPressed = false;
         this.jumpTime = 0;
@@ -72,17 +63,13 @@ export class Player extends Entity {
         this.jumpMaxHeight = 0;
         this.jumpStartY = 0;
         
-        // スコア
         this.score = 0;
         this.coins = 0;
         
-        // 入力参照
         this.inputManager = null;
         
-        // 音楽システム参照
         this.musicSystem = null;
         
-        // アセットローダー参照
         this.assetLoader = null;
     }
     
@@ -117,7 +104,6 @@ export class Player extends Entity {
     onUpdate(deltaTime) {
         if (this.isDead) return;
         
-        // 入力状態を取得
         const input = {
             left: this.inputManager ? this.inputManager.isActionPressed('left') : false,
             right: this.inputManager ? this.inputManager.isActionPressed('right') : false,
@@ -125,28 +111,22 @@ export class Player extends Entity {
             jumpJustPressed: this.inputManager ? this.inputManager.isActionJustPressed('jump') : false
         };
         
-        // 移動処理
         this.handleMovement(input);
         
-        // ジャンプ処理
         this.handleJump(input);
         
-        // アニメーション状態の更新
         this.updateAnimationState();
         
-        // アニメーションフレームの更新
         this.updateAnimationFrame(deltaTime);
         
-        // 無敵時間の更新
         if (this.invulnerable) {
             this.invulnerabilityTime -= deltaTime;
             if (this.invulnerabilityTime <= 0) {
                 this.invulnerable = false;
-                this.invulnerabilityTime = 0; // 負の値にならないようにリセット
+                this.invulnerabilityTime = 0;
             }
         }
         
-        // 画面外落下チェック
         if (this.y > 1000) {
             this.takeDamage(this.maxHealth);
         }
@@ -157,7 +137,6 @@ export class Player extends Entity {
      * @param {Object} input - 入力状態
      */
     handleMovement(input) {
-        // 横移動
         if (input.left) {
             this.vx = -this.speed;
             this.facing = 'left';
@@ -167,7 +146,6 @@ export class Player extends Entity {
             this.facing = 'right';
             this.flipX = false;
         } else {
-            // 入力がない場合は減速
             this.vx *= 0.8;
             if (Math.abs(this.vx) < 0.1) {
                 this.vx = 0;
@@ -180,7 +158,6 @@ export class Player extends Entity {
      * @param {Object} input - 入力状態
      */
     handleJump(input) {
-        // デバッグログ（デバッグモード時のみ）
         if (input.jump && window.game?.debug) {
             console.log('Jump button pressed!', {
                 jumpButtonPressed: this.jumpButtonPressed,
@@ -190,7 +167,6 @@ export class Player extends Entity {
             });
         }
         
-        // ジャンプボタンが押された瞬間
         if (input.jumpJustPressed && this.grounded) {
             if (window.game?.debug) {
                 console.log('JUMP! vy before:', this.vy, 'jumpPower:', this.jumpPower);
@@ -208,34 +184,26 @@ export class Player extends Entity {
                 console.log('JUMP! vy after:', this.vy, 'y:', this.y);
             }
             
-            // ジャンプ音を再生
             if (this.musicSystem) {
                 this.musicSystem.playJumpSound();
             }
         }
         
-        // ジャンプ時間をカウント
         if (this.isJumping && !this.grounded) {
             this.jumpTime++;
         }
         
-        // 可変ジャンプ処理
         if (this.canVariableJump && this.isJumping && !this.grounded) {
             if (input.jump) {
                 this.jumpButtonHoldTime++;
                 
-                // 最大保持時間内なら重力を少し軽減（完全に相殺しない）
                 if (this.jumpTime < PLAYER_CONFIG.maxJumpTime && this.vy < 0) {
-                    // 重力の影響を軽減するだけ（加速はしない）
-                    this.vy -= this.gravityStrength * 0.5; // 重力の50%を相殺
+                    this.vy -= this.gravityStrength * 0.5;
                 } else if (this.jumpTime >= PLAYER_CONFIG.maxJumpTime) {
-                    // 最大時間に達したら通常の重力に戻す
                     this.canVariableJump = false;
                 }
             } else {
-                // ボタンが離された時
                 if (this.jumpTime >= PLAYER_CONFIG.minJumpTime && this.vy < 0) {
-                    // 最小時間経過後なら上昇力を半減
                     this.vy *= 0.5;
                 }
                 this.jumpButtonPressed = false;
@@ -243,7 +211,6 @@ export class Player extends Entity {
             }
         }
         
-        // ジャンプ中の最高到達点を記録
         if (this.isJumping && !this.grounded) {
             const currentHeight = this.jumpStartY - this.y;
             if (currentHeight > this.jumpMaxHeight) {
@@ -251,12 +218,10 @@ export class Player extends Entity {
             }
         }
         
-        // ジャンプ状態のリセット
         if (!input.jump) {
             this.jumpButtonPressed = false;
         }
         
-        // 着地処理
         if (this.grounded && this.isJumping) {
             this.isJumping = false;
             this.canVariableJump = false;
@@ -281,7 +246,6 @@ export class Player extends Entity {
             this.animState = 'idle';
         }
         
-        // アニメーション状態が変わったらスプライトを更新
         if (prevState !== this.animState) {
             this.updateSprite();
         }
@@ -294,13 +258,11 @@ export class Player extends Entity {
     updateAnimationFrame(deltaTime) {
         this.animTimer += deltaTime;
         
-        // アニメーション速度を定数から取得
         const speed = ANIMATION_CONFIG.speed[this.animState] || 200;
         
         if (this.animTimer >= speed) {
             this.animTimer = 0;
             
-            // フレーム数を定数から取得
             const frames = ANIMATION_CONFIG.frameCount[this.animState] || 1;
             this.animFrame = (this.animFrame + 1) % frames;
         }
@@ -319,15 +281,12 @@ export class Player extends Entity {
             this.health = 0;
             this.die();
         } else {
-            // 無敵時間を設定
             this.invulnerable = true;
             this.invulnerabilityTime = PLAYER_CONFIG.invulnerabilityTime;
             
-            // ノックバック（設定値を使用）
             this.vy = PLAYER_CONFIG.knockbackVertical;
             this.vx = this.facing === 'right' ? -PLAYER_CONFIG.knockbackHorizontal : PLAYER_CONFIG.knockbackHorizontal;
             
-            // ダメージ音を再生
             if (this.musicSystem) {
                 this.musicSystem.playDamageSound();
             }
@@ -350,7 +309,6 @@ export class Player extends Entity {
         this.coins += value;
         this.score += value * 100;
         
-        // コイン音を再生
         if (this.musicSystem) {
             this.musicSystem.playCoinSound();
         }
@@ -363,12 +321,10 @@ export class Player extends Entity {
         this.isDead = true;
         this.active = false;
         
-        // ゲームオーバー音を再生
         if (this.musicSystem) {
             this.musicSystem.playGameOverJingle();
         }
         
-        // ゲームオーバー処理をトリガー
         if (this.onDeath) {
             this.onDeath();
         }
@@ -384,7 +340,7 @@ export class Player extends Entity {
         this.health = this.maxHealth;
         this.isDead = false;
         this.invulnerable = true;
-        this.invulnerabilityTime = 1000; // 1秒の無敵時間（ミリ秒）
+        this.invulnerabilityTime = 1000;
         this.animState = 'idle';
         this.animFrame = 0;
         this.facing = 'right';
@@ -397,7 +353,6 @@ export class Player extends Entity {
     updateSprite() {
         if (!this.assetLoader) return;
         
-        // アニメーション状態に基づいてスプライトキーを決定
         switch (this.animState) {
         case 'idle':
             this.spriteKey = 'player/idle';
@@ -421,17 +376,14 @@ export class Player extends Entity {
     render(renderer) {
         if (!this.visible) return;
         
-        // 無敵時間中は点滅（100ミリ秒ごとに切り替え）
         if (this.invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 0) {
             return;
         }
         
-        // スプライトが設定されていない場合は初期化
         if (!this.spriteKey) {
             this.updateSprite();
         }
         
-        // デバッグ: 最初の描画時のみログ
         if (!this._firstRenderLogged) {
             console.log('Player render:', {
                 spriteKey: this.spriteKey,
@@ -443,11 +395,9 @@ export class Player extends Entity {
             this._firstRenderLogged = true;
         }
         
-        // ピクセルアートスプライトの描画
         if (this.spriteKey && renderer.pixelArtRenderer) {
             const screenPos = renderer.worldToScreen(this.x, this.y);
             
-            // アニメーションの場合
             if (this.animState === 'walk') {
                 const animation = renderer.pixelArtRenderer.animations.get('player/walk');
                 if (animation) {
@@ -463,7 +413,6 @@ export class Player extends Entity {
                 }
             }
             
-            // ジャンプ・落下の場合はアニメーションを使用
             if (this.animState === 'jump' || this.animState === 'fall') {
                 const animation = renderer.pixelArtRenderer.animations.get('player/jump');
                 if (animation) {
@@ -477,10 +426,8 @@ export class Player extends Entity {
                     );
                     return;
                 }
-                // アニメーションが見つからない場合は単体スプライトにフォールバック
             }
             
-            // 単一スプライトの場合
             const sprite = renderer.pixelArtRenderer.sprites.get(this.spriteKey);
             if (sprite) {
                 sprite.draw(
@@ -496,7 +443,6 @@ export class Player extends Entity {
             }
         }
         
-        // デバッグ情報の追加描画
         if (renderer.debug) {
             const screenPos = renderer.worldToScreen(this.x, this.y - 20);
             renderer.ctx.fillStyle = '#FFFFFF';
@@ -538,10 +484,8 @@ export class Player extends Entity {
      * @param {Object} collisionInfo - 衝突情報
      */
     onCollision(collisionInfo) {
-        // 敵との衝突
         if (collisionInfo.other.constructor.name === 'Enemy' || 
             collisionInfo.other.constructor.name === 'Slime') {
-            // 敵のonCollisionWithPlayerメソッドを呼ぶ
             if (collisionInfo.other.onCollisionWithPlayer) {
                 collisionInfo.other.onCollisionWithPlayer(this);
             }

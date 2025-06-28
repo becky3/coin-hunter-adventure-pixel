@@ -7,28 +7,23 @@ export class Enemy extends Entity {
     constructor(x, y, width = 16, height = 16) {
         super(x, y, width, height);
         
-        // 敵の基本パラメータ
         this.maxHealth = 1;
         this.health = this.maxHealth;
-        this.damage = 1;  // プレイヤーに与えるダメージ
-        this.moveSpeed = 30;  // 移動速度
-        this.direction = 1;  // 1: 右, -1: 左
+        this.damage = 1;
+        this.moveSpeed = 30;
+        this.direction = 1;
         
-        // AI関連
-        this.aiType = 'patrol';  // 'patrol', 'chase', 'idle'など
-        this.detectRange = 100;  // プレイヤー検知範囲
-        this.attackRange = 20;   // 攻撃範囲
+        this.aiType = 'patrol';
+        this.detectRange = 100;
+        this.attackRange = 20;
         
-        // 状態管理
-        this.state = 'idle';  // 'idle', 'moving', 'attacking', 'hurt', 'dead'
+        this.state = 'idle';
         this.stateTimer = 0;
-        this.invincibleTime = 0;  // 無敵時間
+        this.invincibleTime = 0;
         
-        // アニメーション
         this.animState = 'idle';
         this.facingRight = true;
         
-        // 物理パラメータ
         this.gravityScale = 1.0;
         this.canJump = false;
     }
@@ -40,20 +35,16 @@ export class Enemy extends Entity {
     update(deltaTime) {
         if (!this.active) return;
         
-        // 無敵時間の更新
         if (this.invincibleTime > 0) {
             this.invincibleTime -= deltaTime;
         }
         
-        // 状態タイマーの更新
         if (this.stateTimer > 0) {
             this.stateTimer -= deltaTime;
         }
         
-        // AI更新
         this.updateAI(deltaTime);
         
-        // 基底クラスの更新（アニメーションなど）
         super.update(deltaTime);
     }
     
@@ -62,8 +53,6 @@ export class Enemy extends Entity {
      * @param {number} deltaTime - 前フレームからの経過時間
      */
     updateAI() {
-        // 子クラスで実装
-        // deltaTimeは必要に応じて子クラスで引数を追加
     }
     
     /**
@@ -72,19 +61,17 @@ export class Enemy extends Entity {
      * @param {Object} source - ダメージソース
      */
     takeDamage(amount, source = null) {
-        // 無敵時間中はダメージを受けない
         if (this.invincibleTime > 0) return;
         
         this.health -= amount;
-        this.invincibleTime = 1000;  // 1秒の無敵時間
+        this.invincibleTime = 1000;
         
         if (this.health <= 0) {
             this.die();
         } else {
             this.state = 'hurt';
-            this.stateTimer = 300;  // 0.3秒のひるみ
+            this.stateTimer = 300;
             
-            // ノックバック
             if (source && source.x !== undefined) {
                 const knockbackDirection = this.x > source.x ? 1 : -1;
                 this.vx = knockbackDirection * 100;
@@ -100,7 +87,6 @@ export class Enemy extends Entity {
         this.state = 'dead';
         this.active = false;
         
-        // 死亡エフェクトやアイテムドロップなど
         this.onDeath();
     }
     
@@ -108,7 +94,6 @@ export class Enemy extends Entity {
      * 死亡時の処理（子クラスでオーバーライド）
      */
     onDeath() {
-        // 子クラスで実装（エフェクト、アイテムドロップなど）
     }
     
     /**
@@ -116,26 +101,20 @@ export class Enemy extends Entity {
      * @param {Player} player - プレイヤー
      */
     onCollisionWithPlayer(player) {
-        // 死亡中またはプレイヤーが無敵中はスキップ
         if (this.state === 'dead' || !this.active || player.invulnerable) return;
         
-        // プレイヤーが上から踏んでいる場合（より正確な判定）
         const playerBottom = player.y + player.height;
-        const playerPrevBottom = player.y + player.height - player.vy; // 前フレームの位置
+        const playerPrevBottom = player.y + player.height - player.vy;
         const enemyTop = this.y;
         
-        // 前フレームでプレイヤーが敵の上にいて、現在下向きに移動している
         const wasAbove = playerPrevBottom <= enemyTop + 4;
         const isNowColliding = playerBottom >= enemyTop;
-        const isFalling = player.vy >= 0; // 0も含む（着地時）
+        const isFalling = player.vy >= 0;
         
         if (wasAbove && isNowColliding && isFalling) {
-            // 敵がダメージを受ける
             this.takeDamage(1, player);
-            // プレイヤーはバウンド（ジャンプ力の半分程度）
             player.vy = -5;
         } else {
-            // プレイヤーがダメージを受ける
             if (player.takeDamage) {
                 player.takeDamage(this.damage);
             }
@@ -146,7 +125,6 @@ export class Enemy extends Entity {
      * 壁との衝突処理
      */
     onCollisionWithWall() {
-        // 方向転換
         this.direction *= -1;
         this.facingRight = !this.facingRight;
     }
@@ -156,7 +134,6 @@ export class Enemy extends Entity {
      * @param {Object} collisionInfo - 衝突情報
      */
     onCollision(collisionInfo) {
-        // プレイヤーとの衝突
         if (collisionInfo.other.constructor.name === 'Player') {
             this.onCollisionWithPlayer(collisionInfo.other);
         }
@@ -167,7 +144,6 @@ export class Enemy extends Entity {
      * @returns {boolean} 崖があるかどうか
      */
     checkCliff() {
-        // PhysicsSystemのレイキャストを使用して足元をチェック
         // TODO: PhysicsSystemと連携して実装
         return false;
     }
@@ -179,12 +155,10 @@ export class Enemy extends Entity {
     render(renderer) {
         if (!this.active) return;
         
-        // 無敵時間中は点滅
         if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
             return;
         }
         
-        // 基底クラスの描画処理
         super.render(renderer);
     }
     
@@ -195,16 +169,13 @@ export class Enemy extends Entity {
     renderDebug(renderer) {
         super.renderDebug(renderer);
         
-        // HPバー
         const barWidth = 20;
         const barHeight = 2;
         const barX = this.x + (this.width - barWidth) / 2;
         const barY = this.y - 8;
         
-        // 背景
         renderer.drawRect(barX, barY, barWidth, barHeight, '#000000');
         
-        // HP
         const hpWidth = (this.health / this.maxHealth) * barWidth;
         renderer.drawRect(barX, barY, hpWidth, barHeight, '#FF0000');
     }
