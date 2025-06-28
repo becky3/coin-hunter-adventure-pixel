@@ -1,4 +1,4 @@
-import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants.js';
+import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants';
 
 export class PixelRenderer {
     constructor(canvas) {

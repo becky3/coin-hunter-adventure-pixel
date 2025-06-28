@@ -1,7 +1,7 @@
 /**
  * テスト用のシンプルなPlayState
  */
-import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants.js';
+import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants';
 
 export class TestPlayState {
     constructor(game) {

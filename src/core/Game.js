@@ -10,7 +10,7 @@ import { PhysicsSystem } from '../physics/PhysicsSystem.js';
 import { MenuState } from '../states/MenuState.js';
 import { PlayState } from '../states/PlayState.js';
 import { TestPlayState } from '../states/TestPlayState.js';
-import { FPS, GAME_RESOLUTION } from '../constants/gameConstants.js';
+import { FPS, GAME_RESOLUTION } from '../constants/gameConstants';
 
 export class Game {
     constructor(canvas) {

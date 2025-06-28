@@ -2,6 +2,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     root: '.',
+    resolve: {
+        extensions: ['.ts', '.js', '.json']
+    },
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
@@ -26,7 +29,7 @@ export default defineConfig({
     },
     // ESBuildの設定
     esbuild: {
-        // インクリメンタルビルドを無効化（より確実な更新）
-        incremental: false
+        // TypeScript設定
+        target: 'es2022'
     }
 });
