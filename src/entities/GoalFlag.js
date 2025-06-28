@@ -6,8 +6,8 @@ import { Entity } from './Entity.js';
 
 export class GoalFlag extends Entity {
     constructor(x, y) {
-        // ゴールフラグのサイズは16x32ピクセル（地面に設置）
-        super(x, y - 16, 16, 32);  // y座標を調整して地面に接地
+        // ゴールフラグのサイズは32x32ピクセル（地面に設置）
+        super(x, y, 32, 32);
         
         // ゴールフラグは重力の影響を受けない
         this.gravity = false;

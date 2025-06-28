@@ -6,8 +6,8 @@ import { Entity } from './Entity.js';
 
 export class Spring extends Entity {
     constructor(x, y) {
-        // スプリングのサイズは40x40ピクセル
-        super(x, y, 40, 40);
+        // スプリングのサイズは16x16ピクセル
+        super(x, y, 16, 16);
         
         // スプリングは重力の影響を受けない
         this.gravity = false;
@@ -19,7 +19,7 @@ export class Spring extends Entity {
         this.solid = true;
         
         // スプリングの設定
-        this.bouncePower = 16; // ジャンプ力（通常ジャンプの1.6倍）
+        this.bouncePower = 12; // ジャンプ力（通常ジャンプの1.2倍）
         this.compression = 0; // 圧縮量（0-1）
         this.triggered = false; // 発動フラグ
         this.animationSpeed = 0.14; // アニメーション速度
@@ -58,12 +58,14 @@ export class Spring extends Entity {
         // スプリングのスプライトを描画
         if (renderer.assetLoader && renderer.assetLoader.hasSprite('terrain/spring')) {
             // 圧縮時は縦方向にスケール
-            const scaleY = 1 - this.compression * 0.3; // 最大30%圧縮
-            const offsetY = this.height * (1 - scaleY);
+            const compression = this.compression * 0.3; // 最大30%圧縮
+            const scaleX = 1;
+            const scaleY = 1 - compression;
+            const offsetY = this.height * compression;
             
             renderer.ctx.save();
             renderer.ctx.translate(screenPos.x, screenPos.y + offsetY);
-            renderer.ctx.scale(1, scaleY);
+            renderer.ctx.scale(scaleX, scaleY);
             
             renderer.drawSprite('terrain/spring', 0, 0);
             

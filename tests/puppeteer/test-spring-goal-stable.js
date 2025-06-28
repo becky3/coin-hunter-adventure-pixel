@@ -128,7 +128,8 @@ async function runStableSpringGoalTest() {
                 initial: initialState,
                 final: finalState,
                 success: finalState.playerVelY < -20 || spring.triggered,
-                bouncePower: spring.bouncePower
+                bouncePower: spring.bouncePower,
+                hasSprite: !!(window.game?.renderer?.assetLoader?.hasSprite('terrain/spring'))
             };
         });
         
