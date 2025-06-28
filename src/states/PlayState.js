@@ -6,6 +6,8 @@ import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { Slime } from '../entities/enemies/Slime.js';
 import { Coin } from '../entities/Coin.js';
+import { Spring } from '../entities/Spring.js';
+import { GoalFlag } from '../entities/GoalFlag.js';
 
 export class PlayState {
     constructor(game) {
@@ -46,6 +48,33 @@ export class PlayState {
         // 入力リスナー
         this.inputListeners = [];
         
+        // デバッグ機能をグローバルに公開
+        if (typeof window !== 'undefined') {
+            window.debugWarp = (x, y) => this.debugWarp(x, y);
+        }
+    }
+    
+    /**
+     * スプライトの事前読み込み
+     */
+    async preloadSprites() {
+        console.log('Preloading sprites...');
+        
+        try {
+            // terrain sprites
+            await this.game.assetLoader.loadSprite('terrain', 'spring');
+            await this.game.assetLoader.loadSprite('terrain', 'goal_flag');
+            
+            // item sprites
+            await this.game.assetLoader.loadSprite('items', 'coin_spin1');
+            await this.game.assetLoader.loadSprite('items', 'coin_spin2');
+            await this.game.assetLoader.loadSprite('items', 'coin_spin3');
+            await this.game.assetLoader.loadSprite('items', 'coin_spin4');
+            
+            console.log('Sprites preloaded successfully');
+        } catch (error) {
+            console.error('Failed to preload sprites:', error);
+        }
     }
     
     /**
@@ -54,6 +83,9 @@ export class PlayState {
      */
     async enter(params = {}) {
         console.log('Entering PlayState', params);
+        
+        // スプライトを事前読み込み
+        await this.preloadSprites();
         
         // 物理システムをクリア
         this.game.physicsSystem.entities.clear();
@@ -348,27 +380,63 @@ export class PlayState {
         // 既存のアイテムをクリア
         this.items = [];
         
-        // レベルデータからコインを配置
+        // レベルデータからアイテムを配置
         if (this.levelData && this.levelData.entities) {
             this.levelData.entities.forEach(entity => {
-                if (entity.type === 'coin') {
-                    const coin = new Coin(
+                let item = null;
+                
+                switch (entity.type) {
+                case 'coin':
+                    item = new Coin(
                         entity.x * TILE_SIZE,
                         entity.y * TILE_SIZE
                     );
-                    this.items.push(coin);
+                    break;
+                        
+                case 'spring':
+                    item = new Spring(
+                        entity.x * TILE_SIZE,
+                        entity.y * TILE_SIZE
+                    );
+                    // スプリングは物理システムに追加
+                    this.game.physicsSystem.addEntity(item, this.game.physicsSystem.layers.ITEM);
+                    break;
+                        
+                case 'goal':
+                    item = new GoalFlag(
+                        entity.x * TILE_SIZE,
+                        entity.y * TILE_SIZE
+                    );
+                    break;
+                }
+                
+                if (item) {
+                    this.items.push(item);
                 }
             });
+        }
+        
+        // テスト用にSpringとGoalFlagを追加
+        if (!this.levelData || this.items.length === 0) {
+            // スプリング（x=5, y=10タイル目）
+            const spring = new Spring(5 * TILE_SIZE, 10 * TILE_SIZE);
+            this.items.push(spring);
+            this.game.physicsSystem.addEntity(spring, this.game.physicsSystem.layers.ITEM);
+            
+            // ゴールフラグ（x=17, y=12タイル目）
+            const goal = new GoalFlag(17 * TILE_SIZE, 12 * TILE_SIZE);
+            this.items.push(goal);
         }
     }
     
     /**
-     * コイン収集のチェック
+     * アイテムの衝突チェック
      */
-    checkCoinCollection() {
+    checkItemCollisions() {
         if (!this.player) return;
         
         this.items.forEach((item) => {
+            // コインの処理
             if (item.constructor.name === 'Coin' && !item.collected) {
                 if (item.collidesWith(this.player)) {
                     // コインを収集
@@ -384,6 +452,25 @@ export class PlayState {
                     console.log(`Coin collected! Score: ${this.score}, Total coins: ${this.coinsCollected}`);
                 }
             }
+            
+            // ゴールフラグの処理
+            else if (item.constructor.name === 'GoalFlag' && !item.cleared) {
+                if (item.collidesWith(this.player)) {
+                    // ゴール処理
+                    item.clear();
+                    
+                    // 効果音を再生
+                    if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
+                        this.game.musicSystem.playGoalSound();
+                    }
+                    
+                    console.log('Stage Clear!');
+                    
+                    // ステージクリア処理（仮実装）
+                    // TODO: リザルト画面への遷移を実装
+                    this.stageClear();
+                }
+            }
         });
         
         // 収集済みのアイテムを配列から削除
@@ -393,6 +480,13 @@ export class PlayState {
             }
             return true;
         });
+    }
+    
+    /**
+     * コイン収集のチェック（互換性のため残す）
+     */
+    checkCoinCollection() {
+        this.checkItemCollisions();
     }
     
     /**
@@ -596,6 +690,45 @@ export class PlayState {
         console.log('Game Over!');
         // メニューに戻る
         this.game.stateManager.setState('menu');
+    }
+    
+    /**
+     * ステージクリア処理
+     */
+    stageClear() {
+        console.log('Stage Clear!');
+        // TODO: リザルト画面への遷移を実装
+        // 現在は仮実装としてメニューに戻る
+        this.game.stateManager.setState('menu');
+    }
+    
+    /**
+     * デバッグ用：指定座標にプレイヤーをワープ
+     * @param {number} x - X座標（タイル単位またはピクセル単位）
+     * @param {number} y - Y座標（タイル単位またはピクセル単位）
+     * @param {boolean} tileCoords - trueの場合タイル座標として扱う
+     */
+    debugWarp(x, y, tileCoords = false) {
+        if (!this.player) {
+            console.warn('Player not found');
+            return;
+        }
+        
+        // タイル座標の場合はピクセル座標に変換
+        const pixelX = tileCoords ? x * TILE_SIZE : x;
+        const pixelY = tileCoords ? y * TILE_SIZE : y;
+        
+        // プレイヤーをワープ
+        this.player.x = pixelX;
+        this.player.y = pixelY;
+        this.player.vx = 0;
+        this.player.vy = 0;
+        this.player.grounded = false;
+        
+        // カメラも追従
+        this.updateCamera();
+        
+        console.log(`Player warped to (${pixelX}, ${pixelY})`);
     }
     
     /**

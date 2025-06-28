@@ -456,7 +456,8 @@ export class Player extends Entity {
                         renderer.ctx,
                         screenPos.x,
                         screenPos.y,
-                        this.flipX
+                        this.flipX,
+                        renderer.scale
                     );
                     return;
                 }
@@ -471,7 +472,8 @@ export class Player extends Entity {
                         renderer.ctx,
                         screenPos.x,
                         screenPos.y,
-                        this.flipX
+                        this.flipX,
+                        renderer.scale
                     );
                     return;
                 }
@@ -485,7 +487,8 @@ export class Player extends Entity {
                     renderer.ctx,
                     screenPos.x,
                     screenPos.y,
-                    this.flipX
+                    this.flipX,
+                    renderer.scale
                 );
                 return;
             } else if (window.game?.debug) {

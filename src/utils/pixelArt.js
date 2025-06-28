@@ -3,10 +3,9 @@
  */
 
 class PixelArtSprite {
-    constructor(pixelData, colors, scale = 1) {
+    constructor(pixelData, colors) {
         this.pixelData = pixelData;
         this.colors = colors;
-        this.scale = scale;
         this.width = pixelData[0].length;
         this.height = pixelData.length;
         this.canvas = null;
@@ -23,8 +22,8 @@ class PixelArtSprite {
     _render() {
         // 通常版の描画
         this.canvas = document.createElement('canvas');
-        this.canvas.width = this.width * this.scale;
-        this.canvas.height = this.height * this.scale;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
         const ctx = this.canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
         
@@ -32,8 +31,8 @@ class PixelArtSprite {
         
         // 水平反転版の描画
         this.flippedCanvas = document.createElement('canvas');
-        this.flippedCanvas.width = this.width * this.scale;
-        this.flippedCanvas.height = this.height * this.scale;
+        this.flippedCanvas.width = this.width;
+        this.flippedCanvas.height = this.height;
         const flippedCtx = this.flippedCanvas.getContext('2d');
         flippedCtx.imageSmoothingEnabled = false;
         
@@ -45,22 +44,22 @@ class PixelArtSprite {
             row.forEach((pixel, x) => {
                 if (pixel > 0 && this.colors[pixel]) {
                     ctx.fillStyle = this.colors[pixel];
-                    const drawX = flipped ? (this.width - 1 - x) * this.scale : x * this.scale;
-                    ctx.fillRect(drawX, y * this.scale, this.scale, this.scale);
+                    const drawX = flipped ? (this.width - 1 - x) : x;
+                    ctx.fillRect(drawX, y, 1, 1);
                 }
             });
         });
     }
 
-    draw(ctx, x, y, flipped = false) {
+    draw(ctx, x, y, flipped = false, scale = 1) {
         const source = flipped ? this.flippedCanvas : this.canvas;
-        ctx.drawImage(source, x, y);
+        ctx.drawImage(source, x, y, this.width * scale, this.height * scale);
     }
 }
 
 class PixelArtAnimation {
-    constructor(frames, colors, scale = 1, frameDuration = 100) {
-        this.frames = frames.map(frameData => new PixelArtSprite(frameData, colors, scale));
+    constructor(frames, colors, frameDuration = 100) {
+        this.frames = frames.map(frameData => new PixelArtSprite(frameData, colors));
         this.frameDuration = frameDuration;
         this.currentFrame = 0;
         this.lastFrameTime = 0;
@@ -73,8 +72,8 @@ class PixelArtAnimation {
         }
     }
 
-    draw(ctx, x, y, flipped = false) {
-        this.frames[this.currentFrame].draw(ctx, x, y, flipped);
+    draw(ctx, x, y, flipped = false, scale = 1) {
+        this.frames[this.currentFrame].draw(ctx, x, y, flipped, scale);
     }
 
     reset() {
@@ -92,12 +91,12 @@ class PixelArtRenderer {
         this.animations = new Map();
     }
 
-    addSprite(name, pixelData, colors, scale = 1) {
-        this.sprites.set(name, new PixelArtSprite(pixelData, colors, scale));
+    addSprite(name, pixelData, colors) {
+        this.sprites.set(name, new PixelArtSprite(pixelData, colors));
     }
 
-    addAnimation(name, frames, colors, scale = 1, frameDuration = 100) {
-        this.animations.set(name, new PixelArtAnimation(frames, colors, scale, frameDuration));
+    addAnimation(name, frames, colors, frameDuration = 100) {
+        this.animations.set(name, new PixelArtAnimation(frames, colors, frameDuration));
     }
 
     drawSprite(name, x, y, flipped = false) {

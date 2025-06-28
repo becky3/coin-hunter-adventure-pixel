@@ -32,6 +32,9 @@ export class PhysicsSystem {
         // タイルマップ参照
         this.tileMap = null;
         this.tileSize = 16;
+        
+        // 衝突状態の追跡（エンティティペアごと）
+        this.collisionPairs = new Map();
     }
     
     /**
@@ -53,6 +56,9 @@ export class PhysicsSystem {
     addEntity(entity, layer = this.layers.TILE) {
         entity.physicsLayer = layer;
         this.entities.add(entity);
+        
+        // PhysicsSystemへの参照を設定
+        entity.physicsSystem = this;
         
         // 初期接地判定
         if (entity.gravity) {
@@ -241,6 +247,7 @@ export class PhysicsSystem {
      */
     checkEntityCollisions() {
         const entitiesArray = Array.from(this.entities);
+        const currentPairs = new Set();
         
         for (let i = 0; i < entitiesArray.length; i++) {
             const entityA = entitiesArray[i];
@@ -257,11 +264,28 @@ export class PhysicsSystem {
                 if (collisionLayers.includes(entityB.physicsLayer) ||
                     (this.collisionMatrix[entityB.physicsLayer] || []).includes(entityA.physicsLayer)) {
                     
+                    // ペアのキーを作成（順序を統一）
+                    const pairKey = entityA.id < entityB.id ? 
+                        `${entityA.id}-${entityB.id}` : 
+                        `${entityB.id}-${entityA.id}`;
+                    
                     if (this.checkAABB(entityA.getBounds(), entityB.getBounds())) {
-                        // 衝突を通知
-                        this.notifyCollision(entityA, entityB);
+                        currentPairs.add(pairKey);
+                        
+                        // 新しい衝突の場合のみ通知
+                        if (!this.collisionPairs.has(pairKey)) {
+                            this.collisionPairs.set(pairKey, true);
+                            this.notifyCollision(entityA, entityB);
+                        }
                     }
                 }
+            }
+        }
+        
+        // 衝突が終了したペアを削除
+        for (const [pairKey] of this.collisionPairs) {
+            if (!currentPairs.has(pairKey)) {
+                this.collisionPairs.delete(pairKey);
             }
         }
     }

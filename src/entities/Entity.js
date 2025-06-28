@@ -2,8 +2,14 @@
  * エンティティ基底クラス
  * すべてのゲームオブジェクトの基本機能を提供
  */
+// エンティティの一意なIDを生成するためのカウンター
+let entityIdCounter = 0;
+
 export class Entity {
     constructor(x = 0, y = 0, width = 16, height = 16) {
+        // 一意なID
+        this.id = ++entityIdCounter;
+        
         // 位置
         this.x = x;
         this.y = y;

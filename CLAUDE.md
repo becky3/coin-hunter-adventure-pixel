@@ -212,6 +212,13 @@ handover-docs/
    - 必要に応じて `gemini-to-claude/YYYY-MM-DD_機能名_review.md` を作成
    - テスト結果、問題点、改善案を明記
 
+3. **Claude → Gemini（レビュー対応時）**
+   - レビューコメントへの返信には必ず以下のIDを含める：
+     - 自身の返信ID: `ID: CLAUDE-RESPONSE-YYYYMMDD-XX`
+     - 対応するGeminiのレビューID: `ID: GEMINI-REVIEW-YYYYMMDD-XX`
+   - 例: 「ID: CLAUDE-RESPONSE-20250628-01」「ID: GEMINI-REVIEW-20250628-01 への対応として...」
+   - これにより双方でコメントの特定が容易になる
+
 #### 実装後の必須テスト
 
 **重要**: レビュー依頼前に以下のテストを必ず実施してください。
