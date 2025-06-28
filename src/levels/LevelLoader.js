@@ -1,7 +1,3 @@
-/**
- * レベルローダー
- * JSONファイルからステージデータを読み込み、進行状況を管理する
- */
 export class LevelLoader {
     constructor() {
         this.stages = null;
@@ -10,10 +6,6 @@ export class LevelLoader {
         this.basePath = '/src/levels/data/';
     }
     
-    /**
-     * ステージリストを読み込む
-     * @returns {Promise<Object>} ステージリストデータ
-     */
     async loadStageList() {
         try {
             const response = await fetch(this.basePath + 'stages.json');
@@ -25,14 +17,12 @@ export class LevelLoader {
             this.stages = data.stages;
             this.stageList = data;
             
-            // 保存された進行状況を読み込む
             this.loadProgress();
             
             return data;
         } catch (error) {
             console.error('ステージリスト読み込み失敗:', error);
             
-            // フォールバック: デフォルトステージリスト
             const fallbackData = {
                 stages: [
                     {
@@ -59,20 +49,13 @@ export class LevelLoader {
         }
     }
     
-    /**
-     * 特定のステージデータを読み込む
-     * @param {string} stageId - ステージID
-     * @returns {Promise<Object>} ステージデータ
-     */
     async loadStage(stageId) {
         try {
-            // ステージ情報を取得
             const stageInfo = this.stages?.find(s => s.id === stageId);
             if (!stageInfo) {
                 throw new Error(`ステージ情報が見つかりません: ${stageId}`);
             }
             
-            // ステージデータを読み込む
             const response = await fetch(this.basePath + stageInfo.filename);
             if (!response.ok) {
                 throw new Error(`ステージデータ読み込みエラー: ${response.status}`);
@@ -80,7 +63,6 @@ export class LevelLoader {
             
             const stageData = await response.json();
             
-            // データの検証
             this.validateStageData(stageData);
             
             this.currentStageData = stageData;
@@ -93,11 +75,6 @@ export class LevelLoader {
         }
     }
     
-    /**
-     * ステージデータの検証
-     * @param {Object} data - ステージデータ
-     * @throws {Error} データが不正な場合
-     */
     validateStageData(data) {
         const required = ['name', 'width', 'height', 'tileSize', 'playerSpawn', 'tilemap'];
         
@@ -107,7 +84,6 @@ export class LevelLoader {
             }
         }
         
-        // サイズの検証
         if (data.width < 20 || data.width > 200) {
             throw new Error(`ステージ幅が不正です: ${data.width}`);
         }
@@ -115,7 +91,6 @@ export class LevelLoader {
             throw new Error(`ステージ高さが不正です: ${data.height}`);
         }
         
-        // タイルマップの検証
         if (!Array.isArray(data.tilemap)) {
             throw new Error('タイルマップが配列ではありません');
         }
@@ -124,26 +99,14 @@ export class LevelLoader {
         }
     }
     
-    /**
-     * 現在のステージデータを取得
-     * @returns {Object|null} ステージデータ
-     */
     getCurrentStageData() {
         return this.currentStageData;
     }
     
-    /**
-     * 現在のステージIDを取得
-     * @returns {string|null} ステージID
-     */
     getCurrentStageId() {
         return this.currentStageId;
     }
     
-    /**
-     * 次のステージが存在するかチェック
-     * @returns {boolean}
-     */
     hasNextStage() {
         if (!this.stages || !this.currentStageId) return false;
         
@@ -151,10 +114,6 @@ export class LevelLoader {
         return currentIndex >= 0 && currentIndex < this.stages.length - 1;
     }
     
-    /**
-     * 次のステージIDを取得
-     * @returns {string|null} 次のステージID
-     */
     getNextStageId() {
         if (!this.hasNextStage()) return null;
         
@@ -162,18 +121,12 @@ export class LevelLoader {
         return this.stages[currentIndex + 1].id;
     }
     
-    /**
-     * ステージクリア情報を更新
-     * @param {string} stageId - ステージID
-     * @param {Object} clearInfo - クリア情報
-     */
     updateStageClearInfo(stageId, clearInfo) {
         const stage = this.stages?.find(s => s.id === stageId);
         if (!stage) return;
         
         const { score, time, coins, deaths } = clearInfo;
         
-        // ベスト記録を更新
         if (!stage.bestScore || score > stage.bestScore) {
             stage.bestScore = score;
         }
@@ -187,22 +140,16 @@ export class LevelLoader {
             stage.minDeaths = deaths;
         }
         
-        // クリアフラグを立てる
         stage.cleared = true;
         
-        // 次のステージをアンロック
         const currentIndex = this.stages.findIndex(s => s.id === stageId);
         if (currentIndex >= 0 && currentIndex < this.stages.length - 1) {
             this.stages[currentIndex + 1].unlocked = true;
         }
         
-        // 進行状況を保存
         this.saveProgress();
     }
     
-    /**
-     * 進行状況をローカルストレージに保存
-     */
     saveProgress() {
         if (!this.stages) return;
         
@@ -227,9 +174,6 @@ export class LevelLoader {
         }
     }
     
-    /**
-     * 進行状況をローカルストレージから読み込む
-     */
     loadProgress() {
         try {
             const saved = localStorage.getItem('pixelAdventureProgress');
@@ -238,13 +182,11 @@ export class LevelLoader {
             const progress = JSON.parse(saved);
             if (!progress.stages || !this.stages) return;
             
-            // バージョンチェック
             if (progress.version !== 1) {
                 console.warn('進行状況のバージョンが異なります');
                 return;
             }
             
-            // 保存された進行状況を適用
             progress.stages.forEach(savedStage => {
                 const stage = this.stages.find(s => s.id === savedStage.id);
                 if (stage) {
@@ -261,13 +203,9 @@ export class LevelLoader {
         }
     }
     
-    /**
-     * 進行状況をリセット
-     */
     resetProgress() {
         if (!this.stages) return;
         
-        // 最初のステージ以外をロック
         this.stages.forEach((stage, index) => {
             stage.unlocked = index === 0;
             stage.cleared = false;
@@ -277,7 +215,6 @@ export class LevelLoader {
             stage.minDeaths = 0;
         });
         
-        // ローカルストレージをクリア
         try {
             localStorage.removeItem('pixelAdventureProgress');
         } catch (error) {
@@ -285,28 +222,14 @@ export class LevelLoader {
         }
     }
     
-    /**
-     * ステージ一覧を取得
-     * @returns {Array} ステージ情報の配列
-     */
     getStageList() {
         return this.stages || [];
     }
     
-    /**
-     * 特定のステージ情報を取得
-     * @param {string} stageId - ステージID
-     * @returns {Object|null} ステージ情報
-     */
     getStageInfo(stageId) {
         return this.stages?.find(s => s.id === stageId) || null;
     }
     
-    /**
-     * レベルデータからタイルマップを生成
-     * @param {Object} levelData - レベルデータ
-     * @returns {Array} 2次元配列のタイルマップ
-     */
     createTileMap(levelData) {
         if (!levelData || !levelData.tilemap) {
             throw new Error('Invalid level data: missing tilemap');
@@ -314,33 +237,18 @@ export class LevelLoader {
         return levelData.tilemap;
     }
     
-    /**
-     * レベルデータからエンティティ情報を取得
-     * @param {Object} levelData - レベルデータ
-     * @returns {Array} エンティティ情報の配列
-     */
     getEntities(levelData) {
         if (!levelData) return [];
         return levelData.entities || [];
     }
     
-    /**
-     * プレイヤーのスポーン位置を取得
-     * @param {Object} levelData - レベルデータ
-     * @returns {Object} {x, y} タイル座標
-     */
     getPlayerSpawn(levelData) {
         if (!levelData || !levelData.playerSpawn) {
-            return { x: 2, y: 10 }; // デフォルト位置
+            return { x: 2, y: 10 };
         }
         return levelData.playerSpawn;
     }
     
-    /**
-     * ゴール位置を取得
-     * @param {Object} levelData - レベルデータ
-     * @returns {Object|null} {x, y} タイル座標
-     */
     getGoalPosition(levelData) {
         if (!levelData || !levelData.goal) {
             return null;
@@ -348,26 +256,16 @@ export class LevelLoader {
         return levelData.goal;
     }
     
-    /**
-     * タイムリミットを取得
-     * @param {Object} levelData - レベルデータ
-     * @returns {number} 秒単位のタイムリミット
-     */
     getTimeLimit(levelData) {
         if (!levelData || !levelData.timeLimit) {
-            return 300; // デフォルト5分
+            return 300;
         }
         return levelData.timeLimit;
     }
     
-    /**
-     * 背景色を取得
-     * @param {Object} levelData - レベルデータ
-     * @returns {string} 背景色のカラーコード
-     */
     getBackgroundColor(levelData) {
         if (!levelData || !levelData.backgroundColor) {
-            return '#5C94FC'; // デフォルトの空色
+            return '#5C94FC';
         }
         return levelData.backgroundColor;
     }

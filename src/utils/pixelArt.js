@@ -1,6 +1,3 @@
-/**
- * ピクセルアートレンダリングシステム
- */
 
 class PixelArtSprite {
     constructor(pixelData, colors) {
@@ -13,14 +10,12 @@ class PixelArtSprite {
         this._render();
     }
     
-    // パレットを更新して再描画
     updatePalette(colors) {
         this.colors = colors;
         this._render();
     }
 
     _render() {
-        // 通常版の描画
         this.canvas = document.createElement('canvas');
         this.canvas.width = this.width;
         this.canvas.height = this.height;
@@ -29,7 +24,6 @@ class PixelArtSprite {
         
         this._drawPixels(ctx, false);
         
-        // 水平反転版の描画
         this.flippedCanvas = document.createElement('canvas');
         this.flippedCanvas.width = this.width;
         this.flippedCanvas.height = this.height;
@@ -124,9 +118,7 @@ class PixelArtRenderer {
     }
 }
 
-// ピクセルフォント用のヘルパー関数
 function drawPixelText(ctx, text, x, y, scale = 1, color = '#FFFFFF') {
-    // 簡易的な数字のピクセルデータ（3x5）
     const numbers = {
         '0': [
             [1,1,1],
@@ -218,7 +210,7 @@ function drawPixelText(ctx, text, x, y, scale = 1, color = '#FFFFFF') {
                     }
                 });
             });
-            offsetX += 4 * scale; // 文字間隔
+            offsetX += 4 * scale;
         } else if (char === ' ') {
             offsetX += 3 * scale;
         }

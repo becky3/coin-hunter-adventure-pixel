@@ -6,32 +6,24 @@ import { Entity } from './Entity.js';
 
 export class Coin extends Entity {
     constructor(x, y) {
-        // コインのサイズは16x16ピクセル（統一サイズ）
         super(x, y, 16, 16);
         
-        // コインは重力の影響を受けない
         this.gravity = false;
         
-        // 物理演算は不要
         this.physicsEnabled = false;
         
-        // 他のエンティティと衝突しない（プレイヤーは通り抜ける）
         this.solid = false;
         
-        // 収集可能フラグ
         this.collected = false;
         
-        // アニメーション時間
         this.animationTime = 0;
         this.flipX = false;
         
-        // 浮遊アニメーション（速度を遅く調整）
         this.floatOffset = 0;
-        this.floatSpeed = 0.002; // 0.05から0.002に減速（約25分の1）
-        this.floatAmplitude = 2; // 振幅も少し小さく
+        this.floatSpeed = 0.002;
+        this.floatAmplitude = 2;
         this.baseY = y;
         
-        // スコア値
         this.scoreValue = 10;
     }
     
@@ -42,11 +34,9 @@ export class Coin extends Entity {
     onUpdate(deltaTime) {
         if (this.collected) return;
         
-        // 浮遊アニメーション
         this.floatOffset += this.floatSpeed * deltaTime;
         this.y = this.baseY + Math.sin(this.floatOffset) * this.floatAmplitude;
         
-        // アニメーション時間を更新
         this.animationTime += deltaTime;
     }
     
@@ -57,20 +47,16 @@ export class Coin extends Entity {
     render(renderer) {
         if (!this.visible || this.collected) return;
         
-        // コインのスプライトを描画
         // TODO: アニメーション対応が必要
         const frameNumber = Math.floor(this.animationTime / 200) % 4 + 1;
         const spriteKey = `items/coin_spin${frameNumber}`;
         
         if (renderer.assetLoader && renderer.assetLoader.hasSprite(spriteKey)) {
-            // スプライトを描画
             renderer.drawSprite(spriteKey, this.x, this.y);
         } else {
-            // フォールバック描画
             this.renderDefault(renderer);
         }
         
-        // デバッグ描画
         if (renderer.debug) {
             this.renderDebug(renderer);
         }
@@ -95,10 +81,8 @@ export class Coin extends Entity {
      * @param {Entity} other - 衝突したエンティティ
      */
     onCollision(other) {
-        // プレイヤーとの衝突時のみ処理
         if (other.constructor.name === 'Player' && !this.collected) {
-            // コイン収集処理はPlayStateで行う
-            // ここでは衝突の通知のみ
+            // TODO: コイン収集処理を実装
         }
     }
     

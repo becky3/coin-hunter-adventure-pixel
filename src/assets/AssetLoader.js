@@ -1,7 +1,3 @@
-/**
- * アセットローダー
- * スプライトデータの読み込みとキャッシュ管理を行う
- */
 import { SpriteLoader } from '../utils/spriteLoader.js';
 import { getColorPalette } from '../utils/pixelArtPalette.js';
 
@@ -14,34 +10,21 @@ export class AssetLoader {
         this.loadedCount = 0;
     }
     
-    /**
-     * PixelArtRendererを設定
-     * @param {PixelArtRenderer} renderer 
-     */
     setRenderer(renderer) {
         this.renderer = renderer;
     }
     
-    /**
-     * 単一スプライトを読み込み
-     * @param {string} category - スプライトカテゴリ
-     * @param {string} name - スプライト名
-     * @returns {Promise<Object>} スプライトデータ
-     */
     async loadSprite(category, name) {
         const key = `${category}/${name}`;
         
-        // 既に読み込み済み
         if (this.loadedAssets.has(key)) {
             return this.loadedAssets.get(key);
         }
         
-        // 読み込み中
         if (this.loadingPromises.has(key)) {
             return this.loadingPromises.get(key);
         }
         
-        // 新規読み込み
         const loadPromise = this._loadSpriteInternal(category, name);
         this.loadingPromises.set(key, loadPromise);
         
@@ -57,14 +40,6 @@ export class AssetLoader {
         }
     }
     
-    /**
-     * アニメーションを読み込み
-     * @param {string} category - カテゴリ
-     * @param {string} baseName - ベース名（例: "player_walk"）
-     * @param {number} frameCount - フレーム数
-     * @param {number} frameDuration - フレーム持続時間（ms）
-     * @returns {Promise<Object>} アニメーションデータ
-     */
     async loadAnimation(category, baseName, frameCount, frameDuration = 100) {
         const key = `${category}/${baseName}_anim`;
         
@@ -90,26 +65,17 @@ export class AssetLoader {
         }
     }
     
-    /**
-     * ゲーム開始時に必要なアセットを一括読み込み
-     * @param {Function} progressCallback - 進捗コールバック(loaded, total)
-     * @returns {Promise<void>}
-     */
     async preloadGameAssets(progressCallback) {
         const assetsToLoad = [
-            // プレイヤー（実装済み）
             { type: 'sprite', category: 'player', name: 'idle' },
             { type: 'animation', category: 'player', baseName: 'walk', frameCount: 4 },
             { type: 'animation', category: 'player', baseName: 'jump', frameCount: 2 },
             
-            // アイテム
-            { type: 'animation', category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 200 }, // フレーム持続時間を200msに
+            { type: 'animation', category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 200 },
             
-            // 地形
             { type: 'sprite', category: 'terrain', name: 'spring' },
             { type: 'sprite', category: 'terrain', name: 'goal_flag' },
             
-            // 以下は後で実装予定（一旦コメントアウト）
             // { type: 'animation', category: 'enemies', baseName: 'slime', frameCount: 2 },
             // { type: 'sprite', category: 'terrain', name: 'grass_block' },
             // { type: 'sprite', category: 'terrain', name: 'dirt_block' },
@@ -145,14 +111,10 @@ export class AssetLoader {
         await Promise.all(loadPromises);
     }
     
-    /**
-     * 内部的なスプライト読み込み処理
-     */
     async _loadSpriteInternal(category, name) {
         const spriteData = await this.spriteLoader.loadSprite(category, name);
         
         if (this.renderer) {
-            // RendererにもスプライトをSpriteとして登録
             const paletteName = this._getPaletteForCategory(category);
             const colors = getColorPalette(paletteName);
             this.renderer.addSprite(
@@ -168,9 +130,6 @@ export class AssetLoader {
         };
     }
     
-    /**
-     * 内部的なアニメーション読み込み処理
-     */
     async _loadAnimationInternal(category, baseName, frameCount, frameDuration) {
         const frames = [];
         
@@ -181,7 +140,6 @@ export class AssetLoader {
         }
         
         if (this.renderer) {
-            // Rendererにアニメーションを登録
             const paletteName = this._getPaletteForCategory(category);
             const colors = getColorPalette(paletteName);
             this.renderer.addAnimation(
@@ -201,9 +159,6 @@ export class AssetLoader {
         };
     }
     
-    /**
-     * カテゴリに応じたパレットを取得
-     */
     _getPaletteForCategory(category) {
         const paletteMap = {
             'player': 'character',
@@ -216,10 +171,6 @@ export class AssetLoader {
         return paletteMap[category] || 'grassland';
     }
     
-    /**
-     * 読み込み進捗を取得
-     * @returns {Object} { loaded, total, percentage }
-     */
     getLoadingProgress() {
         return {
             loaded: this.loadedCount,
@@ -228,27 +179,14 @@ export class AssetLoader {
         };
     }
     
-    /**
-     * 特定のアセットが読み込み済みか確認
-     * @param {string} key - アセットキー
-     * @returns {boolean}
-     */
     isLoaded(key) {
         return this.loadedAssets.has(key);
     }
     
-    /**
-     * スプライトが読み込み済みか確認
-     * @param {string} key - スプライトキー
-     * @returns {boolean}
-     */
     hasSprite(key) {
         return this.loadedAssets.has(key);
     }
     
-    /**
-     * すべてのアセットをクリア
-     */
     clear() {
         this.loadedAssets.clear();
         this.loadingPromises.clear();

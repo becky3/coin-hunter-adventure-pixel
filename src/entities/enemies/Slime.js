@@ -126,18 +126,14 @@ export class Slime extends Enemy {
     render(renderer) {
         if (!this.active) return;
         
-        // 無敵時間中は点滅
         if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
             return;
         }
         
-        // スプライトが読み込まれるまで仮の描画を使用
         // TODO: PixelArtRendererとの統合後にスプライト描画を実装
         
-        // 緑色の四角形でスライムを表現
         renderer.drawRect(this.x, this.y, this.width, this.height, '#00FF00');
         
-        // 目を描画（2つの黒い点）
         renderer.drawRect(this.x + 4, this.y + 4, 2, 2, '#000000');
         renderer.drawRect(this.x + 10, this.y + 4, 2, 2, '#000000');
     }

@@ -1,7 +1,3 @@
-/**
- * Web Audio APIを使用したオリジナル音楽生成システム
- * 元プロジェクトから移植・最適化
- */
 export class MusicSystem {
     constructor() {
         // AudioContextの初期化
@@ -115,10 +111,8 @@ export class MusicSystem {
         oscillator.connect(gainNode);
         gainNode.connect(this.masterGain);
         
-        // アクティブノードリストに追加
         this.activeNodes.push({ oscillator, gainNode });
         
-        // エンベロープ
         const now = startTime;
         gainNode.gain.setValueAtTime(0, now);
         gainNode.gain.linearRampToValueAtTime(volume, now + 0.01); // アタック
@@ -129,7 +123,6 @@ export class MusicSystem {
         oscillator.start(now);
         oscillator.stop(now + duration);
         
-        // 終了時にアクティブノードリストから削除
         oscillator.addEventListener('ended', () => {
             const index = this.activeNodes.findIndex(node => node.oscillator === oscillator);
             if (index !== -1) {
@@ -168,7 +161,6 @@ export class MusicSystem {
         oscillator.connect(gainNode);
         gainNode.connect(this.masterGain);
         
-        // アクティブノードリストに追加
         this.activeNodes.push({ oscillator, gainNode });
         
         switch(type) {
@@ -208,7 +200,6 @@ export class MusicSystem {
             break;
         }
         
-        // 終了時にアクティブノードリストから削除
         oscillator.addEventListener('ended', () => {
             const index = this.activeNodes.findIndex(node => node.oscillator === oscillator);
             if (index !== -1) {
@@ -293,10 +284,8 @@ export class MusicSystem {
             });
         };
         
-        // 最初のバーを再生
         playBar();
         
-        // ループ設定
         this.bgmLoopInterval = setInterval(() => {
             playBar();
         }, beatLength * 4 * 1000);
@@ -387,10 +376,8 @@ export class MusicSystem {
             currentBeat += 4;
         };
         
-        // 最初のバーを再生
         playBar();
         
-        // ループ設定
         this.bgmLoopInterval = setInterval(() => {
             playBar();
         }, beatLength * 4 * 1000);
@@ -506,7 +493,6 @@ export class MusicSystem {
             { attack: 0.01, decayTime: 0.03, decay: 0.7, sustain: 0.5, release: 0.06 }
         );
         
-        // ハーモニクスを追加
         setTimeout(() => {
             if (!this.isInitialized || this.isMuted) return;
             this.playSoundEffect(880, 0.08, 'sine', 0.15);
@@ -533,7 +519,6 @@ export class MusicSystem {
             }, time * 1000);
         });
         
-        // ハーモニクスを追加
         setTimeout(() => {
             if (!this.isInitialized || this.isMuted) return;
             this.playSoundEffect(this.getNoteFrequency('A6'), 0.1, 'triangle', 0.3);
@@ -671,13 +656,11 @@ export class MusicSystem {
         // 現在のBGMタイプを保存
         this.pausedBGM = this.currentBGM;
         
-        // ループを停止
         if (this.bgmLoopInterval) {
             clearInterval(this.bgmLoopInterval);
             this.bgmLoopInterval = null;
         }
         
-        // 全てのアクティブノードを強制停止
         this.stopAllActiveNodes();
         
         this.isPaused = true;
@@ -717,13 +700,11 @@ export class MusicSystem {
             return;
         }
         
-        // ループを停止
         if (this.bgmLoopInterval) {
             clearInterval(this.bgmLoopInterval);
             this.bgmLoopInterval = null;
         }
         
-        // 全てのアクティブノードを強制停止
         this.stopAllActiveNodes();
         
         // 現在のBGMを無効化

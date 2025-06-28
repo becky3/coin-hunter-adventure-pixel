@@ -1,7 +1,3 @@
-/**
- * スプライトローダー
- * JSONファイルからスプライトデータを動的に読み込む
- */
 
 class SpriteLoader {
     constructor() {
@@ -9,16 +5,9 @@ class SpriteLoader {
         this.basePath = '/src/assets/sprites/';
     }
 
-    /**
-     * スプライトデータを読み込む
-     * @param {string} category - カテゴリ（player, enemies, items, terrain, ui）
-     * @param {string} name - スプライト名
-     * @returns {Promise<Object>} スプライトデータ
-     */
     async loadSprite(category, name) {
         const key = `${category}/${name}`;
         
-        // キャッシュチェック
         if (this.cache.has(key)) {
             return this.cache.get(key);
         }
@@ -38,11 +27,6 @@ class SpriteLoader {
         }
     }
 
-    /**
-     * 複数のスプライトを一括読み込み
-     * @param {Array<{category: string, name: string}>} sprites - スプライトリスト
-     * @returns {Promise<Map>} スプライトデータのMap
-     */
     async loadMultipleSprites(sprites) {
         const promises = sprites.map(({ category, name }) => 
             this.loadSprite(category, name)
@@ -59,26 +43,16 @@ class SpriteLoader {
         return spriteMap;
     }
 
-    /**
-     * カテゴリ内の全スプライトを読み込み
-     * @param {string} category - カテゴリ名
-     * @param {Array<string>} names - スプライト名の配列
-     * @returns {Promise<Map>} スプライトデータのMap
-     */
     async loadCategory(category, names) {
         const sprites = names.map(name => ({ category, name }));
         return this.loadMultipleSprites(sprites);
     }
 
-    /**
-     * キャッシュをクリア
-     */
     clearCache() {
         this.cache.clear();
     }
 }
 
-// スプライト定義（どのスプライトが存在するか）
 const SPRITE_DEFINITIONS = {
     player: ['idle', 'jump', 'walk1'],
     enemies: ['slime_idle1', 'slime_idle2', 'bird_fly1', 'bird_fly2'],

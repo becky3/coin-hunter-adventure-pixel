@@ -2,52 +2,41 @@
  * エンティティ基底クラス
  * すべてのゲームオブジェクトの基本機能を提供
  */
-// エンティティの一意なIDを生成するためのカウンター
 let entityIdCounter = 0;
 
 export class Entity {
     constructor(x = 0, y = 0, width = 16, height = 16) {
-        // 一意なID
         this.id = ++entityIdCounter;
         
-        // 位置
         this.x = x;
         this.y = y;
         
-        // サイズ
         this.width = width;
         this.height = height;
         
-        // 速度
         this.vx = 0;
         this.vy = 0;
         
-        // 加速度
         this.ax = 0;
         this.ay = 0;
         
-        // 物理特性
         this.gravity = true;
         this.gravityStrength = 0.65;
         this.maxFallSpeed = 15;
         this.friction = 0.8;
-        this.physicsEnabled = true; // PhysicsSystemで管理されているか
+        this.physicsEnabled = true;
         
-        // 状態
         this.active = true;
         this.visible = true;
         this.grounded = false;
         
-        // 衝突判定
         this.solid = true;
         this.collidable = true;
         
-        // アニメーション
         this.currentAnimation = null;
         this.animationTime = 0;
         this.flipX = false;
         
-        // スプライト
         this.sprite = null;
         this.spriteScale = 1;
     }
@@ -59,12 +48,7 @@ export class Entity {
     update(deltaTime) {
         if (!this.active) return;
         
-        // 物理演算はPhysicsSystemに任せる
-        
-        // アニメーション更新
         this.updateAnimation(deltaTime);
-        
-        // 子クラスの更新処理
         this.onUpdate(deltaTime);
     }
     
@@ -73,37 +57,28 @@ export class Entity {
      * @param {number} deltaTime - 経過時間
      */
     updatePhysics(deltaTime) {
-        // deltaTimeが適切でない場合のフェールセーフ
         if (!deltaTime || deltaTime <= 0 || deltaTime > 100) {
-            deltaTime = 16.67; // 60FPSのデフォルト値
+            deltaTime = 16.67;
         }
         
-        // 重力を適用（フレームレート非依存）
         if (this.gravity && !this.grounded) {
             this.vy += this.gravityStrength;
             
-            // 最大落下速度を制限
             if (this.vy > this.maxFallSpeed) {
                 this.vy = this.maxFallSpeed;
             }
         }
         
-        // 摩擦を適用
         if (this.grounded) {
             this.vx *= this.friction;
             
-            // 小さな速度は0にする
             if (Math.abs(this.vx) < 0.1) {
                 this.vx = 0;
             }
         }
         
-        // 位置更新はPhysicsSystemで行うため、ここでは行わない
-        // PhysicsSystemを使用しない場合のみ位置を更新
         if (!this.physicsEnabled) {
-            // 位置を更新（deltaTimeを考慮）
-            // 60FPSを基準として、deltaTimeで調整
-            const frameFactor = deltaTime / 16.67; // 16.67ms = 60FPS
+            const frameFactor = deltaTime / 16.67;
             this.x += this.vx * frameFactor;
             this.y += this.vy * frameFactor;
         }
@@ -126,7 +101,6 @@ export class Entity {
     render(renderer) {
         if (!this.visible) return;
         
-        // スプライトまたはアニメーションを描画
         if (this.sprite) {
             renderer.drawSprite(
                 this.sprite,
@@ -136,11 +110,9 @@ export class Entity {
                 this.flipX
             );
         } else {
-            // デフォルトの描画（デバッグ用）
             this.renderDefault(renderer);
         }
         
-        // デバッグ描画
         if (renderer.debug) {
             this.renderDebug(renderer);
         }
@@ -159,7 +131,6 @@ export class Entity {
             '#FF00FF'
         );
         
-        // デバッグ用に大きめの枠も描画
         renderer.drawRect(
             this.x - 2,
             this.y - 2,
@@ -175,7 +146,6 @@ export class Entity {
      * @param {PixelRenderer} renderer 
      */
     renderDebug(renderer) {
-        // 当たり判定ボックス
         renderer.drawRect(
             this.x,
             this.y,
@@ -185,7 +155,6 @@ export class Entity {
             false
         );
         
-        // 速度ベクトル
         if (this.vx !== 0 || this.vy !== 0) {
             renderer.drawLine(
                 this.x + this.width / 2,
@@ -197,7 +166,6 @@ export class Entity {
             );
         }
         
-        // 状態テキスト
         const screenPos = renderer.worldToScreen(this.x, this.y - 10);
         renderer.ctx.fillStyle = '#FFFFFF';
         renderer.ctx.font = '10px monospace';
@@ -333,22 +301,17 @@ export class Entity {
         this.onDestroy();
     }
     
-    // 子クラスでオーバーライドするメソッド
-    
     /**
      * 更新処理（子クラスで実装）
      * @param {number} deltaTime - 経過時間
      */
     onUpdate() {
-        // 子クラスで実装
-        // deltaTimeが必要な場合は子クラスで引数を追加
     }
     
     /**
      * 破棄処理（子クラスで実装）
      */
     onDestroy() {
-        // 子クラスで実装
     }
     
     /**
@@ -356,7 +319,5 @@ export class Entity {
      * @param {Object} collisionInfo - 衝突情報 {other: Entity, side: string}
      */
     onCollision() {
-        // 子クラスで実装
-        // collisionInfoが必要な場合は子クラスで引数を追加
     }
 }
