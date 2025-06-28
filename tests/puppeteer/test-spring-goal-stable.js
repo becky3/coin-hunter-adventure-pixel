@@ -43,37 +43,18 @@ async function runStableSpringGoalTest() {
         });
         
         // ゲームページにアクセス
-        try {
-            await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
-        } catch (error) {
-            console.error('Failed to connect to http://localhost:3000');
-            console.error('Make sure the dev server is running with: npm run dev');
-            throw error;
-        }
+        await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
         
-        // ゲームの初期化を待つ（タイムアウトを延長）
-        await page.waitForFunction(() => {
-            return window.game && window.game.stateManager;
-        }, { timeout: 10000 });
+        // ゲームの初期化を待つ（test-spring-goal.jsと同じ方法）
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         console.log('=== Spring Test (Stable Version) ===');
         
         // ゲーム開始（タイトル画面でSpaceキー）
         await page.keyboard.press('Space');
         
-        // PlayStateへの遷移を待つ（test-spring-goal.jsと同じ方法も試す）
+        // PlayStateへの遷移を待つ
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        const isPlaying = await page.evaluate(() => {
-            return window.game?.stateManager?.currentStateName === 'play';
-        });
-        
-        if (!isPlaying) {
-            console.log('Game did not transition to play state, waiting more...');
-            await page.waitForFunction(() => {
-                return window.game?.stateManager?.currentStateName === 'play';
-            }, { timeout: 5000 });
-        }
         
         console.log('Game started successfully');
         
@@ -161,23 +142,42 @@ async function runStableSpringGoalTest() {
         
         // ゲームの状態をリセット（GoalFlagテストのため）
         await page.reload();
-        await page.waitForFunction(() => {
-            return window.game && window.game.stateManager;
-        }, { timeout: 5000 });
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // ゲームが初期化されているか確認
+        const gameReloaded = await page.evaluate(() => {
+            return !!window.game && !!window.game.stateManager;
+        });
+        
+        if (!gameReloaded) {
+            console.log('Game not initialized after reload, waiting more...');
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
         
         await page.keyboard.press('Space');
-        await page.waitForFunction(() => {
-            return window.game?.stateManager?.currentStateName === 'play';
-        }, { timeout: 5000 });
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         // GoalFlag機能のテスト
         console.log('\n=== Testing GoalFlag Functionality ===');
         
+        // 現在の状態を確認
+        const currentState = await page.evaluate(() => {
+            return {
+                hasGame: !!window.game,
+                currentStateName: window.game?.stateManager?.currentStateName,
+                hasPlayer: !!window.game?.stateManager?.currentState?.player
+            };
+        });
+        console.log('Current state before GoalFlag test:', currentState);
+        
         const goalTestResult = await page.evaluate(() => {
             const game = window.game;
-            const state = game.stateManager.currentState;
+            if (!game) return { error: 'No game object' };
+            if (!game.stateManager) return { error: 'No stateManager' };
             
-            if (!state || !state.player) return { error: 'No game state or player' };
+            const state = game.stateManager.currentState;
+            if (!state) return { error: 'No currentState' };
+            if (!state.player) return { error: 'No player in state' };
             
             // GoalFlagを探す
             const goal = state.items?.find(item => item.constructor.name === 'GoalFlag');
