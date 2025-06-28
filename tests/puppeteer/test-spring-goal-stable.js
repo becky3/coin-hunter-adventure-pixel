@@ -27,6 +27,9 @@ async function runStableSpringGoalTest() {
         
         page = await browser.newPage();
         
+        // エラーログの収集スクリプトを注入
+        await injectErrorCollection(page);
+        
         // コンソールログの出力
         page.on('console', msg => {
             if (msg.type() === 'error') {
@@ -40,22 +43,37 @@ async function runStableSpringGoalTest() {
         });
         
         // ゲームページにアクセス
-        await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
+        try {
+            await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
+        } catch (error) {
+            console.error('Failed to connect to http://localhost:3000');
+            console.error('Make sure the dev server is running with: npm run dev');
+            throw error;
+        }
         
-        // ゲームの初期化を待つ
+        // ゲームの初期化を待つ（タイムアウトを延長）
         await page.waitForFunction(() => {
             return window.game && window.game.stateManager;
-        }, { timeout: 5000 });
+        }, { timeout: 10000 });
         
         console.log('=== Spring Test (Stable Version) ===');
         
         // ゲーム開始（タイトル画面でSpaceキー）
         await page.keyboard.press('Space');
         
-        // PlayStateへの遷移を待つ
-        await page.waitForFunction(() => {
+        // PlayStateへの遷移を待つ（test-spring-goal.jsと同じ方法も試す）
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        const isPlaying = await page.evaluate(() => {
             return window.game?.stateManager?.currentStateName === 'play';
-        }, { timeout: 5000 });
+        });
+        
+        if (!isPlaying) {
+            console.log('Game did not transition to play state, waiting more...');
+            await page.waitForFunction(() => {
+                return window.game?.stateManager?.currentStateName === 'play';
+            }, { timeout: 5000 });
+        }
         
         console.log('Game started successfully');
         

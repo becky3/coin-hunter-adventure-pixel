@@ -68,23 +68,21 @@ async function runSimpleTest() {
             // プレイヤーをSpringの位置に移動（デバッグ用）
             state.player.x = spring.x;
             state.player.y = spring.y - state.player.height - 10;
-            state.player.velY = 5; // 下向きの速度
+            state.player.vy = 5; // 下向きの速度
             
-            const beforeVelY = state.player.velY;
+            const beforeVelY = state.player.vy;
             
-            // 衝突判定を手動でトリガー
+            // 衝突判定を手動でトリガー（PhysicsSystemの形式で）
             const collisionInfo = {
-                fromTop: true,
-                fromBottom: false,
-                fromLeft: false,
-                fromRight: false
+                other: state.player,
+                side: 'top'
             };
             
-            spring.onCollision(state.player, collisionInfo);
+            spring.onCollision(collisionInfo);
             
             return {
                 beforeVelY,
-                afterVelY: state.player.velY,
+                afterVelY: state.player.vy,
                 springTriggered: spring.triggered,
                 compression: spring.compression
             };
