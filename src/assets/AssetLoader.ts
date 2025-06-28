@@ -1,7 +1,39 @@
 import { SpriteLoader } from '../utils/spriteLoader';
 import { getColorPalette } from '../utils/pixelArtPalette';
+import { PixelArtRenderer } from '../utils/pixelArt';
+
+export interface LoadedAsset {
+    key: string;
+    baseName?: string;
+    frames?: number[][][];
+    frameCount?: number;
+    frameDuration?: number;
+    data?: number[][];
+    width?: number;
+    height?: number;
+    imageData?: ImageData;
+    canvas?: HTMLCanvasElement;
+}
+
+export interface AssetToLoad {
+    type: 'sprite' | 'animation';
+    category: string;
+    name?: string;
+    baseName?: string;
+    frameCount?: number;
+    frameDuration?: number;
+}
+
+export type ProgressCallback = (loaded: number, total: number) => void;
 
 export class AssetLoader {
+    private spriteLoader: SpriteLoader;
+    public loadedAssets: Map<string, LoadedAsset>;
+    private loadingPromises: Map<string, Promise<LoadedAsset>>;
+    private totalAssets: number;
+    private loadedCount: number;
+    public renderer?: PixelArtRenderer;
+
     constructor() {
         this.spriteLoader = new SpriteLoader();
         this.loadedAssets = new Map();
@@ -10,19 +42,19 @@ export class AssetLoader {
         this.loadedCount = 0;
     }
     
-    setRenderer(renderer) {
+    setRenderer(renderer: PixelArtRenderer): void {
         this.renderer = renderer;
     }
     
-    async loadSprite(category, name) {
+    async loadSprite(category: string, name: string): Promise<LoadedAsset> {
         const key = `${category}/${name}`;
         
         if (this.loadedAssets.has(key)) {
-            return this.loadedAssets.get(key);
+            return this.loadedAssets.get(key)!;
         }
         
         if (this.loadingPromises.has(key)) {
-            return this.loadingPromises.get(key);
+            return this.loadingPromises.get(key)!;
         }
         
         const loadPromise = this._loadSpriteInternal(category, name);
@@ -40,15 +72,15 @@ export class AssetLoader {
         }
     }
     
-    async loadAnimation(category, baseName, frameCount, frameDuration = 100) {
+    async loadAnimation(category: string, baseName: string, frameCount: number, frameDuration: number = 100): Promise<LoadedAsset> {
         const key = `${category}/${baseName}_anim`;
         
         if (this.loadedAssets.has(key)) {
-            return this.loadedAssets.get(key);
+            return this.loadedAssets.get(key)!;
         }
         
         if (this.loadingPromises.has(key)) {
-            return this.loadingPromises.get(key);
+            return this.loadingPromises.get(key)!;
         }
         
         const loadPromise = this._loadAnimationInternal(category, baseName, frameCount, frameDuration);
@@ -65,8 +97,8 @@ export class AssetLoader {
         }
     }
     
-    async preloadGameAssets(progressCallback) {
-        const assetsToLoad = [
+    async preloadGameAssets(progressCallback?: ProgressCallback): Promise<void> {
+        const assetsToLoad: AssetToLoad[] = [
             { type: 'sprite', category: 'player', name: 'idle' },
             { type: 'animation', category: 'player', baseName: 'walk', frameCount: 4 },
             { type: 'animation', category: 'player', baseName: 'jump', frameCount: 2 },
@@ -88,13 +120,13 @@ export class AssetLoader {
         this.loadedCount = 0;
         
         const loadPromises = assetsToLoad.map(asset => {
-            if (asset.type === 'sprite') {
+            if (asset.type === 'sprite' && asset.name) {
                 return this.loadSprite(asset.category, asset.name).then(() => {
                     if (progressCallback) {
                         progressCallback(this.loadedCount, this.totalAssets);
                     }
                 });
-            } else if (asset.type === 'animation') {
+            } else if (asset.type === 'animation' && asset.baseName && asset.frameCount) {
                 return this.loadAnimation(
                     asset.category, 
                     asset.baseName, 
@@ -106,12 +138,13 @@ export class AssetLoader {
                     }
                 });
             }
+            return Promise.resolve();
         });
         
         await Promise.all(loadPromises);
     }
     
-    async _loadSpriteInternal(category, name) {
+    private async _loadSpriteInternal(category: string, name: string): Promise<LoadedAsset> {
         const spriteData = await this.spriteLoader.loadSprite(category, name);
         
         if (this.renderer) {
@@ -130,8 +163,8 @@ export class AssetLoader {
         };
     }
     
-    async _loadAnimationInternal(category, baseName, frameCount, frameDuration) {
-        const frames = [];
+    private async _loadAnimationInternal(category: string, baseName: string, frameCount: number, frameDuration: number): Promise<LoadedAsset> {
+        const frames: number[][][] = [];
         
         for (let i = 1; i <= frameCount; i++) {
             const frameName = `${baseName}${i}`;
@@ -159,8 +192,8 @@ export class AssetLoader {
         };
     }
     
-    _getPaletteForCategory(category) {
-        const paletteMap = {
+    private _getPaletteForCategory(category: string): string {
+        const paletteMap: { [key: string]: string } = {
             'player': 'character',
             'enemies': 'enemy',
             'items': 'items',
@@ -171,7 +204,7 @@ export class AssetLoader {
         return paletteMap[category] || 'grassland';
     }
     
-    getLoadingProgress() {
+    getLoadingProgress(): { loaded: number; total: number; percentage: number } {
         return {
             loaded: this.loadedCount,
             total: this.totalAssets,
@@ -179,15 +212,15 @@ export class AssetLoader {
         };
     }
     
-    isLoaded(key) {
+    isLoaded(key: string): boolean {
         return this.loadedAssets.has(key);
     }
     
-    hasSprite(key) {
+    hasSprite(key: string): boolean {
         return this.loadedAssets.has(key);
     }
     
-    clear() {
+    clear(): void {
         this.loadedAssets.clear();
         this.loadingPromises.clear();
         this.loadedCount = 0;

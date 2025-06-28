@@ -1,12 +1,12 @@
-import { InputSystem } from './InputSystem.js';
+import { InputSystem } from './InputSystem';
 import { GameStateManager } from '../states/GameStateManager.js';
-import { AssetLoader } from '../assets/AssetLoader.js';
-import { PixelRenderer } from '../rendering/PixelRenderer.js';
+import { AssetLoader } from '../assets/AssetLoader';
+import { PixelRenderer } from '../rendering/PixelRenderer';
 import { PixelArtRenderer } from '../utils/pixelArt';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { MusicSystem } from '../audio/MusicSystem.js';
-import { PhysicsSystem } from '../physics/PhysicsSystem.js';
+import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { MenuState } from '../states/MenuState.js';
 import { PlayState } from '../states/PlayState.js';
 import { TestPlayState } from '../states/TestPlayState.js';

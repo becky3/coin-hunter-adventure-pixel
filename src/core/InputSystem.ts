@@ -2,7 +2,56 @@
  * イベントベースの入力管理システム
  * キーボード入力をイベントとして管理し、リスナーに通知する
  */
+
+// Type definitions
+export type InputEventType = 'keyPress' | 'keyRelease' | 'keyHold';
+export type ActionName = 'left' | 'right' | 'up' | 'down' | 'jump' | 'action' | 'escape' | 'mute' | 'debug';
+
+export interface InputEvent {
+    type: InputEventType;
+    key: string;
+    action: ActionName | null;
+    timestamp: number;
+}
+
+export type InputEventListener = (event: InputEvent) => void;
+export type UnsubscribeFunction = () => void;
+
+interface KeyMap {
+    [action: string]: string[];
+}
+
+interface Listeners {
+    keyPress: InputEventListener[];
+    keyRelease: InputEventListener[];
+    keyHold: InputEventListener[];
+}
+
+interface DebugInfo {
+    pressedKeys: string[];
+    pressedActions: string[];
+    eventCount: number;
+    listenerCounts: {
+        keyPress: number;
+        keyRelease: number;
+        keyHold: number;
+    };
+}
+
 export class InputSystem {
+    private keys: Map<string, boolean>;
+    private previousKeys: Map<string, boolean>;
+    private justPressedKeys: Set<string>;
+    private justReleasedKeys: Set<string>;
+    
+    private listeners: Listeners;
+    
+    private keyMap: KeyMap;
+    
+    private reverseKeyMap: Map<string, string[]>;
+    
+    private eventQueue: InputEvent[];
+
     constructor() {
         this.keys = new Map();
         this.previousKeys = new Map();
@@ -33,7 +82,7 @@ export class InputSystem {
                 if (!this.reverseKeyMap.has(key)) {
                     this.reverseKeyMap.set(key, []);
                 }
-                this.reverseKeyMap.get(key).push(action);
+                this.reverseKeyMap.get(key)!.push(action);
             }
         }
         
@@ -42,9 +91,10 @@ export class InputSystem {
         this.setupEventListeners();
     }
     
-    setupEventListeners() {
-        window.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    private setupEventListeners(): void {
+        window.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLElement && 
+                (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
                 return;
             }
             
@@ -59,7 +109,7 @@ export class InputSystem {
             }
         });
         
-        window.addEventListener('keyup', (e) => {
+        window.addEventListener('keyup', (e: KeyboardEvent) => {
             const code = e.code;
             this.keys.set(code, false);
         });
@@ -69,7 +119,7 @@ export class InputSystem {
         });
     }
     
-    update() {
+    update(): void {
         this.eventQueue = [];
         
         this.justPressedKeys.clear();
@@ -101,13 +151,13 @@ export class InputSystem {
         }
     }
     
-    triggerKeyPress(key) {
+    private triggerKeyPress(key: string): void {
         const actions = this.reverseKeyMap.get(key) || [];
         for (const action of actions) {
-            const event = {
+            const event: InputEvent = {
                 type: 'keyPress',
                 key: key,
-                action: action,
+                action: action as ActionName,
                 timestamp: Date.now()
             };
             
@@ -117,7 +167,7 @@ export class InputSystem {
             }
         }
         if (actions.length === 0) {
-            const event = {
+            const event: InputEvent = {
                 type: 'keyPress',
                 key: key,
                 action: null,
@@ -131,14 +181,14 @@ export class InputSystem {
         }
     }
     
-    triggerKeyRelease(key) {
+    private triggerKeyRelease(key: string): void {
         const actions = this.reverseKeyMap.get(key) || [];
         
         for (const action of actions) {
-            const event = {
+            const event: InputEvent = {
                 type: 'keyRelease',
                 key: key,
-                action: action,
+                action: action as ActionName,
                 timestamp: Date.now()
             };
             
@@ -149,14 +199,14 @@ export class InputSystem {
         }
     }
     
-    triggerKeyHold(key) {
+    private triggerKeyHold(key: string): void {
         const actions = this.reverseKeyMap.get(key) || [];
         
         for (const action of actions) {
-            const event = {
+            const event: InputEvent = {
                 type: 'keyHold',
                 key: key,
-                action: action,
+                action: action as ActionName,
                 timestamp: Date.now()
             };
             for (const listener of this.listeners.keyHold) {
@@ -165,7 +215,7 @@ export class InputSystem {
         }
     }
     
-    on(eventType, callback) {
+    on(eventType: InputEventType, callback: InputEventListener): UnsubscribeFunction {
         if (!this.listeners[eventType]) {
             console.warn(`Unknown event type: ${eventType}`);
             return () => {};
@@ -180,7 +230,7 @@ export class InputSystem {
         };
     }
     
-    once(eventType, callback) {
+    once(eventType: InputEventType, callback: InputEventListener): UnsubscribeFunction {
         const removeListener = this.on(eventType, (event) => {
             callback(event);
             removeListener();
@@ -189,36 +239,36 @@ export class InputSystem {
         return removeListener;
     }
     
-    isActionPressed(action) {
+    isActionPressed(action: string): boolean {
         const keys = this.keyMap[action];
         if (!keys) return false;
         
         return keys.some(key => this.keys.get(key) || false);
     }
     
-    isActionJustPressed(action) {
+    isActionJustPressed(action: string): boolean {
         const keys = this.keyMap[action];
         if (!keys) return false;
         
         return keys.some(key => this.justPressedKeys.has(key));
     }
     
-    isActionJustReleased(action) {
+    isActionJustReleased(action: string): boolean {
         const keys = this.keyMap[action];
         if (!keys) return false;
         
         return keys.some(key => this.justReleasedKeys.has(key));
     }
     
-    isKeyPressed(keyCode) {
+    isKeyPressed(keyCode: string): boolean {
         return this.keys.get(keyCode) || false;
     }
     
-    getEventQueue() {
+    getEventQueue(): InputEvent[] {
         return [...this.eventQueue];
     }
     
-    setKeyMapping(action, keys) {
+    setKeyMapping(action: string, keys: string[]): void {
         if (this.keyMap[action]) {
             for (const key of this.keyMap[action]) {
                 const actions = this.reverseKeyMap.get(key);
@@ -238,19 +288,19 @@ export class InputSystem {
             if (!this.reverseKeyMap.has(key)) {
                 this.reverseKeyMap.set(key, []);
             }
-            this.reverseKeyMap.get(key).push(action);
+            this.reverseKeyMap.get(key)!.push(action);
         }
     }
     
-    reset() {
+    reset(): void {
         this.keys.clear();
         this.previousKeys.clear();
         this.eventQueue = [];
     }
     
-    getDebugInfo() {
-        const pressedKeys = [];
-        const pressedActions = [];
+    getDebugInfo(): DebugInfo {
+        const pressedKeys: string[] = [];
+        const pressedActions: string[] = [];
         
         for (const [key, pressed] of this.keys) {
             if (pressed) {

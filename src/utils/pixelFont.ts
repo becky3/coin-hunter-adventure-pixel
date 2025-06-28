@@ -3,10 +3,17 @@
  * 5x7ピクセルのレトロゲーム風フォント
  */
 
-// シングルトンインスタンス
-let instance = null;
+export type FontData = { [key: string]: number[][] };
 
-class PixelFont {
+// シングルトンインスタンス
+let instance: PixelFont | null = null;
+
+export class PixelFont {
+    private fontData: FontData;
+    public charWidth: number;
+    public charHeight: number;
+    public defaultSpacing: number;
+
     constructor() {
         // シングルトンパターンを実装
         if (instance) {
@@ -441,20 +448,22 @@ class PixelFont {
         this.defaultSpacing = 1;
         
         // インスタンスを保存
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         instance = this;
     }
 
     /**
      * テキストを描画
-     * @param {CanvasRenderingContext2D} ctx - Canvas コンテキスト
-     * @param {string} text - 描画するテキスト
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
-     * @param {number} scale - 拡大率
-     * @param {string} color - 色
-     * @param {number} spacing - 文字間隔（ピクセル単位）
      */
-    drawText(ctx, text, x, y, scale = 1, color = '#FFFFFF', spacing = null) {
+    drawText(
+        ctx: CanvasRenderingContext2D, 
+        text: string, 
+        x: number, 
+        y: number, 
+        scale: number = 1, 
+        color: string = '#FFFFFF', 
+        spacing: number | null = null
+    ): void {
         // Canvas設定を保存
         const savedSmoothing = ctx.imageSmoothingEnabled;
         ctx.imageSmoothingEnabled = false;
@@ -478,7 +487,14 @@ class PixelFont {
      * 単一文字を描画
      * @private
      */
-    drawChar(ctx, char, x, y, scale, color) {
+    private drawChar(
+        ctx: CanvasRenderingContext2D, 
+        char: string, 
+        x: number, 
+        y: number, 
+        scale: number, 
+        color: string
+    ): void {
         const charData = this.fontData[char];
         ctx.fillStyle = color;
 
@@ -498,12 +514,8 @@ class PixelFont {
 
     /**
      * テキストの描画幅を計算
-     * @param {string} text - テキスト
-     * @param {number} scale - 拡大率
-     * @param {number} spacing - 文字間隔
-     * @returns {number} 描画幅
      */
-    getTextWidth(text, scale = 1, spacing = null) {
+    getTextWidth(text: string, scale: number = 1, spacing: number | null = null): number {
         const actualSpacing = spacing !== null ? spacing : this.defaultSpacing;
         const charCount = text.length;
         return (this.charWidth * charCount + actualSpacing * (charCount - 1)) * scale;
@@ -511,23 +523,23 @@ class PixelFont {
 
     /**
      * テキストの描画高さを取得
-     * @param {number} scale - 拡大率
-     * @returns {number} 描画高さ
      */
-    getTextHeight(scale = 1) {
+    getTextHeight(scale: number = 1): number {
         return this.charHeight * scale;
     }
 
     /**
      * 中央揃えでテキストを描画
-     * @param {CanvasRenderingContext2D} ctx - Canvas コンテキスト
-     * @param {string} text - 描画するテキスト
-     * @param {number} centerX - 中心X座標
-     * @param {number} y - Y座標
-     * @param {number} scale - 拡大率
-     * @param {string} color - 色
      */
-    drawTextCentered(ctx, text, centerX, y, scale = 1, color = '#FFFFFF', spacing = null) {
+    drawTextCentered(
+        ctx: CanvasRenderingContext2D, 
+        text: string, 
+        centerX: number, 
+        y: number, 
+        scale: number = 1, 
+        color: string = '#FFFFFF', 
+        spacing: number | null = null
+    ): void {
         const textWidth = this.getTextWidth(text, scale, spacing);
         const x = centerX - textWidth / 2;
         this.drawText(ctx, text, x, y, scale, color, spacing);
@@ -535,14 +547,16 @@ class PixelFont {
 
     /**
      * 右揃えでテキストを描画
-     * @param {CanvasRenderingContext2D} ctx - Canvas コンテキスト
-     * @param {string} text - 描画するテキスト
-     * @param {number} rightX - 右端X座標
-     * @param {number} y - Y座標
-     * @param {number} scale - 拡大率
-     * @param {string} color - 色
      */
-    drawTextRight(ctx, text, rightX, y, scale = 1, color = '#FFFFFF', spacing = null) {
+    drawTextRight(
+        ctx: CanvasRenderingContext2D, 
+        text: string, 
+        rightX: number, 
+        y: number, 
+        scale: number = 1, 
+        color: string = '#FFFFFF', 
+        spacing: number | null = null
+    ): void {
         const textWidth = this.getTextWidth(text, scale, spacing);
         const x = rightX - textWidth;
         this.drawText(ctx, text, x, y, scale, color, spacing);
@@ -550,32 +564,34 @@ class PixelFont {
     
     /**
      * パレットインデックスを使用してテキストを描画
-     * @param {CanvasRenderingContext2D} ctx - Canvas コンテキスト
-     * @param {string} text - 描画するテキスト
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
-     * @param {number} scale - 拡大率
-     * @param {Array} palette - パレット配列
-     * @param {number} colorIndex - パレットインデックス
-     * @param {number} spacing - 文字間隔
      */
-    drawTextWithPalette(ctx, text, x, y, scale = 1, palette, colorIndex = 0, spacing = null) {
+    drawTextWithPalette(
+        ctx: CanvasRenderingContext2D, 
+        text: string, 
+        x: number, 
+        y: number, 
+        scale: number = 1, 
+        palette: string[], 
+        colorIndex: number = 0, 
+        spacing: number | null = null
+    ): void {
         const color = palette[colorIndex] || '#FFFFFF';
         this.drawText(ctx, text, x, y, scale, color, spacing);
     }
     
     /**
      * 影付きテキストを描画（レトロゲーム風）
-     * @param {CanvasRenderingContext2D} ctx - Canvas コンテキスト
-     * @param {string} text - 描画するテキスト
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
-     * @param {number} scale - 拡大率
-     * @param {string} color - メイン色
-     * @param {string} shadowColor - 影の色
-     * @param {number} shadowOffset - 影のオフセット（ピクセル単位）
      */
-    drawTextWithShadow(ctx, text, x, y, scale = 1, color = '#FFFFFF', shadowColor = '#000000', shadowOffset = 1) {
+    drawTextWithShadow(
+        ctx: CanvasRenderingContext2D, 
+        text: string, 
+        x: number, 
+        y: number, 
+        scale: number = 1, 
+        color: string = '#FFFFFF', 
+        shadowColor: string = '#000000', 
+        shadowOffset: number = 1
+    ): void {
         // 影を描画
         this.drawText(ctx, text, x + shadowOffset * scale, y + shadowOffset * scale, scale, shadowColor);
         // メインテキストを描画
@@ -584,24 +600,23 @@ class PixelFont {
     
     /**
      * 文字が存在するかチェック
-     * @param {string} char - チェックする文字
-     * @returns {boolean} 文字が存在する場合true
      */
-    hasChar(char) {
+    hasChar(char: string): boolean {
         return Object.prototype.hasOwnProperty.call(this.fontData, char.toUpperCase());
     }
     
     /**
      * 数字を指定桁数でゼロパディングして描画
-     * @param {CanvasRenderingContext2D} ctx - Canvas コンテキスト
-     * @param {number} number - 描画する数値
-     * @param {number} digits - 桁数
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
-     * @param {number} scale - 拡大率
-     * @param {string} color - 色
      */
-    drawNumber(ctx, number, digits, x, y, scale = 1, color = '#FFFFFF') {
+    drawNumber(
+        ctx: CanvasRenderingContext2D, 
+        number: number, 
+        digits: number, 
+        x: number, 
+        y: number, 
+        scale: number = 1, 
+        color: string = '#FFFFFF'
+    ): void {
         const numStr = Math.floor(number).toString();
         const paddedStr = numStr.padStart(digits, '0');
         this.drawText(ctx, paddedStr, x, y, scale, color);
@@ -609,14 +624,15 @@ class PixelFont {
     
     /**
      * 時間を MM:SS 形式で描画
-     * @param {CanvasRenderingContext2D} ctx - Canvas コンテキスト
-     * @param {number} seconds - 秒数
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
-     * @param {number} scale - 拡大率
-     * @param {string} color - 色
      */
-    drawTime(ctx, seconds, x, y, scale = 1, color = '#FFFFFF') {
+    drawTime(
+        ctx: CanvasRenderingContext2D, 
+        seconds: number, 
+        x: number, 
+        y: number, 
+        scale: number = 1, 
+        color: string = '#FFFFFF'
+    ): void {
         const minutes = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         const timeStr = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -625,10 +641,8 @@ class PixelFont {
     
     /**
      * テキスト内のすべての文字が描画可能かチェック
-     * @param {string} text - チェックするテキスト
-     * @returns {boolean} すべて描画可能な場合true
      */
-    canDrawText(text) {
+    canDrawText(text: string): boolean {
         for (const char of text.toUpperCase()) {
             if (char !== ' ' && !this.hasChar(char)) {
                 return false;
@@ -639,6 +653,4 @@ class PixelFont {
 }
 
 // デフォルトインスタンスをエクスポート
-const pixelFont = new PixelFont();
-
-export { PixelFont, pixelFont };
+export const pixelFont = new PixelFont();

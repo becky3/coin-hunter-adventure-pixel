@@ -6,8 +6,8 @@ class PixelArtSprite {
     private colors: ColorMap;
     public width: number;
     public height: number;
-    private canvas: HTMLCanvasElement | null;
-    private flippedCanvas: HTMLCanvasElement | null;
+    public canvas: HTMLCanvasElement | null;
+    public flippedCanvas: HTMLCanvasElement | null;
 
     constructor(pixelData: PixelData, colors: ColorMap) {
         this.pixelData = pixelData;
@@ -95,8 +95,8 @@ class PixelArtAnimation {
 class PixelArtRenderer {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
-    private sprites: Map<string, PixelArtSprite>;
-    private animations: Map<string, PixelArtAnimation>;
+    public sprites: Map<string, PixelArtSprite>;
+    public animations: Map<string, PixelArtAnimation>;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;

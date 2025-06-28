@@ -1,7 +1,7 @@
 /**
  * 敵キャラクターの基底クラス
  */
-import { Entity } from './Entity.js';
+import { Entity } from './Entity';
 
 export class Enemy extends Entity {
     constructor(x, y, width = 16, height = 16) {

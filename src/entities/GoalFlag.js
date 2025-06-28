@@ -2,7 +2,7 @@
  * ゴールフラグクラス
  * ステージクリアのトリガー
  */
-import { Entity } from './Entity.js';
+import { Entity } from './Entity';
 
 export class GoalFlag extends Entity {
     constructor(x, y) {

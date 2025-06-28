@@ -1,4 +1,48 @@
+import { Entity, Bounds, CollisionInfo } from '../entities/Entity';
+
+// Type definitions
+export type PhysicsLayer = 'tile' | 'player' | 'enemy' | 'item' | 'platform';
+
+export interface PhysicsLayers {
+    TILE: PhysicsLayer;
+    PLAYER: PhysicsLayer;
+    ENEMY: PhysicsLayer;
+    ITEM: PhysicsLayer;
+    PLATFORM: PhysicsLayer;
+}
+
+export interface RaycastResult {
+    x: number;
+    y: number;
+    tile: boolean;
+}
+
+type CollisionMatrix = {
+    [key in PhysicsLayer]?: PhysicsLayer[];
+};
+
+// Extended Entity interface for physics system
+interface PhysicsEntity extends Entity {
+    physicsLayer?: PhysicsLayer;
+    physicsSystem?: PhysicsSystem;
+}
+
+// Renderer interface (will be properly typed when PixelRenderer is converted)
+interface IRenderer {
+    drawRect(x: number, y: number, width: number, height: number, color: string, fill?: boolean): void;
+}
+
 export class PhysicsSystem {
+    public gravity: number;
+    public maxFallSpeed: number;
+    public friction: number;
+    public layers: PhysicsLayers;
+    private collisionMatrix: CollisionMatrix;
+    private entities: Set<PhysicsEntity>;
+    private tileMap: number[][] | null;
+    private tileSize: number;
+    private collisionPairs: Map<string, boolean>;
+
     constructor() {
         this.gravity = 0.65;
         this.maxFallSpeed = 15;
@@ -22,12 +66,12 @@ export class PhysicsSystem {
         this.collisionPairs = new Map();
     }
     
-    setTileMap(tileMap, tileSize = 16) {
+    setTileMap(tileMap: number[][], tileSize = 16): void {
         this.tileMap = tileMap;
         this.tileSize = tileSize;
     }
     
-    addEntity(entity, layer = this.layers.TILE) {
+    addEntity(entity: PhysicsEntity, layer: PhysicsLayer = this.layers.TILE): void {
         entity.physicsLayer = layer;
         this.entities.add(entity);
         entity.physicsSystem = this;
@@ -36,11 +80,11 @@ export class PhysicsSystem {
         }
     }
     
-    removeEntity(entity) {
+    removeEntity(entity: PhysicsEntity): void {
         this.entities.delete(entity);
     }
     
-    update(deltaTime) {
+    update(deltaTime: number): void {
         for (const entity of this.entities) {
             if (entity.active) {
                 this.updateGroundedState(entity);
@@ -60,7 +104,7 @@ export class PhysicsSystem {
         this.checkEntityCollisions();
     }
     
-    applyGravity(entity, deltaTime) {
+    applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
         
         entity.vy += this.gravity * (deltaTime / 16.67);
@@ -69,7 +113,7 @@ export class PhysicsSystem {
         }
     }
     
-    applyFriction(entity, deltaTime) {
+    applyFriction(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.grounded) return;
         
         const frictionFactor = Math.pow(entity.friction || this.friction, deltaTime / 16.67);
@@ -79,14 +123,16 @@ export class PhysicsSystem {
         }
     }
     
-    checkCollisionsForEntity(entity, axis) {
+    checkCollisionsForEntity(entity: PhysicsEntity, axis: 'horizontal' | 'vertical'): void {
         if (!entity.collidable) return;
         if (this.tileMap && entity.physicsLayer !== this.layers.TILE) {
             this.checkTileCollisions(entity, axis);
         }
     }
     
-    checkTileCollisions(entity, axis) {
+    checkTileCollisions(entity: PhysicsEntity, axis: 'horizontal' | 'vertical'): void {
+        if (!this.tileMap) return;
+        
         const bounds = entity.getBounds();
         const startCol = Math.floor(bounds.left / this.tileSize);
         const endCol = Math.floor(bounds.right / this.tileSize);
@@ -96,10 +142,11 @@ export class PhysicsSystem {
         const clampedEndCol = Math.min(this.tileMap[0].length - 1, endCol);
         const clampedStartRow = Math.max(0, startRow);
         const clampedEndRow = Math.min(this.tileMap.length - 1, endRow);
+        
         for (let row = clampedStartRow; row <= clampedEndRow; row++) {
             for (let col = clampedStartCol; col <= clampedEndCol; col++) {
                 if (this.tileMap[row][col] === 1) {
-                    const tileBounds = {
+                    const tileBounds: Bounds = {
                         left: col * this.tileSize,
                         top: row * this.tileSize,
                         right: (col + 1) * this.tileSize,
@@ -116,7 +163,7 @@ export class PhysicsSystem {
         }
     }
     
-    resolveTileCollision(entity, tileBounds, axis) {
+    resolveTileCollision(entity: PhysicsEntity, tileBounds: Bounds, axis: 'horizontal' | 'vertical'): void {
         if (axis === 'horizontal') {
             if (entity.vx > 0) {
                 entity.x = tileBounds.left - entity.width;
@@ -137,20 +184,20 @@ export class PhysicsSystem {
         }
     }
     
-    checkEntityCollisions() {
+    checkEntityCollisions(): void {
         const entitiesArray = Array.from(this.entities);
-        const currentPairs = new Set();
+        const currentPairs = new Set<string>();
         
         for (let i = 0; i < entitiesArray.length; i++) {
             const entityA = entitiesArray[i];
             if (!entityA.active || !entityA.collidable) continue;
-            const collisionLayers = this.collisionMatrix[entityA.physicsLayer] || [];
+            const collisionLayers = this.collisionMatrix[entityA.physicsLayer!] || [];
             
             for (let j = i + 1; j < entitiesArray.length; j++) {
                 const entityB = entitiesArray[j];
                 if (!entityB.active || !entityB.collidable) continue;
-                if (collisionLayers.includes(entityB.physicsLayer) ||
-                    (this.collisionMatrix[entityB.physicsLayer] || []).includes(entityA.physicsLayer)) {
+                if (collisionLayers.includes(entityB.physicsLayer!) ||
+                    (this.collisionMatrix[entityB.physicsLayer!] || []).includes(entityA.physicsLayer!)) {
                     const pairKey = entityA.id < entityB.id ? 
                         `${entityA.id}-${entityB.id}` : 
                         `${entityB.id}-${entityA.id}`;
@@ -172,20 +219,20 @@ export class PhysicsSystem {
         }
     }
     
-    checkAABB(a, b) {
+    checkAABB(a: Bounds, b: Bounds): boolean {
         return a.left < b.right &&
                a.right > b.left &&
                a.top < b.bottom &&
                a.bottom > b.top;
     }
     
-    notifyCollision(entityA, entityB) {
-        const collisionInfoA = {
+    notifyCollision(entityA: PhysicsEntity, entityB: PhysicsEntity): void {
+        const collisionInfoA: CollisionInfo = {
             other: entityB,
             side: this.getCollisionSide(entityA, entityB)
         };
         
-        const collisionInfoB = {
+        const collisionInfoB: CollisionInfo = {
             other: entityA,
             side: this.getCollisionSide(entityB, entityA)
         };
@@ -198,7 +245,7 @@ export class PhysicsSystem {
         }
     }
     
-    getCollisionSide(entity, other) {
+    getCollisionSide(entity: PhysicsEntity, other: PhysicsEntity): string {
         const dx = (entity.x + entity.width / 2) - (other.x + other.width / 2);
         const dy = (entity.y + entity.height / 2) - (other.y + other.height / 2);
         const width = (entity.width + other.width) / 2;
@@ -217,9 +264,9 @@ export class PhysicsSystem {
         return 'none';
     }
     
-    updateGroundedState(entity) {
+    updateGroundedState(entity: PhysicsEntity): void {
         entity.grounded = false;
-        const testBounds = {
+        const testBounds: Bounds = {
             left: entity.x,
             top: entity.y + entity.height + 1,
             right: entity.x + entity.width,
@@ -243,7 +290,7 @@ export class PhysicsSystem {
         }
     }
     
-    isPointInTile(x, y) {
+    isPointInTile(x: number, y: number): boolean {
         if (!this.tileMap) return false;
         
         const col = Math.floor(x / this.tileSize);
@@ -257,7 +304,7 @@ export class PhysicsSystem {
         return false;
     }
     
-    raycast(x1, y1, x2, y2) {
+    raycast(x1: number, y1: number, x2: number, y2: number): RaycastResult | null {
         const dx = Math.abs(x2 - x1);
         const dy = Math.abs(y2 - y1);
         const sx = x1 < x2 ? 1 : -1;
@@ -286,7 +333,7 @@ export class PhysicsSystem {
         return null;
     }
     
-    renderDebug(renderer) {
+    renderDebug(renderer: IRenderer): void {
         for (const entity of this.entities) {
             if (!entity.active) continue;
             
