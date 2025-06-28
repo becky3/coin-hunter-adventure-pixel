@@ -71,7 +71,7 @@ async function checkGameFiles() {
         'src/core/Game.js',
         'src/entities/Player.js',
         'src/states/PlayState.js',
-        'src/utils/pixelArt.js',
+        'src/utils/pixelArt.ts',
         'src/assets/AssetLoader.js'
     ];
     

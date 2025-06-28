@@ -1,7 +1,34 @@
+import { SpriteLoader, SPRITE_DEFINITIONS } from './spriteLoader';
 
-import { SpriteLoader, SPRITE_DEFINITIONS } from './spriteLoader.js';
+// Type definitions
+type ColorIndex = number;
+type ColorHex = string | null;
+type Palette = ColorHex[];
+type PaletteConfig = {
+    background: ColorIndex[][];
+    sprite: ColorIndex[][];
+};
+
+type StagePalette = {
+    background: Palette[];
+    sprite: Palette[];
+};
+
+interface ColorPalette {
+    [key: number]: ColorHex;
+}
+
+interface SpriteData {
+    width: number;
+    height: number;
+    data: number[][];
+}
 
 class PaletteSystem {
+    private masterPalette: Record<number, string>;
+    private currentStagePalette: StagePalette | null;
+    private spriteLoader: SpriteLoader;
+
     constructor() {
         this.masterPalette = {
             0x00: '#000000',
@@ -52,7 +79,7 @@ class PaletteSystem {
         this.spriteLoader = new SpriteLoader();
     }
 
-    createStagePalette(config) {
+    createStagePalette(config: PaletteConfig): StagePalette {
         return {
             background: config.background.map(palette => 
                 palette.map(colorIndex => this.masterPalette[colorIndex] || '#000000')
@@ -63,11 +90,11 @@ class PaletteSystem {
         };
     }
 
-    setStagePalette(stagePalette) {
+    setStagePalette(stagePalette: StagePalette): void {
         this.currentStagePalette = stagePalette;
     }
 
-    getColor(type, paletteIndex, colorIndex) {
+    getColor(type: 'background' | 'sprite', paletteIndex: number, colorIndex: number): ColorHex {
         if (!this.currentStagePalette) return '#000000';
         
         const palette = this.currentStagePalette[type];
@@ -76,16 +103,16 @@ class PaletteSystem {
         return palette[paletteIndex][colorIndex];
     }
 
-    async loadSpriteData(category, name) {
+    async loadSpriteData(category: string, name: string): Promise<number[][]> {
         const sprite = await this.spriteLoader.loadSprite(category, name);
         return sprite.data;
     }
 
-    async loadAllSprites() {
-        const allSprites = {};
+    async loadAllSprites(): Promise<Record<string, number[][]>> {
+        const allSprites: Record<string, number[][]> = {};
         
         for (const [category, names] of Object.entries(SPRITE_DEFINITIONS)) {
-            const categorySprites = await this.spriteLoader.loadCategory(category, names);
+            const categorySprites = await this.spriteLoader.loadCategory(category, [...names]);
             
             categorySprites.forEach((sprite, key) => {
                 const spriteName = key.split('/')[1];
@@ -97,7 +124,7 @@ class PaletteSystem {
     }
 }
 
-const STAGE_PALETTES = {
+const STAGE_PALETTES: Record<string, PaletteConfig> = {
     grassland: {
         background: [
             [0x12, 0x03, 0x02, 0x01],
@@ -142,10 +169,10 @@ const STAGE_PALETTES = {
             [0, 0x52, 0x53, 0x51]
         ]
     }
-};
+} as const;
 
-function getColorPalette(paletteName) {
-    const palettes = {
+function getColorPalette(paletteName: string): ColorPalette {
+    const palettes: Record<string, ColorPalette> = {
         character: {
             0: null,
             1: '#4169E1',
@@ -182,3 +209,4 @@ function getColorPalette(paletteName) {
 }
 
 export { PaletteSystem, STAGE_PALETTES, SPRITE_DEFINITIONS, getColorPalette };
+export type { ColorHex, Palette, PaletteConfig, StagePalette, ColorPalette, SpriteData };

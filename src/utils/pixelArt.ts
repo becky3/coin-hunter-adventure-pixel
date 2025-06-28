@@ -1,6 +1,15 @@
+type PixelData = number[][];
+type ColorMap = { [key: number]: string | null };
 
 class PixelArtSprite {
-    constructor(pixelData, colors) {
+    private pixelData: PixelData;
+    private colors: ColorMap;
+    public width: number;
+    public height: number;
+    private canvas: HTMLCanvasElement | null;
+    private flippedCanvas: HTMLCanvasElement | null;
+
+    constructor(pixelData: PixelData, colors: ColorMap) {
         this.pixelData = pixelData;
         this.colors = colors;
         this.width = pixelData[0].length;
@@ -10,16 +19,16 @@ class PixelArtSprite {
         this._render();
     }
     
-    updatePalette(colors) {
+    updatePalette(colors: ColorMap): void {
         this.colors = colors;
         this._render();
     }
 
-    _render() {
+    private _render(): void {
         this.canvas = document.createElement('canvas');
         this.canvas.width = this.width;
         this.canvas.height = this.height;
-        const ctx = this.canvas.getContext('2d');
+        const ctx = this.canvas.getContext('2d')!;
         ctx.imageSmoothingEnabled = false;
         
         this._drawPixels(ctx, false);
@@ -27,17 +36,17 @@ class PixelArtSprite {
         this.flippedCanvas = document.createElement('canvas');
         this.flippedCanvas.width = this.width;
         this.flippedCanvas.height = this.height;
-        const flippedCtx = this.flippedCanvas.getContext('2d');
+        const flippedCtx = this.flippedCanvas.getContext('2d')!;
         flippedCtx.imageSmoothingEnabled = false;
         
         this._drawPixels(flippedCtx, true);
     }
 
-    _drawPixels(ctx, flipped = false) {
+    private _drawPixels(ctx: CanvasRenderingContext2D, flipped = false): void {
         this.pixelData.forEach((row, y) => {
             row.forEach((pixel, x) => {
                 if (pixel > 0 && this.colors[pixel]) {
-                    ctx.fillStyle = this.colors[pixel];
+                    ctx.fillStyle = this.colors[pixel] as string;
                     const drawX = flipped ? (this.width - 1 - x) : x;
                     ctx.fillRect(drawX, y, 1, 1);
                 }
@@ -45,62 +54,74 @@ class PixelArtSprite {
         });
     }
 
-    draw(ctx, x, y, flipped = false, scale = 1) {
+    draw(ctx: CanvasRenderingContext2D, x: number, y: number, flipped = false, scale = 1): void {
         const source = flipped ? this.flippedCanvas : this.canvas;
-        ctx.drawImage(source, x, y, this.width * scale, this.height * scale);
+        if (source) {
+            ctx.drawImage(source, x, y, this.width * scale, this.height * scale);
+        }
     }
 }
 
 class PixelArtAnimation {
-    constructor(frames, colors, frameDuration = 100) {
+    private frames: PixelArtSprite[];
+    private frameDuration: number;
+    private currentFrame: number;
+    private lastFrameTime: number;
+
+    constructor(frames: PixelData[], colors: ColorMap, frameDuration = 100) {
         this.frames = frames.map(frameData => new PixelArtSprite(frameData, colors));
         this.frameDuration = frameDuration;
         this.currentFrame = 0;
         this.lastFrameTime = 0;
     }
 
-    update(currentTime) {
+    update(currentTime: number): void {
         if (currentTime - this.lastFrameTime > this.frameDuration) {
             this.currentFrame = (this.currentFrame + 1) % this.frames.length;
             this.lastFrameTime = currentTime;
         }
     }
 
-    draw(ctx, x, y, flipped = false, scale = 1) {
+    draw(ctx: CanvasRenderingContext2D, x: number, y: number, flipped = false, scale = 1): void {
         this.frames[this.currentFrame].draw(ctx, x, y, flipped, scale);
     }
 
-    reset() {
+    reset(): void {
         this.currentFrame = 0;
         this.lastFrameTime = 0;
     }
 }
 
 class PixelArtRenderer {
-    constructor(canvas) {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private sprites: Map<string, PixelArtSprite>;
+    private animations: Map<string, PixelArtAnimation>;
+
+    constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        this.ctx = canvas.getContext('2d')!;
         this.ctx.imageSmoothingEnabled = false;
         this.sprites = new Map();
         this.animations = new Map();
     }
 
-    addSprite(name, pixelData, colors) {
+    addSprite(name: string, pixelData: PixelData, colors: ColorMap): void {
         this.sprites.set(name, new PixelArtSprite(pixelData, colors));
     }
 
-    addAnimation(name, frames, colors, frameDuration = 100) {
+    addAnimation(name: string, frames: PixelData[], colors: ColorMap, frameDuration = 100): void {
         this.animations.set(name, new PixelArtAnimation(frames, colors, frameDuration));
     }
 
-    drawSprite(name, x, y, flipped = false) {
+    drawSprite(name: string, x: number, y: number, flipped = false): void {
         const sprite = this.sprites.get(name);
         if (sprite) {
             sprite.draw(this.ctx, x, y, flipped);
         }
     }
 
-    drawAnimation(name, x, y, currentTime, flipped = false) {
+    drawAnimation(name: string, x: number, y: number, currentTime: number, flipped = false): void {
         const animation = this.animations.get(name);
         if (animation) {
             animation.update(currentTime);
@@ -108,18 +129,18 @@ class PixelArtRenderer {
         }
     }
 
-    clear() {
+    clear(): void {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    fillBackground(color) {
+    fillBackground(color: string): void {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
 
-function drawPixelText(ctx, text, x, y, scale = 1, color = '#FFFFFF') {
-    const numbers = {
+function drawPixelText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, scale = 1, color = '#FFFFFF'): void {
+    const numbers: { [key: string]: PixelData } = {
         '0': [
             [1,1,1],
             [1,0,1],
@@ -195,7 +216,7 @@ function drawPixelText(ctx, text, x, y, scale = 1, color = '#FFFFFF') {
     ctx.fillStyle = color;
     let offsetX = 0;
     
-    for (let char of text) {
+    for (const char of text) {
         if (numbers[char]) {
             const charData = numbers[char];
             charData.forEach((row, y) => {
@@ -218,3 +239,4 @@ function drawPixelText(ctx, text, x, y, scale = 1, color = '#FFFFFF') {
 }
 
 export { PixelArtRenderer, PixelArtSprite, PixelArtAnimation, drawPixelText };
+export type { PixelData, ColorMap };

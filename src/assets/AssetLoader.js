@@ -1,5 +1,5 @@
-import { SpriteLoader } from '../utils/spriteLoader.js';
-import { getColorPalette } from '../utils/pixelArtPalette.js';
+import { SpriteLoader } from '../utils/spriteLoader';
+import { getColorPalette } from '../utils/pixelArtPalette';
 
 export class AssetLoader {
     constructor() {

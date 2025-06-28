@@ -2,7 +2,7 @@ import { InputSystem } from './InputSystem.js';
 import { GameStateManager } from '../states/GameStateManager.js';
 import { AssetLoader } from '../assets/AssetLoader.js';
 import { PixelRenderer } from '../rendering/PixelRenderer.js';
-import { PixelArtRenderer } from '../utils/pixelArt.js';
+import { PixelArtRenderer } from '../utils/pixelArt';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { MusicSystem } from '../audio/MusicSystem.js';
