@@ -38,7 +38,6 @@ Geminiは、ファイルシステム操作、シェルコマンド実行、Web�
 *   **改善提案:** Claude Code やユーザーとのやり取り、Gemini自身の作業プロセスにおいて、改善点や効率化のアイデアがあれば積極的に提案します。提案はPull Requestのコメントや、必要に応じて別途ドキュメントとして作成します。
 *   **引き継ぎ資料:** Geminiが作成する引き継ぎ資料は `handover-docs/gemini-to-claude/` ディレクトリに格納されます。過去の作業内容やレビュー結果、テスト手順などを確認する際に参照してください。
 *   **テストの実行:**
-    *   開発サーバーは `npm run dev` で起動します。
     *   基本的なテストは `npm run test:simple` で実行できます。
     *   ゲームプレイテストは `node tests/puppeteer/test-gameplay.js` で実行できます。
     *   パフォーマンステストは `node tests/puppeteer/test-performance.js` で実行できます。
