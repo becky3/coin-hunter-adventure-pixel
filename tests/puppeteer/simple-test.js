@@ -72,7 +72,7 @@ async function checkGameFiles() {
         'src/entities/Player.js',
         'src/states/PlayState.js',
         'src/utils/pixelArt.ts',
-        'src/assets/AssetLoader.js'
+        'src/assets/AssetLoader.ts'
     ];
     
     let allValid = true;

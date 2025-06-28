@@ -2,7 +2,7 @@
  * コインクラス
  * 収集可能なアイテム
  */
-import { Entity } from './Entity.js';
+import { Entity } from './Entity';
 
 export class Coin extends Entity {
     constructor(x, y) {

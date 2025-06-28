@@ -2,9 +2,74 @@
  * エンティティ基底クラス
  * すべてのゲームオブジェクトの基本機能を提供
  */
+
+// Type definitions
+export interface Bounds {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+}
+
+export interface Vector2D {
+    x: number;
+    y: number;
+}
+
+export interface CollisionInfo {
+    other: Entity;
+    side: string;
+}
+
+// Renderer interface (will be properly typed when PixelRenderer is converted)
+interface IRenderer {
+    debug: boolean;
+    drawSprite(sprite: any, x: number, y: number, scale: number, flipX: boolean): void;
+    drawRect(x: number, y: number, width: number, height: number, color: string, fill?: boolean): void;
+    drawLine(x1: number, y1: number, x2: number, y2: number, color: string, width: number): void;
+    worldToScreen(worldX: number, worldY: number): Vector2D;
+    ctx: CanvasRenderingContext2D;
+}
+
 let entityIdCounter = 0;
 
 export class Entity {
+    public id: number;
+    
+    public x: number;
+    public y: number;
+    
+    public width: number;
+    public height: number;
+    
+    public vx: number;
+    public vy: number;
+    
+    public ax: number;
+    public ay: number;
+    
+    public gravity: boolean;
+    public gravityStrength: number;
+    public maxFallSpeed: number;
+    public friction: number;
+    public physicsEnabled: boolean;
+    
+    public active: boolean;
+    public visible: boolean;
+    public grounded: boolean;
+    
+    public solid: boolean;
+    public collidable: boolean;
+    
+    public currentAnimation: string | null;
+    public animationTime: number;
+    public flipX: boolean;
+    
+    public sprite: any; // Will be properly typed when sprite system is converted
+    public spriteScale: number;
+
     constructor(x = 0, y = 0, width = 16, height = 16) {
         this.id = ++entityIdCounter;
         
@@ -43,9 +108,9 @@ export class Entity {
     
     /**
      * エンティティを更新
-     * @param {number} deltaTime - 前フレームからの経過時間（ms）
+     * @param deltaTime - 前フレームからの経過時間（ms）
      */
-    update(deltaTime) {
+    update(deltaTime: number): void {
         if (!this.active) return;
         
         this.updateAnimation(deltaTime);
@@ -54,9 +119,9 @@ export class Entity {
     
     /**
      * 物理演算の更新
-     * @param {number} deltaTime - 経過時間
+     * @param deltaTime - 経過時間
      */
-    updatePhysics(deltaTime) {
+    updatePhysics(deltaTime: number): void {
         if (!deltaTime || deltaTime <= 0 || deltaTime > 100) {
             deltaTime = 16.67;
         }
@@ -86,9 +151,9 @@ export class Entity {
     
     /**
      * アニメーションの更新
-     * @param {number} deltaTime - 経過時間
+     * @param deltaTime - 経過時間
      */
-    updateAnimation(deltaTime) {
+    updateAnimation(deltaTime: number): void {
         if (this.currentAnimation) {
             this.animationTime += deltaTime;
         }
@@ -96,9 +161,9 @@ export class Entity {
     
     /**
      * エンティティを描画
-     * @param {PixelRenderer} renderer - レンダラー
+     * @param renderer - レンダラー
      */
-    render(renderer) {
+    render(renderer: IRenderer): void {
         if (!this.visible) return;
         
         if (this.sprite) {
@@ -120,9 +185,9 @@ export class Entity {
     
     /**
      * デフォルトの描画（スプライトがない場合）
-     * @param {PixelRenderer} renderer 
+     * @param renderer 
      */
-    renderDefault(renderer) {
+    renderDefault(renderer: IRenderer): void {
         renderer.drawRect(
             this.x,
             this.y,
@@ -143,9 +208,9 @@ export class Entity {
     
     /**
      * デバッグ情報の描画
-     * @param {PixelRenderer} renderer 
+     * @param renderer 
      */
-    renderDebug(renderer) {
+    renderDebug(renderer: IRenderer): void {
         renderer.drawRect(
             this.x,
             this.y,
@@ -178,9 +243,9 @@ export class Entity {
     
     /**
      * 当たり判定用の境界ボックスを取得
-     * @returns {Object} 境界ボックス
+     * @returns 境界ボックス
      */
-    getBounds() {
+    getBounds(): Bounds {
         return {
             left: this.x,
             top: this.y,
@@ -193,10 +258,10 @@ export class Entity {
     
     /**
      * 他のエンティティとの衝突判定
-     * @param {Entity} other - 判定対象
-     * @returns {boolean} 衝突している場合true
+     * @param other - 判定対象
+     * @returns 衝突している場合true
      */
-    collidesWith(other) {
+    collidesWith(other: Entity): boolean {
         if (!this.collidable || !other.collidable) return false;
         
         const a = this.getBounds();
@@ -210,10 +275,10 @@ export class Entity {
     
     /**
      * 矩形との衝突判定
-     * @param {Object} rect - 判定対象の矩形
-     * @returns {boolean} 衝突している場合true
+     * @param rect - 判定対象の矩形
+     * @returns 衝突している場合true
      */
-    collidesWithRect(rect) {
+    collidesWithRect(rect: Bounds): boolean {
         const bounds = this.getBounds();
         
         return bounds.left < rect.right &&
@@ -224,10 +289,10 @@ export class Entity {
     
     /**
      * エンティティ間の距離を計算
-     * @param {Entity} other - 対象エンティティ
-     * @returns {number} 距離
+     * @param other - 対象エンティティ
+     * @returns 距離
      */
-    distanceTo(other) {
+    distanceTo(other: Entity): number {
         const dx = (this.x + this.width / 2) - (other.x + other.width / 2);
         const dy = (this.y + this.height / 2) - (other.y + other.height / 2);
         return Math.sqrt(dx * dx + dy * dy);
@@ -235,10 +300,10 @@ export class Entity {
     
     /**
      * エンティティへの方向を計算
-     * @param {Entity} other - 対象エンティティ
-     * @returns {Object} 正規化された方向ベクトル
+     * @param other - 対象エンティティ
+     * @returns 正規化された方向ベクトル
      */
-    directionTo(other) {
+    directionTo(other: Entity): Vector2D {
         const dx = (other.x + other.width / 2) - (this.x + this.width / 2);
         const dy = (other.y + other.height / 2) - (this.y + this.height / 2);
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -255,19 +320,19 @@ export class Entity {
     
     /**
      * スプライトを設定
-     * @param {Object} sprite - スプライトデータ
-     * @param {number} scale - 描画スケール
+     * @param sprite - スプライトデータ
+     * @param scale - 描画スケール
      */
-    setSprite(sprite, scale = 1) {
+    setSprite(sprite: any, scale = 1): void {
         this.sprite = sprite;
         this.spriteScale = scale;
     }
     
     /**
      * アニメーションを設定
-     * @param {string} animationName - アニメーション名
+     * @param animationName - アニメーション名
      */
-    setAnimation(animationName) {
+    setAnimation(animationName: string): void {
         if (this.currentAnimation !== animationName) {
             this.currentAnimation = animationName;
             this.animationTime = 0;
@@ -276,10 +341,10 @@ export class Entity {
     
     /**
      * エンティティをリセット
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
+     * @param x - X座標
+     * @param y - Y座標
      */
-    reset(x, y) {
+    reset(x: number, y: number): void {
         this.x = x;
         this.y = y;
         this.vx = 0;
@@ -295,7 +360,7 @@ export class Entity {
     /**
      * エンティティを破棄
      */
-    destroy() {
+    destroy(): void {
         this.active = false;
         this.visible = false;
         this.onDestroy();
@@ -303,21 +368,24 @@ export class Entity {
     
     /**
      * 更新処理（子クラスで実装）
-     * @param {number} deltaTime - 経過時間
+     * @param deltaTime - 経過時間
      */
-    onUpdate() {
+    onUpdate(_deltaTime: number): void {
+        // Override in subclasses
     }
     
     /**
      * 破棄処理（子クラスで実装）
      */
-    onDestroy() {
+    onDestroy(): void {
+        // Override in subclasses
     }
     
     /**
      * 衝突時の処理（子クラスで実装）
-     * @param {Object} collisionInfo - 衝突情報 {other: Entity, side: string}
+     * @param collisionInfo - 衝突情報 {other: Entity, side: string}
      */
-    onCollision() {
+    onCollision(_collisionInfo?: CollisionInfo): void {
+        // Override in subclasses
     }
 }

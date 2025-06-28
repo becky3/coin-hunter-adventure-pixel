@@ -2,7 +2,7 @@
  * スプリング（ばね）クラス
  * プレイヤーを高くジャンプさせるギミック
  */
-import { Entity } from './Entity.js';
+import { Entity } from './Entity';
 
 export class Spring extends Entity {
     constructor(x, y) {

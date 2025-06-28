@@ -2,7 +2,7 @@
  * プレイヤーエンティティ
  * プレイヤーキャラクターの動作を管理
  */
-import { Entity } from './Entity.js';
+import { Entity } from './Entity';
 
 const PLAYER_CONFIG = {
     width: 16,

@@ -1,13 +1,37 @@
 import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants';
+import { PixelArtRenderer } from '../utils/pixelArt';
+// AssetLoader import will be added when needed to avoid circular dependency
+
+export interface SpriteData {
+    width: number;
+    height: number;
+    canvas?: HTMLCanvasElement;
+    imageData?: ImageData;
+    flippedCanvas?: HTMLCanvasElement;
+}
 
 export class PixelRenderer {
-    constructor(canvas) {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private width: number;
+    private height: number;
+    private canvasWidth: number;
+    private canvasHeight: number;
+    private scale: number;
+    private cameraX: number;
+    private cameraY: number;
+    private spriteCache: Map<string, HTMLCanvasElement>;
+    private debug: boolean;
+    public pixelArtRenderer?: PixelArtRenderer;
+    public assetLoader?: any; // AssetLoader type to avoid circular dependency
+
+    constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        this.ctx = canvas.getContext('2d')!;
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.mozImageSmoothingEnabled = false;
-        this.ctx.webkitImageSmoothingEnabled = false;
-        this.ctx.msImageSmoothingEnabled = false;
+        (this.ctx as any).mozImageSmoothingEnabled = false;
+        (this.ctx as any).webkitImageSmoothingEnabled = false;
+        (this.ctx as any).msImageSmoothingEnabled = false;
         this.width = GAME_RESOLUTION.WIDTH;
         this.height = GAME_RESOLUTION.HEIGHT;
         this.canvasWidth = canvas.width;
@@ -19,7 +43,7 @@ export class PixelRenderer {
         this.debug = false;
     }
     
-    clear(color = null) {
+    clear(color: string | null = null): void {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         
@@ -33,67 +57,76 @@ export class PixelRenderer {
         this.ctx.restore();
     }
     
-    setCamera(x, y) {
+    setCamera(x: number, y: number): void {
         this.cameraX = Math.floor(x);
         this.cameraY = Math.floor(y);
     }
     
-    drawSprite(sprite, x, y, flipX = false) {
+    drawSprite(sprite: string | SpriteData | HTMLCanvasElement | ImageData, x: number, y: number, flipX: boolean = false): void {
+        let finalSprite: SpriteData | HTMLCanvasElement | ImageData | null = null;
+
         if (typeof sprite === 'string') {
             if (this.pixelArtRenderer && this.pixelArtRenderer.sprites.has(sprite)) {
-                const pixelSprite = this.pixelArtRenderer.sprites.get(sprite);
+                const pixelSprite = this.pixelArtRenderer.sprites.get(sprite)!;
                 const canvas = flipX ? pixelSprite.flippedCanvas : pixelSprite.canvas;
-                sprite = canvas;
+                finalSprite = canvas;
             }
             else if (this.assetLoader) {
                 const loadedSprite = this.assetLoader.loadedAssets.get(sprite);
                 if (!loadedSprite) {
-                    this.assetLoader.loadSprite(...sprite.split('/'));
+                    this.assetLoader.loadSprite(...sprite.split('/') as [string, string]);
                     return;
                 }
-                sprite = loadedSprite.imageData || loadedSprite.canvas;
-                if (!sprite) return;
+                finalSprite = loadedSprite.imageData || loadedSprite.canvas;
+                if (!finalSprite) return;
             } else {
                 return;
             }
+        } else {
+            finalSprite = sprite;
         }
+
+        const spriteWidth = 'width' in finalSprite ? finalSprite.width : 0;
+        const spriteHeight = 'height' in finalSprite ? finalSprite.height : 0;
+
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);
-        if (drawX + sprite.width * this.scale < 0 || drawX > this.canvasWidth ||
-            drawY + sprite.height * this.scale < 0 || drawY > this.canvasHeight) {
+        if (drawX + spriteWidth * this.scale < 0 || drawX > this.canvasWidth ||
+            drawY + spriteHeight * this.scale < 0 || drawY > this.canvasHeight) {
             return;
         }
         
         this.ctx.save();
         
         if (flipX) {
-            this.ctx.translate(drawX + sprite.width * this.scale, drawY);
+            this.ctx.translate(drawX + spriteWidth * this.scale, drawY);
             this.ctx.scale(-1, 1);
             this.ctx.translate(-drawX, -drawY);
         }
         
-        if (sprite instanceof ImageData) {
-            const tempCanvas = this._getOrCreateTempCanvas(sprite);
+        if (finalSprite instanceof ImageData) {
+            const tempCanvas = this._getOrCreateTempCanvas(finalSprite);
             this.ctx.drawImage(
                 tempCanvas,
-                0, 0, sprite.width, sprite.height,
-                drawX, drawY, sprite.width * this.scale, sprite.height * this.scale
+                0, 0, spriteWidth, spriteHeight,
+                drawX, drawY, spriteWidth * this.scale, spriteHeight * this.scale
             );
-        } else {
+        } else if (finalSprite instanceof HTMLCanvasElement || (finalSprite && 'canvas' in finalSprite)) {
+            const canvas = finalSprite instanceof HTMLCanvasElement ? finalSprite : (finalSprite as any).canvas;
             this.ctx.drawImage(
-                sprite,
-                0, 0, sprite.width, sprite.height,
-                drawX, drawY, sprite.width * this.scale, sprite.height * this.scale
+                canvas,
+                0, 0, spriteWidth, spriteHeight,
+                drawX, drawY, spriteWidth * this.scale, spriteHeight * this.scale
             );
         }
         
         this.ctx.restore();
         if (this.debug) {
-            this.drawDebugBox(drawX, drawY, sprite.width * this.scale, sprite.height * this.scale);
+            this.drawDebugBox(drawX, drawY, spriteWidth * this.scale, spriteHeight * this.scale);
         }
     }
     
-    drawRect(x, y, width, height, color, fill = true) {
+    drawRect(x: number, y: number, width: number, height: number, color: string, fill: boolean = true): void {
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
@@ -107,7 +140,7 @@ export class PixelRenderer {
         }
     }
     
-    drawText(text, x, y, color = '#FFFFFF', alpha = 1) {
+    drawText(text: string, x: number, y: number, color: string = '#FFFFFF', alpha: number = 1): void {
         const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
         const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
         
@@ -125,13 +158,13 @@ export class PixelRenderer {
         this.ctx.restore();
     }
     
-    drawTextCentered(text, centerX, y, color = '#FFFFFF', alpha = 1) {
+    drawTextCentered(text: string, centerX: number, y: number, color: string = '#FFFFFF', alpha: number = 1): void {
         const textWidth = text.length * FONT.GRID;
         const x = centerX - Math.floor(textWidth / 2);
         this.drawText(text, x, y, color, alpha);
     }
     
-    drawLine(x1, y1, x2, y2, color = '#FFFFFF', width = 1) {
+    drawLine(x1: number, y1: number, x2: number, y2: number, color: string = '#FFFFFF', width: number = 1): void {
         const drawX1 = Math.floor((x1 - this.cameraX) * this.scale);
         const drawY1 = Math.floor((y1 - this.cameraY) * this.scale);
         const drawX2 = Math.floor((x2 - this.cameraX) * this.scale);
@@ -145,13 +178,18 @@ export class PixelRenderer {
         this.ctx.stroke();
     }
     
-    drawDebugBox(x, y, width, height) {
+    drawDebugBox(x: number, y: number, width: number, height: number): void {
         this.ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
         this.ctx.lineWidth = 1;
         this.ctx.strokeRect(x, y, width, height);
     }
     
-    drawTilemap(tilemap, getTileSprite, tileSize, scale = 1) {
+    drawTilemap(
+        tilemap: number[][], 
+        getTileSprite: (tileId: number) => SpriteData | HTMLCanvasElement | string | null, 
+        tileSize: number, 
+        scale: number = 1
+    ): void {
         const startX = Math.floor(this.cameraX / (tileSize * scale));
         const startY = Math.floor(this.cameraY / (tileSize * scale));
         const endX = Math.ceil((this.cameraX + this.width) / (tileSize * scale));
@@ -178,28 +216,28 @@ export class PixelRenderer {
         }
     }
     
-    isInView(x, y, width = 0, height = 0) {
+    isInView(x: number, y: number, width: number = 0, height: number = 0): boolean {
         return x + width >= this.cameraX &&
                x <= this.cameraX + this.width &&
                y + height >= this.cameraY &&
                y <= this.cameraY + this.height;
     }
     
-    worldToScreen(worldX, worldY) {
+    worldToScreen(worldX: number, worldY: number): { x: number; y: number } {
         return {
             x: Math.floor((worldX - this.cameraX) * this.scale),
             y: Math.floor((worldY - this.cameraY) * this.scale)
         };
     }
     
-    screenToWorld(screenX, screenY) {
+    screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
         return {
             x: (screenX / this.scale) + this.cameraX,
             y: (screenY / this.scale) + this.cameraY
         };
     }
     
-    _getOrCreateTempCanvas(imageData) {
+    private _getOrCreateTempCanvas(imageData: ImageData): HTMLCanvasElement {
         const key = `${imageData.width}x${imageData.height}`;
         
         if (!this.spriteCache.has(key)) {
@@ -209,18 +247,18 @@ export class PixelRenderer {
             this.spriteCache.set(key, tempCanvas);
         }
         
-        const tempCanvas = this.spriteCache.get(key);
-        const tempCtx = tempCanvas.getContext('2d');
+        const tempCanvas = this.spriteCache.get(key)!;
+        const tempCtx = tempCanvas.getContext('2d')!;
         tempCtx.putImageData(imageData, 0, 0);
         
         return tempCanvas;
     }
     
-    setDebugMode(enabled) {
+    setDebugMode(enabled: boolean): void {
         this.debug = enabled;
     }
     
-    resize(width, height) {
+    resize(width: number, height: number): void {
         this.canvasWidth = width;
         this.canvasHeight = height;
         this.canvas.width = width;
@@ -229,17 +267,17 @@ export class PixelRenderer {
         this.height = GAME_RESOLUTION.HEIGHT;
         this.scale = Math.min(width / GAME_RESOLUTION.WIDTH, height / GAME_RESOLUTION.HEIGHT);
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.mozImageSmoothingEnabled = false;
-        this.ctx.webkitImageSmoothingEnabled = false;
-        this.ctx.msImageSmoothingEnabled = false;
+        (this.ctx as any).mozImageSmoothingEnabled = false;
+        (this.ctx as any).webkitImageSmoothingEnabled = false;
+        (this.ctx as any).msImageSmoothingEnabled = false;
     }
     
-    fillRect(x, y, width, height, color) {
+    fillRect(x: number, y: number, width: number, height: number, color: string): void {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(x, y, width, height);
     }
     
-    strokeCircle(x, y, radius, color = '#FFFFFF', lineWidth = 1) {
+    strokeCircle(x: number, y: number, radius: number, color: string = '#FFFFFF', lineWidth: number = 1): void {
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = lineWidth;
         this.ctx.beginPath();
