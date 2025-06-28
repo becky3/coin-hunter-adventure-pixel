@@ -1,4 +1,4 @@
-import { GAME_RESOLUTION } from '../constants/gameConstants.js';
+import { GAME_RESOLUTION } from '../constants/gameConstants';
 
 export class MenuState {
     constructor(game) {

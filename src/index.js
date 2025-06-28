@@ -2,7 +2,7 @@
 // Entry point
 
 import { Game } from './core/Game.js';
-import { CANVAS_SIZE } from './constants/gameConstants.js';
+import { CANVAS_SIZE } from './constants/gameConstants';
 
 // ゲームの初期化
 window.addEventListener('DOMContentLoaded', () => {

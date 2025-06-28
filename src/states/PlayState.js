@@ -1,7 +1,7 @@
 /**
  * プレイ状態クラス - メインゲームプレイの管理
  */
-import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants.js';
+import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { Slime } from '../entities/enemies/Slime.js';
