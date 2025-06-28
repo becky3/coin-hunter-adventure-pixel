@@ -6,8 +6,8 @@ import { Entity } from './Entity.js';
 
 export class GoalFlag extends Entity {
     constructor(x, y) {
-        // ゴールフラグのサイズは60x80ピクセル
-        super(x, y, 60, 80);
+        // ゴールフラグのサイズは16x32ピクセル（地面に設置）
+        super(x, y - 16, 16, 32);  // y座標を調整して地面に接地
         
         // ゴールフラグは重力の影響を受けない
         this.gravity = false;
@@ -54,7 +54,7 @@ export class GoalFlag extends Entity {
         // ゴールフラグのスプライトを描画
         if (renderer.assetLoader && renderer.assetLoader.hasSprite('terrain/goal_flag')) {
             // スプライトのサイズ（16x16）を拡大して描画
-            const scale = 4; // 16x16 -> 64x64
+            const scale = 2; // 16x16 -> 32x32
             
             renderer.ctx.save();
             

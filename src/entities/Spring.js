@@ -19,7 +19,7 @@ export class Spring extends Entity {
         this.solid = true;
         
         // スプリングの設定
-        this.bouncePower = 25; // ジャンプ力
+        this.bouncePower = 16; // ジャンプ力（通常ジャンプの1.6倍）
         this.compression = 0; // 圧縮量（0-1）
         this.triggered = false; // 発動フラグ
         this.animationSpeed = 0.14; // アニメーション速度
