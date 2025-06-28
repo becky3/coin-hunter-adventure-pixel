@@ -21,11 +21,9 @@ export class Coin extends Entity {
         // 収集可能フラグ
         this.collected = false;
         
-        // アニメーション設定
-        this.animationFrames = ['coin_spin1', 'coin_spin2', 'coin_spin3', 'coin_spin4'];
-        this.currentFrame = 0;
-        this.frameDuration = 150; // 各フレーム150ms
-        this.frameTimer = 0;
+        // アニメーション時間
+        this.animationTime = 0;
+        this.flipX = false;
         
         // 浮遊アニメーション
         this.floatOffset = 0;
@@ -44,16 +42,12 @@ export class Coin extends Entity {
     onUpdate(deltaTime) {
         if (this.collected) return;
         
-        // アニメーション更新
-        this.frameTimer += deltaTime;
-        if (this.frameTimer >= this.frameDuration) {
-            this.frameTimer = 0;
-            this.currentFrame = (this.currentFrame + 1) % this.animationFrames.length;
-        }
-        
         // 浮遊アニメーション
         this.floatOffset += this.floatSpeed * deltaTime;
         this.y = this.baseY + Math.sin(this.floatOffset) * this.floatAmplitude;
+        
+        // アニメーション時間を更新
+        this.animationTime += deltaTime;
     }
     
     /**
@@ -63,20 +57,26 @@ export class Coin extends Entity {
     render(renderer) {
         if (!this.visible || this.collected) return;
         
-        // 現在のフレームのスプライトを描画
-        const spriteName = this.animationFrames[this.currentFrame];
-        const sprite = renderer.sprites[`items/${spriteName}`];
-        
-        if (sprite) {
-            renderer.drawSprite(
-                sprite,
-                this.x,
-                this.y,
-                this.spriteScale || 4, // スケール4で描画
-                false
+        // PixelArtRendererを使用してアニメーションを描画
+        if (renderer.pixelArtRenderer) {
+            const screenPos = renderer.worldToScreen(this.x, this.y);
+            
+            // アニメーションキーを使用
+            const animationKey = 'items/coin_spin';
+            
+            // アニメーションを描画
+            renderer.pixelArtRenderer.drawAnimation(
+                animationKey,
+                screenPos.x,
+                screenPos.y,
+                this.animationTime || 0,
+                this.flipX
             );
+            
+            // アニメーション時間を更新
+            this.animationTime = (this.animationTime || 0) + 16.67; // 60FPSを想定
         } else {
-            // スプライトがない場合はデフォルト描画
+            // PixelArtRendererがない場合はデフォルト描画
             this.renderDefault(renderer);
         }
         
@@ -122,7 +122,6 @@ export class Coin extends Entity {
         this.collected = false;
         this.baseY = y;
         this.floatOffset = 0;
-        this.currentFrame = 0;
-        this.frameTimer = 0;
+        this.animationTime = 0;
     }
 }
