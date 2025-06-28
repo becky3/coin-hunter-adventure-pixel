@@ -1,0 +1,50 @@
+{
+  "id": "performance-test",
+  "name": "PERFORMANCE TEST",
+  "width": 20,
+  "height": 15,
+  "tileSize": 16,
+  "backgroundColor": "#5C94FC",
+  "playerSpawn": {
+    "x": 1,
+    "y": 11
+  },
+  "goal": {
+    "x": 18,
+    "y": 11
+  },
+  "timeLimit": 300,
+  "tilemap": [
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ],
+  "tileTypes": {
+    "0": "empty",
+    "1": "ground"
+  },
+  "entities": [
+    {"type": "coin", "x": 1, "y": 2}, {"type": "coin", "x": 2, "y": 2}, {"type": "coin", "x": 3, "y": 2}, {"type": "coin", "x": 4, "y": 2}, {"type": "coin", "x": 5, "y": 2}, {"type": "coin", "x": 6, "y": 2}, {"type": "coin", "x": 7, "y": 2}, {"type": "coin", "x": 8, "y": 2}, {"type": "coin", "x": 9, "y": 2}, {"type": "coin", "x": 10, "y": 2}, {"type": "coin", "x": 11, "y": 2}, {"type": "coin", "x": 12, "y": 2}, {"type": "coin", "x": 13, "y": 2}, {"type": "coin", "x": 14, "y": 2}, {"type": "coin", "x": 15, "y": 2}, {"type": "coin", "x": 16, "y": 2}, {"type": "coin", "x": 17, "y": 2}, {"type": "coin", "x": 18, "y": 2},
+    {"type": "coin", "x": 1, "y": 3}, {"type": "coin", "x": 2, "y": 3}, {"type": "coin", "x": 3, "y": 3}, {"type": "coin", "x": 4, "y": 3}, {"type": "coin", "x": 5, "y": 3}, {"type": "coin", "x": 6, "y": 3}, {"type": "coin", "x": 7, "y": 3}, {"type": "coin", "x": 8, "y": 3}, {"type": "coin", "x": 9, "y": 3}, {"type": "coin", "x": 10, "y": 3}, {"type": "coin", "x": 11, "y": 3}, {"type": "coin", "x": 12, "y": 3}, {"type": "coin", "x": 13, "y": 3}, {"type": "coin", "x": 14, "y": 3}, {"type": "coin", "x": 15, "y": 3}, {"type": "coin", "x": 16, "y": 3}, {"type": "coin", "x": 17, "y": 3}, {"type": "coin", "x": 18, "y": 3},
+    {"type": "coin", "x": 1, "y": 4}, {"type": "coin", "x": 2, "y": 4}, {"type": "coin", "x": 3, "y": 4}, {"type": "coin", "x": 4, "y": 4}, {"type": "coin", "x": 5, "y": 4}, {"type": "coin", "x": 6, "y": 4}, {"type": "coin", "x": 7, "y": 4}, {"type": "coin", "x": 8, "y": 4}, {"type": "coin", "x": 9, "y": 4}, {"type": "coin", "x": 10, "y": 4}, {"type": "coin", "x": 11, "y": 4}, {"type": "coin", "x": 12, "y": 4}, {"type": "coin", "x": 13, "y": 4}, {"type": "coin", "x": 14, "y": 4}, {"type": "coin", "x": 15, "y": 4}, {"type": "coin", "x": 16, "y": 4}, {"type": "coin", "x": 17, "y": 4}, {"type": "coin", "x": 18, "y": 4},
+    {"type": "coin", "x": 1, "y": 5}, {"type": "coin", "x": 2, "y": 5}, {"type": "coin", "x": 3, "y": 5}, {"type": "coin", "x": 4, "y": 5}, {"type": "coin", "x": 5, "y": 5}, {"type": "coin", "x": 6, "y": 5}, {"type": "coin", "x": 7, "y": 5}, {"type": "coin", "x": 8, "y": 5}, {"type": "coin", "x": 9, "y": 5}, {"type": "coin", "x": 10, "y": 5}, {"type": "coin", "x": 11, "y": 5}, {"type": "coin", "x": 12, "y": 5}, {"type": "coin", "x": 13, "y": 5}, {"type": "coin", "x": 14, "y": 5}, {"type": "coin", "x": 15, "y": 5}, {"type": "coin", "x": 16, "y": 5}, {"type": "coin", "x": 17, "y": 5}, {"type": "coin", "x": 18, "y": 5},
+    {"type": "coin", "x": 1, "y": 6}, {"type": "coin", "x": 2, "y": 6}, {"type": "coin", "x": 3, "y": 6}, {"type": "coin", "x": 4, "y": 6}, {"type": "coin", "x": 5, "y": 6}, {"type": "coin", "x": 6, "y": 6}, {"type": "coin", "x": 7, "y": 6}, {"type": "coin", "x": 8, "y": 6}, {"type": "coin", "x": 9, "y": 6}, {"type": "coin", "x": 10, "y": 6}, {"type": "coin", "x": 11, "y": 6}, {"type": "coin", "x": 12, "y": 6}, {"type": "coin", "x": 13, "y": 6}, {"type": "coin", "x": 14, "y": 6}, {"type": "coin", "x": 15, "y": 6}, {"type": "coin", "x": 16, "y": 6}, {"type": "coin", "x": 17, "y": 6}, {"type": "coin", "x": 18, "y": 6},
+    {"type": "coin", "x": 1, "y": 7}, {"type": "coin", "x": 2, "y": 7}, {"type": "coin", "x": 3, "y": 7}, {"type": "coin", "x": 4, "y": 7}, {"type": "coin", "x": 5, "y": 7}, {"type": "coin", "x": 6, "y": 7}, {"type": "coin", "x": 7, "y": 7}, {"type": "coin", "x": 8, "y": 7}, {"type": "coin", "x": 9, "y": 7}, {"type": "coin", "x": 10, "y": 7}, {"type": "coin", "x": 11, "y": 7}, {"type": "coin", "x": 12, "y": 7}, {"type": "coin", "x": 13, "y": 7}, {"type": "coin", "x": 14, "y": 7}, {"type": "coin", "x": 15, "y": 7}, {"type": "coin", "x": 16, "y": 7}, {"type": "coin", "x": 17, "y": 7}, {"type": "coin", "x": 18, "y": 7},
+    {"type": "coin", "x": 1, "y": 8}, {"type": "coin", "x": 2, "y": 8}, {"type": "coin", "x": 3, "y": 8}, {"type": "coin", "x": 4, "y": 8}, {"type": "coin", "x": 5, "y": 8}, {"type": "coin", "x": 6, "y": 8}, {"type": "coin", "x": 7, "y": 8}, {"type": "coin", "x": 8, "y": 8}, {"type": "coin", "x": 9, "y": 8}, {"type": "coin", "x": 10, "y": 8}, {"type": "coin", "x": 11, "y": 8}, {"type": "coin", "x": 12, "y": 8}, {"type": "coin", "x": 13, "y": 8}, {"type": "coin", "x": 14, "y": 8}, {"type": "coin", "x": 15, "y": 8}, {"type": "coin", "x": 16, "y": 8}, {"type": "coin", "x": 17, "y": 8}, {"type": "coin", "x": 18, "y": 8},
+    {"type": "coin", "x": 1, "y": 9}, {"type": "coin", "x": 2, "y": 9}, {"type": "coin", "x": 3, "y": 9}, {"type": "coin", "x": 4, "y": 9}, {"type": "coin", "x": 5, "y": 9}, {"type": "coin", "x": 6, "y": 9}, {"type": "coin", "x": 7, "y": 9}, {"type": "coin", "x": 8, "y": 9}, {"type": "coin", "x": 9, "y": 9}, {"type": "coin", "x": 10, "y": 9}, {"type": "coin", "x": 11, "y": 9}, {"type": "coin", "x": 12, "y": 9}, {"type": "coin", "x": 13, "y": 9}, {"type": "coin", "x": 14, "y": 9}, {"type": "coin", "x": 15, "y": 9}, {"type": "coin", "x": 16, "y": 9}, {"type": "coin", "x": 17, "y": 9}, {"type": "coin", "x": 18, "y": 9},
+    {"type": "coin", "x": 2, "y": 10}, {"type": "coin", "x": 4, "y": 10}, {"type": "coin", "x": 6, "y": 10}, {"type": "coin", "x": 8, "y": 10}, {"type": "coin", "x": 10, "y": 10}, {"type": "coin", "x": 12, "y": 10}, {"type": "coin", "x": 14, "y": 10}, {"type": "coin", "x": 16, "y": 10}, {"type": "coin", "x": 18, "y": 10},
+    {"type": "coin", "x": 3, "y": 11}, {"type": "coin", "x": 6, "y": 11}, {"type": "coin", "x": 9, "y": 11}, {"type": "coin", "x": 12, "y": 11}, {"type": "coin", "x": 15, "y": 11}
+  ]
+}

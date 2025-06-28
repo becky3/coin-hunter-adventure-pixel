@@ -104,9 +104,11 @@ export class AssetLoader {
             { type: 'animation', category: 'player', baseName: 'walk', frameCount: 4 },
             { type: 'animation', category: 'player', baseName: 'jump', frameCount: 2 },
             
+            // アイテム
+            { type: 'animation', category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 200 }, // フレーム持続時間を200msに
+            
             // 以下は後で実装予定（一旦コメントアウト）
             // { type: 'animation', category: 'enemies', baseName: 'slime', frameCount: 2 },
-            // { type: 'animation', category: 'items', baseName: 'coin', frameCount: 4 },
             // { type: 'sprite', category: 'items', name: 'spring' },
             // { type: 'sprite', category: 'terrain', name: 'grass_block' },
             // { type: 'sprite', category: 'terrain', name: 'dirt_block' },

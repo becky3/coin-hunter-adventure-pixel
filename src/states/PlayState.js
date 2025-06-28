@@ -5,6 +5,7 @@ import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants.js';
 import { LevelLoader } from '../levels/LevelLoader.js';
 import { Player } from '../entities/Player.js';
 import { Slime } from '../entities/enemies/Slime.js';
+import { Coin } from '../entities/Coin.js';
 
 export class PlayState {
     constructor(game) {
@@ -80,6 +81,9 @@ export class PlayState {
         // 敵の初期化（テスト用）
         this.initializeEnemies();
         
+        // アイテムの初期化
+        this.initializeItems();
+        
         // 入力の設定
         this.setupInputListeners();
         
@@ -140,6 +144,9 @@ export class PlayState {
         
         // アイテムの更新
         this.items.forEach(item => item.update && item.update(deltaTime));
+        
+        // コイン収集チェック
+        this.checkCoinCollection();
         
         // カメラの更新
         this.updateCamera();
@@ -332,6 +339,60 @@ export class PlayState {
         
         // スプライトの読み込みはPixelArtRenderer統合後に実装
         // TODO: PixelArtRendererを使用してスプライトを読み込む
+    }
+    
+    /**
+     * アイテムの初期化
+     */
+    initializeItems() {
+        // 既存のアイテムをクリア
+        this.items = [];
+        
+        // レベルデータからコインを配置
+        if (this.levelData && this.levelData.entities) {
+            this.levelData.entities.forEach(entity => {
+                if (entity.type === 'coin') {
+                    const coin = new Coin(
+                        entity.x * TILE_SIZE,
+                        entity.y * TILE_SIZE
+                    );
+                    this.items.push(coin);
+                }
+            });
+        }
+    }
+    
+    /**
+     * コイン収集のチェック
+     */
+    checkCoinCollection() {
+        if (!this.player) return;
+        
+        this.items.forEach((item) => {
+            if (item.constructor.name === 'Coin' && !item.collected) {
+                if (item.collidesWith(this.player)) {
+                    // コインを収集
+                    const scoreGained = item.collect();
+                    this.score += scoreGained;
+                    this.coinsCollected++;
+                    
+                    // 効果音を再生
+                    if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
+                        this.game.musicSystem.playCoinSound();
+                    }
+                    
+                    console.log(`Coin collected! Score: ${this.score}, Total coins: ${this.coinsCollected}`);
+                }
+            }
+        });
+        
+        // 収集済みのアイテムを配列から削除
+        this.items = this.items.filter(item => {
+            if (item.constructor.name === 'Coin') {
+                return !item.collected;
+            }
+            return true;
+        });
     }
     
     /**
