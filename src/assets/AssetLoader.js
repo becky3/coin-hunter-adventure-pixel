@@ -26,10 +26,9 @@ export class AssetLoader {
      * 単一スプライトを読み込み
      * @param {string} category - スプライトカテゴリ
      * @param {string} name - スプライト名
-     * @param {number} scale - 描画スケール
      * @returns {Promise<Object>} スプライトデータ
      */
-    async loadSprite(category, name, scale = 4) {
+    async loadSprite(category, name) {
         const key = `${category}/${name}`;
         
         // 既に読み込み済み
@@ -43,7 +42,7 @@ export class AssetLoader {
         }
         
         // 新規読み込み
-        const loadPromise = this._loadSpriteInternal(category, name, scale);
+        const loadPromise = this._loadSpriteInternal(category, name);
         this.loadingPromises.set(key, loadPromise);
         
         try {
@@ -63,11 +62,10 @@ export class AssetLoader {
      * @param {string} category - カテゴリ
      * @param {string} baseName - ベース名（例: "player_walk"）
      * @param {number} frameCount - フレーム数
-     * @param {number} scale - 描画スケール
      * @param {number} frameDuration - フレーム持続時間（ms）
      * @returns {Promise<Object>} アニメーションデータ
      */
-    async loadAnimation(category, baseName, frameCount, scale = 4, frameDuration = 100) {
+    async loadAnimation(category, baseName, frameCount, frameDuration = 100) {
         const key = `${category}/${baseName}_anim`;
         
         if (this.loadedAssets.has(key)) {
@@ -78,7 +76,7 @@ export class AssetLoader {
             return this.loadingPromises.get(key);
         }
         
-        const loadPromise = this._loadAnimationInternal(category, baseName, frameCount, scale, frameDuration);
+        const loadPromise = this._loadAnimationInternal(category, baseName, frameCount, frameDuration);
         this.loadingPromises.set(key, loadPromise);
         
         try {
@@ -107,9 +105,12 @@ export class AssetLoader {
             // アイテム
             { type: 'animation', category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 200 }, // フレーム持続時間を200msに
             
+            // 地形
+            { type: 'sprite', category: 'terrain', name: 'spring' },
+            { type: 'sprite', category: 'terrain', name: 'goal_flag' },
+            
             // 以下は後で実装予定（一旦コメントアウト）
             // { type: 'animation', category: 'enemies', baseName: 'slime', frameCount: 2 },
-            // { type: 'sprite', category: 'items', name: 'spring' },
             // { type: 'sprite', category: 'terrain', name: 'grass_block' },
             // { type: 'sprite', category: 'terrain', name: 'dirt_block' },
             // { type: 'sprite', category: 'terrain', name: 'stone_block' },
@@ -132,7 +133,6 @@ export class AssetLoader {
                     asset.category, 
                     asset.baseName, 
                     asset.frameCount,
-                    asset.scale || 4,
                     asset.frameDuration || 100
                 ).then(() => {
                     if (progressCallback) {
@@ -148,7 +148,7 @@ export class AssetLoader {
     /**
      * 内部的なスプライト読み込み処理
      */
-    async _loadSpriteInternal(category, name, scale) {
+    async _loadSpriteInternal(category, name) {
         const spriteData = await this.spriteLoader.loadSprite(category, name);
         
         if (this.renderer) {
@@ -158,14 +158,12 @@ export class AssetLoader {
             this.renderer.addSprite(
                 `${category}/${name}`,
                 spriteData.data,
-                colors,
-                scale
+                colors
             );
         }
         
         return {
             ...spriteData,
-            scale,
             key: `${category}/${name}`
         };
     }
@@ -173,7 +171,7 @@ export class AssetLoader {
     /**
      * 内部的なアニメーション読み込み処理
      */
-    async _loadAnimationInternal(category, baseName, frameCount, scale, frameDuration) {
+    async _loadAnimationInternal(category, baseName, frameCount, frameDuration) {
         const frames = [];
         
         for (let i = 1; i <= frameCount; i++) {
@@ -190,7 +188,6 @@ export class AssetLoader {
                 `${category}/${baseName}`,
                 frames,
                 colors,
-                scale,
                 frameDuration
             );
         }
@@ -200,7 +197,6 @@ export class AssetLoader {
             frames,
             frameCount,
             frameDuration,
-            scale,
             key: `${category}/${baseName}_anim`
         };
     }
@@ -238,6 +234,15 @@ export class AssetLoader {
      * @returns {boolean}
      */
     isLoaded(key) {
+        return this.loadedAssets.has(key);
+    }
+    
+    /**
+     * スプライトが読み込み済みか確認
+     * @param {string} key - スプライトキー
+     * @returns {boolean}
+     */
+    hasSprite(key) {
         return this.loadedAssets.has(key);
     }
     

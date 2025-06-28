@@ -6,8 +6,8 @@ import { Entity } from './Entity.js';
 
 export class Coin extends Entity {
     constructor(x, y) {
-        // コインのサイズは仕様書通り30x30ピクセル
-        super(x, y, 30, 30);
+        // コインのサイズは16x16ピクセル（統一サイズ）
+        super(x, y, 16, 16);
         
         // コインは重力の影響を受けない
         this.gravity = false;
@@ -57,26 +57,16 @@ export class Coin extends Entity {
     render(renderer) {
         if (!this.visible || this.collected) return;
         
-        // PixelArtRendererを使用してアニメーションを描画
-        if (renderer.pixelArtRenderer) {
-            const screenPos = renderer.worldToScreen(this.x, this.y);
-            
-            // アニメーションキーを使用
-            const animationKey = 'items/coin_spin';
-            
-            // アニメーションを描画
-            renderer.pixelArtRenderer.drawAnimation(
-                animationKey,
-                screenPos.x,
-                screenPos.y,
-                this.animationTime || 0,
-                this.flipX
-            );
-            
-            // アニメーション時間を更新
-            this.animationTime = (this.animationTime || 0) + 16.67; // 60FPSを想定
+        // コインのスプライトを描画
+        // TODO: アニメーション対応が必要
+        const frameNumber = Math.floor(this.animationTime / 200) % 4 + 1;
+        const spriteKey = `items/coin_spin${frameNumber}`;
+        
+        if (renderer.assetLoader && renderer.assetLoader.hasSprite(spriteKey)) {
+            // スプライトを描画
+            renderer.drawSprite(spriteKey, this.x, this.y);
         } else {
-            // PixelArtRendererがない場合はデフォルト描画
+            // フォールバック描画
             this.renderDefault(renderer);
         }
         

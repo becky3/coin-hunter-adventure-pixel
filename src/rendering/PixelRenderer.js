@@ -68,20 +68,42 @@ export class PixelRenderer {
     
     /**
      * スプライトを描画
-     * @param {ImageData|HTMLCanvasElement} sprite - スプライトデータ
+     * @param {ImageData|HTMLCanvasElement|string} sprite - スプライトデータまたはスプライト名
      * @param {number} x - ワールドX座標
      * @param {number} y - ワールドY座標
      * @param {number} scale - 描画スケール
      * @param {boolean} flipX - 水平反転
      */
-    drawSprite(sprite, x, y, scale = 1, flipX = false) {
+    drawSprite(sprite, x, y, flipX = false) {
+        // 文字列の場合はPixelArtRendererまたはassetLoaderから取得
+        if (typeof sprite === 'string') {
+            // まずPixelArtRendererを試す
+            if (this.pixelArtRenderer && this.pixelArtRenderer.sprites.has(sprite)) {
+                const pixelSprite = this.pixelArtRenderer.sprites.get(sprite);
+                const canvas = flipX ? pixelSprite.flippedCanvas : pixelSprite.canvas;
+                sprite = canvas;
+            }
+            // 次にassetLoaderを試す
+            else if (this.assetLoader) {
+                const loadedSprite = this.assetLoader.loadedAssets.get(sprite);
+                if (!loadedSprite) {
+                    // スプライトが読み込まれていない場合はロード
+                    this.assetLoader.loadSprite(...sprite.split('/'));
+                    return;
+                }
+                sprite = loadedSprite.imageData || loadedSprite.canvas;
+                if (!sprite) return;
+            } else {
+                return;
+            }
+        }
         // 整数座標に丸めて、スケールを適用
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
         // 画面外は描画しない（実際のキャンバスサイズで判定）
-        if (drawX + sprite.width * scale * this.scale < 0 || drawX > this.canvasWidth ||
-            drawY + sprite.height * scale * this.scale < 0 || drawY > this.canvasHeight) {
+        if (drawX + sprite.width * this.scale < 0 || drawX > this.canvasWidth ||
+            drawY + sprite.height * this.scale < 0 || drawY > this.canvasHeight) {
             return;
         }
         
@@ -89,7 +111,7 @@ export class PixelRenderer {
         
         if (flipX) {
             // 水平反転（スケールを考慮）
-            this.ctx.translate(drawX + sprite.width * scale * this.scale, drawY);
+            this.ctx.translate(drawX + sprite.width * this.scale, drawY);
             this.ctx.scale(-1, 1);
             this.ctx.translate(-drawX, -drawY);
         }
@@ -100,14 +122,14 @@ export class PixelRenderer {
             this.ctx.drawImage(
                 tempCanvas,
                 0, 0, sprite.width, sprite.height,
-                drawX, drawY, sprite.width * scale * this.scale, sprite.height * scale * this.scale
+                drawX, drawY, sprite.width * this.scale, sprite.height * this.scale
             );
         } else {
             // Canvas要素の場合はそのまま描画
             this.ctx.drawImage(
                 sprite,
                 0, 0, sprite.width, sprite.height,
-                drawX, drawY, sprite.width * scale * this.scale, sprite.height * scale * this.scale
+                drawX, drawY, sprite.width * this.scale, sprite.height * this.scale
             );
         }
         
@@ -115,7 +137,7 @@ export class PixelRenderer {
         
         // デバッグ時は当たり判定ボックスを表示
         if (this.debug) {
-            this.drawDebugBox(drawX, drawY, sprite.width * scale * this.scale, sprite.height * scale * this.scale);
+            this.drawDebugBox(drawX, drawY, sprite.width * this.scale, sprite.height * this.scale);
         }
     }
     
@@ -251,8 +273,7 @@ export class PixelRenderer {
                     this.drawSprite(
                         sprite,
                         x * tileSize * scale,
-                        y * tileSize * scale,
-                        scale
+                        y * tileSize * scale
                     );
                 }
             }

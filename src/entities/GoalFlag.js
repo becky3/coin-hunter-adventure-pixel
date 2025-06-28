@@ -6,8 +6,8 @@ import { Entity } from './Entity.js';
 
 export class GoalFlag extends Entity {
     constructor(x, y) {
-        // ゴールフラグのサイズは32x32ピクセル（地面に設置）
-        super(x, y, 32, 32);
+        // ゴールフラグのサイズは16x16ピクセル
+        super(x, y, 16, 16);
         
         // ゴールフラグは重力の影響を受けない
         this.gravity = false;
@@ -49,46 +49,30 @@ export class GoalFlag extends Entity {
     render(renderer) {
         if (!this.visible) return;
         
-        const screenPos = renderer.worldToScreen(this.x, this.y);
-        
         // ゴールフラグのスプライトを描画
         if (renderer.assetLoader && renderer.assetLoader.hasSprite('terrain/goal_flag')) {
-            // スプライトのサイズ（16x16）を拡大して描画
-            const scale = 2; // 16x16 -> 32x32
-            
-            renderer.ctx.save();
-            
             // 旗のなびき効果を追加
-            if (!this.cleared) {
-                const wave = Math.sin(this.waveOffset) * this.waveAmplitude;
-                renderer.ctx.translate(screenPos.x + wave, screenPos.y);
-            } else {
-                renderer.ctx.translate(screenPos.x, screenPos.y);
-            }
+            const wave = !this.cleared ? Math.sin(this.waveOffset) * this.waveAmplitude : 0;
             
-            renderer.ctx.scale(scale, scale);
-            renderer.drawSprite('terrain/goal_flag', 0, 0);
-            
-            renderer.ctx.restore();
+            // スプライトを描画（既にスケール済みなので追加スケールなし）
+            renderer.drawSprite('terrain/goal_flag', this.x + wave, this.y);
             
             // クリア時のエフェクト
             if (this.cleared) {
+                const screenPos = renderer.worldToScreen(this.x, this.y);
                 this.renderClearEffect(renderer, screenPos);
             }
         } else {
             // デフォルト描画（黄色の旗）
-            renderer.ctx.fillStyle = '#FFD700';
-            renderer.ctx.fillRect(screenPos.x, screenPos.y, this.width, this.height);
+            renderer.drawRect(this.x, this.y, this.width, this.height, '#FFD700');
             
             // ポール
-            renderer.ctx.fillStyle = '#8B4513';
-            renderer.ctx.fillRect(screenPos.x + 10, screenPos.y, 10, this.height);
+            renderer.drawRect(this.x + 10, this.y, 10, this.height, '#8B4513');
             
             // 旗
-            renderer.ctx.fillStyle = '#FF0000';
-            const flagWidth = 40;
-            const flagHeight = 30;
-            renderer.ctx.fillRect(screenPos.x + 20, screenPos.y + 10, flagWidth, flagHeight);
+            const flagWidth = 20;
+            const flagHeight = 15;
+            renderer.drawRect(this.x + 20, this.y + 5, flagWidth, flagHeight, '#FF0000');
         }
         
         // デバッグ描画

@@ -48,6 +48,33 @@ export class PlayState {
         // 入力リスナー
         this.inputListeners = [];
         
+        // デバッグ機能をグローバルに公開
+        if (typeof window !== 'undefined') {
+            window.debugWarp = (x, y) => this.debugWarp(x, y);
+        }
+    }
+    
+    /**
+     * スプライトの事前読み込み
+     */
+    async preloadSprites() {
+        console.log('Preloading sprites...');
+        
+        try {
+            // terrain sprites
+            await this.game.assetLoader.loadSprite('terrain', 'spring');
+            await this.game.assetLoader.loadSprite('terrain', 'goal_flag');
+            
+            // item sprites
+            await this.game.assetLoader.loadSprite('items', 'coin_spin1');
+            await this.game.assetLoader.loadSprite('items', 'coin_spin2');
+            await this.game.assetLoader.loadSprite('items', 'coin_spin3');
+            await this.game.assetLoader.loadSprite('items', 'coin_spin4');
+            
+            console.log('Sprites preloaded successfully');
+        } catch (error) {
+            console.error('Failed to preload sprites:', error);
+        }
     }
     
     /**
@@ -56,6 +83,9 @@ export class PlayState {
      */
     async enter(params = {}) {
         console.log('Entering PlayState', params);
+        
+        // スプライトを事前読み込み
+        await this.preloadSprites();
         
         // 物理システムをクリア
         this.game.physicsSystem.entities.clear();
@@ -385,6 +415,18 @@ export class PlayState {
                 }
             });
         }
+        
+        // テスト用にSpringとGoalFlagを追加
+        if (!this.levelData || this.items.length === 0) {
+            // スプリング（x=5, y=10タイル目）
+            const spring = new Spring(5 * TILE_SIZE, 10 * TILE_SIZE);
+            this.items.push(spring);
+            this.game.physicsSystem.addEntity(spring, this.game.physicsSystem.layers.ITEM);
+            
+            // ゴールフラグ（x=17, y=12タイル目）
+            const goal = new GoalFlag(17 * TILE_SIZE, 12 * TILE_SIZE);
+            this.items.push(goal);
+        }
     }
     
     /**
@@ -658,6 +700,35 @@ export class PlayState {
         // TODO: リザルト画面への遷移を実装
         // 現在は仮実装としてメニューに戻る
         this.game.stateManager.setState('menu');
+    }
+    
+    /**
+     * デバッグ用：指定座標にプレイヤーをワープ
+     * @param {number} x - X座標（タイル単位またはピクセル単位）
+     * @param {number} y - Y座標（タイル単位またはピクセル単位）
+     * @param {boolean} tileCoords - trueの場合タイル座標として扱う
+     */
+    debugWarp(x, y, tileCoords = false) {
+        if (!this.player) {
+            console.warn('Player not found');
+            return;
+        }
+        
+        // タイル座標の場合はピクセル座標に変換
+        const pixelX = tileCoords ? x * TILE_SIZE : x;
+        const pixelY = tileCoords ? y * TILE_SIZE : y;
+        
+        // プレイヤーをワープ
+        this.player.x = pixelX;
+        this.player.y = pixelY;
+        this.player.vx = 0;
+        this.player.vy = 0;
+        this.player.grounded = false;
+        
+        // カメラも追従
+        this.updateCamera();
+        
+        console.log(`Player warped to (${pixelX}, ${pixelY})`);
     }
     
     /**

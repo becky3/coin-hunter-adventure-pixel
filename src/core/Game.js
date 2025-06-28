@@ -41,6 +41,10 @@ export class Game {
         this.pixelArtRenderer = new PixelArtRenderer(canvas);
         this.renderer.pixelArtRenderer = this.pixelArtRenderer;
         
+        // AssetLoaderをrendererに設定
+        this.renderer.assetLoader = this.assetLoader;
+        this.assetLoader.setRenderer(this.pixelArtRenderer);
+        
         // デバッグ用
         this.debug = false;
         window.game = this; // デバッグ用にグローバルに公開
