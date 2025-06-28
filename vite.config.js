@@ -2,6 +2,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     root: '.',
+    resolve: {
+        extensions: ['.ts', '.js', '.json']
+    },
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
