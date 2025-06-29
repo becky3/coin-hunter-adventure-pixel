@@ -57,6 +57,10 @@ export class PixelRenderer {
         this.ctx.restore();
     }
     
+    public getCameraPosition(): { x: number; y: number } {
+        return { x: this.cameraX, y: this.cameraY };
+    }
+
     setCamera(x: number, y: number): void {
         this.cameraX = Math.floor(x);
         this.cameraY = Math.floor(y);

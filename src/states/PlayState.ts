@@ -25,7 +25,7 @@ interface LevelData {
     width: number;
     height: number;
     tileSize: number;
-    spawnPoint: { x: number; y: number };
+    playerSpawn: { x: number; y: number };
     entities?: Array<{ type: string; x: number; y: number }>;
 }
 
@@ -234,8 +234,8 @@ export class PlayState implements GameState {
                 
                 if (this.player.health > 0) {
                     this.player.respawn(
-                        this.levelData!.spawnPoint.x * TILE_SIZE,
-                        this.levelData!.spawnPoint.y * TILE_SIZE
+                        this.levelData!.playerSpawn.x * TILE_SIZE,
+                        this.levelData!.playerSpawn.y * TILE_SIZE
                     );
                 }
             }
@@ -411,9 +411,9 @@ export class PlayState implements GameState {
         let spawnX = 64;
         let spawnY = 160;
         
-        if (this.levelData && this.levelData.spawnPoint) {
-            spawnX = this.levelData.spawnPoint.x * TILE_SIZE;
-            spawnY = this.levelData.spawnPoint.y * TILE_SIZE;
+        if (this.levelData && this.levelData.playerSpawn) {
+            spawnX = this.levelData.playerSpawn.x * TILE_SIZE;
+            spawnY = this.levelData.playerSpawn.y * TILE_SIZE;
         }
         
         this.player = new Player(spawnX, spawnY);
@@ -511,7 +511,7 @@ export class PlayState implements GameState {
         
         this.items.forEach((item) => {
             // コインの処理
-            if (item.constructor.name === 'Coin' && !(item as Coin).collected) {
+            if (item.constructor.name === 'Coin' && !(item as Coin).isCollected()) {
                 if (item.collidesWith(this.player!)) {
                     // コインを収集
                     const scoreGained = (item as Coin).collect();
@@ -528,7 +528,7 @@ export class PlayState implements GameState {
             }
             
             // ゴールフラグの処理
-            else if (item.constructor.name === 'GoalFlag' && !(item as GoalFlag).cleared) {
+            else if (item.constructor.name === 'GoalFlag' && !(item as GoalFlag).isCleared()) {
                 if (item.collidesWith(this.player!)) {
                     // ゴール処理
                     (item as GoalFlag).clear();
@@ -550,7 +550,7 @@ export class PlayState implements GameState {
         // 収集済みのアイテムを配列から削除
         this.items = this.items.filter(item => {
             if (item.constructor.name === 'Coin') {
-                return !(item as Coin).collected;
+                return !(item as Coin).isCollected();
             }
             return true;
         });
