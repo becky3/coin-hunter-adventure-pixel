@@ -1,7 +1,4 @@
-/**
- * スプリング（ばね）クラス
- * プレイヤーを高くジャンプさせるギミック
- */
+
 import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
@@ -34,11 +31,7 @@ export class Spring extends Entity {
         
         this.physicsSystem = null;
     }
-    
-    /**
-     * スプリングの更新処理
-     * @param deltaTime - 経過時間(ms)
-     */
+
     onUpdate(deltaTime: number): void {
         if (this.compression > 0) {
             this.compression *= 0.9;
@@ -64,10 +57,7 @@ export class Spring extends Entity {
             }
         }
     }
-    
-    /**
-     * プレイヤーとの接触をチェックして、必要ならジャンプさせる
-     */
+
     checkPlayerContact(): void {
         
         if (!this.physicsSystem) return;
@@ -101,8 +91,7 @@ export class Spring extends Entity {
                 
                 this.compression = 1;
                 this.triggered = true;
-                
-                
+
                 if (this.physicsSystem && this.physicsSystem.entities) {
                     // TODO: Implement sound effect playback
                 }
@@ -117,11 +106,7 @@ export class Spring extends Entity {
             }
         }
     }
-    
-    /**
-     * スプリングの描画
-     * @param renderer
-     */
+
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
@@ -149,11 +134,7 @@ export class Spring extends Entity {
             this.renderDebug(renderer);
         }
     }
-    
-    /**
-     * プレイヤーとの衝突時の処理
-     * @param collisionInfo - 衝突情報（PhysicsSystemから渡される）
-     */
+
     onCollision(collisionInfo?: CollisionInfo): boolean {
         if (!collisionInfo) return false;
         
@@ -172,19 +153,13 @@ export class Spring extends Entity {
                 
                 this.compression = 1;
                 this.triggered = true;
-                
-                
+
                 return true;
             }
         }
         return false;
     }
-    
-    /**
-     * リセット処理
-     * @param x - X座標
-     * @param y - Y座標
-     */
+
     reset(x: number, y: number): void {
         super.reset(x, y);
         this.compression = 0;

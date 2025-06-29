@@ -1,55 +1,20 @@
 
-// src/services/ServiceLocator.ts
 
-/**
- * サービスを管理するためのServiceLocatorインターフェース
- */
 export interface IServiceLocator {
-    /**
-     * サービスを登録する
-     * @param name サービス名
-     * @param service サービスインスタンス
-     * @param override 既存のサービスを上書きするか（デフォルト: false）
-     */
+    
     register<T>(name: string, service: T, override?: boolean): void;
-    
-    /**
-     * サービスを取得する
-     * @param name サービス名
-     * @returns サービスインスタンス
-     * @throws Error サービスが見つからない場合
-     */
+
     get<T>(name: string): T;
-    
-    /**
-     * サービスを安全に取得する（存在しない場合はundefined）
-     * @param name サービス名
-     * @returns サービスインスタンスまたはundefined
-     */
+
     tryGet<T>(name: string): T | undefined;
-    
-    /**
-     * サービスが登録されているか確認する
-     * @param name サービス名
-     * @returns 登録されている場合true
-     */
+
     has(name: string): boolean;
-    
-    /**
-     * サービスの登録を解除する
-     * @param name サービス名
-     */
+
     unregister(name: string): void;
-    
-    /**
-     * すべてのサービスをクリアする
-     */
+
     clear(): void;
 }
 
-/**
- * ServiceLocatorの実装
- */
 export class ServiceLocator implements IServiceLocator {
     private services: Map<string, any> = new Map();
     
@@ -85,5 +50,4 @@ export class ServiceLocator implements IServiceLocator {
     }
 }
 
-// シングルトンインスタンス（オプション）
 export const serviceLocator = new ServiceLocator();

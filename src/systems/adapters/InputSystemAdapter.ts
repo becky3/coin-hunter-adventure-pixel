@@ -1,5 +1,4 @@
 
-// src/systems/adapters/InputSystemAdapter.ts
 
 import { ISystem } from '../../services/SystemManager';
 import { SystemPriorities } from '../../services/SystemPriorities';

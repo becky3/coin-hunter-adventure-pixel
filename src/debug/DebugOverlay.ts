@@ -1,5 +1,4 @@
 
-// src/debug/DebugOverlay.ts
 
 import { ServiceLocator } from '../services/ServiceLocator';
 import { ServiceNames } from '../services/ServiceNames';
@@ -17,26 +16,19 @@ export class DebugOverlay {
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
     }
-    
-    /**
-     * デバッグオーバーレイの初期化
-     */
+
     async init(): Promise<void> {
         this.createDebugUI();
         this.setupEventListeners();
     }
-    
-    /**
-     * デバッグUIの作成
-     */
+
     private createDebugUI(): void {
-        // 既存のデバッグ要素があれば削除
+
         const existingDebug = document.getElementById('debug-info');
         if (existingDebug) {
             existingDebug.remove();
         }
-        
-        // デバッグコンテナの作成
+
         this.debugElement = document.createElement('div');
         this.debugElement.id = 'debug-info';
         this.debugElement.style.cssText = `
@@ -52,8 +44,7 @@ export class DebugOverlay {
             z-index: 1000;
             pointer-events: none;
         `;
-        
-        // 統計情報の要素を作成
+
         const stats = ['FPS', 'Entities', 'State', 'Camera', 'Input'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
@@ -64,20 +55,14 @@ export class DebugOverlay {
         
         document.body.appendChild(this.debugElement);
     }
-    
-    /**
-     * イベントリスナーの設定
-     */
+
     private setupEventListeners(): void {
         const eventBus = this.serviceLocator.get<EventBus>(ServiceNames.EVENT_BUS);
-        
-        // ステート変更イベント
+
         eventBus.on(GameEvents.STATE_CHANGE, (data) => {
             this.updateStat('state', data.to);
         });
-        
-        // キー入力の表示設定
-        // F3キーでデバッグ表示の切り替え
+
         window.addEventListener('keydown', (e) => {
             if (e.key === 'F3') {
                 e.preventDefault();
@@ -85,10 +70,7 @@ export class DebugOverlay {
             }
         });
     }
-    
-    /**
-     * フレーム更新（FPS計算）
-     */
+
     update(_deltaTime: number): void {
         this.frameCount++;
         const currentTime = performance.now();
@@ -99,29 +81,23 @@ export class DebugOverlay {
             this.lastFrameTime = currentTime;
             this.updateStat('fps', this.fps.toString());
         }
-        
-        // その他の統計情報を更新
+
         this.updateStats();
     }
-    
-    /**
-     * 統計情報の更新
-     */
+
     private updateStats(): void {
-        // エンティティ数の更新
+
         const physicsSystem = this.serviceLocator.tryGet(ServiceNames.PHYSICS) as any;
         if (physicsSystem && physicsSystem.entities) {
             this.updateStat('entities', physicsSystem.entities.size.toString());
         }
-        
-        // カメラ位置の更新
+
         const renderer = this.serviceLocator.tryGet(ServiceNames.RENDERER) as any;
         if (renderer && renderer.getCameraPosition) {
             const pos = renderer.getCameraPosition();
             this.updateStat('camera', `${Math.floor(pos.x)}, ${Math.floor(pos.y)}`);
         }
-        
-        // 入力状態の更新
+
         const inputSystem = this.serviceLocator.tryGet(ServiceNames.INPUT) as any;
         if (inputSystem) {
             const keys: string[] = [];
@@ -131,30 +107,21 @@ export class DebugOverlay {
             this.updateStat('input', keys.join(' ') || 'none');
         }
     }
-    
-    /**
-     * 統計情報の更新
-     */
+
     private updateStat(name: string, value: string): void {
         const element = this.statsElements.get(name);
         if (element) {
             element.textContent = value;
         }
     }
-    
-    /**
-     * デバッグ表示の切り替え
-     */
+
     private toggleVisibility(): void {
         if (this.debugElement) {
             this.debugElement.style.display = 
                 this.debugElement.style.display === 'none' ? 'block' : 'none';
         }
     }
-    
-    /**
-     * クリーンアップ
-     */
+
     destroy(): void {
         if (this.debugElement) {
             this.debugElement.remove();

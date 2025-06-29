@@ -1,4 +1,4 @@
-// Type definitions
+
 export type InputEventType = 'keyPress' | 'keyRelease' | 'keyHold';
 export type ActionName = 'left' | 'right' | 'up' | 'down' | 'jump' | 'action' | 'escape' | 'mute' | 'debug';
 

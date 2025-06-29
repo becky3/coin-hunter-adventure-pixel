@@ -205,8 +205,7 @@ export class MenuState implements GameState {
         
         renderer.ctx.globalAlpha = prevAlpha;
     }
-    
-    
+
     private renderHowToPlay(renderer: PixelRenderer): void {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         renderer.drawTextCentered('HOW TO PLAY', centerX, 24, '#FFD700');

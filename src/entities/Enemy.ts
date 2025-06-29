@@ -1,6 +1,4 @@
-/**
- * 敵キャラクターの基底クラス
- */
+
 import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
@@ -46,11 +44,7 @@ export class Enemy extends Entity {
         
         this.canJump = false;
     }
-    
-    /**
-     * 更新処理
-     * @param deltaTime - 前フレームからの経過時間
-     */
+
     update(deltaTime: number): void {
         if (!this.active) return;
         
@@ -66,20 +60,11 @@ export class Enemy extends Entity {
         
         super.update(deltaTime);
     }
-    
-    /**
-     * AI更新処理（子クラスでオーバーライド）
-     * @param deltaTime - 前フレームからの経過時間
-     */
+
     protected updateAI(_deltaTime: number): void {
-        // Override in subclasses
+
     }
-    
-    /**
-     * ダメージを受ける
-     * @param amount - ダメージ量
-     * @param source - ダメージソース
-     */
+
     takeDamage(amount: number, source: { x?: number; y?: number } | null = null): void {
         if (this.invincibleTime > 0) return;
         
@@ -99,28 +84,18 @@ export class Enemy extends Entity {
             }
         }
     }
-    
-    /**
-     * 死亡処理
-     */
+
     die(): void {
         this.state = 'dead';
         this.active = false;
         
         this.onDeath();
     }
-    
-    /**
-     * 死亡時の処理（子クラスでオーバーライド）
-     */
+
     protected onDeath(): void {
-        // Override in subclasses
+
     }
-    
-    /**
-     * プレイヤーとの衝突処理
-     * @param player - プレイヤー
-     */
+
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || !this.active || player.invulnerable) return;
         
@@ -141,19 +116,12 @@ export class Enemy extends Entity {
             }
         }
     }
-    
-    /**
-     * 壁との衝突処理
-     */
+
     onCollisionWithWall(): void {
         this.direction *= -1;
         this.facingRight = !this.facingRight;
     }
-    
-    /**
-     * 衝突ハンドラ（PhysicsSystemから呼ばれる）
-     * @param collisionInfo - 衝突情報
-     */
+
     onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo || !collisionInfo.other) return;
         
@@ -161,20 +129,12 @@ export class Enemy extends Entity {
             this.onCollisionWithPlayer(collisionInfo.other as unknown as Player);
         }
     }
-    
-    /**
-     * 崖の検知
-     * @returns 崖があるかどうか
-     */
+
     checkCliff(): boolean {
         // TODO: PhysicsSystemと連携して実装
         return false;
     }
-    
-    /**
-     * 描画処理
-     * @param renderer - レンダラー
-     */
+
     render(renderer: PixelRenderer): void {
         if (!this.active) return;
         
@@ -184,11 +144,7 @@ export class Enemy extends Entity {
         
         super.render(renderer);
     }
-    
-    /**
-     * デバッグ情報の描画
-     * @param renderer - レンダラー
-     */
+
     renderDebug(renderer: PixelRenderer): void {
         super.renderDebug(renderer);
         

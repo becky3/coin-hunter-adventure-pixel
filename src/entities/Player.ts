@@ -289,7 +289,7 @@ export class Player extends Entity {
         
         if (this.musicSystem) {
             // TODO: Add playPlayerDeathSound to MusicSystem
-            // this.musicSystem.playPlayerDeathSound();
+
         }
     }
     

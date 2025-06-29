@@ -1,7 +1,4 @@
-/**
- * コインクラス
- * 収集可能なアイテム
- */
+
 import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 
@@ -35,11 +32,7 @@ export class Coin extends Entity {
         
         this.scoreValue = 10;
     }
-    
-    /**
-     * コインの更新処理
-     * @param deltaTime - 経過時間(ms)
-     */
+
     onUpdate(deltaTime: number): void {
         if (this.collected) return;
         
@@ -48,11 +41,7 @@ export class Coin extends Entity {
         
         this.animationTime += deltaTime;
     }
-    
-    /**
-     * コインの描画
-     * @param renderer
-     */
+
     render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
@@ -75,10 +64,6 @@ export class Coin extends Entity {
         return this.collected;
     }
 
-    /**
-     * コインを収集
-     * @returns 獲得スコア
-     */
     collect(): number {
         if (this.collected) return 0;
         
@@ -88,11 +73,7 @@ export class Coin extends Entity {
         
         return this.scoreValue;
     }
-    
-    /**
-     * プレイヤーとの衝突時の処理
-     * @param collisionInfo - 衝突情報
-     */
+
     onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo || !collisionInfo.other) return;
         
@@ -100,12 +81,7 @@ export class Coin extends Entity {
             // TODO: コイン収集処理を実装
         }
     }
-    
-    /**
-     * リセット処理
-     * @param x - X座標
-     * @param y - Y座標
-     */
+
     reset(x: number, y: number): void {
         super.reset(x, y);
         this.collected = false;

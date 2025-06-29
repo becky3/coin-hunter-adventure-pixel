@@ -107,13 +107,7 @@ export class AssetLoader {
             
             { type: 'sprite', category: 'terrain', name: 'spring' },
             { type: 'sprite', category: 'terrain', name: 'goal_flag' },
-            
-            // { type: 'animation', category: 'enemies', baseName: 'slime', frameCount: 2 },
-            // { type: 'sprite', category: 'terrain', name: 'grass_block' },
-            // { type: 'sprite', category: 'terrain', name: 'dirt_block' },
-            // { type: 'sprite', category: 'terrain', name: 'stone_block' },
-            // { type: 'sprite', category: 'ui', name: 'heart_full' },
-            // { type: 'sprite', category: 'ui', name: 'heart_empty' }
+
         ];
         
         this.totalAssets = assetsToLoad.length;

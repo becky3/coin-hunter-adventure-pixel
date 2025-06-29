@@ -1,5 +1,4 @@
 
-// src/systems/adapters/RenderSystemAdapter.ts
 
 import { ISystem } from '../../services/SystemManager';
 import { SystemPriorities } from '../../services/SystemPriorities';
@@ -16,10 +15,9 @@ export class RenderSystemAdapter implements ISystem {
     ) {}
     
     render(renderer: PixelRenderer): void {
-        // レンダラーのクリア
+
         renderer.clear('#000000');
-        
-        // 現在のステートの描画
+
         this.stateManager.render(renderer);
     }
 }

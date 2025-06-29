@@ -1,7 +1,4 @@
-/**
- * ゴールフラグクラス
- * ステージクリアのトリガー
- */
+
 import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 
@@ -28,11 +25,7 @@ export class GoalFlag extends Entity {
         this.waveSpeed = 0.003;
         this.waveAmplitude = 5;
     }
-    
-    /**
-     * ゴールフラグの更新処理
-     * @param deltaTime - 経過時間(ms)
-     */
+
     onUpdate(deltaTime: number): void {
         if (this.cleared) return;
         
@@ -40,11 +33,7 @@ export class GoalFlag extends Entity {
         
         this.animationTime += deltaTime;
     }
-    
-    /**
-     * ゴールフラグの描画
-     * @param renderer
-     */
+
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
@@ -71,12 +60,7 @@ export class GoalFlag extends Entity {
             this.renderDebug(renderer);
         }
     }
-    
-    /**
-     * クリアエフェクトの描画
-     * @param renderer
-     * @param screenPos - スクリーン座標
-     */
+
     private renderClearEffect(renderer: PixelRenderer, screenPos: { x: number; y: number }): void {
         const time = this.animationTime * 0.001;
         const radius = 30 + Math.sin(time * 2) * 10;
@@ -95,11 +79,7 @@ export class GoalFlag extends Entity {
         renderer.ctx.fill();
         renderer.ctx.restore();
     }
-    
-    /**
-     * プレイヤーとの衝突時の処理
-     * @param collisionInfo - 衝突情報
-     */
+
     onCollision(collisionInfo?: CollisionInfo): boolean {
         if (!collisionInfo || !collisionInfo.other) return false;
         
@@ -113,18 +93,10 @@ export class GoalFlag extends Entity {
         return this.cleared;
     }
 
-    /**
-     * ゴールフラグをクリア状態にする
-     */
     clear(): void {
         this.cleared = true;
     }
-    
-    /**
-     * リセット処理
-     * @param x - X座標
-     * @param y - Y座標
-     */
+
     reset(x: number, y: number): void {
         super.reset(x, y);
         this.cleared = false;

@@ -36,88 +36,58 @@ export class Slime extends Enemy {
         if (this.jumpCooldown > 0) {
             this.jumpCooldown -= deltaTime;
         }
-        
-        // 移動とジャンプ
+
         if (this.grounded) {
-            // 左右移動
+
             this.vx = this.moveSpeed * this.direction;
-            
-            // 定期的にジャンプ
+
             if (this.jumpCooldown <= 0) {
                 this.jump();
                 this.jumpCooldown = this.jumpInterval;
             }
-            
-            // アニメーション設定
+
             this.animState = 'move';
         } else {
-            // 空中ではジャンプアニメーション
+
             this.animState = 'jump';
         }
-        
-        // 崖や壁の検知は現在無効化
+
         // TODO: PhysicsSystemのレイキャスト実装後に有効化
-        // if (this.checkWallAhead() || this.checkCliffAhead()) {
-        //     this.onCollisionWithWall();
-        // }
+
     }
-    
-    /**
-     * ジャンプ処理
-     */
+
     private jump(): void {
         if (this.grounded) {
             this.vy = -this.jumpHeight;
             this.grounded = false;
         }
     }
-    
-    /**
-     * 前方の壁をチェック
-     * @returns 壁があるかどうか
-     */
+
     checkWallAhead(): boolean {
         // TODO: PhysicsSystemのレイキャストを使用
-        // 仮実装: 現在は常にfalseを返す
+
         return false;
     }
-    
-    /**
-     * 前方の崖をチェック
-     * @returns 崖があるかどうか
-     */
+
     checkCliffAhead(): boolean {
         // TODO: PhysicsSystemのレイキャストを使用
-        // 仮実装: 現在は常にfalse
+
         return false;
     }
-    
-    /**
-     * 地面との衝突処理
-     */
+
     onGroundCollision(): void {
-        // super.onGroundCollision(); // Method doesn't exist in base class
-        
-        // スライムは着地時に少し弾む
-        // 注: この処理は現在無効化（物理システムとの競合を避けるため）
+
         // TODO: PhysicsSystemでバウンス処理を実装
     }
-    
-    /**
-     * 死亡時の処理
-     */
+
     protected onDeath(): void {
-        // スライムが潰れるエフェクト
+
         console.log('Slime defeated!');
         
         // TODO: 死亡エフェクトの生成
         // TODO: アイテムドロップ（コインなど）
     }
-    
-    /**
-     * 描画処理
-     * @param renderer - レンダラー
-     */
+
     render(renderer: PixelRenderer): void {
         if (!this.active) return;
         
