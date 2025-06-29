@@ -95,9 +95,20 @@ export class MenuState implements GameState {
                 const isValidJump = event.action === 'jump' && event.key === 'Space';
                 const isValidAction = event.action === 'action';
                 
+                console.log('MenuState: keyPress event', {
+                    action: event.action,
+                    key: event.key,
+                    isValidJump,
+                    isValidAction,
+                    optionsAlpha: this.optionsAlpha,
+                    showHowTo: this.showHowTo,
+                    showCredits: this.showCredits
+                });
+                
                 if ((isValidAction || isValidJump) && 
                     !this.showHowTo && !this.showCredits && 
                     this.optionsAlpha >= 1) {
+                    console.log('MenuState: Executing option...');
                     setTimeout(() => {
                         this.executeOption();
                     }, 0);
