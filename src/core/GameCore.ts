@@ -101,6 +101,10 @@ export class GameCore {
         }
 
         await systemManager.initSystems();
+
+        // MusicSystemの初期化
+        const musicSystem = this._serviceLocator.get<MusicSystem>(ServiceNames.AUDIO);
+        await musicSystem.init();
     }
 
     private registerStates(): void {
@@ -142,5 +146,9 @@ export class GameCore {
 
     get serviceLocator(): ServiceLocator {
         return this._serviceLocator;
+    }
+
+    get stateManager(): GameStateManager {
+        return this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
     }
 }
