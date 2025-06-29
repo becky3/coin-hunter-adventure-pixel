@@ -163,11 +163,11 @@ main                    # 本番環境
 ### 例
 
 **良い例**:
-```javascript
+```typescript
 /**
  * プレイヤーキャラクターを制御するクラス
  */
-class Player extends Entity {
+export class Player extends Entity {
     // TODO: ダッシュ機能を実装
     
     // ジャンプ力の計算式：初速度 = sqrt(2 * 重力 * 最大高さ)
@@ -176,8 +176,8 @@ class Player extends Entity {
 ```
 
 **悪い例**:
-```javascript
-class Player extends Entity {
+```typescript
+export class Player extends Entity {
     // プレイヤーのX座標
     this.x = x;
     
@@ -185,7 +185,7 @@ class Player extends Entity {
     this.x += speed;
     
     // ジャンプ処理
-    jump() {
+    jump(): void {
         // 速度を上向きに設定
         this.vy = -12;
     }
@@ -200,7 +200,7 @@ class Player extends Entity {
 - クラスのソースコードを直接確認
 
 ### 5.2 防御的プログラミング
-```javascript
+```typescript
 // メソッドの存在チェック
 if (renderer.hasSprite && !renderer.hasSprite(key)) {
     // フォールバック処理
@@ -211,6 +211,12 @@ const value = obj?.property?.method?.();
 
 // デフォルト値
 const items = state.items || [];
+
+// TypeScriptの型ガード
+if (entity instanceof Player) {
+    // Player固有のメソッドを安全に呼び出し
+    entity.jump();
+}
 ```
 
 ### 5.3 エラーハンドリング

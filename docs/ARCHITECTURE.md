@@ -209,23 +209,22 @@ Entity
 - **衝突判定**: AABBベース
 
 ### エンティティ物理プロパティ
-```javascript
-{
-    position: { x, y },
-    velocity: { x, y },
-    acceleration: { x, y },
-    bounds: { width, height },
-    solid: boolean,
-    gravity: boolean
+```typescript
+interface PhysicsEntity extends Entity {
+    vx: number;
+    vy: number;
+    grounded: boolean;
+    physicsLayer?: PhysicsLayer;
+    onCollision?: (other: Entity, info: CollisionInfo) => void;
 }
 ```
 
 ## 8. 音声システム
 
 ### 構成
-- **AudioManager**: 全体の音量管理、ミュート制御
-- **Music**: BGM管理（ループ、フェード）
-- **SoundEffect**: 効果音管理（同時再生数制限）
+- **MusicSystem**: BGM・効果音の統合管理
+- Web Audio APIを使用したプログラム音源
+- BGMループ、効果音再生、ミュート制御
 
 ## 9. エラーハンドリング方針
 
