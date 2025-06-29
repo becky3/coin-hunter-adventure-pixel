@@ -2,10 +2,21 @@
  * スプリング（ばね）クラス
  * プレイヤーを高くジャンプさせるギミック
  */
-import { Entity } from './Entity';
+import { Entity, CollisionInfo } from './Entity';
+import { Player } from './Player';
+import { PixelRenderer } from '../rendering/PixelRenderer';
+import { PhysicsSystem } from '../physics/PhysicsSystem';
 
 export class Spring extends Entity {
-    constructor(x, y) {
+    private bouncePower: number;
+    private compression: number;
+    public triggered: boolean;
+    private animationSpeed: number;
+    declare animationTime: number;
+    public physicsSystem: PhysicsSystem | null;
+    private _debugCount?: number;
+
+    constructor(x: number, y: number) {
         super(x, y, 16, 16);
         
         this.gravity = false;
@@ -26,9 +37,9 @@ export class Spring extends Entity {
     
     /**
      * スプリングの更新処理
-     * @param {number} deltaTime - 経過時間(ms)
+     * @param deltaTime - 経過時間(ms)
      */
-    onUpdate(deltaTime) {
+    onUpdate(deltaTime: number): void {
         if (this.compression > 0) {
             this.compression *= 0.9;
             if (this.compression < 0.01) {
@@ -43,7 +54,7 @@ export class Spring extends Entity {
         
         if (this.triggered && this.physicsSystem) {
             const entities = Array.from(this.physicsSystem.entities);
-            const player = entities.find(e => e.constructor.name === 'Player');
+            const player = entities.find(e => e.constructor.name === 'Player') as unknown as Player | undefined;
             if (player) {
                 const playerBottom = player.y + player.height;
                 const notTouching = playerBottom < this.y - 5 || player.y > this.y + this.height;
@@ -58,12 +69,12 @@ export class Spring extends Entity {
     /**
      * プレイヤーとの接触をチェックして、必要ならジャンプさせる
      */
-    checkPlayerContact() {
+    checkPlayerContact(): void {
         
         if (!this.physicsSystem) return;
         
         const entities = Array.from(this.physicsSystem.entities);
-        const player = entities.find(e => e.constructor.name === 'Player');
+        const player = entities.find(e => e.constructor.name === 'Player') as Player | undefined;
         if (!player) return;
         
         const playerBounds = player.getBounds();
@@ -118,9 +129,9 @@ export class Spring extends Entity {
     
     /**
      * スプリングの描画
-     * @param {PixelRenderer} renderer 
+     * @param renderer
      */
-    render(renderer) {
+    render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
         if (renderer.assetLoader && renderer.assetLoader.hasSprite('terrain/spring')) {
@@ -150,20 +161,23 @@ export class Spring extends Entity {
     
     /**
      * プレイヤーとの衝突時の処理
-     * @param {Object} collisionInfo - 衝突情報（PhysicsSystemから渡される）
+     * @param collisionInfo - 衝突情報（PhysicsSystemから渡される）
      */
-    onCollision(collisionInfo) {
+    onCollision(collisionInfo?: CollisionInfo): boolean {
+        if (!collisionInfo) return false;
+        
         const other = collisionInfo.other;
         
         if (other && other.constructor.name === 'Player') {
+            const player = other as unknown as Player;
             const fromTop = collisionInfo.side === 'top' || 
-                          (other.y + other.height <= this.y + 8 && other.vy > 0);
+                          (player.y + player.height <= this.y + 8 && player.vy > 0);
             
-            if (fromTop && other.vy > 0) {
-                other.y = this.y - other.height;
+            if (fromTop && player.vy > 0) {
+                player.y = this.y - player.height;
                 
-                other.vy = -this.bouncePower;
-                other.grounded = false;
+                player.vy = -this.bouncePower;
+                player.grounded = false;
                 
                 this.compression = 1;
                 this.triggered = true;
@@ -178,10 +192,10 @@ export class Spring extends Entity {
     
     /**
      * リセット処理
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
+     * @param x - X座標
+     * @param y - Y座標
      */
-    reset(x, y) {
+    reset(x: number, y: number): void {
         super.reset(x, y);
         this.compression = 0;
         this.triggered = false;

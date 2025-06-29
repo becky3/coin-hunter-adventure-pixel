@@ -2,7 +2,11 @@
  * プレイヤーエンティティ
  * プレイヤーキャラクターの動作を管理
  */
-import { Entity } from './Entity';
+import { Entity, CollisionInfo } from './Entity';
+import { InputSystem } from '../core/InputSystem';
+import { MusicSystem } from '../audio/MusicSystem.js';
+import { AssetLoader } from '../assets/AssetLoader';
+import { PixelRenderer } from '../rendering/PixelRenderer';
 
 const PLAYER_CONFIG = {
     width: 16,
@@ -17,7 +21,7 @@ const PLAYER_CONFIG = {
     spawnY: 300,
     knockbackVertical: -5,
     knockbackHorizontal: 3
-};
+} as const;
 
 const ANIMATION_CONFIG = {
     speed: {
@@ -32,10 +36,56 @@ const ANIMATION_CONFIG = {
         jump: 1,
         fall: 1
     }
-};
+} as const;
+
+type AnimationState = 'idle' | 'walk' | 'jump' | 'fall';
+type Facing = 'left' | 'right';
+
+interface PlayerState {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    health: number;
+    maxHealth: number;
+    isDead: boolean;
+    invulnerable: boolean;
+    facing: Facing;
+    animState: AnimationState;
+    animFrame: number;
+    score: number;
+    coins: number;
+    grounded: boolean;
+    isJumping: boolean;
+}
 
 export class Player extends Entity {
-    constructor(x = PLAYER_CONFIG.spawnX, y = PLAYER_CONFIG.spawnY) {
+    public speed: number;
+    public jumpPower: number;
+    public spriteKey: string | null;
+    public health: number;
+    public maxHealth: number;
+    public isDead: boolean;
+    public invulnerable: boolean;
+    public invulnerabilityTime: number;
+    public facing: Facing;
+    public animState: AnimationState;
+    public animFrame: number;
+    public animTimer: number;
+    public isJumping: boolean;
+    public jumpButtonPressed: boolean;
+    public jumpTime: number;
+    public canVariableJump: boolean;
+    public jumpButtonHoldTime: number;
+    public jumpMaxHeight: number;
+    public jumpStartY: number;
+    public score: number;
+    public coins: number;
+    private inputManager: InputSystem | null;
+    private musicSystem: MusicSystem | null;
+    private assetLoader: AssetLoader | null;
+
+    constructor(x: number = PLAYER_CONFIG.spawnX, y: number = PLAYER_CONFIG.spawnY) {
         super(x, y, PLAYER_CONFIG.width, PLAYER_CONFIG.height);
         
         this.speed = PLAYER_CONFIG.speed;
@@ -75,48 +125,47 @@ export class Player extends Entity {
     
     /**
      * 入力マネージャーを設定
-     * @param {InputManager} inputManager 
      */
-    setInputManager(inputManager) {
+    setInputManager(inputManager: InputSystem): void {
         this.inputManager = inputManager;
     }
     
     /**
      * 音楽システムを設定
-     * @param {MusicSystem} musicSystem 
      */
-    setMusicSystem(musicSystem) {
+    setMusicSystem(musicSystem: MusicSystem): void {
         this.musicSystem = musicSystem;
     }
     
     /**
      * アセットローダーを設定
-     * @param {AssetLoader} assetLoader 
      */
-    setAssetLoader(assetLoader) {
+    setAssetLoader(assetLoader: AssetLoader): void {
         this.assetLoader = assetLoader;
     }
     
     /**
      * 更新処理
-     * @param {number} deltaTime - 経過時間
+     * @param deltaTime - 経過時間
      */
-    onUpdate(deltaTime) {
+    update(deltaTime: number): void {
+        super.update(deltaTime);
+        
         if (this.isDead) return;
         
+        if (!this.inputManager) return;
+        
         const input = {
-            left: this.inputManager ? this.inputManager.isActionPressed('left') : false,
-            right: this.inputManager ? this.inputManager.isActionPressed('right') : false,
-            jump: this.inputManager ? this.inputManager.isActionPressed('jump') : false,
-            jumpJustPressed: this.inputManager ? this.inputManager.isActionJustPressed('jump') : false
+            left: this.inputManager.isActionPressed('left'),
+            right: this.inputManager.isActionPressed('right'),
+            jump: this.inputManager.isActionPressed('jump'),
+            action: this.inputManager.isActionPressed('action')
         };
         
         this.handleMovement(input);
-        
-        this.handleJump(input);
+        this.handleJump(input, deltaTime);
         
         this.updateAnimationState();
-        
         this.updateAnimationFrame(deltaTime);
         
         if (this.invulnerable) {
@@ -126,25 +175,19 @@ export class Player extends Entity {
                 this.invulnerabilityTime = 0;
             }
         }
-        
-        if (this.y > 1000) {
-            this.takeDamage(this.maxHealth);
-        }
     }
     
     /**
      * 移動処理
-     * @param {Object} input - 入力状態
+     * @param input - 入力状態
      */
-    handleMovement(input) {
+    private handleMovement(input: { left: boolean; right: boolean; jump: boolean; action: boolean }): void {
         if (input.left) {
             this.vx = -this.speed;
             this.facing = 'left';
-            this.flipX = true;
         } else if (input.right) {
             this.vx = this.speed;
             this.facing = 'right';
-            this.flipX = false;
         } else {
             this.vx *= 0.8;
             if (Math.abs(this.vx) < 0.1) {
@@ -155,48 +198,28 @@ export class Player extends Entity {
     
     /**
      * ジャンプ処理
-     * @param {Object} input - 入力状態
+     * @param input - 入力状態
+     * @param deltaTime - 経過時間
      */
-    handleJump(input) {
-        if (input.jump && window.game?.debug) {
-            console.log('Jump button pressed!', {
-                jumpButtonPressed: this.jumpButtonPressed,
-                grounded: this.grounded,
-                y: this.y,
-                vy: this.vy
-            });
-        }
-        
-        if (input.jumpJustPressed && this.grounded) {
-            if (window.game?.debug) {
-                console.log('JUMP! vy before:', this.vy, 'jumpPower:', this.jumpPower);
-            }
+    private handleJump(input: { left: boolean; right: boolean; jump: boolean; action: boolean }, deltaTime: number): void {
+        if (input.jump && !this.jumpButtonPressed && this.grounded) {
             this.vy = -this.jumpPower;
-            this.grounded = false;
             this.isJumping = true;
             this.jumpButtonPressed = true;
             this.jumpTime = 0;
             this.canVariableJump = true;
-            this.jumpButtonHoldTime = 0;
             this.jumpMaxHeight = 0;
             this.jumpStartY = this.y;
-            if (window.game?.debug) {
-                console.log('JUMP! vy after:', this.vy, 'y:', this.y);
-            }
             
             if (this.musicSystem) {
                 this.musicSystem.playJumpSound();
             }
         }
         
-        if (this.isJumping && !this.grounded) {
-            this.jumpTime++;
-        }
-        
-        if (this.canVariableJump && this.isJumping && !this.grounded) {
-            if (input.jump) {
-                this.jumpButtonHoldTime++;
-                
+        if (this.isJumping) {
+            this.jumpTime += deltaTime;
+            
+            if (input.jump && this.canVariableJump) {
                 if (this.jumpTime < PLAYER_CONFIG.maxJumpTime && this.vy < 0) {
                     this.vy -= this.gravityStrength * 0.5;
                 } else if (this.jumpTime >= PLAYER_CONFIG.maxJumpTime) {
@@ -231,8 +254,8 @@ export class Player extends Entity {
     /**
      * アニメーション状態の更新
      */
-    updateAnimationState() {
-        let prevState = this.animState;
+    private updateAnimationState(): void {
+        const prevState = this.animState;
         
         if (!this.grounded) {
             if (this.vy < 0) {
@@ -253,9 +276,9 @@ export class Player extends Entity {
     
     /**
      * アニメーションフレームの更新
-     * @param {number} deltaTime - 経過時間
+     * @param deltaTime - 経過時間
      */
-    updateAnimationFrame(deltaTime) {
+    private updateAnimationFrame(deltaTime: number): void {
         this.animTimer += deltaTime;
         
         const speed = ANIMATION_CONFIG.speed[this.animState] || 200;
@@ -270,9 +293,9 @@ export class Player extends Entity {
     
     /**
      * ダメージを受ける
-     * @param {number} damage - ダメージ量
+     * @param damage - ダメージ量
      */
-    takeDamage(damage = 1) {
+    takeDamage(damage: number = 1): void {
         if (this.invulnerable || this.isDead) return;
         
         this.health -= damage;
@@ -295,107 +318,89 @@ export class Player extends Entity {
     
     /**
      * 回復
-     * @param {number} amount - 回復量
+     * @param amount - 回復量
      */
-    heal(amount = 1) {
+    heal(amount: number = 1): void {
         this.health = Math.min(this.health + amount, this.maxHealth);
-    }
-    
-    /**
-     * コインを取得
-     * @param {number} value - コインの価値
-     */
-    collectCoin(value = 1) {
-        this.coins += value;
-        this.score += value * 100;
-        
-        if (this.musicSystem) {
-            this.musicSystem.playCoinSound();
-        }
     }
     
     /**
      * 死亡処理
      */
-    die() {
+    private die(): void {
         this.isDead = true;
-        this.active = false;
+        this.vy = -8;
         
         if (this.musicSystem) {
-            this.musicSystem.playGameOverJingle();
-        }
-        
-        if (this.onDeath) {
-            this.onDeath();
+            // TODO: Add playPlayerDeathSound to MusicSystem
+            // this.musicSystem.playPlayerDeathSound();
         }
     }
     
     /**
      * リスポーン
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
+     * @param x - X座標
+     * @param y - Y座標
      */
-    respawn(x = PLAYER_CONFIG.spawnX, y = PLAYER_CONFIG.spawnY) {
-        this.reset(x, y);
-        this.health = this.maxHealth;
+    respawn(x: number, y: number): void {
+        this.x = x;
+        this.y = y;
+        this.vx = 0;
+        this.vy = 0;
         this.isDead = false;
-        this.invulnerable = true;
-        this.invulnerabilityTime = 1000;
+        this.invulnerable = false;
+        this.invulnerabilityTime = 0;
         this.animState = 'idle';
         this.animFrame = 0;
-        this.facing = 'right';
-        this.flipX = false;
+        this.animTimer = 0;
+        this.isJumping = false;
+        this.jumpButtonPressed = false;
+        this.canVariableJump = false;
+        this.grounded = false;
+        this.health = this.maxHealth;
     }
     
     /**
-     * スプライトを更新
+     * スコアを追加
+     * @param points - 追加ポイント
      */
-    updateSprite() {
-        if (!this.assetLoader) return;
-        
-        switch (this.animState) {
-        case 'idle':
+    addScore(points: number): void {
+        this.score += points;
+    }
+    
+    /**
+     * コインを収集
+     * @param amount - コイン枚数
+     */
+    collectCoin(amount: number = 1): void {
+        this.coins += amount;
+    }
+    
+    /**
+     * スプライトキーを更新
+     */
+    private updateSprite(): void {
+        if (this.animState === 'idle') {
             this.spriteKey = 'player/idle';
-            break;
-        case 'walk':
+        } else if (this.animState === 'walk') {
             this.spriteKey = 'player/walk';
-            break;
-        case 'jump':
-        case 'fall':
+        } else if (this.animState === 'jump' || this.animState === 'fall') {
             this.spriteKey = 'player/jump';
-            break;
-        default:
-            this.spriteKey = 'player/idle';
         }
     }
     
     /**
-     * 描画処理のオーバーライド
-     * @param {PixelRenderer} renderer 
+     * 描画処理
+     * @param renderer - レンダラー
      */
-    render(renderer) {
-        if (!this.visible) return;
+    render(renderer: PixelRenderer): void {
+        this.flipX = this.facing === 'left';
         
         if (this.invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 0) {
             return;
         }
         
-        if (!this.spriteKey) {
-            this.updateSprite();
-        }
-        
-        if (!this._firstRenderLogged) {
-            console.log('Player render:', {
-                spriteKey: this.spriteKey,
-                pixelArtRenderer: !!renderer.pixelArtRenderer,
-                x: this.x,
-                y: this.y,
-                animState: this.animState
-            });
-            this._firstRenderLogged = true;
-        }
-        
-        if (this.spriteKey && renderer.pixelArtRenderer) {
+        if (renderer.pixelArtRenderer) {
             const screenPos = renderer.worldToScreen(this.x, this.y);
             
             if (this.animState === 'walk') {
@@ -428,7 +433,7 @@ export class Player extends Entity {
                 }
             }
             
-            const sprite = renderer.pixelArtRenderer.sprites.get(this.spriteKey);
+            const sprite = renderer.pixelArtRenderer.sprites.get(this.spriteKey || 'player/idle');
             if (sprite) {
                 sprite.draw(
                     renderer.ctx,
@@ -438,7 +443,7 @@ export class Player extends Entity {
                     renderer.scale
                 );
                 return;
-            } else if (window.game?.debug) {
+            } else if ((window as any).game?.debug) {
                 console.warn('Sprite not found:', this.spriteKey);
             }
         }
@@ -457,9 +462,8 @@ export class Player extends Entity {
     
     /**
      * プレイヤーの状態を取得
-     * @returns {Object} プレイヤー状態
      */
-    getState() {
+    getState(): PlayerState {
         return {
             x: this.x,
             y: this.y,
@@ -481,13 +485,15 @@ export class Player extends Entity {
     
     /**
      * 衝突ハンドラ（PhysicsSystemから呼ばれる）
-     * @param {Object} collisionInfo - 衝突情報
+     * @param collisionInfo - 衝突情報
      */
-    onCollision(collisionInfo) {
+    onCollision(collisionInfo?: CollisionInfo): void {
+        if (!collisionInfo || !collisionInfo.other) return;
+        
         if (collisionInfo.other.constructor.name === 'Enemy' || 
             collisionInfo.other.constructor.name === 'Slime') {
-            if (collisionInfo.other.onCollisionWithPlayer) {
-                collisionInfo.other.onCollisionWithPlayer(this);
+            if ('onCollisionWithPlayer' in collisionInfo.other) {
+                (collisionInfo.other as any).onCollisionWithPlayer(this);
             }
         }
     }

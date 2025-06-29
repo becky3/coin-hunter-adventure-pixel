@@ -38,7 +38,7 @@ export class PhysicsSystem {
     public friction: number;
     public layers: PhysicsLayers;
     private collisionMatrix: CollisionMatrix;
-    private entities: Set<PhysicsEntity>;
+    public entities: Set<PhysicsEntity>;
     private tileMap: number[][] | null;
     private tileSize: number;
     private collisionPairs: Map<string, boolean>;

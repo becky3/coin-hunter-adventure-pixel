@@ -1,10 +1,30 @@
 /**
  * 敵キャラクターの基底クラス
  */
-import { Entity } from './Entity';
+import { Entity, CollisionInfo } from './Entity';
+import { Player } from './Player';
+import { PixelRenderer } from '../rendering/PixelRenderer';
+
+export type AIType = 'patrol' | 'chase' | 'idle';
+export type EnemyState = 'idle' | 'hurt' | 'dead';
 
 export class Enemy extends Entity {
-    constructor(x, y, width = 16, height = 16) {
+    public maxHealth: number;
+    public health: number;
+    public damage: number;
+    public moveSpeed: number;
+    public direction: number;
+    public aiType: AIType;
+    public detectRange: number;
+    public attackRange: number;
+    public state: EnemyState;
+    public stateTimer: number;
+    public invincibleTime: number;
+    public animState: string;
+    public facingRight: boolean;
+    public canJump: boolean;
+
+    constructor(x: number, y: number, width: number = 16, height: number = 16) {
         super(x, y, width, height);
         
         this.maxHealth = 1;
@@ -24,15 +44,14 @@ export class Enemy extends Entity {
         this.animState = 'idle';
         this.facingRight = true;
         
-        this.gravityScale = 1.0;
         this.canJump = false;
     }
     
     /**
      * 更新処理
-     * @param {number} deltaTime - 前フレームからの経過時間
+     * @param deltaTime - 前フレームからの経過時間
      */
-    update(deltaTime) {
+    update(deltaTime: number): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0) {
@@ -50,17 +69,18 @@ export class Enemy extends Entity {
     
     /**
      * AI更新処理（子クラスでオーバーライド）
-     * @param {number} deltaTime - 前フレームからの経過時間
+     * @param deltaTime - 前フレームからの経過時間
      */
-    updateAI() {
+    protected updateAI(_deltaTime: number): void {
+        // Override in subclasses
     }
     
     /**
      * ダメージを受ける
-     * @param {number} amount - ダメージ量
-     * @param {Object} source - ダメージソース
+     * @param amount - ダメージ量
+     * @param source - ダメージソース
      */
-    takeDamage(amount, source = null) {
+    takeDamage(amount: number, source: { x?: number; y?: number } | null = null): void {
         if (this.invincibleTime > 0) return;
         
         this.health -= amount;
@@ -83,7 +103,7 @@ export class Enemy extends Entity {
     /**
      * 死亡処理
      */
-    die() {
+    die(): void {
         this.state = 'dead';
         this.active = false;
         
@@ -93,14 +113,15 @@ export class Enemy extends Entity {
     /**
      * 死亡時の処理（子クラスでオーバーライド）
      */
-    onDeath() {
+    protected onDeath(): void {
+        // Override in subclasses
     }
     
     /**
      * プレイヤーとの衝突処理
-     * @param {Player} player - プレイヤー
+     * @param player - プレイヤー
      */
-    onCollisionWithPlayer(player) {
+    onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || !this.active || player.invulnerable) return;
         
         const playerBottom = player.y + player.height;
@@ -124,35 +145,37 @@ export class Enemy extends Entity {
     /**
      * 壁との衝突処理
      */
-    onCollisionWithWall() {
+    onCollisionWithWall(): void {
         this.direction *= -1;
         this.facingRight = !this.facingRight;
     }
     
     /**
      * 衝突ハンドラ（PhysicsSystemから呼ばれる）
-     * @param {Object} collisionInfo - 衝突情報
+     * @param collisionInfo - 衝突情報
      */
-    onCollision(collisionInfo) {
+    onCollision(collisionInfo?: CollisionInfo): void {
+        if (!collisionInfo || !collisionInfo.other) return;
+        
         if (collisionInfo.other.constructor.name === 'Player') {
-            this.onCollisionWithPlayer(collisionInfo.other);
+            this.onCollisionWithPlayer(collisionInfo.other as unknown as Player);
         }
     }
     
     /**
      * 崖の検知
-     * @returns {boolean} 崖があるかどうか
+     * @returns 崖があるかどうか
      */
-    checkCliff() {
+    checkCliff(): boolean {
         // TODO: PhysicsSystemと連携して実装
         return false;
     }
     
     /**
      * 描画処理
-     * @param {PixelRenderer} renderer - レンダラー
+     * @param renderer - レンダラー
      */
-    render(renderer) {
+    render(renderer: PixelRenderer): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
@@ -164,9 +187,9 @@ export class Enemy extends Entity {
     
     /**
      * デバッグ情報の描画
-     * @param {PixelRenderer} renderer - レンダラー
+     * @param renderer - レンダラー
      */
-    renderDebug(renderer) {
+    renderDebug(renderer: PixelRenderer): void {
         super.renderDebug(renderer);
         
         const barWidth = 20;

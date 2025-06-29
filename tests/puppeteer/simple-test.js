@@ -69,7 +69,7 @@ async function checkGameFiles() {
     console.log('\n=== Core Game Files Check ===');
     const coreFiles = [
         'src/core/Game.js',
-        'src/entities/Player.js',
+        'src/entities/Player.ts',
         'src/states/PlayState.js',
         'src/utils/pixelArt.ts',
         'src/assets/AssetLoader.ts'

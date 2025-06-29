@@ -3,11 +3,11 @@
  */
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants';
 import { LevelLoader } from '../levels/LevelLoader.js';
-import { Player } from '../entities/Player.js';
-import { Slime } from '../entities/enemies/Slime.js';
-import { Coin } from '../entities/Coin.js';
-import { Spring } from '../entities/Spring.js';
-import { GoalFlag } from '../entities/GoalFlag.js';
+import { Player } from '../entities/Player';
+import { Slime } from '../entities/enemies/Slime';
+import { Coin } from '../entities/Coin';
+import { Spring } from '../entities/Spring';
+import { GoalFlag } from '../entities/GoalFlag';
 
 export class PlayState {
     constructor(game) {
