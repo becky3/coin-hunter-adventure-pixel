@@ -1,10 +1,18 @@
 /**
  * スライムの敵キャラクター
  */
-import { Enemy } from '../Enemy.js';
+import { Enemy } from '../Enemy';
+import { PixelRenderer } from '../../rendering/PixelRenderer';
 
 export class Slime extends Enemy {
-    constructor(x, y) {
+    private jumpHeight: number;
+    private jumpCooldown: number;
+    private jumpInterval: number;
+    public spriteKey: string;
+    private bounceHeight: number;
+    declare friction: number;
+
+    constructor(x: number, y: number) {
         super(x, y, 16, 16);
         
         // スライムのパラメータ
@@ -29,9 +37,9 @@ export class Slime extends Enemy {
     
     /**
      * AI更新処理
-     * @param {number} deltaTime - 前フレームからの経過時間
+     * @param deltaTime - 前フレームからの経過時間
      */
-    updateAI(deltaTime) {
+    protected updateAI(deltaTime: number): void {
         // 死亡中またはひるみ中は動かない
         if (this.state === 'dead' || this.state === 'hurt') {
             return;
@@ -70,7 +78,7 @@ export class Slime extends Enemy {
     /**
      * ジャンプ処理
      */
-    jump() {
+    private jump(): void {
         if (this.grounded) {
             this.vy = -this.jumpHeight;
             this.grounded = false;
@@ -79,9 +87,9 @@ export class Slime extends Enemy {
     
     /**
      * 前方の壁をチェック
-     * @returns {boolean} 壁があるかどうか
+     * @returns 壁があるかどうか
      */
-    checkWallAhead() {
+    checkWallAhead(): boolean {
         // TODO: PhysicsSystemのレイキャストを使用
         // 仮実装: 現在は常にfalseを返す
         return false;
@@ -89,9 +97,9 @@ export class Slime extends Enemy {
     
     /**
      * 前方の崖をチェック
-     * @returns {boolean} 崖があるかどうか
+     * @returns 崖があるかどうか
      */
-    checkCliffAhead() {
+    checkCliffAhead(): boolean {
         // TODO: PhysicsSystemのレイキャストを使用
         // 仮実装: 現在は常にfalse
         return false;
@@ -100,8 +108,8 @@ export class Slime extends Enemy {
     /**
      * 地面との衝突処理
      */
-    onGroundCollision() {
-        super.onGroundCollision();
+    onGroundCollision(): void {
+        // super.onGroundCollision(); // Method doesn't exist in base class
         
         // スライムは着地時に少し弾む
         // 注: この処理は現在無効化（物理システムとの競合を避けるため）
@@ -111,7 +119,7 @@ export class Slime extends Enemy {
     /**
      * 死亡時の処理
      */
-    onDeath() {
+    protected onDeath(): void {
         // スライムが潰れるエフェクト
         console.log('Slime defeated!');
         
@@ -121,9 +129,9 @@ export class Slime extends Enemy {
     
     /**
      * 描画処理
-     * @param {PixelRenderer} renderer - レンダラー
+     * @param renderer - レンダラー
      */
-    render(renderer) {
+    render(renderer: PixelRenderer): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {

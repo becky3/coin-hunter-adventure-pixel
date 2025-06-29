@@ -2,10 +2,19 @@
  * コインクラス
  * 収集可能なアイテム
  */
-import { Entity } from './Entity';
+import { Entity, CollisionInfo } from './Entity';
+import { PixelRenderer } from '../rendering/PixelRenderer';
 
 export class Coin extends Entity {
-    constructor(x, y) {
+    private collected: boolean;
+    declare animationTime: number;
+    private floatOffset: number;
+    private floatSpeed: number;
+    private floatAmplitude: number;
+    private baseY: number;
+    public scoreValue: number;
+
+    constructor(x: number, y: number) {
         super(x, y, 16, 16);
         
         this.gravity = false;
@@ -29,9 +38,9 @@ export class Coin extends Entity {
     
     /**
      * コインの更新処理
-     * @param {number} deltaTime - 経過時間(ms)
+     * @param deltaTime - 経過時間(ms)
      */
-    onUpdate(deltaTime) {
+    onUpdate(deltaTime: number): void {
         if (this.collected) return;
         
         this.floatOffset += this.floatSpeed * deltaTime;
@@ -42,9 +51,9 @@ export class Coin extends Entity {
     
     /**
      * コインの描画
-     * @param {PixelRenderer} renderer 
+     * @param renderer
      */
-    render(renderer) {
+    render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
         // TODO: アニメーション対応が必要
@@ -64,9 +73,9 @@ export class Coin extends Entity {
     
     /**
      * コインを収集
-     * @returns {number} 獲得スコア
+     * @returns 獲得スコア
      */
-    collect() {
+    collect(): number {
         if (this.collected) return 0;
         
         this.collected = true;
@@ -78,20 +87,22 @@ export class Coin extends Entity {
     
     /**
      * プレイヤーとの衝突時の処理
-     * @param {Entity} other - 衝突したエンティティ
+     * @param collisionInfo - 衝突情報
      */
-    onCollision(other) {
-        if (other.constructor.name === 'Player' && !this.collected) {
+    onCollision(collisionInfo?: CollisionInfo): void {
+        if (!collisionInfo || !collisionInfo.other) return;
+        
+        if (collisionInfo.other.constructor.name === 'Player' && !this.collected) {
             // TODO: コイン収集処理を実装
         }
     }
     
     /**
      * リセット処理
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
+     * @param x - X座標
+     * @param y - Y座標
      */
-    reset(x, y) {
+    reset(x: number, y: number): void {
         super.reset(x, y);
         this.collected = false;
         this.baseY = y;

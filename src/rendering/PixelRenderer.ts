@@ -12,16 +12,16 @@ export interface SpriteData {
 
 export class PixelRenderer {
     private canvas: HTMLCanvasElement;
-    private ctx: CanvasRenderingContext2D;
+    public ctx: CanvasRenderingContext2D;
     private width: number;
     private height: number;
     private canvasWidth: number;
     private canvasHeight: number;
-    private scale: number;
+    public scale: number;
     private cameraX: number;
     private cameraY: number;
     private spriteCache: Map<string, HTMLCanvasElement>;
-    private debug: boolean;
+    public debug: boolean;
     public pixelArtRenderer?: PixelArtRenderer;
     public assetLoader?: any; // AssetLoader type to avoid circular dependency
 

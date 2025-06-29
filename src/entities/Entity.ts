@@ -2,6 +2,7 @@
  * エンティティ基底クラス
  * すべてのゲームオブジェクトの基本機能を提供
  */
+import type { PixelRenderer } from '../rendering/PixelRenderer';
 
 // Type definitions
 export interface Bounds {
@@ -23,15 +24,7 @@ export interface CollisionInfo {
     side: string;
 }
 
-// Renderer interface (will be properly typed when PixelRenderer is converted)
-interface IRenderer {
-    debug: boolean;
-    drawSprite(sprite: any, x: number, y: number, scale: number, flipX: boolean): void;
-    drawRect(x: number, y: number, width: number, height: number, color: string, fill?: boolean): void;
-    drawLine(x1: number, y1: number, x2: number, y2: number, color: string, width: number): void;
-    worldToScreen(worldX: number, worldY: number): Vector2D;
-    ctx: CanvasRenderingContext2D;
-}
+// Using PixelRenderer type directly
 
 let entityIdCounter = 0;
 
@@ -52,6 +45,7 @@ export class Entity {
     
     public gravity: boolean;
     public gravityStrength: number;
+    public gravityScale: number;
     public maxFallSpeed: number;
     public friction: number;
     public physicsEnabled: boolean;
@@ -87,6 +81,7 @@ export class Entity {
         
         this.gravity = true;
         this.gravityStrength = 0.65;
+        this.gravityScale = 1.0;
         this.maxFallSpeed = 15;
         this.friction = 0.8;
         this.physicsEnabled = true;
@@ -163,7 +158,7 @@ export class Entity {
      * エンティティを描画
      * @param renderer - レンダラー
      */
-    render(renderer: IRenderer): void {
+    render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
         if (this.sprite) {
@@ -171,7 +166,6 @@ export class Entity {
                 this.sprite,
                 this.x,
                 this.y,
-                this.spriteScale,
                 this.flipX
             );
         } else {
@@ -187,7 +181,7 @@ export class Entity {
      * デフォルトの描画（スプライトがない場合）
      * @param renderer 
      */
-    renderDefault(renderer: IRenderer): void {
+    renderDefault(renderer: PixelRenderer): void {
         renderer.drawRect(
             this.x,
             this.y,
@@ -210,7 +204,7 @@ export class Entity {
      * デバッグ情報の描画
      * @param renderer 
      */
-    renderDebug(renderer: IRenderer): void {
+    renderDebug(renderer: PixelRenderer): void {
         renderer.drawRect(
             this.x,
             this.y,

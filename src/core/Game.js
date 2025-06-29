@@ -4,7 +4,7 @@ import { AssetLoader } from '../assets/AssetLoader';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { PixelArtRenderer } from '../utils/pixelArt';
 import { LevelLoader } from '../levels/LevelLoader.js';
-import { Player } from '../entities/Player.js';
+import { Player } from '../entities/Player';
 import { MusicSystem } from '../audio/MusicSystem.js';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { MenuState } from '../states/MenuState.js';

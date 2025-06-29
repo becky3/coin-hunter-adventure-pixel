@@ -2,10 +2,17 @@
  * ゴールフラグクラス
  * ステージクリアのトリガー
  */
-import { Entity } from './Entity';
+import { Entity, CollisionInfo } from './Entity';
+import { PixelRenderer } from '../rendering/PixelRenderer';
 
 export class GoalFlag extends Entity {
-    constructor(x, y) {
+    private cleared: boolean;
+    declare animationTime: number;
+    private waveOffset: number;
+    private waveSpeed: number;
+    private waveAmplitude: number;
+
+    constructor(x: number, y: number) {
         super(x, y, 16, 16);
         
         this.gravity = false;
@@ -24,9 +31,9 @@ export class GoalFlag extends Entity {
     
     /**
      * ゴールフラグの更新処理
-     * @param {number} deltaTime - 経過時間(ms)
+     * @param deltaTime - 経過時間(ms)
      */
-    onUpdate(deltaTime) {
+    onUpdate(deltaTime: number): void {
         if (this.cleared) return;
         
         this.waveOffset += this.waveSpeed * deltaTime;
@@ -36,9 +43,9 @@ export class GoalFlag extends Entity {
     
     /**
      * ゴールフラグの描画
-     * @param {PixelRenderer} renderer 
+     * @param renderer
      */
-    render(renderer) {
+    render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
         if (renderer.assetLoader && renderer.assetLoader.hasSprite('terrain/goal_flag')) {
@@ -67,10 +74,10 @@ export class GoalFlag extends Entity {
     
     /**
      * クリアエフェクトの描画
-     * @param {PixelRenderer} renderer 
-     * @param {Object} screenPos - スクリーン座標
+     * @param renderer
+     * @param screenPos - スクリーン座標
      */
-    renderClearEffect(renderer, screenPos) {
+    private renderClearEffect(renderer: PixelRenderer, screenPos: { x: number; y: number }): void {
         const time = this.animationTime * 0.001;
         const radius = 30 + Math.sin(time * 2) * 10;
         
@@ -91,10 +98,12 @@ export class GoalFlag extends Entity {
     
     /**
      * プレイヤーとの衝突時の処理
-     * @param {Entity} other - 衝突したエンティティ
+     * @param collisionInfo - 衝突情報
      */
-    onCollision(other) {
-        if (other.constructor.name === 'Player' && !this.cleared) {
+    onCollision(collisionInfo?: CollisionInfo): boolean {
+        if (!collisionInfo || !collisionInfo.other) return false;
+        
+        if (collisionInfo.other.constructor.name === 'Player' && !this.cleared) {
             return true;
         }
         return false;
@@ -103,16 +112,16 @@ export class GoalFlag extends Entity {
     /**
      * ゴールフラグをクリア状態にする
      */
-    clear() {
+    clear(): void {
         this.cleared = true;
     }
     
     /**
      * リセット処理
-     * @param {number} x - X座標
-     * @param {number} y - Y座標
+     * @param x - X座標
+     * @param y - Y座標
      */
-    reset(x, y) {
+    reset(x: number, y: number): void {
         super.reset(x, y);
         this.cleared = false;
         this.waveOffset = 0;
