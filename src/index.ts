@@ -1,13 +1,13 @@
 // Coin Hunter Adventure - Pixel Edition
 // Entry point
 
-import { Game } from './core/Game.js';
+import { Game } from './core/Game';
 import { CANVAS_SIZE } from './constants/gameConstants';
 
 // ゲームの初期化
 window.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('gameCanvas');
-    const loadingScreen = document.getElementById('loadingScreen');
+    const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
+    const loadingScreen = document.getElementById('loadingScreen') as HTMLElement;
     
     // キャンバスサイズを設定
     canvas.width = CANVAS_SIZE.WIDTH;

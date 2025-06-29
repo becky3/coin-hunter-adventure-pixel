@@ -1,21 +1,64 @@
 import { InputSystem } from './InputSystem';
-import { GameStateManager } from '../states/GameStateManager.js';
+import { GameStateManager } from '../states/GameStateManager';
 import { AssetLoader } from '../assets/AssetLoader';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { PixelArtRenderer } from '../utils/pixelArt';
-import { LevelLoader } from '../levels/LevelLoader.js';
+import { LevelLoader } from '../levels/LevelLoader';
 import { Player } from '../entities/Player';
-import { MusicSystem } from '../audio/MusicSystem.js';
+import { MusicSystem } from '../audio/MusicSystem';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
-import { MenuState } from '../states/MenuState.js';
-import { PlayState } from '../states/PlayState.js';
-import { TestPlayState } from '../states/TestPlayState.js';
+import { MenuState } from '../states/MenuState';
+import { PlayState } from '../states/PlayState';
+import { TestPlayState } from '../states/TestPlayState';
 import { FPS, GAME_RESOLUTION } from '../constants/gameConstants';
 
+interface DebugElements {
+    panel: HTMLElement | null;
+    fps: HTMLElement | null;
+    frameTime: HTMLElement | null;
+    gameState: HTMLElement | null;
+    entityCount: HTMLElement | null;
+    cameraPos: HTMLElement | null;
+    activeKeys: HTMLElement | null;
+    musicStatus: HTMLElement | null;
+    playerSection: HTMLElement | null;
+    playerPos: HTMLElement | null;
+    playerVel: HTMLElement | null;
+    playerHealth: HTMLElement | null;
+    playerGrounded: HTMLElement | null;
+}
+
+// Extend window interface for global game reference
+declare global {
+    interface Window {
+        game: Game;
+    }
+}
+
 export class Game {
-    constructor(canvas) {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private running: boolean;
+    private lastTime: number;
+    private targetFPS: number;
+    private frameTime: number;
+    private debug: boolean;
+    private testGroundY?: number;
+    private debugElements: DebugElements | null;
+    
+    public inputSystem: InputSystem;
+    public stateManager: GameStateManager;
+    public assetLoader: AssetLoader;
+    public renderer: PixelRenderer;
+    public levelLoader: LevelLoader;
+    public musicSystem: MusicSystem;
+    public physicsSystem: PhysicsSystem;
+    public pixelArtRenderer: PixelArtRenderer;
+    public player: Player | null;
+    
+    constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        this.ctx = canvas.getContext('2d')!;
         this.ctx.imageSmoothingEnabled = false;
         
         this.running = false;
@@ -40,7 +83,7 @@ export class Game {
         this.debugElements = null;
     }
     
-    async initialize() {
+    async initialize(): Promise<boolean> {
         console.log('Initializing game...');
         
         try {
@@ -68,9 +111,9 @@ export class Game {
         }
     }
     
-    async loadTestAssets() {
+    private async loadTestAssets(): Promise<void> {
         try {
-            await this.assetLoader.preloadGameAssets((loaded, total) => {
+            await this.assetLoader.preloadGameAssets((loaded: number, total: number) => {
                 console.log(`Loading assets: ${loaded}/${total}`);
             });
             console.log('All game assets loaded successfully');
@@ -79,7 +122,7 @@ export class Game {
         }
     }
     
-    createTestPlayer() {
+    private createTestPlayer(): void {
         this.player = new Player(50, 150);
         this.player.setInputManager(this.inputSystem);
         this.player.setMusicSystem(this.musicSystem);
@@ -89,7 +132,7 @@ export class Game {
         this.testGroundY = GAME_RESOLUTION.HEIGHT - 40;
     }
     
-    registerStates() {
+    private registerStates(): void {
         const menuState = new MenuState(this);
         this.stateManager.registerState('menu', menuState);
         const playState = new PlayState(this);
@@ -98,7 +141,7 @@ export class Game {
         this.stateManager.registerState('testplay', testPlayState);
     }
     
-    setupAudioEvents() {
+    private setupAudioEvents(): void {
         let musicStarted = false;
         
         const startMusic = async () => {
@@ -126,14 +169,14 @@ export class Game {
         console.log('Audio events setup complete - waiting for user interaction');
     }
     
-    start() {
+    start(): void {
         console.log('Starting game...');
         this.running = true;
         this.lastTime = performance.now();
         this.gameLoop();
     }
     
-    gameLoop = (currentTime) => {
+    private gameLoop = (currentTime: number): void => {
         if (!this.running) return;
         
         const deltaTime = currentTime - this.lastTime;
@@ -148,7 +191,7 @@ export class Game {
         requestAnimationFrame(this.gameLoop);
     };
     
-    update(deltaTime) {
+    private update(deltaTime: number): void {
         this.inputSystem.update();
         if (this.inputSystem.isActionJustPressed('debug')) {
             this.debug = !this.debug;
@@ -158,12 +201,12 @@ export class Game {
         this.stateManager.update(deltaTime);
     }
     
-    updateTestMode() {
+    private updateTestMode(): void {
         if (this.inputSystem.isActionPressed('jump') && this.debug) {
             console.log('===== JUMP KEY DETECTED IN GAME.JS =====');
         }
         this.stateManager.update(this.frameTime);
-        if (this.player) {
+        if (this.player && this.testGroundY !== undefined) {
             this.player.update(this.frameTime);
             if (this.player.y + this.player.height > this.testGroundY) {
                 this.player.y = this.testGroundY - this.player.height;
@@ -188,14 +231,14 @@ export class Game {
         }
     }
     
-    render() {
+    private render(): void {
         this.stateManager.render(this.renderer);
         this.renderDebugOverlay();
     }
     
-    renderTestMode() {
+    private renderTestMode(): void {
         this.renderer.clear('#5C94FC');
-        if (this.testGroundY) {
+        if (this.testGroundY !== undefined) {
             this.renderer.drawRect(0, this.testGroundY, GAME_RESOLUTION.WIDTH, GAME_RESOLUTION.HEIGHT - this.testGroundY, '#8B4513');
         }
         if (this.player) {
@@ -204,12 +247,12 @@ export class Game {
         this.renderDebugInfo();
     }
     
-    renderDebugOverlay() {
+    private renderDebugOverlay(): void {
         const fps = this.frameTime > 0 ? Math.round(1000 / this.frameTime) : 0;
         this.updateHTMLDebugInfo(fps);
     }
     
-    cacheDebugElements() {
+    private cacheDebugElements(): void {
         this.debugElements = {
             panel: document.getElementById('debugPanel'),
             fps: document.getElementById('fps'),
@@ -227,7 +270,7 @@ export class Game {
         };
     }
     
-    updateHTMLDebugInfo(fps) {
+    private updateHTMLDebugInfo(fps: number): void {
         if (!this.debugElements) {
             this.cacheDebugElements();
         }
@@ -238,7 +281,7 @@ export class Game {
         if (this.debug) {
             panel.classList.add('active');
             if (this.debugElements.fps) {
-                this.debugElements.fps.textContent = fps;
+                this.debugElements.fps.textContent = fps.toString();
                 if (fps >= 55) {
                     this.debugElements.fps.className = 'debug-value success';
                 } else if (fps >= 30) {
@@ -251,7 +294,7 @@ export class Game {
                 this.debugElements.frameTime.textContent = `${this.frameTime.toFixed(1)}ms`;
             }
             if (this.debugElements.gameState) {
-                this.debugElements.gameState.textContent = this.stateManager.currentStateName || 'none';
+                this.debugElements.gameState.textContent = (this.stateManager as any).currentStateName || 'none';
             }
             if (this.debugElements.entityCount) {
                 this.debugElements.entityCount.textContent = this.player ? '1' : '0';
@@ -259,7 +302,7 @@ export class Game {
             if (this.debugElements.cameraPos) {
                 this.debugElements.cameraPos.textContent = `${Math.floor(this.renderer.cameraX)}, ${Math.floor(this.renderer.cameraY)}`;
             }
-            const keys = [];
+            const keys: string[] = [];
             if (this.inputSystem.isActionPressed('left')) keys.push('←');
             if (this.inputSystem.isActionPressed('right')) keys.push('→');
             if (this.inputSystem.isActionPressed('up')) keys.push('↑');
@@ -311,8 +354,7 @@ export class Game {
         }
     }
     
-    renderDebugInfo() {
-        
+    private renderDebugInfo(): void {
         if (!this.musicSystem.isInitialized) {
             const centerX = GAME_RESOLUTION.WIDTH / 2;
             const centerY = GAME_RESOLUTION.HEIGHT / 2;
@@ -321,7 +363,7 @@ export class Game {
         }
     }
     
-    stop() {
+    stop(): void {
         this.running = false;
         if (this.musicSystem) {
             this.musicSystem.stopBGM();

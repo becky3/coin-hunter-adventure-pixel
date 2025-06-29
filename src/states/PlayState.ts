@@ -8,9 +8,83 @@ import { Slime } from '../entities/enemies/Slime';
 import { Coin } from '../entities/Coin';
 import { Spring } from '../entities/Spring';
 import { GoalFlag } from '../entities/GoalFlag';
+import { GameState } from './GameStateManager';
+import { PixelRenderer } from '../rendering/PixelRenderer';
+import { Entity } from '../entities/Entity';
+import { Enemy } from '../entities/Enemy';
+import { InputEvent } from '../core/InputSystem';
 
-export class PlayState {
-    constructor(game) {
+interface Camera {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+interface LevelData {
+    width: number;
+    height: number;
+    tileSize: number;
+    spawnPoint: { x: number; y: number };
+    entities?: Array<{ type: string; x: number; y: number }>;
+}
+
+interface Game {
+    renderer?: PixelRenderer;
+    inputSystem: any;
+    musicSystem?: any;
+    stateManager: any;
+    physicsSystem: any;
+    assetLoader?: any;
+    frameCount?: number;
+    player?: Player;
+    entities?: Entity[];
+    camera?: Camera;
+}
+
+// Extend window interface for debug functions
+declare global {
+    interface Window {
+        debugWarp?: (x: number, y: number, tileCoords?: boolean) => void;
+    }
+}
+
+export class PlayState implements GameState {
+    public name = 'play';
+    private game: Game;
+    
+    // ゲーム状態
+    private score: number;
+    private lives: number;
+    private time: number;
+    private coinsCollected: number;
+    private isPaused: boolean;
+    
+    // エンティティ
+    private player: Player | null;
+    private enemies: Enemy[];
+    private items: Entity[];
+    private platforms: Entity[];
+    
+    // レベル関連
+    private levelLoader: LevelLoader;
+    private currentLevel: string | null;
+    private levelData: LevelData | null;
+    private tileMap: number[][];
+    private levelWidth: number;
+    private levelHeight: number;
+    private backgroundColor?: string;
+    
+    // カメラ
+    private camera: Camera;
+    
+    // タイマー関連
+    private lastTimeUpdate: number;
+    
+    // 入力リスナー
+    private inputListeners: Array<() => void>;
+
+    constructor(game: Game) {
         this.game = game;
         
         // ゲーム状態
@@ -50,14 +124,14 @@ export class PlayState {
         
         // デバッグ機能をグローバルに公開
         if (typeof window !== 'undefined') {
-            window.debugWarp = (x, y) => this.debugWarp(x, y);
+            window.debugWarp = (x: number, y: number, tileCoords?: boolean) => this.debugWarp(x, y, tileCoords);
         }
     }
     
     /**
      * スプライトの事前読み込み
      */
-    async preloadSprites() {
+    private async preloadSprites(): Promise<void> {
         console.log('Preloading sprites...');
         
         try {
@@ -79,9 +153,9 @@ export class PlayState {
     
     /**
      * 状態開始時の処理
-     * @param {Object} params - レベル情報等のパラメータ
+     * @param params - レベル情報等のパラメータ
      */
-    async enter(params = {}) {
+    async enter(params: any = {}): Promise<void> {
         console.log('Entering PlayState', params);
         
         // スプライトを事前読み込み
@@ -130,9 +204,9 @@ export class PlayState {
     
     /**
      * 状態更新処理
-     * @param {number} deltaTime - 前フレームからの経過時間
+     * @param deltaTime - 前フレームからの経過時間
      */
-    update(deltaTime) {
+    update(deltaTime: number): void {
         if (this.isPaused) return;
         
         // タイマーの更新
@@ -160,8 +234,8 @@ export class PlayState {
                 
                 if (this.player.health > 0) {
                     this.player.respawn(
-                        this.levelData.spawnPoint.x * TILE_SIZE,
-                        this.levelData.spawnPoint.y * TILE_SIZE
+                        this.levelData!.spawnPoint.x * TILE_SIZE,
+                        this.levelData!.spawnPoint.y * TILE_SIZE
                     );
                 }
             }
@@ -191,9 +265,9 @@ export class PlayState {
     
     /**
      * 描画処理
-     * @param {PixelRenderer} renderer - レンダラー
+     * @param renderer - レンダラー
      */
-    render(renderer) {
+    render(renderer: PixelRenderer): void {
         // 背景色でクリア
         renderer.clear(this.backgroundColor || '#5C94FC'); // レベルの背景色または空の色
         
@@ -227,7 +301,7 @@ export class PlayState {
     /**
      * 状態終了時の処理
      */
-    exit() {
+    exit(): void {
         console.log('Exiting PlayState');
         
         // ポーズ状態をリセット
@@ -256,9 +330,9 @@ export class PlayState {
     
     /**
      * レベルの読み込み
-     * @param {string} levelName - レベル名
+     * @param levelName - レベル名
      */
-    async loadLevel(levelName) {
+    private async loadLevel(levelName: string): Promise<void> {
         console.log(`Loading level: ${levelName}`);
         
         try {
@@ -301,7 +375,7 @@ export class PlayState {
     /**
      * テスト用レベルの作成
      */
-    createTestLevel() {
+    private createTestLevel(): void {
         // シンプルなタイルマップ（16x15）
         this.tileMap = [
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -332,7 +406,7 @@ export class PlayState {
     /**
      * プレイヤーの初期化
      */
-    initializePlayer() {
+    private initializePlayer(): void {
         // レベルデータからスポーン位置を取得
         let spawnX = 64;
         let spawnY = 160;
@@ -354,7 +428,7 @@ export class PlayState {
     /**
      * 敵の初期化
      */
-    initializeEnemies() {
+    private initializeEnemies(): void {
         // 既存の敵をクリア
         this.enemies = [];
         
@@ -376,14 +450,14 @@ export class PlayState {
     /**
      * アイテムの初期化
      */
-    initializeItems() {
+    private initializeItems(): void {
         // 既存のアイテムをクリア
         this.items = [];
         
         // レベルデータからアイテムを配置
         if (this.levelData && this.levelData.entities) {
             this.levelData.entities.forEach(entity => {
-                let item = null;
+                let item: Entity | null = null;
                 
                 switch (entity.type) {
                 case 'coin':
@@ -432,15 +506,15 @@ export class PlayState {
     /**
      * アイテムの衝突チェック
      */
-    checkItemCollisions() {
+    private checkItemCollisions(): void {
         if (!this.player) return;
         
         this.items.forEach((item) => {
             // コインの処理
-            if (item.constructor.name === 'Coin' && !item.collected) {
-                if (item.collidesWith(this.player)) {
+            if (item.constructor.name === 'Coin' && !(item as Coin).collected) {
+                if (item.collidesWith(this.player!)) {
                     // コインを収集
-                    const scoreGained = item.collect();
+                    const scoreGained = (item as Coin).collect();
                     this.score += scoreGained;
                     this.coinsCollected++;
                     
@@ -454,10 +528,10 @@ export class PlayState {
             }
             
             // ゴールフラグの処理
-            else if (item.constructor.name === 'GoalFlag' && !item.cleared) {
-                if (item.collidesWith(this.player)) {
+            else if (item.constructor.name === 'GoalFlag' && !(item as GoalFlag).cleared) {
+                if (item.collidesWith(this.player!)) {
                     // ゴール処理
-                    item.clear();
+                    (item as GoalFlag).clear();
                     
                     // 効果音を再生
                     if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
@@ -476,7 +550,7 @@ export class PlayState {
         // 収集済みのアイテムを配列から削除
         this.items = this.items.filter(item => {
             if (item.constructor.name === 'Coin') {
-                return !item.collected;
+                return !(item as Coin).collected;
             }
             return true;
         });
@@ -485,17 +559,17 @@ export class PlayState {
     /**
      * コイン収集のチェック（互換性のため残す）
      */
-    checkCoinCollection() {
+    private checkCoinCollection(): void {
         this.checkItemCollisions();
     }
     
     /**
      * 入力リスナーの設定
      */
-    setupInputListeners() {
+    private setupInputListeners(): void {
         // ポーズ
         this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event) => {
+            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
                 if (event.action === 'escape') {
                     this.togglePause();
                 }
@@ -504,7 +578,7 @@ export class PlayState {
         
         // ポーズ中のQキーでタイトルに戻る
         this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event) => {
+            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
                 if (this.isPaused && event.key === 'KeyQ') {
                     this.gameOver();
                 }
@@ -515,7 +589,7 @@ export class PlayState {
     /**
      * 入力リスナーの削除
      */
-    removeInputListeners() {
+    private removeInputListeners(): void {
         this.inputListeners.forEach(removeListener => removeListener());
         this.inputListeners = [];
     }
@@ -523,7 +597,7 @@ export class PlayState {
     /**
      * タイマーの更新
      */
-    updateTimer() {
+    private updateTimer(): void {
         const now = Date.now();
         const elapsed = (now - this.lastTimeUpdate) / 1000;
         
@@ -536,7 +610,7 @@ export class PlayState {
     /**
      * カメラの更新
      */
-    updateCamera() {
+    private updateCamera(): void {
         if (!this.player) return;
         
         // プレイヤーを中心に追従
@@ -559,15 +633,15 @@ export class PlayState {
      * タイルとの衝突判定（PhysicsSystemに移行済み）
      * @deprecated PhysicsSystemを使用してください
      */
-    checkTileCollisions() {
+    private checkTileCollisions(): void {
         // PhysicsSystemに移行済み
     }
     
     /**
      * タイルマップの描画
-     * @param {PixelRenderer} renderer - レンダラー
+     * @param renderer - レンダラー
      */
-    renderTileMap(renderer) {
+    private renderTileMap(renderer: PixelRenderer): void {
         if (!this.tileMap) {
             console.warn('No tileMap available');
             return;
@@ -598,9 +672,9 @@ export class PlayState {
     
     /**
      * HUDの描画
-     * @param {PixelRenderer} renderer - レンダラー
+     * @param renderer - レンダラー
      */
-    renderHUD(renderer) {
+    private renderHUD(renderer: PixelRenderer): void {
         const blackPattern = [
             [1,1,1,1,1,1,1,1],
             [1,1,1,1,1,1,1,1],
@@ -632,9 +706,9 @@ export class PlayState {
     
     /**
      * ポーズ画面の描画
-     * @param {PixelRenderer} renderer - レンダラー
+     * @param renderer - レンダラー
      */
-    renderPauseScreen(renderer) {
+    private renderPauseScreen(renderer: PixelRenderer): void {
         // メニューボックス
         const menuWidth = 200;
         const menuHeight = 100;
@@ -669,7 +743,7 @@ export class PlayState {
     /**
      * ポーズの切り替え
      */
-    togglePause() {
+    private togglePause(): void {
         this.isPaused = !this.isPaused;
         
         if (this.isPaused) {
@@ -686,7 +760,7 @@ export class PlayState {
     /**
      * ゲームオーバー処理
      */
-    gameOver() {
+    private gameOver(): void {
         console.log('Game Over!');
         // メニューに戻る
         this.game.stateManager.setState('menu');
@@ -695,7 +769,7 @@ export class PlayState {
     /**
      * ステージクリア処理
      */
-    stageClear() {
+    private stageClear(): void {
         console.log('Stage Clear!');
         // TODO: リザルト画面への遷移を実装
         // 現在は仮実装としてメニューに戻る
@@ -704,11 +778,11 @@ export class PlayState {
     
     /**
      * デバッグ用：指定座標にプレイヤーをワープ
-     * @param {number} x - X座標（タイル単位またはピクセル単位）
-     * @param {number} y - Y座標（タイル単位またはピクセル単位）
-     * @param {boolean} tileCoords - trueの場合タイル座標として扱う
+     * @param x - X座標（タイル単位またはピクセル単位）
+     * @param y - Y座標（タイル単位またはピクセル単位）
+     * @param tileCoords - trueの場合タイル座標として扱う
      */
-    debugWarp(x, y, tileCoords = false) {
+    private debugWarp(x: number, y: number, tileCoords: boolean = false): void {
         if (!this.player) {
             console.warn('Player not found');
             return;
@@ -734,7 +808,7 @@ export class PlayState {
     /**
      * UIスプライトの読み込み
      */
-    async loadUISprites() {
+    private async loadUISprites(): Promise<void> {
         try {
             if (this.game.assetLoader) {
                 await this.game.assetLoader.loadSprite('ui', 'border_horizontal', 1);
@@ -748,10 +822,10 @@ export class PlayState {
     
     /**
      * 水平ボーダーの描画
-     * @param {PixelRenderer} renderer - レンダラー
-     * @param {number} y - Y座標
+     * @param renderer - レンダラー
+     * @param y - Y座標
      */
-    renderHorizontalBorder(renderer, y) {
+    private renderHorizontalBorder(renderer: PixelRenderer, y: number): void {
         const blackPattern = [
             [1,1,1,1,1,1,1,1],
             [1,1,1,1,1,1,1,1],
@@ -770,13 +844,13 @@ export class PlayState {
     
     /**
      * ボックスボーダーの描画
-     * @param {PixelRenderer} renderer - レンダラー
-     * @param {number} x - X座標
-     * @param {number} y - Y座標  
-     * @param {number} width - 幅
-     * @param {number} height - 高さ
+     * @param renderer - レンダラー
+     * @param x - X座標
+     * @param y - Y座標  
+     * @param width - 幅
+     * @param height - 高さ
      */
-    renderBoxBorder(renderer, x, y, width, height) {
+    private renderBoxBorder(renderer: PixelRenderer, x: number, y: number, width: number, height: number): void {
         const blackPattern = [
             [1,1,1,1,1,1,1,1],
             [1,1,1,1,1,1,1,1],
@@ -812,7 +886,7 @@ export class PlayState {
     /**
      * パターンタイルの描画
      */
-    drawPatternTile(renderer, x, y, pattern, color) {
+    private drawPatternTile(renderer: PixelRenderer, x: number, y: number, pattern: number[][], color: string): void {
         const tileSize = 8;
         const imageData = new ImageData(tileSize, tileSize);
         const data = imageData.data;
@@ -840,7 +914,7 @@ export class PlayState {
             }
         }
         
-        renderer.drawSprite(imageData, x, y, 1, false);
+        renderer.drawSprite(imageData, x, y, false);
     }
     
 }

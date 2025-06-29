@@ -2,15 +2,36 @@
  * テスト用のシンプルなPlayState
  */
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants';
+import { GameState } from './GameStateManager';
+import { PixelRenderer } from '../rendering/PixelRenderer';
 
-export class TestPlayState {
-    constructor(game) {
+interface TestPlayer {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    vx: number;
+    vy: number;
+    grounded: boolean;
+}
+
+interface Game {
+    inputSystem: any;
+}
+
+export class TestPlayState implements GameState {
+    public name = 'testplay';
+    private game: Game;
+    private player: TestPlayer | null;
+    private tileMap: number[][];
+    
+    constructor(game: Game) {
         this.game = game;
         this.player = null;
         this.tileMap = [];
     }
     
-    enter() {
+    enter(): void {
         console.log('TestPlayState: enter');
         
         // プレイヤー初期化
@@ -42,7 +63,7 @@ export class TestPlayState {
         this.tileMap[8][8] = 1;
     }
     
-    update() {
+    update(): void {
         if (!this.player) return;
         
         // 入力処理（デバッグ付き）
@@ -90,7 +111,7 @@ export class TestPlayState {
         }
     }
     
-    render(renderer) {
+    render(renderer: PixelRenderer): void {
         // 背景
         renderer.clear('#5C94FC');
         
@@ -122,7 +143,7 @@ export class TestPlayState {
         }
     }
     
-    exit() {
+    exit(): void {
         console.log('TestPlayState: exit');
     }
 }

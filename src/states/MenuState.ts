@@ -1,7 +1,34 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
+import { GameState } from './GameStateManager';
+import { PixelRenderer } from '../rendering/PixelRenderer';
+import { InputEvent } from '../core/InputSystem';
 
-export class MenuState {
-    constructor(game) {
+interface MenuOption {
+    text: string;
+    action: string;
+}
+
+interface Game {
+    renderer?: PixelRenderer;
+    inputSystem: any;
+    musicSystem?: any;
+    stateManager: any;
+}
+
+export class MenuState implements GameState {
+    public name = 'menu';
+    private game: Game;
+    private selectedOption: number;
+    private options: MenuOption[];
+    private logoY: number;
+    private logoTargetY: number;
+    private optionsAlpha: number;
+    private showHowTo: boolean;
+    private showCredits: boolean;
+    private titleAnimTimer: number;
+    private inputListeners: Array<() => void>;
+
+    constructor(game: Game) {
         this.game = game;
         this.selectedOption = 0;
         this.options = [
@@ -18,7 +45,7 @@ export class MenuState {
         this.inputListeners = [];
     }
     
-    init() {
+    private init(): void {
         this.logoY = -100;
         this.optionsAlpha = 0;
         this.selectedOption = 0;
@@ -29,7 +56,7 @@ export class MenuState {
         }
     }
     
-    enter() {
+    enter(): void {
         this.init();
         this.setupInputListeners();
         if (this.game.renderer) {
@@ -37,10 +64,10 @@ export class MenuState {
         }
     }
     
-    setupInputListeners() {
+    private setupInputListeners(): void {
         this.removeInputListeners();
         this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event) => {
+            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
                 if ((event.action === 'up' || event.action === 'down') && 
                     !this.showHowTo && !this.showCredits) {
                     
@@ -63,22 +90,21 @@ export class MenuState {
             })
         );
         this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event) => {
+            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
                 const isValidJump = event.action === 'jump' && event.key === 'Space';
                 const isValidAction = event.action === 'action';
                 
                 if ((isValidAction || isValidJump) && 
                     !this.showHowTo && !this.showCredits && 
                     this.optionsAlpha >= 1) {
-                    const self = this;
                     setTimeout(() => {
-                        self.executeOption();
+                        this.executeOption();
                     }, 0);
                 }
             })
         );
         this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event) => {
+            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
                 const isValidJump = event.action === 'jump' && event.key === 'Space';
                 const isValidAction = event.action === 'action';
                 const isEscape = event.action === 'escape';
@@ -94,7 +120,7 @@ export class MenuState {
             })
         );
         this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event) => {
+            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
                 if (event.action === 'mute') {
                     if (this.game.musicSystem) {
                         this.game.musicSystem.toggleMute();
@@ -105,12 +131,12 @@ export class MenuState {
         );
     }
     
-    removeInputListeners() {
+    private removeInputListeners(): void {
         this.inputListeners.forEach(removeListener => removeListener());
         this.inputListeners = [];
     }
     
-    update(deltaTime) {
+    update(deltaTime: number): void {
         this.titleAnimTimer += deltaTime;
         if (this.logoY < this.logoTargetY) {
             this.logoY += 5;
@@ -126,7 +152,7 @@ export class MenuState {
         }
     }
     
-    render(renderer) {
+    render(renderer: PixelRenderer): void {
         renderer.clear('#000000');
         
         if (this.showHowTo) {
@@ -141,14 +167,14 @@ export class MenuState {
         renderer.drawText('v0.1.0', 8, GAME_RESOLUTION.HEIGHT - 16, '#666666');
     }
     
-    drawTitleLogo(renderer) {
+    private drawTitleLogo(renderer: PixelRenderer): void {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         const titleY = this.logoY;
         renderer.drawTextCentered('COIN HUNTER', centerX, titleY, '#FFD700');
         renderer.drawTextCentered('ADVENTURE', centerX, titleY + 16, '#FF6B6B');
     }
     
-    drawMenuOptions(renderer) {
+    private drawMenuOptions(renderer: PixelRenderer): void {
         if (this.optionsAlpha <= 0) return;
         
         const centerX = GAME_RESOLUTION.WIDTH / 2;
@@ -181,7 +207,7 @@ export class MenuState {
     }
     
     
-    renderHowToPlay(renderer) {
+    private renderHowToPlay(renderer: PixelRenderer): void {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         renderer.drawTextCentered('HOW TO PLAY', centerX, 24, '#FFD700');
         const instructions = [
@@ -204,7 +230,7 @@ export class MenuState {
         renderer.drawTextCentered('ESC/ENTER TO RETURN', centerX, 216, '#999999');
     }
     
-    renderCredits(renderer) {
+    private renderCredits(renderer: PixelRenderer): void {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         renderer.drawTextCentered('CREDITS', centerX, 24, '#FFD700');
         const credits = [
@@ -223,7 +249,7 @@ export class MenuState {
         renderer.drawTextCentered('ESC/ENTER TO RETURN', centerX, 216, '#999999');
     }
     
-    drawMuteButton(renderer) {
+    private drawMuteButton(renderer: PixelRenderer): void {
         const muteState = this.game.musicSystem?.getMuteState() || false;
         const buttonText = muteState ? 'SOUND:OFF' : 'SOUND:ON';
         const buttonColor = muteState ? '#FF0000' : '#00FF00';
@@ -235,7 +261,7 @@ export class MenuState {
         renderer.drawText('(M)', x + 16, y + 8, '#666666');
     }
     
-    executeOption() {
+    private executeOption(): void {
         const option = this.options[this.selectedOption];
         
         switch (option.action) {
@@ -266,11 +292,11 @@ export class MenuState {
         }
     }
     
-    exit() {
+    exit(): void {
         this.removeInputListeners();
     }
     
-    destroy() {
+    destroy(): void {
         this.exit();
     }
 }

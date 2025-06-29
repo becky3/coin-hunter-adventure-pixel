@@ -1,19 +1,85 @@
+interface StageInfo {
+    id: string;
+    name: string;
+    description: string;
+    filename: string;
+    unlocked: boolean;
+    cleared?: boolean;
+    bestScore?: number;
+    bestTime?: number;
+    maxCoins?: number;
+    minDeaths?: number;
+}
+
+interface StageList {
+    stages: StageInfo[];
+    currentStage: string;
+}
+
+interface StageData {
+    name: string;
+    width: number;
+    height: number;
+    tileSize: number;
+    playerSpawn: { x: number; y: number };
+    tilemap: number[][];
+    entities?: EntityData[];
+    goal?: { x: number; y: number };
+    timeLimit?: number;
+    backgroundColor?: string;
+}
+
+interface EntityData {
+    type: string;
+    x: number;
+    y: number;
+    [key: string]: any;
+}
+
+interface ClearInfo {
+    score: number;
+    time: number;
+    coins: number;
+    deaths: number;
+}
+
+interface SavedProgress {
+    version: number;
+    lastPlayed: number;
+    stages: Array<{
+        id: string;
+        unlocked: boolean;
+        cleared: boolean;
+        bestScore: number;
+        bestTime: number;
+        maxCoins: number;
+        minDeaths: number;
+    }>;
+}
+
 export class LevelLoader {
+    private stages: StageInfo[] | null;
+    private currentStageData: StageData | null;
+    private currentStageId: string | null;
+    private basePath: string;
+    private stageList: StageList | null;
+    
     constructor() {
         this.stages = null;
         this.currentStageData = null;
         this.currentStageId = null;
         this.basePath = '/src/levels/data/';
+        this.stageList = null;
     }
     
-    async loadStageList() {
+    async loadStageList(): Promise<StageList> {
         try {
             const response = await fetch(this.basePath + 'stages.json');
             if (!response.ok) {
                 throw new Error(`ステージリスト読み込みエラー: ${response.status}`);
             }
             
-            const data = await response.json();
+            const data = await response.json() as StageList;
             this.stages = data.stages;
             this.stageList = data;
             
@@ -23,7 +89,7 @@ export class LevelLoader {
         } catch (error) {
             console.error('ステージリスト読み込み失敗:', error);
             
-            const fallbackData = {
+            const fallbackData: StageList = {
                 stages: [
                     {
                         id: 'tutorial',
@@ -49,7 +115,7 @@ export class LevelLoader {
         }
     }
     
-    async loadStage(stageId) {
+    async loadStage(stageId: string): Promise<StageData> {
         try {
             const stageInfo = this.stages?.find(s => s.id === stageId);
             if (!stageInfo) {
@@ -61,7 +127,7 @@ export class LevelLoader {
                 throw new Error(`ステージデータ読み込みエラー: ${response.status}`);
             }
             
-            const stageData = await response.json();
+            const stageData = await response.json() as StageData;
             
             this.validateStageData(stageData);
             
@@ -75,8 +141,8 @@ export class LevelLoader {
         }
     }
     
-    validateStageData(data) {
-        const required = ['name', 'width', 'height', 'tileSize', 'playerSpawn', 'tilemap'];
+    private validateStageData(data: StageData): void {
+        const required: (keyof StageData)[] = ['name', 'width', 'height', 'tileSize', 'playerSpawn', 'tilemap'];
         
         for (const field of required) {
             if (!(field in data)) {
@@ -99,29 +165,29 @@ export class LevelLoader {
         }
     }
     
-    getCurrentStageData() {
+    getCurrentStageData(): StageData | null {
         return this.currentStageData;
     }
     
-    getCurrentStageId() {
+    getCurrentStageId(): string | null {
         return this.currentStageId;
     }
     
-    hasNextStage() {
+    hasNextStage(): boolean {
         if (!this.stages || !this.currentStageId) return false;
         
         const currentIndex = this.stages.findIndex(s => s.id === this.currentStageId);
         return currentIndex >= 0 && currentIndex < this.stages.length - 1;
     }
     
-    getNextStageId() {
+    getNextStageId(): string | null {
         if (!this.hasNextStage()) return null;
         
-        const currentIndex = this.stages.findIndex(s => s.id === this.currentStageId);
-        return this.stages[currentIndex + 1].id;
+        const currentIndex = this.stages.findIndex(s => s.id === this.currentStageId!);
+        return this.stages![currentIndex + 1].id;
     }
     
-    updateStageClearInfo(stageId, clearInfo) {
+    updateStageClearInfo(stageId: string, clearInfo: ClearInfo): void {
         const stage = this.stages?.find(s => s.id === stageId);
         if (!stage) return;
         
@@ -142,18 +208,18 @@ export class LevelLoader {
         
         stage.cleared = true;
         
-        const currentIndex = this.stages.findIndex(s => s.id === stageId);
-        if (currentIndex >= 0 && currentIndex < this.stages.length - 1) {
-            this.stages[currentIndex + 1].unlocked = true;
+        const currentIndex = this.stages!.findIndex(s => s.id === stageId);
+        if (currentIndex >= 0 && currentIndex < this.stages!.length - 1) {
+            this.stages![currentIndex + 1].unlocked = true;
         }
         
         this.saveProgress();
     }
     
-    saveProgress() {
+    private saveProgress(): void {
         if (!this.stages) return;
         
-        const progress = {
+        const progress: SavedProgress = {
             version: 1,
             lastPlayed: Date.now(),
             stages: this.stages.map(s => ({
@@ -174,12 +240,12 @@ export class LevelLoader {
         }
     }
     
-    loadProgress() {
+    private loadProgress(): void {
         try {
             const saved = localStorage.getItem('pixelAdventureProgress');
             if (!saved) return;
             
-            const progress = JSON.parse(saved);
+            const progress = JSON.parse(saved) as SavedProgress;
             if (!progress.stages || !this.stages) return;
             
             if (progress.version !== 1) {
@@ -188,7 +254,7 @@ export class LevelLoader {
             }
             
             progress.stages.forEach(savedStage => {
-                const stage = this.stages.find(s => s.id === savedStage.id);
+                const stage = this.stages!.find(s => s.id === savedStage.id);
                 if (stage) {
                     stage.unlocked = savedStage.unlocked;
                     stage.cleared = savedStage.cleared;
@@ -203,7 +269,7 @@ export class LevelLoader {
         }
     }
     
-    resetProgress() {
+    resetProgress(): void {
         if (!this.stages) return;
         
         this.stages.forEach((stage, index) => {
@@ -222,48 +288,48 @@ export class LevelLoader {
         }
     }
     
-    getStageList() {
+    getStageList(): StageInfo[] {
         return this.stages || [];
     }
     
-    getStageInfo(stageId) {
+    getStageInfo(stageId: string): StageInfo | null {
         return this.stages?.find(s => s.id === stageId) || null;
     }
     
-    createTileMap(levelData) {
+    createTileMap(levelData: StageData): number[][] {
         if (!levelData || !levelData.tilemap) {
             throw new Error('Invalid level data: missing tilemap');
         }
         return levelData.tilemap;
     }
     
-    getEntities(levelData) {
+    getEntities(levelData: StageData): EntityData[] {
         if (!levelData) return [];
         return levelData.entities || [];
     }
     
-    getPlayerSpawn(levelData) {
+    getPlayerSpawn(levelData: StageData): { x: number; y: number } {
         if (!levelData || !levelData.playerSpawn) {
             return { x: 2, y: 10 };
         }
         return levelData.playerSpawn;
     }
     
-    getGoalPosition(levelData) {
+    getGoalPosition(levelData: StageData): { x: number; y: number } | null {
         if (!levelData || !levelData.goal) {
             return null;
         }
         return levelData.goal;
     }
     
-    getTimeLimit(levelData) {
+    getTimeLimit(levelData: StageData): number {
         if (!levelData || !levelData.timeLimit) {
             return 300;
         }
         return levelData.timeLimit;
     }
     
-    getBackgroundColor(levelData) {
+    getBackgroundColor(levelData: StageData): string {
         if (!levelData || !levelData.backgroundColor) {
             return '#5C94FC';
         }

@@ -1,4 +1,48 @@
+interface ActiveNode {
+    oscillator: OscillatorNode | AudioBufferSourceNode;
+    gainNode: GainNode;
+}
+
+interface EnvelopeSettings {
+    attack: number;
+    decayTime: number;
+    decay: number;
+    sustain: number;
+    release: number;
+}
+
+interface NoteInfo {
+    note?: string;
+    freq?: number;
+    time: number;
+    duration: number;
+}
+
+type BGMType = 'title' | 'game' | null;
+type DrumType = 'kick' | 'snare' | 'hihat';
+type OscillatorType = OscillatorNode['type'];
+
 export class MusicSystem {
+    private audioContext: AudioContext | null;
+    private masterGain: GainNode | null;
+    public isInitialized: boolean;
+    
+    // 現在再生中のBGM
+    private currentBGM: BGMType;
+    private bgmLoopInterval: NodeJS.Timeout | null;
+    
+    // 一時停止状態
+    private isPaused: boolean;
+    private pausedBGM: BGMType;
+    
+    // アクティブなオーディオノードを追跡
+    private activeNodes: ActiveNode[];
+    
+    // 音量設定
+    private bgmVolume: number;
+    private sfxVolume: number;
+    private isMuted: boolean;
+    
     constructor() {
         // AudioContextの初期化
         this.audioContext = null;
@@ -24,13 +68,13 @@ export class MusicSystem {
     
     /**
      * オーディオコンテキストの初期化（ユーザー操作後に呼ぶ必要がある）
-     * @returns {Promise<boolean>} 初期化成功の可否
+     * @returns 初期化成功の可否
      */
-    async init() {
+    async init(): Promise<boolean> {
         if (this.isInitialized) return true;
         
         try {
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
             if (!AudioContextClass) {
                 console.warn('Web Audio API is not supported in this browser');
                 return false;
@@ -38,8 +82,8 @@ export class MusicSystem {
             
             // AudioContextの作成時にエラーが発生する可能性があるので、try-catchで囲む
             try {
-                this.audioContext = new AudioContextClass();
-            } catch (contextError) {
+                this.audioContext = new AudioContextClass() as AudioContext;
+            } catch {
                 console.info('AudioContext creation deferred - will retry on user interaction');
                 return false;
             }
@@ -48,7 +92,7 @@ export class MusicSystem {
             if (this.audioContext.state === 'suspended') {
                 try {
                     await this.audioContext.resume();
-                } catch (resumeError) {
+                } catch {
                     console.info('AudioContext resume deferred - will retry on user interaction');
                     return false;
                 }
@@ -61,7 +105,7 @@ export class MusicSystem {
             this.isInitialized = true;
             console.log('Music system initialized successfully');
             return true;
-        } catch (error) {
+        } catch (error: any) {
             // 自動再生ポリシーによるエラーは警告レベルに留める
             if (error.name === 'NotAllowedError') {
                 console.info('音楽システムはユーザー操作後に開始されます');
@@ -75,11 +119,11 @@ export class MusicSystem {
     
     /**
      * ノートの周波数を取得
-     * @param {string} note - ノート名（例: 'C4'）
-     * @returns {number} 周波数
+     * @param note - ノート名（例: 'C4'）
+     * @returns 周波数
      */
-    getNoteFrequency(note) {
-        const notes = {
+    private getNoteFrequency(note: string): number {
+        const notes: { [key: string]: number } = {
             'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61,
             'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
             'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
@@ -93,14 +137,14 @@ export class MusicSystem {
     
     /**
      * 単音を再生
-     * @param {number} frequency - 周波数
-     * @param {number} duration - 持続時間（秒）
-     * @param {number} startTime - 開始時刻
-     * @param {string} type - 波形タイプ
-     * @param {number} volume - 音量
+     * @param frequency - 周波数
+     * @param duration - 持続時間（秒）
+     * @param startTime - 開始時刻
+     * @param type - 波形タイプ
+     * @param volume - 音量
      */
-    playNote(frequency, duration, startTime, type = 'square', volume = 0.3) {
-        if (!this.isInitialized || this.isMuted) return;
+    private playNote(frequency: number, duration: number, startTime: number, type: OscillatorType = 'square', volume: number = 0.3): void {
+        if (!this.isInitialized || this.isMuted || !this.audioContext || !this.masterGain) return;
         
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
@@ -133,13 +177,13 @@ export class MusicSystem {
     
     /**
      * コードを再生
-     * @param {string[]} notes - ノートの配列
-     * @param {number} duration - 持続時間
-     * @param {number} startTime - 開始時刻
-     * @param {string} type - 波形タイプ
-     * @param {number} volume - 音量
+     * @param notes - ノートの配列
+     * @param duration - 持続時間
+     * @param startTime - 開始時刻
+     * @param type - 波形タイプ
+     * @param volume - 音量
      */
-    playChord(notes, duration, startTime, type = 'sine', volume = 0.2) {
+    private playChord(notes: string[], duration: number, startTime: number, type: OscillatorType = 'sine', volume: number = 0.2): void {
         notes.forEach(note => {
             const freq = this.getNoteFrequency(note);
             this.playNote(freq, duration, startTime, type, volume);
@@ -148,11 +192,11 @@ export class MusicSystem {
     
     /**
      * ドラムサウンドを再生
-     * @param {string} type - ドラムタイプ
-     * @param {number} startTime - 開始時刻
+     * @param type - ドラムタイプ
+     * @param startTime - 開始時刻
      */
-    playDrum(type, startTime) {
-        if (!this.isInitialized || this.isMuted) return;
+    private playDrum(type: DrumType, startTime: number): void {
+        if (!this.isInitialized || this.isMuted || !this.audioContext || !this.masterGain) return;
         
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
@@ -211,14 +255,14 @@ export class MusicSystem {
     /**
      * タイトル画面のBGM
      */
-    playTitleBGM() {
+    playTitleBGM(): void {
         if (this.currentBGM === 'title') {
             return;
         }
         
         this.stopBGM();
         
-        if (!this.isInitialized) {
+        if (!this.isInitialized || !this.audioContext) {
             return;
         }
         
@@ -226,7 +270,7 @@ export class MusicSystem {
         const beatLength = 60 / bpm;
         
         const playBar = () => {
-            if (!this.isInitialized || this.isMuted || this.currentBGM !== 'title') return;
+            if (!this.isInitialized || this.isMuted || this.currentBGM !== 'title' || !this.audioContext) return;
             
             const now = this.audioContext.currentTime;
             
@@ -261,7 +305,7 @@ export class MusicSystem {
             }
             
             // メロディー
-            const melody = [
+            const melody: NoteInfo[] = [
                 { note: 'E5', duration: 0.5 },
                 { note: 'D5', duration: 0.5 },
                 { note: 'C5', duration: 1 },
@@ -273,13 +317,15 @@ export class MusicSystem {
             
             let melodyTime = now;
             melody.forEach(({ note, duration }) => {
-                this.playNote(
-                    this.getNoteFrequency(note),
-                    duration * beatLength * 0.9,
-                    melodyTime,
-                    'square',
-                    0.3
-                );
+                if (note) {
+                    this.playNote(
+                        this.getNoteFrequency(note),
+                        duration * beatLength * 0.9,
+                        melodyTime,
+                        'square',
+                        0.3
+                    );
+                }
                 melodyTime += duration * beatLength;
             });
         };
@@ -296,14 +342,14 @@ export class MusicSystem {
     /**
      * ゲームプレイ中のBGM
      */
-    playGameBGM() {
+    playGameBGM(): void {
         if (this.currentBGM === 'game') {
             return;
         }
         
         this.stopBGM();
         
-        if (!this.isInitialized) {
+        if (!this.isInitialized || !this.audioContext) {
             return;
         }
         
@@ -312,7 +358,7 @@ export class MusicSystem {
         let currentBeat = 0;
         
         const playBar = () => {
-            if (!this.isInitialized || this.isMuted || this.currentBGM !== 'game') return;
+            if (!this.isInitialized || this.isMuted || this.currentBGM !== 'game' || !this.audioContext) return;
             
             const now = this.audioContext.currentTime;
             
@@ -350,7 +396,7 @@ export class MusicSystem {
             
             // リードメロディー（2小節目から）
             if (currentBeat % 8 >= 4) {
-                const leadNotes = [
+                const leadNotes: NoteInfo[] = [
                     { note: 'G5', duration: 0.5 },
                     { note: 'E5', duration: 0.5 },
                     { note: 'C5', duration: 0.5 },
@@ -362,13 +408,15 @@ export class MusicSystem {
                 
                 let leadTime = now;
                 leadNotes.forEach(({ note, duration }) => {
-                    this.playNote(
-                        this.getNoteFrequency(note),
-                        duration * beatLength * 0.8,
-                        leadTime,
-                        'square',
-                        0.25
-                    );
+                    if (note) {
+                        this.playNote(
+                            this.getNoteFrequency(note),
+                            duration * beatLength * 0.8,
+                            leadTime,
+                            'square',
+                            0.25
+                        );
+                    }
                     leadTime += duration * beatLength;
                 });
             }
@@ -388,12 +436,12 @@ export class MusicSystem {
     /**
      * ゲームクリアのジングル
      */
-    playVictoryJingle() {
+    playVictoryJingle(): void {
         this.stopBGM();
-        if (!this.isInitialized) return;
+        if (!this.isInitialized || !this.audioContext) return;
         
         const now = this.audioContext.currentTime;
-        const notes = [
+        const notes: NoteInfo[] = [
             { note: 'C5', time: 0, duration: 0.2 },
             { note: 'E5', time: 0.2, duration: 0.2 },
             { note: 'G5', time: 0.4, duration: 0.2 },
@@ -401,13 +449,15 @@ export class MusicSystem {
         ];
         
         notes.forEach(({ note, time, duration }) => {
-            this.playNote(
-                this.getNoteFrequency(note),
-                duration,
-                now + time,
-                'sine',
-                0.4
-            );
+            if (note) {
+                this.playNote(
+                    this.getNoteFrequency(note),
+                    duration,
+                    now + time,
+                    'sine',
+                    0.4
+                );
+            }
         });
         
         // 和音
@@ -417,12 +467,12 @@ export class MusicSystem {
     /**
      * ゲームオーバーのジングル
      */
-    playGameOverJingle() {
+    playGameOverJingle(): void {
         this.stopBGM();
-        if (!this.isInitialized) return;
+        if (!this.isInitialized || !this.audioContext) return;
         
         const now = this.audioContext.currentTime;
-        const notes = [
+        const notes: NoteInfo[] = [
             { note: 'C4', time: 0, duration: 0.3 },
             { note: 'B3', time: 0.3, duration: 0.3 },
             { note: 'A3', time: 0.6, duration: 0.3 },
@@ -430,26 +480,28 @@ export class MusicSystem {
         ];
         
         notes.forEach(({ note, time, duration }) => {
-            this.playNote(
-                this.getNoteFrequency(note),
-                duration,
-                now + time,
-                'sine',
-                0.3
-            );
+            if (note) {
+                this.playNote(
+                    this.getNoteFrequency(note),
+                    duration,
+                    now + time,
+                    'sine',
+                    0.3
+                );
+            }
         });
     }
     
     /**
      * 効果音を再生する基本メソッド
-     * @param {number} frequency - 周波数
-     * @param {number} duration - 持続時間
-     * @param {string} type - 波形タイプ
-     * @param {number} volume - 音量
-     * @param {Object} envelope - エンベロープ設定
+     * @param frequency - 周波数
+     * @param duration - 持続時間
+     * @param type - 波形タイプ
+     * @param volume - 音量
+     * @param envelope - エンベロープ設定
      */
-    playSoundEffect(frequency, duration, type = 'square', volume = null, envelope = null) {
-        if (!this.isInitialized || this.isMuted) return;
+    private playSoundEffect(frequency: number, duration: number, type: OscillatorType = 'square', volume: number | null = null, envelope: EnvelopeSettings | null = null): void {
+        if (!this.isInitialized || this.isMuted || !this.audioContext || !this.masterGain) return;
         
         const effectVolume = volume !== null ? volume : this.sfxVolume;
         const now = this.audioContext.currentTime;
@@ -482,7 +534,7 @@ export class MusicSystem {
     /**
      * ジャンプ効果音
      */
-    playJumpSound() {
+    playJumpSound(): void {
         if (!this.isInitialized || this.isMuted) return;
         
         this.playSoundEffect(
@@ -502,11 +554,11 @@ export class MusicSystem {
     /**
      * コイン収集効果音
      */
-    playCoinSound() {
+    playCoinSound(): void {
         if (!this.isInitialized || this.isMuted) return;
         
         // 高音のキラキラ音
-        const notes = [
+        const notes: NoteInfo[] = [
             { freq: this.getNoteFrequency('A5'), time: 0, duration: 0.08 },
             { freq: this.getNoteFrequency('C6'), time: 0.04, duration: 0.08 },
             { freq: this.getNoteFrequency('E6'), time: 0.08, duration: 0.12 }
@@ -514,7 +566,7 @@ export class MusicSystem {
         
         notes.forEach(({ freq, time, duration }) => {
             setTimeout(() => {
-                if (!this.isInitialized || this.isMuted) return;
+                if (!this.isInitialized || this.isMuted || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'sine', 0.5);
             }, time * 1000);
         });
@@ -528,8 +580,8 @@ export class MusicSystem {
     /**
      * ダメージ効果音
      */
-    playDamageSound() {
-        if (!this.isInitialized || this.isMuted) return;
+    playDamageSound(): void {
+        if (!this.isInitialized || this.isMuted || !this.audioContext || !this.masterGain) return;
         
         const now = this.audioContext.currentTime;
         
@@ -554,7 +606,7 @@ export class MusicSystem {
     /**
      * ボタンクリック効果音
      */
-    playButtonClickSound() {
+    playButtonClickSound(): void {
         if (!this.isInitialized || this.isMuted) return;
         
         this.playSoundEffect(
@@ -569,11 +621,11 @@ export class MusicSystem {
     /**
      * ゲーム開始効果音
      */
-    playGameStartSound() {
+    playGameStartSound(): void {
         if (!this.isInitialized || this.isMuted) return;
         
         // 上昇音階
-        const notes = [
+        const notes: NoteInfo[] = [
             { freq: this.getNoteFrequency('C4'), time: 0, duration: 0.1 },
             { freq: this.getNoteFrequency('E4'), time: 0.1, duration: 0.1 },
             { freq: this.getNoteFrequency('G4'), time: 0.2, duration: 0.1 },
@@ -582,7 +634,7 @@ export class MusicSystem {
         
         notes.forEach(({ freq, time, duration }) => {
             setTimeout(() => {
-                if (!this.isInitialized || this.isMuted) return;
+                if (!this.isInitialized || this.isMuted || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'sine', 0.6);
             }, time * 1000);
         });
@@ -591,11 +643,11 @@ export class MusicSystem {
     /**
      * ゴール到達効果音
      */
-    playGoalSound() {
+    playGoalSound(): void {
         if (!this.isInitialized || this.isMuted) return;
         
         // 勝利のファンファーレ
-        const notes = [
+        const notes: NoteInfo[] = [
             { freq: this.getNoteFrequency('G4'), time: 0, duration: 0.15 },
             { freq: this.getNoteFrequency('G4'), time: 0.15, duration: 0.15 },
             { freq: this.getNoteFrequency('G4'), time: 0.3, duration: 0.15 },
@@ -608,7 +660,7 @@ export class MusicSystem {
         
         notes.forEach(({ freq, time, duration }) => {
             setTimeout(() => {
-                if (!this.isInitialized || this.isMuted) return;
+                if (!this.isInitialized || this.isMuted || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'square', 0.4, {
                     attack: 0.01,
                     decayTime: 0.1,
@@ -623,19 +675,21 @@ export class MusicSystem {
     /**
      * 全てのアクティブノードを強制停止
      */
-    stopAllActiveNodes() {
+    private stopAllActiveNodes(): void {
+        if (!this.audioContext) return;
+        
         this.activeNodes.forEach(({ oscillator, gainNode }) => {
             try {
                 // ゲインを即座に0に設定
                 if (gainNode && gainNode.gain) {
-                    gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
-                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.cancelScheduledValues(this.audioContext!.currentTime);
+                    gainNode.gain.setValueAtTime(0, this.audioContext!.currentTime);
                 }
                 // オシレーターを即座に停止
                 if (oscillator && oscillator.stop) {
-                    oscillator.stop(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext!.currentTime);
                 }
-            } catch (e) {
+            } catch {
                 // 既に停止済みの場合は無視
             }
         });
@@ -647,7 +701,7 @@ export class MusicSystem {
     /**
      * BGMを一時停止
      */
-    pauseBGM() {
+    pauseBGM(): void {
         // 一時停止中の場合はスキップ
         if (this.isPaused) {
             return;
@@ -669,7 +723,7 @@ export class MusicSystem {
     /**
      * BGMを再開
      */
-    resumeBGM() {
+    resumeBGM(): void {
         // 一時停止中でない場合はスキップ
         if (!this.isPaused) {
             return;
@@ -694,7 +748,7 @@ export class MusicSystem {
     /**
      * BGMを停止
      */
-    stopBGM() {
+    stopBGM(): void {
         // 既に停止済みの場合はスキップ
         if (!this.currentBGM && !this.bgmLoopInterval) {
             return;
@@ -715,9 +769,9 @@ export class MusicSystem {
     
     /**
      * 音量を設定
-     * @param {number} volume - 音量（0.0 - 1.0）
+     * @param volume - 音量（0.0 - 1.0）
      */
-    setVolume(volume) {
+    setVolume(volume: number): void {
         this.bgmVolume = Math.max(0, Math.min(1, volume));
         if (this.masterGain && !this.isMuted) {
             this.masterGain.gain.value = this.bgmVolume;
@@ -726,9 +780,9 @@ export class MusicSystem {
     
     /**
      * ミュート切り替え
-     * @returns {boolean} ミュート状態
+     * @returns ミュート状態
      */
-    toggleMute() {
+    toggleMute(): boolean {
         this.isMuted = !this.isMuted;
         if (this.masterGain) {
             this.masterGain.gain.value = this.isMuted ? 0 : this.bgmVolume;
@@ -738,32 +792,32 @@ export class MusicSystem {
     
     /**
      * ミュート状態を取得
-     * @returns {boolean} ミュート状態
+     * @returns ミュート状態
      */
-    getMuteState() {
+    getMuteState(): boolean {
         return this.isMuted;
     }
     
     /**
      * 効果音の音量を設定
-     * @param {number} volume - 音量（0.0 - 1.0）
+     * @param volume - 音量（0.0 - 1.0）
      */
-    setSfxVolume(volume) {
+    setSfxVolume(volume: number): void {
         this.sfxVolume = Math.max(0, Math.min(1, volume));
     }
     
     /**
      * 効果音の音量を取得
-     * @returns {number} 音量
+     * @returns 音量
      */
-    getSfxVolume() {
+    getSfxVolume(): number {
         return this.sfxVolume;
     }
     
     /**
      * クリーンアップ
      */
-    destroy() {
+    destroy(): void {
         try {
             this.stopAllActiveNodes();
             if (this.audioContext && this.audioContext.state !== 'closed') {
