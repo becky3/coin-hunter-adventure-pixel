@@ -65,8 +65,8 @@ export class GameStateManager {
         this.listeners = new Map();
     }
     
-    registerState(name: string, state: GameState): void {
-        this.states.set(name, state);
+    registerState(state: GameState): void {
+        this.states.set(state.name!, state);
     }
     
     changeState(name: string, params: StateChangeParams = {}): void {
