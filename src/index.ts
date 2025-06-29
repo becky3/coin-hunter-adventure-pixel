@@ -21,8 +21,6 @@ async function startGame() {
         
         await gameCore.init();
         gameCore.start();
-        
-        console.log('Game started successfully!');
     } catch (error) {
         console.error('Failed to start game:', error);
     }

@@ -146,8 +146,8 @@ game.pixelArtRenderer.animations  // List loaded animations
 </body>
 </html>`;
     
-    await fs.writeFile('test-report.html', testHtml);
-    console.log('✓ Test report saved as test-report.html');
+    await fs.writeFile('tests/test-report.html', testHtml);
+    console.log('✓ Test report saved as tests/test-report.html');
 }
 
 // メイン実行

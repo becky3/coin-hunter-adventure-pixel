@@ -132,7 +132,6 @@ export class PlayState implements GameState {
      * スプライトの事前読み込み
      */
     private async preloadSprites(): Promise<void> {
-        console.log('Preloading sprites...');
         
         try {
             // terrain sprites
@@ -145,7 +144,6 @@ export class PlayState implements GameState {
             await this.game.assetLoader.loadSprite('items', 'coin_spin3');
             await this.game.assetLoader.loadSprite('items', 'coin_spin4');
             
-            console.log('Sprites preloaded successfully');
         } catch (error) {
             console.error('Failed to preload sprites:', error);
         }
@@ -156,7 +154,6 @@ export class PlayState implements GameState {
      * @param params - レベル情報等のパラメータ
      */
     async enter(params: any = {}): Promise<void> {
-        console.log('Entering PlayState', params);
         
         // スプライトを事前読み込み
         await this.preloadSprites();
@@ -175,11 +172,6 @@ export class PlayState implements GameState {
         this.currentLevel = params.level || 'tutorial';
         await this.loadLevel(this.currentLevel);
         
-        // デバッグ情報
-        console.log('After loadLevel:');
-        console.log('- tileMap:', this.tileMap ? `${this.tileMap.length}x${this.tileMap[0]?.length}` : 'null');
-        console.log('- levelWidth:', this.levelWidth);
-        console.log('- levelHeight:', this.levelHeight);
         
         // プレイヤーの初期化
         this.initializePlayer();
@@ -302,7 +294,6 @@ export class PlayState implements GameState {
      * 状態終了時の処理
      */
     exit(): void {
-        console.log('Exiting PlayState');
         
         // ポーズ状態をリセット
         this.isPaused = false;
@@ -333,7 +324,6 @@ export class PlayState implements GameState {
      * @param levelName - レベル名
      */
     private async loadLevel(levelName: string): Promise<void> {
-        console.log(`Loading level: ${levelName}`);
         
         try {
             // レベルデータを読み込む
@@ -362,8 +352,7 @@ export class PlayState implements GameState {
             }
             
             // エンティティを生成（後で実装）
-            const entities = this.levelLoader.getEntities(levelData);
-            console.log(`Level loaded: ${entities.length} entities found`);
+            // const entities = this.levelLoader.getEntities(levelData);
             
         } catch (error) {
             console.error('Failed to load level:', error);

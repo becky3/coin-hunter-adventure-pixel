@@ -60,7 +60,6 @@ export class Spring extends Entity {
                 const notTouching = playerBottom < this.y - 5 || player.y > this.y + this.height;
                 if (notTouching) {
                     this.triggered = false;
-                    console.log('Spring trigger reset - player left');
                 }
             }
         }
@@ -91,9 +90,6 @@ export class Spring extends Entity {
             
             if (!this._debugCount) this._debugCount = 0;
             if (this._debugCount < 10 && player.grounded) {
-                console.log(`Spring check: player.y=${player.y}, playerBottom=${playerBottom}, spring.y=${this.y}`);
-                console.log(`  onTopOfSpring=${onTopOfSpring}, grounded=${player.grounded}, vy=${player.vy}, triggered=${this.triggered}`);
-                console.log(`  embedded check: ${!onTopOfSpring} && ${playerBottom > this.y} && ${player.y < this.y + this.height}`);
                 this._debugCount++;
             }
             
@@ -106,22 +102,17 @@ export class Spring extends Entity {
                 this.compression = 1;
                 this.triggered = true;
                 
-                console.log('Spring activated from continuous check!');
                 
                 if (this.physicsSystem && this.physicsSystem.entities) {
                     // TODO: 効果音の再生を実装
                 }
             } else if (!onTopOfSpring && playerBottom > this.y && player.y < this.y + this.height) {
                 if (player.grounded && !this.triggered) {
-                    const penetration = playerBottom - this.y;
-                    console.log(`Spring: Player embedded ${penetration}px, activating bounce`);
-                    
                     player.y = this.y - player.height;
                     player.vy = -this.bouncePower;
                     player.grounded = false;
                     this.compression = 1;
                     this.triggered = true;
-                    console.log('Spring activated after repositioning!');
                 }
             }
         }
@@ -182,7 +173,6 @@ export class Spring extends Entity {
                 this.compression = 1;
                 this.triggered = true;
                 
-                console.log('Spring activated from collision! Player repositioned to top.');
                 
                 return true;
             }

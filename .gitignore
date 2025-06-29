@@ -7,6 +7,8 @@ node_modules/
 coverage/
 .nyc_output/
 tests/screenshots/
+tests/test-report.html
+test-report.html
 
 # Production
 build/

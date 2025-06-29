@@ -40,7 +40,6 @@ export class GameCore {
      * ゲームの初期化
      */
     async init(): Promise<void> {
-        console.log('Initializing GameCore...');
         
         // 基本サービスの登録
         this.registerCoreServices();
@@ -67,7 +66,6 @@ export class GameCore {
             loadingScreen.style.display = 'none';
         }
         
-        console.log('GameCore initialization complete');
     }
     
     /**
@@ -168,7 +166,6 @@ export class GameCore {
      * ゲームの開始
      */
     start(): void {
-        console.log('Starting game...');
         
         const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
         
@@ -187,7 +184,6 @@ export class GameCore {
      * ゲームの停止
      */
     stop(): void {
-        console.log('Stopping game...');
         this.gameLoop.stop();
     }
     
