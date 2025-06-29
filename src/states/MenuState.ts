@@ -232,7 +232,7 @@ export class MenuState implements GameState {
             { key: 'UP/SPACE', desc: 'JUMP' },
             { key: 'HOLD JUMP', desc: 'JUMP HIGH' },
             { key: 'M', desc: 'MUTE' },
-            { key: '@', desc: 'DEBUG' }
+            { key: 'F3', desc: 'DEBUG' }
         ];
         
         let y = 56;

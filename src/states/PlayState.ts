@@ -125,10 +125,7 @@ export class PlayState implements GameState {
             await this.game.assetLoader.loadSprite('terrain', 'goal_flag');
 
             // アイテムスプライト
-            await this.game.assetLoader.loadSprite('items', 'coin_spin1');
-            await this.game.assetLoader.loadSprite('items', 'coin_spin2');
-            await this.game.assetLoader.loadSprite('items', 'coin_spin3');
-            await this.game.assetLoader.loadSprite('items', 'coin_spin4');
+            await this.game.assetLoader.loadAnimation('items', 'coin_spin', 4, 200);
             
         } catch (error) {
             console.error('Failed to preload sprites:', error);

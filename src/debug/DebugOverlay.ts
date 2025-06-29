@@ -112,18 +112,18 @@ export class DebugOverlay {
 
     private updateStats(): void {
 
-        const physicsSystem = this.serviceLocator.tryGet(ServiceNames.PHYSICS) as any;
+        const physicsSystem = this.serviceLocator.get(ServiceNames.PHYSICS) as any;
         if (physicsSystem && physicsSystem.entities) {
             this.updateStat('entities', physicsSystem.entities.size.toString());
         }
 
-        const renderer = this.serviceLocator.tryGet(ServiceNames.RENDERER) as any;
+        const renderer = this.serviceLocator.get(ServiceNames.RENDERER) as any;
         if (renderer && renderer.getCameraPosition) {
             const pos = renderer.getCameraPosition();
             this.updateStat('camera', `${Math.floor(pos.x)}, ${Math.floor(pos.y)}`);
         }
 
-        const inputSystem = this.serviceLocator.tryGet(ServiceNames.INPUT) as any;
+        const inputSystem = this.serviceLocator.get(ServiceNames.INPUT) as any;
         if (inputSystem) {
             const keys: string[] = [];
             if (inputSystem.isActionPressed?.('left')) keys.push('←');
