@@ -7,8 +7,8 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 const PLAYER_CONFIG = {
     width: 16,
     height: 16,
-    speed: 2.33,  // 3.5 * 2/3 ≈ 2.33
-    jumpPower: 6.67,  // 10 * 2/3 ≈ 6.67
+    speed: 2.33,
+    jumpPower: 10,
     minJumpTime: 8,
     maxJumpTime: 20,
     maxHealth: 3,

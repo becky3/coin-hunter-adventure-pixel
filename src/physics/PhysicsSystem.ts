@@ -42,8 +42,8 @@ export class PhysicsSystem {
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
-        this.gravity = 0.43;  // 0.65 * 2/3 ≈ 0.43
-        this.maxFallSpeed = 10;  // 15 * 2/3 = 10
+        this.gravity = 0.65;
+        this.maxFallSpeed = 15;
         this.friction = 0.8;
         this.layers = {
             TILE: 'tile',
