@@ -115,10 +115,16 @@ export class PlayState implements GameState {
     private async preloadSprites(): Promise<void> {
         
         try {
+            // プレイヤースプライト
+            await this.game.assetLoader.loadSprite('player', 'idle');
+            await this.game.assetLoader.loadAnimation('player', 'walk', 4, 100);
+            await this.game.assetLoader.loadAnimation('player', 'jump', 2, 100);
 
+            // 地形スプライト
             await this.game.assetLoader.loadSprite('terrain', 'spring');
             await this.game.assetLoader.loadSprite('terrain', 'goal_flag');
 
+            // アイテムスプライト
             await this.game.assetLoader.loadSprite('items', 'coin_spin1');
             await this.game.assetLoader.loadSprite('items', 'coin_spin2');
             await this.game.assetLoader.loadSprite('items', 'coin_spin3');
@@ -130,6 +136,7 @@ export class PlayState implements GameState {
     }
 
     async enter(params: any = {}): Promise<void> {
+        console.log('PlayState: enter() called with params:', params);
 
         await this.preloadSprites();
 
@@ -142,9 +149,12 @@ export class PlayState implements GameState {
         }
 
         this.currentLevel = params.level || 'tutorial';
+        console.log('PlayState: Loading level:', this.currentLevel);
         await this.loadLevel(this.currentLevel);
 
+        console.log('PlayState: Initializing player...');
         this.initializePlayer();
+        console.log('PlayState: Player initialized:', this.player);
 
         this.initializeEnemies();
 
@@ -154,8 +164,15 @@ export class PlayState implements GameState {
 
         this.lastTimeUpdate = Date.now();
 
+        console.log('PlayState: MusicSystem status:', {
+            exists: !!this.game.musicSystem,
+            isInitialized: this.game.musicSystem?.isInitialized
+        });
         if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
+            console.log('PlayState: Playing game BGM...');
             this.game.musicSystem.playGameBGM();
+        } else {
+            console.log('PlayState: MusicSystem not ready, skipping BGM');
         }
     }
 

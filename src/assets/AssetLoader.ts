@@ -144,11 +144,15 @@ export class AssetLoader {
         if (this.renderer) {
             const paletteName = this._getPaletteForCategory(category);
             const colors = getColorPalette(paletteName);
+            const spriteKey = `${category}/${name}`;
             this.renderer.addSprite(
-                `${category}/${name}`,
+                spriteKey,
                 spriteData.data,
                 colors
             );
+            console.log(`Sprite loaded and added to renderer: ${spriteKey}`);
+        } else {
+            console.warn(`Renderer not set when loading sprite: ${category}/${name}`);
         }
         
         return {
@@ -169,12 +173,16 @@ export class AssetLoader {
         if (this.renderer) {
             const paletteName = this._getPaletteForCategory(category);
             const colors = getColorPalette(paletteName);
+            const animKey = `${category}/${baseName}`;
             this.renderer.addAnimation(
-                `${category}/${baseName}`,
+                animKey,
                 frames,
                 colors,
                 frameDuration
             );
+            console.log(`Animation loaded and added to renderer: ${animKey}`);
+        } else {
+            console.warn(`Renderer not set when loading animation: ${category}/${baseName}`);
         }
         
         return {

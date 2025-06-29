@@ -4,6 +4,7 @@ import { ServiceLocator } from '../services/ServiceLocator';
 import { ServiceNames } from '../services/ServiceNames';
 import { EventBus } from '../services/EventBus';
 import { GameEvents } from '../services/GameEvents';
+import { GAME_CONSTANTS } from '../config/GameConstants';
 
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
@@ -45,13 +46,22 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['FPS', 'Entities', 'State', 'Camera', 'Input'];
+        const stats = ['FPS', 'Entities', 'State', 'Camera', 'Input', 'Speed'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
             this.debugElement!.appendChild(statElement);
             this.statsElements.set(stat.toLowerCase(), statElement.querySelector('span')!);
         });
+        
+        this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
+        
+        const helpDiv = document.createElement('div');
+        helpDiv.style.marginTop = '10px';
+        helpDiv.style.fontSize = '10px';
+        helpDiv.style.color = '#888';
+        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset';
+        this.debugElement!.appendChild(helpDiv);
         
         document.body.appendChild(this.debugElement);
     }
@@ -67,6 +77,21 @@ export class DebugOverlay {
             if (e.key === 'F3') {
                 e.preventDefault();
                 this.toggleVisibility();
+            }
+            
+            if (e.key === '-' || e.key === '_') {
+                e.preventDefault();
+                this.changeSpeed(-0.1);
+            }
+            
+            if (e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                this.changeSpeed(0.1);
+            }
+            
+            if (e.key === '0') {
+                e.preventDefault();
+                this.resetSpeed();
             }
         });
     }
@@ -120,6 +145,17 @@ export class DebugOverlay {
             this.debugElement.style.display = 
                 this.debugElement.style.display === 'none' ? 'block' : 'none';
         }
+    }
+    
+    private changeSpeed(delta: number): void {
+        GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER = Math.max(0.1, Math.min(3.0, 
+            GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER + delta));
+        this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
+    }
+    
+    private resetSpeed(): void {
+        GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER = 1.0;
+        this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
     }
 
     destroy(): void {

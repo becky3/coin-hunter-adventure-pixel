@@ -36,29 +36,33 @@ export interface ISystemManager {
 }
 
 export class SystemManager implements ISystemManager {
-    private systems: Map<string, ISystem> = new Map();
+    private _systems: Map<string, ISystem> = new Map();
     private sortedSystems: ISystem[] = [];
     
+    get systems(): ISystem[] {
+        return Array.from(this._systems.values());
+    }
+    
     registerSystem(system: ISystem): void {
-        if (this.systems.has(system.name)) {
+        if (this._systems.has(system.name)) {
             throw new Error(`System '${system.name}' is already registered`);
         }
         
-        this.systems.set(system.name, system);
+        this._systems.set(system.name, system);
         this.updateSortedSystems();
     }
     
     unregisterSystem(name: string): void {
-        const system = this.systems.get(name);
+        const system = this._systems.get(name);
         if (system) {
             system.destroy?.();
-            this.systems.delete(name);
+            this._systems.delete(name);
             this.updateSortedSystems();
         }
     }
     
     getSystem<T extends ISystem>(name: string): T | undefined {
-        return this.systems.get(name) as T | undefined;
+        return this._systems.get(name) as T | undefined;
     }
     
     async initSystems(): Promise<void> {

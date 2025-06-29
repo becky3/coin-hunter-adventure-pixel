@@ -440,7 +440,7 @@ export class PixelFont {
         this.charHeight = 7;
         this.defaultSpacing = 1;
 
-        instance = this;
+        instance = this as PixelFont;
     }
 
     drawText(

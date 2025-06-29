@@ -1,4 +1,5 @@
 import { Entity, Bounds, CollisionInfo } from '../entities/Entity';
+import { GAME_CONSTANTS } from '../config/GameConstants';
 
 export type PhysicsLayer = 'tile' | 'player' | 'enemy' | 'item' | 'platform';
 
@@ -91,9 +92,9 @@ export class PhysicsSystem {
             if (!entity.active) continue;
             this.applyGravity(entity, deltaTime);
 
-            entity.x += entity.vx * (deltaTime / 16.67);
+            entity.x += entity.vx * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
             this.checkCollisionsForEntity(entity, 'horizontal');
-            entity.y += entity.vy * (deltaTime / 16.67);
+            entity.y += entity.vy * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
             this.checkCollisionsForEntity(entity, 'vertical');
             this.applyFriction(entity, deltaTime);
         }
@@ -103,7 +104,7 @@ export class PhysicsSystem {
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
         
-        entity.vy += this.gravity * (deltaTime / 16.67);
+        entity.vy += this.gravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
         if (entity.vy > this.maxFallSpeed) {
             entity.vy = this.maxFallSpeed;
         }
@@ -112,7 +113,7 @@ export class PhysicsSystem {
     applyFriction(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.grounded) return;
         
-        const frictionFactor = Math.pow(entity.friction || this.friction, deltaTime / 16.67);
+        const frictionFactor = Math.pow(entity.friction || this.friction, deltaTime * 60);
         entity.vx *= frictionFactor;
         if (Math.abs(entity.vx) < 0.1) {
             entity.vx = 0;
