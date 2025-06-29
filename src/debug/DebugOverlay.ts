@@ -92,7 +92,7 @@ export class DebugOverlay {
     /**
      * フレーム更新（FPS計算）
      */
-    update(deltaTime: number): void {
+    update(_deltaTime: number): void {
         this.frameCount++;
         const currentTime = performance.now();
         

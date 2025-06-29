@@ -12,7 +12,7 @@ export class InputSystemAdapter implements ISystem {
     
     constructor(private inputSystem: InputSystem) {}
     
-    update(deltaTime: number): void {
+    update(_deltaTime: number): void {
         this.inputSystem.update();
     }
 }

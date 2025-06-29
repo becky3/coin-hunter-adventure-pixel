@@ -68,7 +68,7 @@ async function validateSpriteData() {
 async function checkGameFiles() {
     console.log('\n=== Core Game Files Check ===');
     const coreFiles = [
-        'src/core/Game.ts',
+        'src/core/GameCore.ts',
         'src/entities/Player.ts',
         'src/states/PlayState.ts',
         'src/utils/pixelArt.ts',

@@ -15,7 +15,7 @@ import { MusicSystem } from '../audio/MusicSystem';
 import { GameStateManager } from '../states/GameStateManager';
 import { MenuState } from '../states/MenuState';
 import { PlayState } from '../states/PlayState';
-import { ISystem } from '../services/SystemManager';
+
 
 import { InputSystemAdapter } from '../systems/adapters/InputSystemAdapter';
 import { PhysicsSystemAdapter } from '../systems/adapters/PhysicsSystemAdapter';
@@ -60,6 +60,12 @@ export class GameCore {
         // 初期ステートの設定
         const stateManager = this.serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
         await stateManager.setState('menu');
+        
+        // Loading画面を非表示にする
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
         
         console.log('GameCore initialization complete');
     }
