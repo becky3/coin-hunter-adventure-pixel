@@ -1,6 +1,3 @@
-/**
- * テスト用のシンプルなPlayState
- */
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants';
 import { GameState } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';

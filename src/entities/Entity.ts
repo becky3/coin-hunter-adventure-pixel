@@ -1,7 +1,3 @@
-/**
- * エンティティ基底クラス
- * すべてのゲームオブジェクトの基本機能を提供
- */
 import type { PixelRenderer } from '../rendering/PixelRenderer';
 
 // Type definitions

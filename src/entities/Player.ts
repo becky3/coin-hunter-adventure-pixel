@@ -1,7 +1,3 @@
-/**
- * プレイヤーエンティティ
- * プレイヤーキャラクターの動作を管理
- */
 import { Entity, CollisionInfo } from './Entity';
 import { InputSystem } from '../core/InputSystem';
 import { MusicSystem } from '../audio/MusicSystem.js';
@@ -123,31 +119,18 @@ export class Player extends Entity {
         this.assetLoader = null;
     }
     
-    /**
-     * 入力マネージャーを設定
-     */
     setInputManager(inputManager: InputSystem): void {
         this.inputManager = inputManager;
     }
     
-    /**
-     * 音楽システムを設定
-     */
     setMusicSystem(musicSystem: MusicSystem): void {
         this.musicSystem = musicSystem;
     }
     
-    /**
-     * アセットローダーを設定
-     */
     setAssetLoader(assetLoader: AssetLoader): void {
         this.assetLoader = assetLoader;
     }
     
-    /**
-     * 更新処理
-     * @param deltaTime - 経過時間
-     */
     update(deltaTime: number): void {
         super.update(deltaTime);
         
@@ -177,10 +160,6 @@ export class Player extends Entity {
         }
     }
     
-    /**
-     * 移動処理
-     * @param input - 入力状態
-     */
     private handleMovement(input: { left: boolean; right: boolean; jump: boolean; action: boolean }): void {
         if (input.left) {
             this.vx = -this.speed;
@@ -196,11 +175,6 @@ export class Player extends Entity {
         }
     }
     
-    /**
-     * ジャンプ処理
-     * @param input - 入力状態
-     * @param deltaTime - 経過時間
-     */
     private handleJump(input: { left: boolean; right: boolean; jump: boolean; action: boolean }, deltaTime: number): void {
         if (input.jump && !this.jumpButtonPressed && this.grounded) {
             this.vy = -this.jumpPower;
@@ -251,9 +225,6 @@ export class Player extends Entity {
         }
     }
     
-    /**
-     * アニメーション状態の更新
-     */
     private updateAnimationState(): void {
         const prevState = this.animState;
         
@@ -274,10 +245,6 @@ export class Player extends Entity {
         }
     }
     
-    /**
-     * アニメーションフレームの更新
-     * @param deltaTime - 経過時間
-     */
     private updateAnimationFrame(deltaTime: number): void {
         this.animTimer += deltaTime;
         
@@ -291,10 +258,6 @@ export class Player extends Entity {
         }
     }
     
-    /**
-     * ダメージを受ける
-     * @param damage - ダメージ量
-     */
     takeDamage(damage: number = 1): void {
         if (this.invulnerable || this.isDead) return;
         
@@ -316,17 +279,10 @@ export class Player extends Entity {
         }
     }
     
-    /**
-     * 回復
-     * @param amount - 回復量
-     */
     heal(amount: number = 1): void {
         this.health = Math.min(this.health + amount, this.maxHealth);
     }
     
-    /**
-     * 死亡処理
-     */
     private die(): void {
         this.isDead = true;
         this.vy = -8;
@@ -337,11 +293,6 @@ export class Player extends Entity {
         }
     }
     
-    /**
-     * リスポーン
-     * @param x - X座標
-     * @param y - Y座標
-     */
     respawn(x: number, y: number): void {
         this.x = x;
         this.y = y;
@@ -360,25 +311,14 @@ export class Player extends Entity {
         this.health = this.maxHealth;
     }
     
-    /**
-     * スコアを追加
-     * @param points - 追加ポイント
-     */
     addScore(points: number): void {
         this.score += points;
     }
     
-    /**
-     * コインを収集
-     * @param amount - コイン枚数
-     */
     collectCoin(amount: number = 1): void {
         this.coins += amount;
     }
     
-    /**
-     * スプライトキーを更新
-     */
     private updateSprite(): void {
         if (this.animState === 'idle') {
             this.spriteKey = 'player/idle';
@@ -389,10 +329,6 @@ export class Player extends Entity {
         }
     }
     
-    /**
-     * 描画処理
-     * @param renderer - レンダラー
-     */
     render(renderer: PixelRenderer): void {
         this.flipX = this.facing === 'left';
         
@@ -460,9 +396,6 @@ export class Player extends Entity {
         }
     }
     
-    /**
-     * プレイヤーの状態を取得
-     */
     getState(): PlayerState {
         return {
             x: this.x,
@@ -483,10 +416,6 @@ export class Player extends Entity {
         };
     }
     
-    /**
-     * 衝突ハンドラ（PhysicsSystemから呼ばれる）
-     * @param collisionInfo - 衝突情報
-     */
     onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo || !collisionInfo.other) return;
         

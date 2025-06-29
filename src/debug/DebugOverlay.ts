@@ -6,9 +6,6 @@ import { ServiceNames } from '../services/ServiceNames';
 import { EventBus } from '../services/EventBus';
 import { GameEvents } from '../services/GameEvents';
 
-/**
- * デバッグ情報の表示を管理
- */
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
     private debugElement?: HTMLDivElement;

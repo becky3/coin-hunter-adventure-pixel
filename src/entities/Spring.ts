@@ -104,7 +104,7 @@ export class Spring extends Entity {
                 
                 
                 if (this.physicsSystem && this.physicsSystem.entities) {
-                    // TODO: 効果音の再生を実装
+                    // TODO: Implement sound effect playback
                 }
             } else if (!onTopOfSpring && playerBottom > this.y && player.y < this.y + this.height) {
                 if (player.grounded && !this.triggered) {

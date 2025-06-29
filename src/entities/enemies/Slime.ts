@@ -1,6 +1,3 @@
-/**
- * スライムの敵キャラクター
- */
 import { Enemy } from '../Enemy';
 import { PixelRenderer } from '../../rendering/PixelRenderer';
 
@@ -15,37 +12,27 @@ export class Slime extends Enemy {
     constructor(x: number, y: number) {
         super(x, y, 16, 16);
         
-        // スライムのパラメータ
         this.maxHealth = 1;
         this.health = this.maxHealth;
         this.damage = 1;
-        this.moveSpeed = 0.5;  // ゆっくり移動（ピクセル/フレーム）
+        this.moveSpeed = 0.5;
         
-        // スライム固有の設定
-        this.jumpHeight = 5;  // 小さくジャンプしながら移動
+        this.jumpHeight = 5;
         this.jumpCooldown = 0;
-        this.jumpInterval = 1000;  // 1秒ごとにジャンプ
+        this.jumpInterval = 1000;
         
-        // スプライト設定
         this.spriteKey = 'slime';
         this.animState = 'idle';
         
-        // 物理設定
-        this.bounceHeight = 0.3;  // 弾む高さ
+        this.bounceHeight = 0.3;
         this.friction = 0.8;
     }
     
-    /**
-     * AI更新処理
-     * @param deltaTime - 前フレームからの経過時間
-     */
     protected updateAI(deltaTime: number): void {
-        // 死亡中またはひるみ中は動かない
         if (this.state === 'dead' || this.state === 'hurt') {
             return;
         }
         
-        // ジャンプクールダウンの更新
         if (this.jumpCooldown > 0) {
             this.jumpCooldown -= deltaTime;
         }

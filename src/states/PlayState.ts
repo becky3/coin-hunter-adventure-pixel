@@ -351,7 +351,7 @@ export class PlayState implements GameState {
                 this.player.y = spawn.y * TILE_SIZE;
             }
             
-            // エンティティを生成（後で実装）
+            // TODO: Entity generation
             // const entities = this.levelLoader.getEntities(levelData);
             
         } catch (error) {
