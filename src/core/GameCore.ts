@@ -9,6 +9,7 @@ import { DebugOverlay } from '../debug/DebugOverlay';
 import { InputSystem as InputSystemImpl } from './InputSystem';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { PixelArtRenderer } from '../rendering/PixelArtRenderer';
 import { AssetLoader } from '../assets/AssetLoader';
 import { MusicSystem } from '../audio/MusicSystem';
 import { GameStateManager } from '../states/GameStateManager';
@@ -76,7 +77,12 @@ export class GameCore {
         const renderer = new PixelRenderer(canvas);
         this._serviceLocator.register(ServiceNames.RENDERER, renderer);
 
+        const pixelArtRenderer = new PixelArtRenderer();
+        renderer.pixelArtRenderer = pixelArtRenderer;
+
         const assetLoader = new AssetLoader();
+        assetLoader.setRenderer(pixelArtRenderer);
+        renderer.assetLoader = assetLoader;
         this._serviceLocator.register(ServiceNames.ASSET_LOADER, assetLoader);
 
         const inputSystem = new InputSystemImpl();

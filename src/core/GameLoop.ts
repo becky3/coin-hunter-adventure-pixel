@@ -23,7 +23,7 @@ export class GameLoop {
             
             if (deltaTime >= this.frameTime) {
 
-                updateCallback(deltaTime / 1000);
+                updateCallback(deltaTime);
                 this._lastTime = currentTime - (deltaTime % this.frameTime);
             }
             
