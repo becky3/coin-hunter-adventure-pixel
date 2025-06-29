@@ -71,6 +71,10 @@ export class Coin extends Entity {
         }
     }
     
+    public isCollected(): boolean {
+        return this.collected;
+    }
+
     /**
      * コインを収集
      * @returns 獲得スコア

@@ -14,7 +14,7 @@ interface EnvelopeSettings {
 interface NoteInfo {
     note?: string;
     freq?: number;
-    time: number;
+    time?: number;
     duration: number;
 }
 

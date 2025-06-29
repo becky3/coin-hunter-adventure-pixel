@@ -109,6 +109,10 @@ export class GoalFlag extends Entity {
         return false;
     }
     
+    public isCleared(): boolean {
+        return this.cleared;
+    }
+
     /**
      * ゴールフラグをクリア状態にする
      */

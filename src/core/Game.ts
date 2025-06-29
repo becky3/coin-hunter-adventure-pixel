@@ -173,7 +173,7 @@ export class Game {
         console.log('Starting game...');
         this.running = true;
         this.lastTime = performance.now();
-        this.gameLoop();
+        requestAnimationFrame(this.gameLoop);
     }
     
     private gameLoop = (currentTime: number): void => {
@@ -300,7 +300,8 @@ export class Game {
                 this.debugElements.entityCount.textContent = this.player ? '1' : '0';
             }
             if (this.debugElements.cameraPos) {
-                this.debugElements.cameraPos.textContent = `${Math.floor(this.renderer.cameraX)}, ${Math.floor(this.renderer.cameraY)}`;
+                const cameraPos = this.renderer.getCameraPosition();
+                this.debugElements.cameraPos.textContent = `${Math.floor(cameraPos.x)}, ${Math.floor(cameraPos.y)}`;
             }
             const keys: string[] = [];
             if (this.inputSystem.isActionPressed('left')) keys.push('←');
