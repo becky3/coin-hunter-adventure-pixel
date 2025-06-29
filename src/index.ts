@@ -16,6 +16,9 @@ window.addEventListener('unhandledrejection', (event) => {
 async function startGame() {
     try {
         const gameCore = new GameCore();
+        // window.gameに登録（デバッグとの互換性のため）
+        (window as any).game = gameCore;
+        
         await gameCore.init();
         gameCore.start();
         

@@ -27,12 +27,12 @@ import { DebugSystemAdapter } from '../systems/adapters/DebugSystemAdapter';
  * ゲームの初期化とサービス管理を担当
  */
 export class GameCore {
-    private serviceLocator: ServiceLocator;
+    private _serviceLocator: ServiceLocator;
     private gameLoop: GameLoop;
     private debugOverlay?: DebugOverlay;
     
     constructor() {
-        this.serviceLocator = new ServiceLocator();
+        this._serviceLocator = new ServiceLocator();
         this.gameLoop = new GameLoop();
     }
     
@@ -53,12 +53,12 @@ export class GameCore {
         
         // デバッグオーバーレイの初期化（開発環境のみ）
         if (process.env.NODE_ENV === 'development') {
-            this.debugOverlay = new DebugOverlay(this.serviceLocator);
+            this.debugOverlay = new DebugOverlay(this._serviceLocator);
             await this.debugOverlay.init();
         }
         
         // 初期ステートの設定
-        const stateManager = this.serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
+        const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
         await stateManager.setState('menu');
         
         // Loading画面を非表示にする
@@ -81,47 +81,47 @@ export class GameCore {
         }
         
         // EventBus
-        this.serviceLocator.register(ServiceNames.EVENT_BUS, new EventBus());
+        this._serviceLocator.register(ServiceNames.EVENT_BUS, new EventBus());
         
         // SystemManager
-        this.serviceLocator.register(ServiceNames.SYSTEM_MANAGER, new SystemManager());
+        this._serviceLocator.register(ServiceNames.SYSTEM_MANAGER, new SystemManager());
         
         // Renderer
         const renderer = new PixelRenderer(canvas);
-        this.serviceLocator.register(ServiceNames.RENDERER, renderer);
+        this._serviceLocator.register(ServiceNames.RENDERER, renderer);
         
         // AssetLoader
         const assetLoader = new AssetLoader();
-        this.serviceLocator.register(ServiceNames.ASSET_LOADER, assetLoader);
+        this._serviceLocator.register(ServiceNames.ASSET_LOADER, assetLoader);
         
         // InputSystem
         const inputSystem = new InputSystemImpl();
-        this.serviceLocator.register(ServiceNames.INPUT, inputSystem);
+        this._serviceLocator.register(ServiceNames.INPUT, inputSystem);
         
         // PhysicsSystem
         const physicsSystem = new PhysicsSystem();
-        this.serviceLocator.register(ServiceNames.PHYSICS, physicsSystem);
+        this._serviceLocator.register(ServiceNames.PHYSICS, physicsSystem);
         
         // MusicSystem
         const musicSystem = new MusicSystem();
-        this.serviceLocator.register(ServiceNames.AUDIO, musicSystem);
+        this._serviceLocator.register(ServiceNames.AUDIO, musicSystem);
         
         // GameStateManager
         const stateManager = new GameStateManager();
-        this.serviceLocator.register(ServiceNames.GAME_STATE_MANAGER, stateManager);
+        this._serviceLocator.register(ServiceNames.GAME_STATE_MANAGER, stateManager);
     }
     
     /**
      * システムの登録
      */
     private async registerSystems(): Promise<void> {
-        const systemManager = this.serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
+        const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
         
         // 各サービスをISystemアダプターでラップして登録
-        const inputSystem = this.serviceLocator.get<InputSystemImpl>(ServiceNames.INPUT);
-        const physicsSystem = this.serviceLocator.get<PhysicsSystem>(ServiceNames.PHYSICS);
-        const renderer = this.serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
-        const stateManager = this.serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
+        const inputSystem = this._serviceLocator.get<InputSystemImpl>(ServiceNames.INPUT);
+        const physicsSystem = this._serviceLocator.get<PhysicsSystem>(ServiceNames.PHYSICS);
+        const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
+        const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
         
         // システムアダプターの作成と登録
         systemManager.registerSystem(new InputSystemAdapter(inputSystem));
@@ -141,7 +141,7 @@ export class GameCore {
      * ゲームステートの登録
      */
     private registerStates(): void {
-        const stateManager = this.serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
+        const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
         
         // 各ステートに必要なサービスを注入するためのゲームプロキシを作成
         const gameProxy = this.createGameProxy();
@@ -156,12 +156,12 @@ export class GameCore {
      */
     private createGameProxy(): any {
         return {
-            renderer: this.serviceLocator.get(ServiceNames.RENDERER),
-            inputSystem: this.serviceLocator.get(ServiceNames.INPUT),
-            physicsSystem: this.serviceLocator.get(ServiceNames.PHYSICS),
-            assetLoader: this.serviceLocator.get(ServiceNames.ASSET_LOADER),
-            musicSystem: this.serviceLocator.get(ServiceNames.AUDIO),
-            stateManager: this.serviceLocator.get(ServiceNames.GAME_STATE_MANAGER)
+            renderer: this._serviceLocator.get(ServiceNames.RENDERER),
+            inputSystem: this._serviceLocator.get(ServiceNames.INPUT),
+            physicsSystem: this._serviceLocator.get(ServiceNames.PHYSICS),
+            assetLoader: this._serviceLocator.get(ServiceNames.ASSET_LOADER),
+            musicSystem: this._serviceLocator.get(ServiceNames.AUDIO),
+            stateManager: this._serviceLocator.get(ServiceNames.GAME_STATE_MANAGER)
         };
     }
     
@@ -171,7 +171,7 @@ export class GameCore {
     start(): void {
         console.log('Starting game...');
         
-        const systemManager = this.serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
+        const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
         
         // ゲームループの開始
         this.gameLoop.start((deltaTime) => {
@@ -179,7 +179,7 @@ export class GameCore {
             systemManager.updateSystems(deltaTime);
             
             // レンダリング
-            const renderer = this.serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
+            const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
             systemManager.renderSystems(renderer);
         });
     }
@@ -190,5 +190,12 @@ export class GameCore {
     stop(): void {
         console.log('Stopping game...');
         this.gameLoop.stop();
+    }
+    
+    /**
+     * ServiceLocatorへのアクセス（デバッグ用）
+     */
+    get serviceLocator(): ServiceLocator {
+        return this._serviceLocator;
     }
 }

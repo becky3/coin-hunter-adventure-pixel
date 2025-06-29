@@ -91,12 +91,17 @@ export class MenuState implements GameState {
         );
         this.inputListeners.push(
             this.game.inputSystem.on('keyPress', (event: InputEvent) => {
+                console.log('MenuState: keyPress event received:', event);
                 const isValidJump = event.action === 'jump' && event.key === 'Space';
                 const isValidAction = event.action === 'action';
+                
+                console.log('MenuState: isValidAction:', isValidAction, 'isValidJump:', isValidJump);
+                console.log('MenuState: optionsAlpha:', this.optionsAlpha);
                 
                 if ((isValidAction || isValidJump) && 
                     !this.showHowTo && !this.showCredits && 
                     this.optionsAlpha >= 1) {
+                    console.log('MenuState: Executing option after timeout');
                     setTimeout(() => {
                         this.executeOption();
                     }, 0);
@@ -262,17 +267,23 @@ export class MenuState implements GameState {
     }
     
     private executeOption(): void {
+        console.log('MenuState: executeOption called, selectedOption:', this.selectedOption);
         const option = this.options[this.selectedOption];
+        console.log('MenuState: Selected option:', option);
         
         switch (option.action) {
         case 'start':
+            console.log('MenuState: START GAME selected');
             if (this.game.musicSystem) {
+                console.log('MenuState: Playing game start sound');
                 this.game.musicSystem.playGameStartSound();
             }
             try {
+                console.log('MenuState: Calling setState("play")');
                 this.game.stateManager.setState('play');
+                console.log('MenuState: setState completed');
             } catch (error) {
-                console.error('PlayState not yet implemented:', error);
+                console.error('MenuState: Error switching to PlayState:', error);
             }
             break;
                 
