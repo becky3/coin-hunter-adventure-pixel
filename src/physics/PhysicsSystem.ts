@@ -1,4 +1,5 @@
 import { Entity, Bounds, CollisionInfo } from '../entities/Entity';
+import { GAME_CONSTANTS } from '../config/GameConstants';
 
 export type PhysicsLayer = 'tile' | 'player' | 'enemy' | 'item' | 'platform';
 
@@ -41,8 +42,8 @@ export class PhysicsSystem {
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
-        this.gravity = 0.65;
-        this.maxFallSpeed = 15;
+        this.gravity = 0.43;  // 0.65 * 2/3 ≈ 0.43
+        this.maxFallSpeed = 10;  // 15 * 2/3 = 10
         this.friction = 0.8;
         this.layers = {
             TILE: 'tile',
@@ -91,9 +92,9 @@ export class PhysicsSystem {
             if (!entity.active) continue;
             this.applyGravity(entity, deltaTime);
 
-            entity.x += entity.vx * deltaTime * 60;
+            entity.x += entity.vx * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
             this.checkCollisionsForEntity(entity, 'horizontal');
-            entity.y += entity.vy * deltaTime * 60;
+            entity.y += entity.vy * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
             this.checkCollisionsForEntity(entity, 'vertical');
             this.applyFriction(entity, deltaTime);
         }
@@ -103,7 +104,7 @@ export class PhysicsSystem {
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
         
-        entity.vy += this.gravity * deltaTime * 60;
+        entity.vy += this.gravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
         if (entity.vy > this.maxFallSpeed) {
             entity.vy = this.maxFallSpeed;
         }
