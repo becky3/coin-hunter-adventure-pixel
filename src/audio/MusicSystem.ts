@@ -597,7 +597,7 @@ export class MusicSystem {
                     oscillator.stop(this.audioContext!.currentTime);
                 }
             } catch {
-
+                // TODO: Handle oscillator stop error
             }
         });
 
