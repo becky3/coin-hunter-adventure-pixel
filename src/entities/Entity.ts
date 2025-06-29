@@ -1,10 +1,5 @@
-/**
- * エンティティ基底クラス
- * すべてのゲームオブジェクトの基本機能を提供
- */
 import type { PixelRenderer } from '../rendering/PixelRenderer';
 
-// Type definitions
 export interface Bounds {
     left: number;
     top: number;
@@ -23,8 +18,6 @@ export interface CollisionInfo {
     other: Entity;
     side: string;
 }
-
-// Using PixelRenderer type directly
 
 let entityIdCounter = 0;
 
@@ -61,7 +54,7 @@ export class Entity {
     public animationTime: number;
     public flipX: boolean;
     
-    public sprite: any; // Will be properly typed when sprite system is converted
+    public sprite: any;
     public spriteScale: number;
 
     constructor(x = 0, y = 0, width = 16, height = 16) {
@@ -100,22 +93,14 @@ export class Entity {
         this.sprite = null;
         this.spriteScale = 1;
     }
-    
-    /**
-     * エンティティを更新
-     * @param deltaTime - 前フレームからの経過時間（ms）
-     */
+
     update(deltaTime: number): void {
         if (!this.active) return;
         
         this.updateAnimation(deltaTime);
         this.onUpdate(deltaTime);
     }
-    
-    /**
-     * 物理演算の更新
-     * @param deltaTime - 経過時間
-     */
+
     updatePhysics(deltaTime: number): void {
         if (!deltaTime || deltaTime <= 0 || deltaTime > 100) {
             deltaTime = 16.67;
@@ -143,21 +128,13 @@ export class Entity {
             this.y += this.vy * frameFactor;
         }
     }
-    
-    /**
-     * アニメーションの更新
-     * @param deltaTime - 経過時間
-     */
+
     updateAnimation(deltaTime: number): void {
         if (this.currentAnimation) {
             this.animationTime += deltaTime;
         }
     }
-    
-    /**
-     * エンティティを描画
-     * @param renderer - レンダラー
-     */
+
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
@@ -176,11 +153,7 @@ export class Entity {
             this.renderDebug(renderer);
         }
     }
-    
-    /**
-     * デフォルトの描画（スプライトがない場合）
-     * @param renderer 
-     */
+
     renderDefault(renderer: PixelRenderer): void {
         renderer.drawRect(
             this.x,
@@ -199,11 +172,7 @@ export class Entity {
             false
         );
     }
-    
-    /**
-     * デバッグ情報の描画
-     * @param renderer 
-     */
+
     renderDebug(renderer: PixelRenderer): void {
         renderer.drawRect(
             this.x,
@@ -234,11 +203,7 @@ export class Entity {
             screenPos.y
         );
     }
-    
-    /**
-     * 当たり判定用の境界ボックスを取得
-     * @returns 境界ボックス
-     */
+
     getBounds(): Bounds {
         return {
             left: this.x,
@@ -249,12 +214,7 @@ export class Entity {
             height: this.height
         };
     }
-    
-    /**
-     * 他のエンティティとの衝突判定
-     * @param other - 判定対象
-     * @returns 衝突している場合true
-     */
+
     collidesWith(other: Entity): boolean {
         if (!this.collidable || !other.collidable) return false;
         
@@ -266,12 +226,7 @@ export class Entity {
                a.top < b.bottom &&
                a.bottom > b.top;
     }
-    
-    /**
-     * 矩形との衝突判定
-     * @param rect - 判定対象の矩形
-     * @returns 衝突している場合true
-     */
+
     collidesWithRect(rect: Bounds): boolean {
         const bounds = this.getBounds();
         
@@ -280,23 +235,13 @@ export class Entity {
                bounds.top < rect.bottom &&
                bounds.bottom > rect.top;
     }
-    
-    /**
-     * エンティティ間の距離を計算
-     * @param other - 対象エンティティ
-     * @returns 距離
-     */
+
     distanceTo(other: Entity): number {
         const dx = (this.x + this.width / 2) - (other.x + other.width / 2);
         const dy = (this.y + this.height / 2) - (other.y + other.height / 2);
         return Math.sqrt(dx * dx + dy * dy);
     }
-    
-    /**
-     * エンティティへの方向を計算
-     * @param other - 対象エンティティ
-     * @returns 正規化された方向ベクトル
-     */
+
     directionTo(other: Entity): Vector2D {
         const dx = (other.x + other.width / 2) - (this.x + this.width / 2);
         const dy = (other.y + other.height / 2) - (this.y + this.height / 2);
@@ -311,33 +256,19 @@ export class Entity {
             y: dy / distance
         };
     }
-    
-    /**
-     * スプライトを設定
-     * @param sprite - スプライトデータ
-     * @param scale - 描画スケール
-     */
+
     setSprite(sprite: any, scale = 1): void {
         this.sprite = sprite;
         this.spriteScale = scale;
     }
-    
-    /**
-     * アニメーションを設定
-     * @param animationName - アニメーション名
-     */
+
     setAnimation(animationName: string): void {
         if (this.currentAnimation !== animationName) {
             this.currentAnimation = animationName;
             this.animationTime = 0;
         }
     }
-    
-    /**
-     * エンティティをリセット
-     * @param x - X座標
-     * @param y - Y座標
-     */
+
     reset(x: number, y: number): void {
         this.x = x;
         this.y = y;
@@ -350,36 +281,22 @@ export class Entity {
         this.visible = true;
         this.animationTime = 0;
     }
-    
-    /**
-     * エンティティを破棄
-     */
+
     destroy(): void {
         this.active = false;
         this.visible = false;
         this.onDestroy();
     }
-    
-    /**
-     * 更新処理（子クラスで実装）
-     * @param deltaTime - 経過時間
-     */
+
     onUpdate(_deltaTime: number): void {
-        // Override in subclasses
+
     }
-    
-    /**
-     * 破棄処理（子クラスで実装）
-     */
+
     onDestroy(): void {
-        // Override in subclasses
+
     }
-    
-    /**
-     * 衝突時の処理（子クラスで実装）
-     * @param collisionInfo - 衝突情報 {other: Entity, side: string}
-     */
+
     onCollision(_collisionInfo?: CollisionInfo): void {
-        // Override in subclasses
+
     }
 }

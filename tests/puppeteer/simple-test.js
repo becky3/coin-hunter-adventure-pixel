@@ -68,7 +68,7 @@ async function validateSpriteData() {
 async function checkGameFiles() {
     console.log('\n=== Core Game Files Check ===');
     const coreFiles = [
-        'src/core/Game.ts',
+        'src/core/GameCore.ts',
         'src/entities/Player.ts',
         'src/states/PlayState.ts',
         'src/utils/pixelArt.ts',
@@ -146,8 +146,8 @@ game.pixelArtRenderer.animations  // List loaded animations
 </body>
 </html>`;
     
-    await fs.writeFile('test-report.html', testHtml);
-    console.log('✓ Test report saved as test-report.html');
+    await fs.writeFile('tests/test-report.html', testHtml);
+    console.log('✓ Test report saved as tests/test-report.html');
 }
 
 // メイン実行

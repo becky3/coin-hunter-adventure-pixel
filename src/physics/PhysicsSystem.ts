@@ -1,6 +1,5 @@
 import { Entity, Bounds, CollisionInfo } from '../entities/Entity';
 
-// Type definitions
 export type PhysicsLayer = 'tile' | 'player' | 'enemy' | 'item' | 'platform';
 
 export interface PhysicsLayers {
@@ -21,13 +20,11 @@ type CollisionMatrix = {
     [key in PhysicsLayer]?: PhysicsLayer[];
 };
 
-// Extended Entity interface for physics system
 interface PhysicsEntity extends Entity {
     physicsLayer?: PhysicsLayer;
     physicsSystem?: PhysicsSystem;
 }
 
-// Renderer interface (will be properly typed when PixelRenderer is converted)
 interface IRenderer {
     drawRect(x: number, y: number, width: number, height: number, color: string, fill?: boolean): void;
 }
@@ -93,8 +90,7 @@ export class PhysicsSystem {
         for (const entity of this.entities) {
             if (!entity.active) continue;
             this.applyGravity(entity, deltaTime);
-            
-            
+
             entity.x += entity.vx * (deltaTime / 16.67);
             this.checkCollisionsForEntity(entity, 'horizontal');
             entity.y += entity.vy * (deltaTime / 16.67);

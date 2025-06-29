@@ -1,10 +1,5 @@
 
-// src/services/ServiceNames.ts
 
-/**
- * サービス名の定数
- * タイプセーフなサービス取得のため
- */
 export const ServiceNames = {
     RENDERER: 'renderer',
     INPUT: 'input',

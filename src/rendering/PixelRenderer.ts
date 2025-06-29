@@ -1,6 +1,5 @@
 import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants';
 import { PixelArtRenderer } from '../utils/pixelArt';
-// AssetLoader import will be added when needed to avoid circular dependency
 
 export interface SpriteData {
     width: number;
@@ -23,7 +22,7 @@ export class PixelRenderer {
     private spriteCache: Map<string, HTMLCanvasElement>;
     public debug: boolean;
     public pixelArtRenderer?: PixelArtRenderer;
-    public assetLoader?: any; // AssetLoader type to avoid circular dependency
+    public assetLoader?: any;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;

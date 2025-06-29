@@ -1,6 +1,3 @@
-/**
- * テスト用のシンプルなPlayState
- */
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants';
 import { GameState } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
@@ -33,8 +30,7 @@ export class TestPlayState implements GameState {
     
     enter(): void {
         console.log('TestPlayState: enter');
-        
-        // プレイヤー初期化
+
         this.player = {
             x: 64,
             y: 160,
@@ -44,18 +40,16 @@ export class TestPlayState implements GameState {
             vy: 0,
             grounded: false
         };
-        
-        // シンプルなマップ
+
         this.tileMap = [];
         for (let y = 0; y < 15; y++) {
             this.tileMap[y] = [];
             for (let x = 0; x < 16; x++) {
-                // 最下段2行を地面に
+
                 this.tileMap[y][x] = (y >= 13) ? 1 : 0;
             }
         }
-        
-        // 中間にプラットフォーム追加
+
         this.tileMap[10][3] = 1;
         this.tileMap[10][4] = 1;
         this.tileMap[8][6] = 1;
@@ -65,8 +59,7 @@ export class TestPlayState implements GameState {
     
     update(): void {
         if (!this.player) return;
-        
-        // 入力処理（デバッグ付き）
+
         this.player.vx = 0;
         if (this.game.inputSystem.isActionPressed('left')) {
             this.player.vx = -2;
@@ -74,22 +67,18 @@ export class TestPlayState implements GameState {
         if (this.game.inputSystem.isActionPressed('right')) {
             this.player.vx = 2;
         }
-        
-        // ジャンプ（デバッグ付き）
+
         if (this.game.inputSystem.isActionJustPressed('jump') && this.player.grounded) {
             this.player.vy = -10;
             console.log('Jump!');
         }
-        
-        // 物理演算
+
         this.player.vy += 0.5;
         if (this.player.vy > 15) this.player.vy = 15;
-        
-        // 位置更新
+
         this.player.x += this.player.vx;
         this.player.y += this.player.vy;
-        
-        // 地面判定（シンプル版）
+
         this.player.grounded = false;
         const nextY = this.player.y + this.player.height;
         const tileY = Math.floor(nextY / TILE_SIZE);
@@ -103,8 +92,7 @@ export class TestPlayState implements GameState {
                 this.player.grounded = true;
             }
         }
-        
-        // 境界制限
+
         if (this.player.x < 0) this.player.x = 0;
         if (this.player.x > GAME_RESOLUTION.WIDTH - this.player.width) {
             this.player.x = GAME_RESOLUTION.WIDTH - this.player.width;
@@ -112,10 +100,9 @@ export class TestPlayState implements GameState {
     }
     
     render(renderer: PixelRenderer): void {
-        // 背景
+
         renderer.clear('#5C94FC');
-        
-        // タイルマップ - drawRectを使用してスケーリングを適用
+
         for (let y = 0; y < this.tileMap.length; y++) {
             for (let x = 0; x < this.tileMap[y].length; x++) {
                 if (this.tileMap[y][x] === 1) {
@@ -123,8 +110,7 @@ export class TestPlayState implements GameState {
                 }
             }
         }
-        
-        // プレイヤー - drawRectを使用
+
         if (this.player) {
             renderer.drawRect(
                 Math.floor(this.player.x),
@@ -134,8 +120,7 @@ export class TestPlayState implements GameState {
                 '#FF0000'
             );
         }
-        
-        // デバッグ情報
+
         renderer.drawText('TEST MODE', 8, 8, '#FFFF00');
         if (this.player) {
             renderer.drawText(`X:${Math.floor(this.player.x)} Y:${Math.floor(this.player.y)}`, 8, 24, '#FFFFFF');

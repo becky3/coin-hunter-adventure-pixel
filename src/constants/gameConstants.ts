@@ -32,7 +32,6 @@ export const FONT = {
 
 export const TILE_SIZE = 16 as const;
 
-// Type exports for better type inference
 export type GameResolution = typeof GAME_RESOLUTION;
 export type Display = typeof DISPLAY;
 export type CanvasSize = typeof CANVAS_SIZE;

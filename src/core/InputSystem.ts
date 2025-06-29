@@ -1,9 +1,4 @@
-/**
- * イベントベースの入力管理システム
- * キーボード入力をイベントとして管理し、リスナーに通知する
- */
 
-// Type definitions
 export type InputEventType = 'keyPress' | 'keyRelease' | 'keyHold';
 export type ActionName = 'left' | 'right' | 'up' | 'down' | 'jump' | 'action' | 'escape' | 'mute' | 'debug';
 

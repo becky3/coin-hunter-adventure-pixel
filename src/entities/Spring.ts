@@ -1,7 +1,4 @@
-/**
- * スプリング（ばね）クラス
- * プレイヤーを高くジャンプさせるギミック
- */
+
 import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
@@ -34,11 +31,7 @@ export class Spring extends Entity {
         
         this.physicsSystem = null;
     }
-    
-    /**
-     * スプリングの更新処理
-     * @param deltaTime - 経過時間(ms)
-     */
+
     onUpdate(deltaTime: number): void {
         if (this.compression > 0) {
             this.compression *= 0.9;
@@ -60,15 +53,11 @@ export class Spring extends Entity {
                 const notTouching = playerBottom < this.y - 5 || player.y > this.y + this.height;
                 if (notTouching) {
                     this.triggered = false;
-                    console.log('Spring trigger reset - player left');
                 }
             }
         }
     }
-    
-    /**
-     * プレイヤーとの接触をチェックして、必要ならジャンプさせる
-     */
+
     checkPlayerContact(): void {
         
         if (!this.physicsSystem) return;
@@ -91,9 +80,6 @@ export class Spring extends Entity {
             
             if (!this._debugCount) this._debugCount = 0;
             if (this._debugCount < 10 && player.grounded) {
-                console.log(`Spring check: player.y=${player.y}, playerBottom=${playerBottom}, spring.y=${this.y}`);
-                console.log(`  onTopOfSpring=${onTopOfSpring}, grounded=${player.grounded}, vy=${player.vy}, triggered=${this.triggered}`);
-                console.log(`  embedded check: ${!onTopOfSpring} && ${playerBottom > this.y} && ${player.y < this.y + this.height}`);
                 this._debugCount++;
             }
             
@@ -105,32 +91,22 @@ export class Spring extends Entity {
                 
                 this.compression = 1;
                 this.triggered = true;
-                
-                console.log('Spring activated from continuous check!');
-                
+
                 if (this.physicsSystem && this.physicsSystem.entities) {
-                    // TODO: 効果音の再生を実装
+                    // TODO: Implement sound effect playback
                 }
             } else if (!onTopOfSpring && playerBottom > this.y && player.y < this.y + this.height) {
                 if (player.grounded && !this.triggered) {
-                    const penetration = playerBottom - this.y;
-                    console.log(`Spring: Player embedded ${penetration}px, activating bounce`);
-                    
                     player.y = this.y - player.height;
                     player.vy = -this.bouncePower;
                     player.grounded = false;
                     this.compression = 1;
                     this.triggered = true;
-                    console.log('Spring activated after repositioning!');
                 }
             }
         }
     }
-    
-    /**
-     * スプリングの描画
-     * @param renderer
-     */
+
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
@@ -158,11 +134,7 @@ export class Spring extends Entity {
             this.renderDebug(renderer);
         }
     }
-    
-    /**
-     * プレイヤーとの衝突時の処理
-     * @param collisionInfo - 衝突情報（PhysicsSystemから渡される）
-     */
+
     onCollision(collisionInfo?: CollisionInfo): boolean {
         if (!collisionInfo) return false;
         
@@ -181,20 +153,13 @@ export class Spring extends Entity {
                 
                 this.compression = 1;
                 this.triggered = true;
-                
-                console.log('Spring activated from collision! Player repositioned to top.');
-                
+
                 return true;
             }
         }
         return false;
     }
-    
-    /**
-     * リセット処理
-     * @param x - X座標
-     * @param y - Y座標
-     */
+
     reset(x: number, y: number): void {
         super.reset(x, y);
         this.compression = 0;

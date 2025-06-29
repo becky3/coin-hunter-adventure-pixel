@@ -1,6 +1,5 @@
 import { SpriteLoader, SPRITE_DEFINITIONS } from './spriteLoader';
 
-// Type definitions
 type ColorIndex = number;
 type ColorHex = string | null;
 type Palette = ColorHex[];
