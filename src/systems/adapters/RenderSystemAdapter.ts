@@ -12,7 +12,6 @@ export class RenderSystemAdapter implements ISystem {
     enabled = true;
     
     constructor(
-        private renderer: PixelRenderer,
         private stateManager: GameStateManager
     ) {}
     

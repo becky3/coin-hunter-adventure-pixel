@@ -120,14 +120,13 @@ export class GameCore {
         // 各サービスをISystemアダプターでラップして登録
         const inputSystem = this._serviceLocator.get<InputSystemImpl>(ServiceNames.INPUT);
         const physicsSystem = this._serviceLocator.get<PhysicsSystem>(ServiceNames.PHYSICS);
-        const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
         const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
         
         // システムアダプターの作成と登録
         systemManager.registerSystem(new InputSystemAdapter(inputSystem));
         systemManager.registerSystem(new PhysicsSystemAdapter(physicsSystem));
         systemManager.registerSystem(new StateSystemAdapter(stateManager));
-        systemManager.registerSystem(new RenderSystemAdapter(renderer, stateManager));
+        systemManager.registerSystem(new RenderSystemAdapter(stateManager));
         
         if (this.debugOverlay) {
             systemManager.registerSystem(new DebugSystemAdapter(this.debugOverlay));

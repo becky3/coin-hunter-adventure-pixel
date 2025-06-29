@@ -66,7 +66,10 @@ export class GameStateManager {
     }
     
     registerState(state: GameState): void {
-        this.states.set(state.name!, state);
+        if (!state.name) {
+            throw new Error('State must have a name property');
+        }
+        this.states.set(state.name, state);
     }
     
     changeState(name: string, params: StateChangeParams = {}): void {
