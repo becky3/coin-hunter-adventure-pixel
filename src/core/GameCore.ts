@@ -128,6 +128,7 @@ export class GameCore {
     }
 
     start(): void {
+        console.log('GameCore: Starting game loop...');
         
         const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
 
@@ -138,6 +139,8 @@ export class GameCore {
             const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
             systemManager.renderSystems(renderer);
         });
+        
+        console.log('GameCore: Game loop started, running:', this.gameLoop.isRunning());
     }
 
     stop(): void {
