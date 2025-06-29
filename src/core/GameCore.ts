@@ -32,26 +32,34 @@ export class GameCore {
     }
 
     async init(): Promise<void> {
+        console.log('GameCore: init() started');
 
+        console.log('GameCore: Registering core services...');
         this.registerCoreServices();
 
+        console.log('GameCore: Registering systems...');
         await this.registerSystems();
 
+        console.log('GameCore: Registering states...');
         this.registerStates();
 
         if (process.env.NODE_ENV === 'development') {
+            console.log('GameCore: Initializing debug overlay...');
             this.debugOverlay = new DebugOverlay(this._serviceLocator);
             await this.debugOverlay.init();
         }
 
+        console.log('GameCore: Setting initial state to menu...');
         const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
         await stateManager.setState('menu');
 
+        console.log('GameCore: Hiding loading screen...');
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {
             loadingScreen.style.display = 'none';
         }
         
+        console.log('GameCore: init() completed');
     }
 
     private registerCoreServices(): void {
@@ -104,7 +112,19 @@ export class GameCore {
 
         // MusicSystemの初期化
         const musicSystem = this._serviceLocator.get<MusicSystem>(ServiceNames.AUDIO);
-        await musicSystem.init();
+        try {
+            console.log('GameCore: Initializing MusicSystem...');
+            // タイムアウトを設定
+            const initPromise = musicSystem.init();
+            const timeoutPromise = new Promise<boolean>((_, reject) => 
+                setTimeout(() => reject(new Error('MusicSystem init timeout')), 5000)
+            );
+            
+            await Promise.race([initPromise, timeoutPromise]);
+            console.log('GameCore: MusicSystem initialized');
+        } catch (error) {
+            console.warn('GameCore: MusicSystem initialization failed, continuing without audio:', error);
+        }
     }
 
     private registerStates(): void {

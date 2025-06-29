@@ -27,6 +27,7 @@ export class MenuState implements GameState {
     private showCredits: boolean;
     private titleAnimTimer: number;
     private inputListeners: Array<() => void>;
+    private _firstUpdateLogged: boolean = false;
 
     constructor(game: Game) {
         this.game = game;
@@ -149,6 +150,12 @@ export class MenuState implements GameState {
             if (this.optionsAlpha > 1) {
                 this.optionsAlpha = 1;
             }
+        }
+        
+        // デバッグ: 初回のみログ出力
+        if (!this._firstUpdateLogged) {
+            console.log('MenuState: update called, optionsAlpha:', this.optionsAlpha);
+            this._firstUpdateLogged = true;
         }
     }
     
