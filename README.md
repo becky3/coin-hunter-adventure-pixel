@@ -54,10 +54,10 @@ See the `docs/` directory for detailed documentation:
 - Custom pixel font
 
 ## 🛠️ Tech Stack
-- Vanilla JavaScript (ES6+)
+- TypeScript
 - Canvas API
 - Vite for bundling
-- Jest for testing
+- Puppeteer for testing
 
 ## 📄 License
 MIT

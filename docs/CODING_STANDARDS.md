@@ -1,309 +1,162 @@
 # コーディング規約
 
-このドキュメントは、coin-hunter-adventure-pixel プロジェクトのコードの書き方に関する規約を定めています。
+このドキュメントは、coin-hunter-adventure-pixel プロジェクトのコーディング規約を定めています。
+
+## 基本方針
+
+- 多くのルールはESLintで自動的に強制されます（`.eslintrc.json`参照）
+- TypeScriptの標準的なスタイルガイドに従います
+- 詳細なスタイルルールよりも、プロジェクト固有の重要な規約に焦点を当てます
 
 ## 1. 命名規則
 
 ### 変数・関数
-```javascript
+```typescript
 // 変数: キャメルケース
-let playerScore = 0;
-let currentLevel = 1;
+let playerScore: number = 0;
+let currentLevel: number = 1;
 
 // 関数: キャメルケース（動詞で始める）
-function updateGameState() {}
-function calculateDamage(attacker, defender) {}
+function updateGameState(): void {}
+function calculateDamage(attacker: Entity, defender: Entity): number {
+    // ダメージ計算ロジック
+    return 0;
+}
 ```
 
 ### 定数
-```javascript
+```typescript
 // グローバル定数: アッパースネークケース
 const MAX_HEALTH = 100;
 const TILE_SIZE = 16;
 const GRAVITY_CONSTANT = 0.65;
+
+// as const アサーションを使用する場合
+export const GAME_CONFIG = {
+    WIDTH: 256,
+    HEIGHT: 240
+} as const;
 ```
 
 ### クラス
-```javascript
+```typescript
 // クラス: パスカルケース
-class PlayerCharacter {}
-class PixelRenderer {}
-class GameStateManager {}
+class PlayerCharacter extends Entity {
+    private health: number;
+    private score: number;
+}
+
+class PixelRenderer {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+}
+
+class GameStateManager {
+    private currentState: GameState | null;
+}
 ```
 
 ### プライベートメンバー
-```javascript
-// プライベート: アンダースコア接頭辞
+```typescript
+// TypeScriptではprivateキーワードを使用
 class Entity {
-    constructor() {
-        this._position = { x: 0, y: 0 };
-        this._velocity = { x: 0, y: 0 };
-    }
+    private position: Vector2D = { x: 0, y: 0 };
+    private velocity: Vector2D = { x: 0, y: 0 };
     
-    _updatePhysics() {
-        // プライベートメソッド
+    // プライベートメソッド
+    private updatePhysics(): void {
+        // 物理演算の更新
     }
+}
+
+// インターフェースの定義
+interface Vector2D {
+    x: number;
+    y: number;
 }
 ```
 
 ### ファイル名
 ```
-// kebab-case を使用
-input-manager.js
-pixel-renderer.js
-game-state-manager.js
+// TypeScriptファイルはパスカルケースまたはキャメルケース
+InputManager.ts
+PixelRenderer.ts
+GameStateManager.ts
+
+// 型定義ファイル
+types.ts
+interfaces.ts
 ```
 
 ## 2. コードスタイル
 
-### 基本設定（ESLint準拠）
-- **インデント**: スペース4つ
-- **文字列**: シングルクォート優先
-- **セミコロン**: 必須
-- **改行コード**: LF (Unix)
-- **行末空白**: 禁止
-- **ファイル末尾改行**: 必須
-- **最大行長**: 100文字（推奨）
+### ESLintによる自動強制
+以下のルールはESLintで自動的にチェックされます：
+- インデント、文字列クォート、セミコロン
+- 行末空白、ファイル末尾改行
+- 未使用変数、命名規則
 
-### ブロック・制御構文
-```javascript
-// if文: 1行でも波括弧必須
-if (condition) {
-    doSomething();
-}
+詳細は `.eslintrc.json` を参照してください。
 
-// else: 同じ行に配置
-if (condition) {
-    doSomething();
-} else {
-    doSomethingElse();
-}
 
-// for/while: スペースを適切に
-for (let i = 0; i < array.length; i++) {
-    // 処理
-}
+### TypeScript必須ルール
+- すべての関数パラメータと戻り値に型を明示
+- `any`型の使用は禁止（やむを得ない場合はコメントで理由を説明）
+- 型アサーションは最小限に留める
 
-// switch: インデントとbreak
-switch (state) {
-    case 'menu':
-        showMenu();
-        break;
-    case 'game':
-        runGame();
-        break;
-    default:
-        showError();
-}
-```
+## 3. プロジェクト固有のルール
 
-### 関数
-```javascript
-// 関数宣言: スペースあり
-function calculateScore(points, multiplier) {
-    return points * multiplier;
-}
+### Canvas/ピクセルアート固有のルール
+- ピクセルアート描画時は `ctx.imageSmoothingEnabled = false` 必須
+- 座標は整数値に丸める（`Math.floor()`使用）
+- Canvas の `save()`/`restore()` は最小限に留める
+- PixelRenderer経由で描画を行う（直接ctx操作は避ける）
 
-// アロー関数: 1行の場合は括弧省略可
-const double = x => x * 2;
-const add = (a, b) => a + b;
+### ファイル・ディレクトリ構成
+- 1ファイル1クラス（または1機能）を原則とする
+- ファイル名はパスカルケースまたはキャメルケース（例: `Player.ts`, `gameConstants.ts`）
+- テストファイルは同名で `.test.ts` 拡張子
 
-// 複数行の場合
-const processData = (data) => {
-    const result = validate(data);
-    return transform(result);
-};
-```
+### コメントのルール
+- **原則：実装内容の説明コメントは書かない**
+- コードは自己文書化（変数名・関数名で意図を表現）
+- 例外的に許可されるコメント：
+  - 複雑なアルゴリズムの説明（数式など）
+  - TODO/FIXMEコメント
+  - 外部仕様への参照
+  - なぜその実装を選んだかの理由（whatではなくwhy）
 
-## 3. モジュール構成
+## 4. 禁止事項
 
-### インポート/エクスポート
-```javascript
-// ファイルの構成順序
-// 1. インポート文（外部→内部の順）
-import { CONSTANTS } from './constants.js';
-import { Player } from './entities/Player.js';
-
-// 2. 定数定義
-const LOCAL_CONSTANT = 42;
-const CONFIG = { fps: 60 };
-
-// 3. クラス定義
-class GameManager {
-    constructor() {
-        // 初期化
-    }
-}
-
-// 4. ヘルパー関数
-function validateInput(input) {
-    // バリデーション
-}
-
-// 5. エクスポート
-export { GameManager, validateInput };
-```
-
-### モジュール設計の原則
-- 1ファイル1クラス（または1機能）
-- 循環参照を避ける
-- 明確な責任分離
-
-## 4. Canvas/ピクセルアート固有の規約
-
-### Canvas描画
-```javascript
-// ピクセルアート描画時は必須
-ctx.imageSmoothingEnabled = false;
-
-// 座標は整数値に丸める
-function drawSprite(ctx, sprite, x, y) {
-    const drawX = Math.floor(x);
-    const drawY = Math.floor(y);
-    // 描画処理
-}
-```
-
-### パフォーマンス最適化
-```javascript
-// save/restoreは最小限に
-// 悪い例
-function drawEntity(ctx, entity) {
-    ctx.save();
-    ctx.translate(entity.x, entity.y);
-    drawSprite(ctx, entity.sprite);
-    ctx.restore();
-}
-
-// 良い例
-function drawEntity(ctx, entity) {
-    drawSprite(ctx, entity.sprite, entity.x, entity.y);
-}
-```
-
-## 5. エラーハンドリング
-
-### 基本パターン
-```javascript
-// エラーは適切にキャッチ
-try {
-    const data = await loadAssets();
-    processData(data);
-} catch (error) {
-    console.error('アセット読み込みエラー:', error);
-    showErrorScreen();
-}
-
-// 早期リターン
-function processInput(input) {
-    if (!input) {
-        console.warn('入力が空です');
-        return;
-    }
-    
-    if (!isValid(input)) {
-        console.error('無効な入力:', input);
-        return;
-    }
-    
-    // 正常処理
-}
-```
-
-### カスタムエラー
-```javascript
-class GameError extends Error {
-    constructor(message, code) {
-        super(message);
-        this.name = 'GameError';
-        this.code = code;
-    }
-}
-```
-
-## 6. コメント
-
-### コメントの原則
-- 必要最小限に留める
-- 「なぜ」を説明する（「何」ではなく）
-- 日本語OK
-- **重要**: 実装の具体的な内容をコメントに書かない
-  - NG例: `// 黒い背景を描画`、`// RECTで枠を描画`、`// タイルベースでボーダーを描画`
-  - OK例: `// UI要素の準備`、`// メニュー表示`
-
-### JSDoc（重要な関数のみ）
-```javascript
-/**
- * スプライトを描画する
- * @param {CanvasRenderingContext2D} ctx - 描画コンテキスト
- * @param {Object} sprite - スプライトデータ
- * @param {number} x - X座標
- * @param {number} y - Y座標
- */
-function drawSprite(ctx, sprite, x, y) {
-    // 実装
-}
-```
-
-## 7. 禁止事項
-
-### コードで避けるべきこと
+- `any` 型の使用（やむを得ない場合は理由をコメント）
 - `eval()` の使用
-- `with` 文の使用
-- グローバル変数の乱用
-- 暗黙的な型変換の悪用
-- ネストが深すぎる構造（3段階まで）
+- マジックナンバーの直接使用（定数化すること）
+- グローバル変数の使用
+- 実装内容を説明するコメント
 
-### アンチパターン
-```javascript
-// 悪い例: マジックナンバー
-if (player.health < 20) {
-    showLowHealthWarning();
-}
+## 5. 推奨事項
 
-// 良い例: 定数を使用
-const LOW_HEALTH_THRESHOLD = 20;
-if (player.health < LOW_HEALTH_THRESHOLD) {
-    showLowHealthWarning();
-}
-```
+- TypeScript の strict モードを有効にする（`tsconfig.json`）
+- 型推論が可能な場合は明示的な型定義を省略してもよい
+- `interface` と `type` は用途に応じて使い分ける
+- 早期リターンで複雑なネストを避ける
 
-## 8. 推奨プラクティス
+## 6. ESLint設定
 
-### 早期リターン
-```javascript
-function processEntity(entity) {
-    if (!entity) return;
-    if (!entity.isActive) return;
-    if (entity.isDestroyed) return;
-    
-    // メイン処理
-    entity.update();
-    entity.render();
-}
-```
+現在のESLint設定（`.eslintrc.json`）は以下の方針で運用されています：
 
-### 配列処理
-```javascript
-// map/filter/reduceを活用
-const activeEnemies = enemies
-    .filter(enemy => enemy.isActive)
-    .map(enemy => enemy.update());
+### 現在の設定
+- `@typescript-eslint/no-explicit-any`: 警告レベル（段階的に削減）
+- `@typescript-eslint/no-non-null-assertion`: 警告レベル（使用は最小限に）
+- `no-console`: 警告レベル（warn, error, infoは許可）
 
-// for...ofを優先
-for (const entity of entities) {
-    entity.render();
-}
-```
+### 将来の改善予定
+1. TypeScriptのstrictモード有効化後、anyの使用を禁止
+2. Non-null assertion（!）の使用を段階的に削減
+3. より厳格な型チェックルールの追加
 
-### オブジェクト操作
-```javascript
-// スプレッド構文を活用
-const newState = {
-    ...oldState,
-    score: oldState.score + points
-};
+## 7. 参考リンク
 
-// 分割代入
-const { x, y, width, height } = entity.bounds;
-```
+- [TypeScript スタイルガイド（Google）](https://google.github.io/styleguide/tsguide.html)
+- [TypeScript Deep Dive](https://basarat.gitbook.io/typescript/)
+- プロジェクトの ESLint 設定: `.eslintrc.json`

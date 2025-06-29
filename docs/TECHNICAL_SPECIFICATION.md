@@ -11,12 +11,12 @@
 ## コア設計
 
 ### ゲームループ
-```javascript
+```typescript
 // 60FPSを目標とした固定タイムステップ
 const FPS = 60;
 const FRAME_TIME = 1000 / FPS;
 
-function gameLoop() {
+function gameLoop(): void {
     update();  // ロジック更新
     render();  // 描画処理
     requestAnimationFrame(gameLoop);
@@ -32,48 +32,55 @@ function gameLoop() {
 ## 物理演算システム
 
 ### 基本パラメータ
-```javascript
+```typescript
 const PHYSICS = {
     GRAVITY: 0.65,
     MAX_FALL_SPEED: 15,
     FRICTION: 0.85,
     AIR_RESISTANCE: 0.98
-};
+} as const;
 ```
 
 ### 移動処理
-```javascript
+```typescript
 // 速度に基づく位置更新
-entity.x += entity.velX;
-entity.y += entity.velY;
+entity.x += entity.vx;
+entity.y += entity.vy;
 
 // 重力適用
-if (!entity.onGround) {
-    entity.velY += PHYSICS.GRAVITY;
-    entity.velY = Math.min(entity.velY, PHYSICS.MAX_FALL_SPEED);
+if (!entity.grounded) {
+    entity.vy += PHYSICS.GRAVITY;
+    entity.vy = Math.min(entity.vy, PHYSICS.MAX_FALL_SPEED);
 }
 
 // 摩擦適用
-if (entity.onGround) {
-    entity.velX *= PHYSICS.FRICTION;
+if (entity.grounded) {
+    entity.vx *= PHYSICS.FRICTION;
 }
 ```
 
 ### 当たり判定
 
 #### 矩形同士の衝突判定
-```javascript
-function checkCollision(a, b) {
+```typescript
+function checkCollision(a: Bounds, b: Bounds): boolean {
     return a.x < b.x + b.width &&
            a.x + a.width > b.x &&
            a.y < b.y + b.height &&
            a.y + a.height > b.y;
 }
+
+interface Bounds {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
 ```
 
 #### プラットフォーム判定（一方通行）
-```javascript
-function checkPlatformCollision(player, platform) {
+```typescript
+function checkPlatformCollision(player: Player, platform: Entity): void {
     // 前フレームで上にいて、現在重なっている場合のみ
     if (player.prevY + player.height <= platform.y &&
         player.y + player.height > platform.y &&
@@ -81,8 +88,8 @@ function checkPlatformCollision(player, platform) {
         player.x < platform.x + platform.width) {
         // プラットフォームの上に配置
         player.y = platform.y - player.height;
-        player.velY = 0;
-        player.onGround = true;
+        player.vy = 0;
+        player.grounded = true;
     }
 }
 ```
@@ -90,24 +97,31 @@ function checkPlatformCollision(player, platform) {
 ## エンティティシステム
 
 ### 基底クラス設計
-```javascript
-class Entity {
-    constructor(x, y, width, height) {
+```typescript
+export class Entity {
+    public id: number;
+    public x: number;
+    public y: number;
+    public width: number;
+    public height: number;
+    public vx: number = 0;
+    public vy: number = 0;
+    public grounded: boolean = false;
+    public active: boolean = true;
+    
+    constructor(x: number, y: number, width: number, height: number) {
+        this.id = ++entityIdCounter;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.velX = 0;
-        this.velY = 0;
-        this.onGround = false;
-        this.active = true;
     }
     
-    update() {
+    update(deltaTime: number): void {
         // 物理演算適用
     }
     
-    render(ctx, camera) {
+    render(renderer: PixelRenderer): void {
         // 描画処理
     }
 }
@@ -123,16 +137,24 @@ class Entity {
 ## アニメーションシステム
 
 ### フレームベースアニメーション
-```javascript
+```typescript
+interface AnimationFrame {
+    spriteKey: string;
+    duration: number;
+}
+
 class Animation {
-    constructor(frames, frameDuration) {
+    private frames: AnimationFrame[];
+    private frameDuration: number;
+    private currentFrame: number = 0;
+    private frameTimer: number = 0;
+    
+    constructor(frames: AnimationFrame[], frameDuration: number) {
         this.frames = frames;
         this.frameDuration = frameDuration;
-        this.currentFrame = 0;
-        this.frameTimer = 0;
     }
     
-    update() {
+    update(): void {
         this.frameTimer++;
         if (this.frameTimer >= this.frameDuration) {
             this.frameTimer = 0;
@@ -140,7 +162,7 @@ class Animation {
         }
     }
     
-    getCurrentFrame() {
+    getCurrentFrame(): AnimationFrame {
         return this.frames[this.currentFrame];
     }
 }
@@ -155,33 +177,34 @@ class Animation {
 ## カメラシステム
 
 ### スクロール制御
-```javascript
-class Camera {
-    constructor(width, height, worldWidth, worldHeight) {
-        this.x = 0;
-        this.y = 0;
-        this.width = width;
-        this.height = height;
-        this.worldWidth = worldWidth;
-        this.worldHeight = worldHeight;
-    }
+```typescript
+interface Camera {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    worldWidth: number;
+    worldHeight: number;
     
-    follow(target) {
-        // プレイヤーを中心に配置
-        this.x = target.x + target.width / 2 - this.width / 2;
-        this.y = target.y + target.height / 2 - this.height / 2;
-        
-        // ワールド境界でクランプ
-        this.x = Math.max(0, Math.min(this.x, this.worldWidth - this.width));
-        this.y = Math.max(0, Math.min(this.y, this.worldHeight - this.height));
-    }
+    follow(target: Entity): void;
+}
+
+// PlayState内で実装されているカメラロジック
+function updateCamera(camera: Camera, target: Entity): void {
+    // プレイヤーを中心に配置
+    camera.x = target.x + target.width / 2 - camera.width / 2;
+    camera.y = target.y + target.height / 2 - camera.height / 2;
+    
+    // ワールド境界でクランプ
+    camera.x = Math.max(0, Math.min(camera.x, camera.worldWidth - camera.width));
+    camera.y = Math.max(0, Math.min(camera.y, camera.worldHeight - camera.height));
 }
 ```
 
 ### 視錐台カリング
 画面外のオブジェクトは処理をスキップ:
-```javascript
-function isInView(entity, camera) {
+```typescript
+function isInView(entity: Entity, camera: Camera): boolean {
     return entity.x + entity.width > camera.x &&
            entity.x < camera.x + camera.width &&
            entity.y + entity.height > camera.y &&
@@ -192,12 +215,12 @@ function isInView(entity, camera) {
 ## レンダリングシステム
 
 ### 画面解像度
-```javascript
+```typescript
 // ゲーム画面の解像度設定
 export const GAME_RESOLUTION = {
     WIDTH: 256,  // ゲーム画面の幅（ピクセル）
     HEIGHT: 240  // ゲーム画面の高さ（ピクセル）
-};
+} as const;
 
 // 表示設定
 export const DISPLAY = {
@@ -208,66 +231,47 @@ export const DISPLAY = {
         BORDER_COLOR: '#333333',
         BORDER_WIDTH: 2
     }
-};
+} as const;
 ```
 
 ### PixelRenderer
 ピクセルパーフェクトな描画を実現するレンダリングクラス:
 
-```javascript
-class PixelRenderer {
-    constructor(canvas) {
+```typescript
+export class PixelRenderer {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    public scale: number = 1;
+    
+    constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Failed to get 2D context');
+        
+        this.ctx = ctx;
         
         // ピクセルアートのためアンチエイリアスを無効化
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.mozImageSmoothingEnabled = false;
-        this.ctx.webkitImageSmoothingEnabled = false;
-        this.ctx.msImageSmoothingEnabled = false;
     }
 }
 ```
 
-### グリッドベーステキストシステム
-すべてのテキストは8×8ピクセルグリッドに配置:
+### ビットマップフォントシステム
+独自のビットマップフォントシステムを実装:
 
-```javascript
-// フォント設定
-export const FONT = {
-    SIZE: 8,     // 論理サイズ（ピクセル）
-    FAMILY: "'Press Start 2P', monospace",
-    GRID: 8      // 文字配置のグリッドサイズ
-};
+```typescript
+// pixelFont.tsで実装されたビットマップフォント
+// サポート文字: A-Z, 0-9, 一部記号
+// 大文字英語のみ対応（小文字、日本語不可）
 
-// テキスト描画（自動グリッドスナップ）
-drawText(text, x, y, color = '#FFFFFF', alpha = 1) {
-    // グリッドにスナップ
-    const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
-    const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
-    
-    const drawX = Math.floor((snappedX - this.cameraX) * this.scale);
-    const drawY = Math.floor((snappedY - this.cameraY) * this.scale);
-    
-    // フォントサイズは固定（8x8ピクセルフォント）
-    const scaledSize = FONT.SIZE * this.scale;
-    
-    this.ctx.save();
-    this.ctx.globalAlpha = alpha;
-    this.ctx.fillStyle = color;
-    this.ctx.font = `${scaledSize}px ${FONT.FAMILY}`;
-    this.ctx.textAlign = 'left';
-    this.ctx.textBaseline = 'top';
-    this.ctx.fillText(text, drawX, drawY);
-    this.ctx.restore();
-}
-
-// 中央揃えテキスト描画（グリッドベース）
-drawTextCentered(text, centerX, y, color = '#FFFFFF', alpha = 1) {
-    // テキストの文字数から幅を計算（各文字は8ピクセル）
-    const textWidth = text.length * FONT.GRID;
-    const x = centerX - Math.floor(textWidth / 2);
-    this.drawText(text, x, y, color, alpha);
+export function drawText(
+    renderer: PixelRenderer,
+    text: string,
+    x: number,
+    y: number,
+    color: string = '#FFFFFF'
+): void {
+    // PixelRendererとpixelFontを使用して描画
 }
 ```
 
@@ -276,9 +280,9 @@ drawTextCentered(text, centerX, y, color = '#FFFFFF', alpha = 1) {
 - **物理座標**: 768×720ピクセルの実際の描画座標
 - すべての座標計算は論理座標で行い、描画時に自動的にスケーリング
 
-```javascript
+```typescript
 // 例: 論理座標 (10, 20) に描画
-renderer.drawSprite(sprite, 10, 20);
+renderer.drawSprite('player_idle', 10, 20);
 // → 実際には (30, 60) の位置に3倍サイズで描画される
 ```
 
@@ -311,11 +315,18 @@ renderer.drawSprite(sprite, 10, 20);
 ```
 
 ### ステージローダー
-```javascript
-async function loadStage(stagePath) {
+```typescript
+async function loadStage(stagePath: string): Promise<LevelData> {
     const response = await fetch(stagePath);
     const stageData = await response.json();
-    return createStageFromData(stageData);
+    return stageData as LevelData;
+}
+
+interface LevelData {
+    name: string;
+    width: number;
+    height: number;
+    // ... その他のプロパティ
 }
 ```
 
@@ -333,27 +344,34 @@ async function loadStage(stagePath) {
 3. **早期リターン**: 不要な処理の早期スキップ
 
 ### メモリ管理
-```javascript
+```typescript
 // オブジェクトプールの例
-class ObjectPool {
-    constructor(createFn, resetFn, initialSize = 10) {
+class ObjectPool<T> {
+    private createFn: () => T;
+    private resetFn: (obj: T) => void;
+    private pool: T[] = [];
+    
+    constructor(
+        createFn: () => T,
+        resetFn: (obj: T) => void,
+        initialSize: number = 10
+    ) {
         this.createFn = createFn;
         this.resetFn = resetFn;
-        this.pool = [];
         
         for (let i = 0; i < initialSize; i++) {
             this.pool.push(this.createFn());
         }
     }
     
-    get() {
+    get(): T {
         if (this.pool.length > 0) {
-            return this.pool.pop();
+            return this.pool.pop()!;
         }
         return this.createFn();
     }
     
-    release(obj) {
+    release(obj: T): void {
         this.resetFn(obj);
         this.pool.push(obj);
     }
@@ -363,31 +381,34 @@ class ObjectPool {
 ## 入力システム
 
 ### キーボード入力管理
-```javascript
-class InputManager {
+```typescript
+export class InputSystem {
+    private keys: Map<string, boolean> = new Map();
+    private previousKeys: Map<string, boolean> = new Map();
+    
     constructor() {
-        this.keys = {};
-        this.previousKeys = {};
-        
-        window.addEventListener('keydown', (e) => {
-            this.keys[e.code] = true;
+        window.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (!e.repeat) {
+                this.keys.set(e.code, true);
+            }
         });
         
-        window.addEventListener('keyup', (e) => {
-            this.keys[e.code] = false;
+        window.addEventListener('keyup', (e: KeyboardEvent) => {
+            this.keys.set(e.code, false);
         });
     }
     
-    update() {
-        this.previousKeys = { ...this.keys };
+    update(): void {
+        this.previousKeys = new Map(this.keys);
     }
     
-    isPressed(key) {
-        return this.keys[key] || false;
+    isPressed(key: string): boolean {
+        return this.keys.get(key) || false;
     }
     
-    isJustPressed(key) {
-        return this.keys[key] && !this.previousKeys[key];
+    isJustPressed(key: string): boolean {
+        return this.keys.get(key) === true && 
+               this.previousKeys.get(key) !== true;
     }
 }
 ```
@@ -400,35 +421,24 @@ class InputManager {
 ## サウンドシステム
 
 ### Web Audio API使用
-```javascript
-class SoundManager {
-    constructor() {
-        this.context = new AudioContext();
-        this.sounds = new Map();
-        this.musicVolume = 0.5;
-        this.sfxVolume = 0.7;
+```typescript
+// MusicSystem.tsで実装されたプログラマブル音源
+// Wave形式でBGM、効果音を生成
+export class MusicSystem {
+    private audioContext: AudioContext | null = null;
+    private masterGain: GainNode | null = null;
+    public isInitialized: boolean = false;
+    
+    async init(): Promise<boolean> {
+        // ユーザー操作後に初期化が必要
     }
     
-    async loadSound(name, url) {
-        const response = await fetch(url);
-        const buffer = await response.arrayBuffer();
-        const audioBuffer = await this.context.decodeAudioData(buffer);
-        this.sounds.set(name, audioBuffer);
+    playJumpSound(): void {
+        // ジャンプ効果音
     }
     
-    play(name, loop = false) {
-        const source = this.context.createBufferSource();
-        const gainNode = this.context.createGain();
-        
-        source.buffer = this.sounds.get(name);
-        source.loop = loop;
-        gainNode.gain.value = this.sfxVolume;
-        
-        source.connect(gainNode);
-        gainNode.connect(this.context.destination);
-        source.start();
-        
-        return source;
+    playTitleBGM(): void {
+        // タイトルBGM
     }
 }
 ```
@@ -441,13 +451,13 @@ class SoundManager {
 - ステージデータ破損時: エラーメッセージ表示
 
 ### デバッグ機能
-```javascript
+```typescript
 const DEBUG = {
     SHOW_HITBOX: false,
     SHOW_FPS: true,
     INVINCIBLE: false,
     STAGE_SELECT: true
-};
+} as const;
 ```
 
 ## ブラウザ互換性
@@ -476,20 +486,19 @@ const DEBUG = {
 - **エディタ**: VSCode
 - **デバッガー**: Chrome DevTools
 - **バージョン管理**: Git
-- **ビルドツール**: Webpack/Vite
-- **テストランナー**: Jest
-- **リンター**: ESLint
+- **ビルドツール**: Vite
+- **テストランナー**: Puppeteer
+- **リンター**: ESLint (TypeScript対応)
+- **言語**: TypeScript
 
 ### パフォーマンス計測
-```javascript
+```typescript
 class PerformanceMonitor {
-    constructor() {
-        this.fps = 0;
-        this.frameCount = 0;
-        this.lastTime = performance.now();
-    }
+    private fps: number = 0;
+    private frameCount: number = 0;
+    private lastTime: number = performance.now();
     
-    update() {
+    update(): void {
         this.frameCount++;
         const currentTime = performance.now();
         
@@ -498,6 +507,10 @@ class PerformanceMonitor {
             this.frameCount = 0;
             this.lastTime = currentTime;
         }
+    }
+    
+    getFPS(): number {
+        return this.fps;
     }
 }
 ```
