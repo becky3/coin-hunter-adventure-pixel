@@ -384,6 +384,12 @@ export class Player extends Entity {
             }
         }
         
+        // フォールバック: スプライトが見つからない場合は基本的な矩形を描画
+        if (!renderer.pixelArtRenderer || !renderer.pixelArtRenderer.sprites.has(this.spriteKey || 'player/idle')) {
+            console.warn('Player sprite not found, falling back to rectangle. spriteKey:', this.spriteKey);
+            super.render(renderer);
+        }
+        
         if (renderer.debug) {
             const screenPos = renderer.worldToScreen(this.x, this.y - 20);
             renderer.ctx.fillStyle = '#FFFFFF';

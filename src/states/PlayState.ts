@@ -115,10 +115,16 @@ export class PlayState implements GameState {
     private async preloadSprites(): Promise<void> {
         
         try {
+            // プレイヤースプライト
+            await this.game.assetLoader.loadSprite('player', 'idle');
+            await this.game.assetLoader.loadAnimation('player', 'walk', 4, 100);
+            await this.game.assetLoader.loadAnimation('player', 'jump', 2, 100);
 
+            // 地形スプライト
             await this.game.assetLoader.loadSprite('terrain', 'spring');
             await this.game.assetLoader.loadSprite('terrain', 'goal_flag');
 
+            // アイテムスプライト
             await this.game.assetLoader.loadSprite('items', 'coin_spin1');
             await this.game.assetLoader.loadSprite('items', 'coin_spin2');
             await this.game.assetLoader.loadSprite('items', 'coin_spin3');
