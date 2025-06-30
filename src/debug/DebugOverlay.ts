@@ -1,18 +1,12 @@
 
 
 import { ServiceLocator } from '../services/ServiceLocator';
-import { ServiceNames } from '../services/ServiceNames';
-import { EventBus } from '../services/EventBus';
-import { GameEvents } from '../services/GameEvents';
 import { GAME_CONSTANTS } from '../config/GameConstants';
 
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
     private debugElement?: HTMLDivElement;
     private statsElements: Map<string, HTMLElement> = new Map();
-    private lastFrameTime: number = 0;
-    private frameCount: number = 0;
-    private fps: number = 0;
     
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
@@ -22,13 +16,11 @@ export class DebugOverlay {
         this.createDebugUI();
         this.setupEventListeners();
         
-        // 初期状態で表示する
         if (this.debugElement) {
             this.debugElement.style.display = 'block';
         }
         
-        console.log('DebugOverlay initialized, available services:', 
-            Array.from((this.serviceLocator as any).services?.keys() || []));
+        (window as any).debugOverlay = this;
     }
 
     private createDebugUI(): void {
@@ -54,7 +46,7 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['FPS', 'Entities', 'State', 'Camera', 'Input', 'Speed'];
+        const stats = ['Speed'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
@@ -75,11 +67,6 @@ export class DebugOverlay {
     }
 
     private setupEventListeners(): void {
-        const eventBus = this.serviceLocator.get<EventBus>(ServiceNames.EVENT_BUS);
-
-        eventBus.on(GameEvents.STATE_CHANGE, (data) => {
-            this.updateStat('state', data.to);
-        });
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'F3') {
@@ -105,17 +92,6 @@ export class DebugOverlay {
     }
 
     update(_deltaTime: number): void {
-        this.frameCount++;
-        const currentTime = performance.now();
-        
-        if (currentTime - this.lastFrameTime >= 1000) {
-            this.fps = this.frameCount;
-            this.frameCount = 0;
-            this.lastFrameTime = currentTime;
-            this.updateStat('fps', this.fps.toString());
-        }
-
-        this.updateStats();
     }
 
     toggle(): void {
@@ -123,39 +99,6 @@ export class DebugOverlay {
     }
 
     private updateStats(): void {
-        try {
-            const physicsSystem = this.serviceLocator.get(ServiceNames.PHYSICS) as any;
-            if (physicsSystem && physicsSystem.entities) {
-                this.updateStat('entities', physicsSystem.entities.size.toString());
-            }
-        } catch (e) {
-            this.updateStat('entities', '0');
-        }
-
-        try {
-            const renderer = this.serviceLocator.get(ServiceNames.RENDERER) as any;
-            if (renderer && renderer.getCameraPosition) {
-                const pos = renderer.getCameraPosition();
-                this.updateStat('camera', `${Math.floor(pos.x)}, ${Math.floor(pos.y)}`);
-            } else if (renderer) {
-                this.updateStat('camera', `${Math.floor(renderer.cameraX || 0)}, ${Math.floor(renderer.cameraY || 0)}`);
-            }
-        } catch (e) {
-            this.updateStat('camera', '0, 0');
-        }
-
-        try {
-            const inputSystem = this.serviceLocator.get(ServiceNames.INPUT) as any;
-            if (inputSystem) {
-                const keys: string[] = [];
-                if (inputSystem.isActionPressed?.('left')) keys.push('←');
-                if (inputSystem.isActionPressed?.('right')) keys.push('→');
-                if (inputSystem.isActionPressed?.('jump')) keys.push('SPACE');
-                this.updateStat('input', keys.join(' ') || 'none');
-            }
-        } catch (e) {
-            this.updateStat('input', 'none');
-        }
     }
 
     private updateStat(name: string, value: string): void {
