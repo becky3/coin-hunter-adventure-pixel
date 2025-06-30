@@ -60,13 +60,6 @@ SVGベースの「coin-hunter-adventure」をピクセルアート（Canvas）�
 
 ### 状況確認資料
 
-#### `docs/PROJECT_STATUS.md` - 現在の実装状況
-- **内容**: 実装済み機能、未実装機能、既知の問題
-- **確認タイミング**:
-  - 作業開始時（推奨）
-  - 既知の問題を確認したいとき
-  - 実装状況を把握したいとき
-
 #### `handover-docs/` - 引き継ぎ資料
 - **内容**: 過去の作業詳細、解決した問題、学んだ教訓
 - **確認タイミング**:
@@ -89,12 +82,9 @@ SVGベースの「coin-hunter-adventure」をピクセルアート（Canvas）�
 このプロジェクトは**GitHub Issueドリブン**で開発を進めます：
 - 作業の優先順位はGitHub Issueで管理されています
 - 新しい作業を始める際は必ずGitHub Issueを確認してください
-- PROJECT_STATUS.mdは実装状況の確認用です（優先順位の決定には使用しません）
-
 ### 作業開始前に必ず読むドキュメント
 1. **このファイル（CLAUDE.md）** - 全体のガイドライン
 2. **docs/DEVELOPMENT_RULES.md** - 開発フロー（初回は必須）
-3. **docs/PROJECT_STATUS.md** - 現在の状況把握
 
 ### 必須作業
 1. **TodoList管理** - 作業開始時に必ずTodoListで計画を作成・管理
@@ -158,13 +148,12 @@ gh issue comment [Issue番号] --body "作業を開始します。
 
 ### 6. プロジェクト状況の確認
 必ず以下のドキュメントを確認してください：
-- `docs/PROJECT_STATUS.md` - 現在の実装状況
 - `docs/IMPLEMENTATION_ROADMAP.md` - 技術的な依存関係
 - `handover-docs/` - 過去の作業履歴と引き継ぎ事項
 
 選択したIssueに関連する機能があれば、該当する仕様書も確認してください。
 
-**重要**: 作業の優先順位はGitHub Issueによって管理されています。PROJECT_STATUS.mdは実装状況の確認用であり、次に何をすべきかはGitHub Issueを確認してください。
+**重要**: 作業の優先順位はGitHub Issueによって管理されています。
 
 ## システムの重要な制限事項
 
@@ -180,7 +169,6 @@ gh issue comment [Issue番号] --body "作業を開始します。
 ## トラブルシューティング
 
 具体的な問題と解決方法については以下を参照してください：
-- `docs/PROJECT_STATUS.md` - 既知の問題と対処法
 - `handover-docs/` - 過去に発生した問題と解決履歴
 
 ## 継続的改善のルール
