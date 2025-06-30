@@ -1,0 +1,28 @@
+title: Coin Hunter Adventure Pixel
+description: ピクセルアートスタイルのコイン収集アドベンチャーゲーム
+theme: jekyll-theme-minimal
+lang: ja
+
+# ナビゲーション
+navigation:
+  - title: ホーム
+    url: /
+  - title: はじめに
+    url: /getting-started/
+  - title: 開発者向け
+    url: /development/
+  - title: 仕様書
+    url: /specifications/
+  - title: リソース
+    url: /resources/
+
+# プラグイン
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# 除外ファイル
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
