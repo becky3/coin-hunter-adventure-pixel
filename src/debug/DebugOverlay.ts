@@ -120,7 +120,7 @@ export class DebugOverlay {
                 this.updateStat('entities', physicsSystem.entities.size.toString());
             }
         } catch (e) {
-            console.warn('Physics system not found');
+            this.updateStat('entities', '0');
         }
 
         try {
@@ -128,9 +128,11 @@ export class DebugOverlay {
             if (renderer && renderer.getCameraPosition) {
                 const pos = renderer.getCameraPosition();
                 this.updateStat('camera', `${Math.floor(pos.x)}, ${Math.floor(pos.y)}`);
+            } else if (renderer) {
+                this.updateStat('camera', `${Math.floor(renderer.cameraX || 0)}, ${Math.floor(renderer.cameraY || 0)}`);
             }
         } catch (e) {
-            console.warn('Renderer not found');
+            this.updateStat('camera', '0, 0');
         }
 
         try {
@@ -143,7 +145,7 @@ export class DebugOverlay {
                 this.updateStat('input', keys.join(' ') || 'none');
             }
         } catch (e) {
-            console.warn('Input system not found');
+            this.updateStat('input', 'none');
         }
     }
 
