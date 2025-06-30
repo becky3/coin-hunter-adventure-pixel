@@ -15,7 +15,7 @@ export class Slime extends Enemy {
         this.maxHealth = 1;
         this.health = this.maxHealth;
         this.damage = 1;
-        this.moveSpeed = 0.5;
+        this.moveSpeed = 0.25;
         
         this.jumpHeight = 5;
         this.jumpCooldown = 0;

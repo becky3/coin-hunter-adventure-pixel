@@ -27,6 +27,7 @@ export class MenuState implements GameState {
     private showCredits: boolean;
     private titleAnimTimer: number;
     private inputListeners: Array<() => void>;
+    private _firstUpdateLogged: boolean = false;
 
     constructor(game: Game) {
         this.game = game;
@@ -94,9 +95,20 @@ export class MenuState implements GameState {
                 const isValidJump = event.action === 'jump' && event.key === 'Space';
                 const isValidAction = event.action === 'action';
                 
+                console.log('MenuState: keyPress event', {
+                    action: event.action,
+                    key: event.key,
+                    isValidJump,
+                    isValidAction,
+                    optionsAlpha: this.optionsAlpha,
+                    showHowTo: this.showHowTo,
+                    showCredits: this.showCredits
+                });
+                
                 if ((isValidAction || isValidJump) && 
                     !this.showHowTo && !this.showCredits && 
                     this.optionsAlpha >= 1) {
+                    console.log('MenuState: Executing option...');
                     setTimeout(() => {
                         this.executeOption();
                     }, 0);
@@ -149,6 +161,12 @@ export class MenuState implements GameState {
             if (this.optionsAlpha > 1) {
                 this.optionsAlpha = 1;
             }
+        }
+        
+        // デバッグ: 初回のみログ出力
+        if (!this._firstUpdateLogged) {
+            console.log('MenuState: update called, optionsAlpha:', this.optionsAlpha);
+            this._firstUpdateLogged = true;
         }
     }
     
@@ -214,7 +232,7 @@ export class MenuState implements GameState {
             { key: 'UP/SPACE', desc: 'JUMP' },
             { key: 'HOLD JUMP', desc: 'JUMP HIGH' },
             { key: 'M', desc: 'MUTE' },
-            { key: '@', desc: 'DEBUG' }
+            { key: 'F3', desc: 'DEBUG' }
         ];
         
         let y = 56;

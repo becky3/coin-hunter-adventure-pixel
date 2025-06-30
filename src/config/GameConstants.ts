@@ -1,0 +1,5 @@
+export const GAME_CONSTANTS = {
+    GLOBAL_SPEED_MULTIPLIER: 1.0,
+    TARGET_FPS: 60,
+    FRAME_TIME_MS: 16.67,
+};

@@ -39,21 +39,33 @@ export class Coin extends Entity {
         this.floatOffset += this.floatSpeed * deltaTime;
         this.y = this.baseY + Math.sin(this.floatOffset) * this.floatAmplitude;
         
-        this.animationTime += deltaTime;
+        this.animationTime += deltaTime * 1000;
     }
 
     render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
-        // TODO: アニメーション対応が必要
-        const frameNumber = Math.floor(this.animationTime / 200) % 4 + 1;
-        const spriteKey = `items/coin_spin${frameNumber}`;
-        
-        if (renderer.assetLoader && renderer.assetLoader.hasSprite(spriteKey)) {
-            renderer.drawSprite(spriteKey, this.x, this.y);
-        } else {
-            this.renderDefault(renderer);
+        if (renderer.pixelArtRenderer) {
+            const animation = renderer.pixelArtRenderer.animations.get('items/coin_spin');
+            if (animation) {
+                const screenPos = renderer.worldToScreen(this.x, this.y);
+                animation.update(Date.now());
+                animation.draw(
+                    renderer.ctx,
+                    screenPos.x,
+                    screenPos.y,
+                    false,
+                    renderer.scale
+                );
+                
+                if (renderer.debug) {
+                    this.renderDebug(renderer);
+                }
+                return;
+            }
         }
+        
+        this.renderDefault(renderer);
         
         if (renderer.debug) {
             this.renderDebug(renderer);

@@ -1,17 +1,12 @@
 
 
 import { ServiceLocator } from '../services/ServiceLocator';
-import { ServiceNames } from '../services/ServiceNames';
-import { EventBus } from '../services/EventBus';
-import { GameEvents } from '../services/GameEvents';
+import { GAME_CONSTANTS } from '../config/GameConstants';
 
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
     private debugElement?: HTMLDivElement;
     private statsElements: Map<string, HTMLElement> = new Map();
-    private lastFrameTime: number = 0;
-    private frameCount: number = 0;
-    private fps: number = 0;
     
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
@@ -20,6 +15,12 @@ export class DebugOverlay {
     async init(): Promise<void> {
         this.createDebugUI();
         this.setupEventListeners();
+        
+        if (this.debugElement) {
+            this.debugElement.style.display = 'block';
+        }
+        
+        (window as any).debugOverlay = this;
     }
 
     private createDebugUI(): void {
@@ -45,7 +46,7 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['FPS', 'Entities', 'State', 'Camera', 'Input'];
+        const stats = ['Speed'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
@@ -53,59 +54,51 @@ export class DebugOverlay {
             this.statsElements.set(stat.toLowerCase(), statElement.querySelector('span')!);
         });
         
+        this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
+        
+        const helpDiv = document.createElement('div');
+        helpDiv.style.marginTop = '10px';
+        helpDiv.style.fontSize = '10px';
+        helpDiv.style.color = '#888';
+        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset';
+        this.debugElement!.appendChild(helpDiv);
+        
         document.body.appendChild(this.debugElement);
     }
 
     private setupEventListeners(): void {
-        const eventBus = this.serviceLocator.get<EventBus>(ServiceNames.EVENT_BUS);
-
-        eventBus.on(GameEvents.STATE_CHANGE, (data) => {
-            this.updateStat('state', data.to);
-        });
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'F3') {
                 e.preventDefault();
                 this.toggleVisibility();
             }
+            
+            if (e.key === '-' || e.key === '_') {
+                e.preventDefault();
+                this.changeSpeed(-0.1);
+            }
+            
+            if (e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                this.changeSpeed(0.1);
+            }
+            
+            if (e.key === '0') {
+                e.preventDefault();
+                this.resetSpeed();
+            }
         });
     }
 
     update(_deltaTime: number): void {
-        this.frameCount++;
-        const currentTime = performance.now();
-        
-        if (currentTime - this.lastFrameTime >= 1000) {
-            this.fps = this.frameCount;
-            this.frameCount = 0;
-            this.lastFrameTime = currentTime;
-            this.updateStat('fps', this.fps.toString());
-        }
+    }
 
-        this.updateStats();
+    toggle(): void {
+        this.toggleVisibility();
     }
 
     private updateStats(): void {
-
-        const physicsSystem = this.serviceLocator.tryGet(ServiceNames.PHYSICS) as any;
-        if (physicsSystem && physicsSystem.entities) {
-            this.updateStat('entities', physicsSystem.entities.size.toString());
-        }
-
-        const renderer = this.serviceLocator.tryGet(ServiceNames.RENDERER) as any;
-        if (renderer && renderer.getCameraPosition) {
-            const pos = renderer.getCameraPosition();
-            this.updateStat('camera', `${Math.floor(pos.x)}, ${Math.floor(pos.y)}`);
-        }
-
-        const inputSystem = this.serviceLocator.tryGet(ServiceNames.INPUT) as any;
-        if (inputSystem) {
-            const keys: string[] = [];
-            if (inputSystem.isActionPressed?.('left')) keys.push('←');
-            if (inputSystem.isActionPressed?.('right')) keys.push('→');
-            if (inputSystem.isActionPressed?.('jump')) keys.push('SPACE');
-            this.updateStat('input', keys.join(' ') || 'none');
-        }
     }
 
     private updateStat(name: string, value: string): void {
@@ -120,6 +113,17 @@ export class DebugOverlay {
             this.debugElement.style.display = 
                 this.debugElement.style.display === 'none' ? 'block' : 'none';
         }
+    }
+    
+    private changeSpeed(delta: number): void {
+        GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER = Math.max(0.1, Math.min(3.0, 
+            GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER + delta));
+        this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
+    }
+    
+    private resetSpeed(): void {
+        GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER = 1.0;
+        this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
     }
 
     destroy(): void {

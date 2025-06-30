@@ -1,4 +1,5 @@
 import type { PixelRenderer } from '../rendering/PixelRenderer';
+import { GAME_CONSTANTS } from '../config/GameConstants';
 
 export interface Bounds {
     left: number;
@@ -102,8 +103,8 @@ export class Entity {
     }
 
     updatePhysics(deltaTime: number): void {
-        if (!deltaTime || deltaTime <= 0 || deltaTime > 100) {
-            deltaTime = 16.67;
+        if (!deltaTime || deltaTime <= 0 || deltaTime > 0.1) {
+            deltaTime = 0.01667;
         }
         
         if (this.gravity && !this.grounded) {
@@ -123,7 +124,7 @@ export class Entity {
         }
         
         if (!this.physicsEnabled) {
-            const frameFactor = deltaTime / 16.67;
+            const frameFactor = deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
             this.x += this.vx * frameFactor;
             this.y += this.vy * frameFactor;
         }

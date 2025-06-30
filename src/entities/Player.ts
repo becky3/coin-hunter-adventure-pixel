@@ -7,7 +7,7 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 const PLAYER_CONFIG = {
     width: 16,
     height: 16,
-    speed: 3.5,
+    speed: 1.17,
     jumpPower: 10,
     minJumpTime: 8,
     maxJumpTime: 20,
@@ -382,6 +382,12 @@ export class Player extends Entity {
             } else if ((window as any).game?.debug) {
                 console.warn('Sprite not found:', this.spriteKey);
             }
+        }
+        
+        // フォールバック: スプライトが見つからない場合は基本的な矩形を描画
+        if (!renderer.pixelArtRenderer || !renderer.pixelArtRenderer.sprites.has(this.spriteKey || 'player/idle')) {
+            console.warn('Player sprite not found, falling back to rectangle. spriteKey:', this.spriteKey);
+            super.render(renderer);
         }
         
         if (renderer.debug) {

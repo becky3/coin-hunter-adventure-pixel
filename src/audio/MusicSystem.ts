@@ -59,7 +59,11 @@ export class MusicSystem {
     }
 
     async init(): Promise<boolean> {
-        if (this.isInitialized) return true;
+        console.log('MusicSystem: init() called');
+        if (this.isInitialized) {
+            console.log('MusicSystem: Already initialized');
+            return true;
+        }
         
         try {
             const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
@@ -70,12 +74,14 @@ export class MusicSystem {
 
             try {
                 this.audioContext = new AudioContextClass() as AudioContext;
+                console.log('MusicSystem: AudioContext created');
             } catch {
                 console.info('AudioContext creation deferred - will retry on user interaction');
                 return false;
             }
 
             if (this.audioContext.state === 'suspended') {
+                console.log('MusicSystem: AudioContext is suspended, attempting to resume...');
                 try {
                     await this.audioContext.resume();
                 } catch {
@@ -597,7 +603,7 @@ export class MusicSystem {
                     oscillator.stop(this.audioContext!.currentTime);
                 }
             } catch {
-
+                // TODO: Handle oscillator stop error
             }
         });
 

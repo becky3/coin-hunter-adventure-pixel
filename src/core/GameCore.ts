@@ -9,6 +9,7 @@ import { DebugOverlay } from '../debug/DebugOverlay';
 import { InputSystem as InputSystemImpl } from './InputSystem';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { PixelArtRenderer } from '../utils/pixelArt';
 import { AssetLoader } from '../assets/AssetLoader';
 import { MusicSystem } from '../audio/MusicSystem';
 import { GameStateManager } from '../states/GameStateManager';
@@ -32,26 +33,32 @@ export class GameCore {
     }
 
     async init(): Promise<void> {
+        console.log('GameCore: init() started');
 
+        console.log('GameCore: Registering core services...');
         this.registerCoreServices();
 
+        console.log('GameCore: Registering systems...');
         await this.registerSystems();
 
+        console.log('GameCore: Registering states...');
         this.registerStates();
 
-        if (process.env.NODE_ENV === 'development') {
-            this.debugOverlay = new DebugOverlay(this._serviceLocator);
-            await this.debugOverlay.init();
-        }
+        console.log('GameCore: Initializing debug overlay...');
+        this.debugOverlay = new DebugOverlay(this._serviceLocator);
+        await this.debugOverlay.init();
 
+        console.log('GameCore: Setting initial state to menu...');
         const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
         await stateManager.setState('menu');
 
+        console.log('GameCore: Hiding loading screen...');
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {
             loadingScreen.style.display = 'none';
         }
         
+        console.log('GameCore: init() completed');
     }
 
     private registerCoreServices(): void {
@@ -68,7 +75,12 @@ export class GameCore {
         const renderer = new PixelRenderer(canvas);
         this._serviceLocator.register(ServiceNames.RENDERER, renderer);
 
+        const pixelArtRenderer = new PixelArtRenderer(canvas);
+        renderer.pixelArtRenderer = pixelArtRenderer;
+
         const assetLoader = new AssetLoader();
+        assetLoader.setRenderer(pixelArtRenderer);
+        renderer.assetLoader = assetLoader;
         this._serviceLocator.register(ServiceNames.ASSET_LOADER, assetLoader);
 
         const inputSystem = new InputSystemImpl();
@@ -101,6 +113,22 @@ export class GameCore {
         }
 
         await systemManager.initSystems();
+
+        // MusicSystemの初期化
+        const musicSystem = this._serviceLocator.get<MusicSystem>(ServiceNames.AUDIO);
+        try {
+            console.log('GameCore: Initializing MusicSystem...');
+            // タイムアウトを設定
+            const initPromise = musicSystem.init();
+            const timeoutPromise = new Promise<boolean>((_, reject) => 
+                setTimeout(() => reject(new Error('MusicSystem init timeout')), 5000)
+            );
+            
+            await Promise.race([initPromise, timeoutPromise]);
+            console.log('GameCore: MusicSystem initialized');
+        } catch (error) {
+            console.warn('GameCore: MusicSystem initialization failed, continuing without audio:', error);
+        }
     }
 
     private registerStates(): void {
@@ -124,6 +152,7 @@ export class GameCore {
     }
 
     start(): void {
+        console.log('GameCore: Starting game loop...');
         
         const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
 
@@ -134,6 +163,8 @@ export class GameCore {
             const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
             systemManager.renderSystems(renderer);
         });
+        
+        console.log('GameCore: Game loop started, running:', this.gameLoop.isRunning());
     }
 
     stop(): void {
@@ -142,5 +173,9 @@ export class GameCore {
 
     get serviceLocator(): ServiceLocator {
         return this._serviceLocator;
+    }
+
+    get stateManager(): GameStateManager {
+        return this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
     }
 }
