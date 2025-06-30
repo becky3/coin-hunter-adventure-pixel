@@ -21,6 +21,9 @@ export class DebugOverlay {
     async init(): Promise<void> {
         this.createDebugUI();
         this.setupEventListeners();
+        
+        console.log('DebugOverlay initialized, available services:', 
+            Array.from((this.serviceLocator as any).services?.keys() || []));
     }
 
     private createDebugUI(): void {
@@ -111,25 +114,36 @@ export class DebugOverlay {
     }
 
     private updateStats(): void {
-
-        const physicsSystem = this.serviceLocator.get(ServiceNames.PHYSICS) as any;
-        if (physicsSystem && physicsSystem.entities) {
-            this.updateStat('entities', physicsSystem.entities.size.toString());
+        try {
+            const physicsSystem = this.serviceLocator.get(ServiceNames.PHYSICS) as any;
+            if (physicsSystem && physicsSystem.entities) {
+                this.updateStat('entities', physicsSystem.entities.size.toString());
+            }
+        } catch (e) {
+            console.warn('Physics system not found');
         }
 
-        const renderer = this.serviceLocator.get(ServiceNames.RENDERER) as any;
-        if (renderer && renderer.getCameraPosition) {
-            const pos = renderer.getCameraPosition();
-            this.updateStat('camera', `${Math.floor(pos.x)}, ${Math.floor(pos.y)}`);
+        try {
+            const renderer = this.serviceLocator.get(ServiceNames.RENDERER) as any;
+            if (renderer && renderer.getCameraPosition) {
+                const pos = renderer.getCameraPosition();
+                this.updateStat('camera', `${Math.floor(pos.x)}, ${Math.floor(pos.y)}`);
+            }
+        } catch (e) {
+            console.warn('Renderer not found');
         }
 
-        const inputSystem = this.serviceLocator.get(ServiceNames.INPUT) as any;
-        if (inputSystem) {
-            const keys: string[] = [];
-            if (inputSystem.isActionPressed?.('left')) keys.push('←');
-            if (inputSystem.isActionPressed?.('right')) keys.push('→');
-            if (inputSystem.isActionPressed?.('jump')) keys.push('SPACE');
-            this.updateStat('input', keys.join(' ') || 'none');
+        try {
+            const inputSystem = this.serviceLocator.get(ServiceNames.INPUT) as any;
+            if (inputSystem) {
+                const keys: string[] = [];
+                if (inputSystem.isActionPressed?.('left')) keys.push('←');
+                if (inputSystem.isActionPressed?.('right')) keys.push('→');
+                if (inputSystem.isActionPressed?.('jump')) keys.push('SPACE');
+                this.updateStat('input', keys.join(' ') || 'none');
+            }
+        } catch (e) {
+            console.warn('Input system not found');
         }
     }
 
