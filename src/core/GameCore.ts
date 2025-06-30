@@ -44,11 +44,9 @@ export class GameCore {
         console.log('GameCore: Registering states...');
         this.registerStates();
 
-        if (process.env.NODE_ENV === 'development') {
-            console.log('GameCore: Initializing debug overlay...');
-            this.debugOverlay = new DebugOverlay(this._serviceLocator);
-            await this.debugOverlay.init();
-        }
+        console.log('GameCore: Initializing debug overlay...');
+        this.debugOverlay = new DebugOverlay(this._serviceLocator);
+        await this.debugOverlay.init();
 
         console.log('GameCore: Setting initial state to menu...');
         const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);

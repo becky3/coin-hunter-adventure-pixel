@@ -22,6 +22,11 @@ export class DebugOverlay {
         this.createDebugUI();
         this.setupEventListeners();
         
+        // 初期状態で表示する
+        if (this.debugElement) {
+            this.debugElement.style.display = 'block';
+        }
+        
         console.log('DebugOverlay initialized, available services:', 
             Array.from((this.serviceLocator as any).services?.keys() || []));
     }
@@ -111,6 +116,10 @@ export class DebugOverlay {
         }
 
         this.updateStats();
+    }
+
+    toggle(): void {
+        this.toggleVisibility();
     }
 
     private updateStats(): void {
