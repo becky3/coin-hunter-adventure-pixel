@@ -99,7 +99,7 @@ export class EntityManager {
             this.items.push(entity);
             break;
                 
-        case 'slime':
+        case 'slime': {
             const slime = new Slime(
                 config.x * TILE_SIZE,
                 config.y * TILE_SIZE
@@ -109,6 +109,7 @@ export class EntityManager {
             this.physicsSystem.addEntity(slime, this.physicsSystem.layers.ENEMY);
             entity = slime;
             break;
+        }
         }
         
         if (entity) {
