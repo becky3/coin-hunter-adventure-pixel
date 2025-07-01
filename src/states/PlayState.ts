@@ -16,6 +16,7 @@ interface Game {
     physicsSystem: any;
     assetLoader?: any;
     frameCount?: number;
+    eventBus?: EventBus;
 }
 
 declare global {
@@ -44,18 +45,36 @@ export class PlayState implements GameState {
     public get player() {
         return this.entityManager.getPlayer();
     }
+    
+    public getEntityManager() {
+        return this.entityManager;
+    }
+    
+    public getLevelManager() {
+        return this.levelManager;
+    }
+    
+    public getHudManager() {
+        return this.hudManager;
+    }
 
     constructor(game: Game) {
         this.game = game;
         
-        // Initialize managers with game services
-        this.entityManager = new EntityManager(game);
-        this.levelManager = new LevelManager(game);
-        this.cameraController = new CameraController(game);
-        this.hudManager = new HUDManager(game);
-        
-        // Create own EventBus instance
+        // Create shared EventBus instance
         this.eventBus = new EventBus();
+        
+        // Create extended game object with eventBus
+        const extendedGame = {
+            ...game,
+            eventBus: this.eventBus
+        };
+        
+        // Initialize managers with extended game services
+        this.entityManager = new EntityManager(extendedGame);
+        this.levelManager = new LevelManager(extendedGame);
+        this.cameraController = new CameraController(extendedGame);
+        this.hudManager = new HUDManager(extendedGame);
 
         // Setup debug warp function
         if (typeof window !== 'undefined') {
@@ -70,6 +89,11 @@ export class PlayState implements GameState {
         // Listen for game events
         this.eventBus.on('coin:collected', (data: any) => {
             console.log(`Coin collected! Score: ${data.score}`);
+            const player = this.entityManager.getPlayer();
+            if (player) {
+                player.score += data.score;
+                this.hudManager.updateScore(player.score);
+            }
         });
 
         this.eventBus.on('goal:reached', () => {
@@ -209,6 +233,9 @@ export class PlayState implements GameState {
 
         // Update camera
         this.cameraController.update(deltaTime);
+        
+        // Update HUD
+        this.hudManager.update(deltaTime);
 
         // Check game over conditions
         const hudData = this.hudManager.getHUDData();
@@ -354,8 +381,23 @@ export class PlayState implements GameState {
 
     private stageClear(): void {
         console.log('Stage Clear!');
-        // TODO: Implement result screen transition
-        this.game.stateManager.setState('menu');
+        this.isPaused = true;
+        
+        // Stop the timer
+        this.hudManager.setPaused(true);
+        
+        // Play clear sound
+        if (this.game.musicSystem?.isInitialized) {
+            this.game.musicSystem.playVictorySound();
+        }
+        
+        // Show clear message
+        this.hudManager.showMessage('STAGE CLEAR!');
+        
+        // Transition to menu after 3 seconds
+        setTimeout(() => {
+            this.game.stateManager.setState('menu');
+        }, 3000);
     }
 
     private debugWarp(x: number, y: number, tileCoords: boolean = false): void {

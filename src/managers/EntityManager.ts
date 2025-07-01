@@ -28,7 +28,7 @@ export class EntityManager {
 
     constructor(game: any) {
         // Get services from game proxy
-        this.eventBus = new EventBus(); // Create own instance
+        this.eventBus = game.eventBus || new EventBus(); // Use shared instance if available
         this.physicsSystem = game.physicsSystem;
         this.musicSystem = game.musicSystem;
         this.assetLoader = game.assetLoader;

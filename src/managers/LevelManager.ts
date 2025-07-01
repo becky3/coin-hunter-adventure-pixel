@@ -27,7 +27,7 @@ export class LevelManager {
 
     constructor(game: any) {
         this.levelLoader = new LevelLoader();
-        this.eventBus = new EventBus();
+        this.eventBus = game.eventBus || new EventBus();
         this.physicsSystem = game.physicsSystem;
     }
 

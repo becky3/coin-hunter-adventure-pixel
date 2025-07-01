@@ -30,7 +30,7 @@ export class CameraController {
             height: GAME_RESOLUTION.HEIGHT
         };
         
-        this.eventBus = new EventBus();
+        this.eventBus = _game.eventBus || new EventBus();
         
         // Listen for level size changes
         this.eventBus.on('level:loaded', (data: any) => {

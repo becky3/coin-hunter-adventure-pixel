@@ -13,9 +13,11 @@ export class HUDManager {
     private eventBus: EventBus;
     private hudData: HUDData;
     private isPaused: boolean = false;
+    private message: string | null = null;
+    private messageTimer: number = 0;
 
     constructor(_game: any) {
-        this.eventBus = new EventBus();
+        this.eventBus = _game.eventBus || new EventBus();
         
         this.hudData = {
             score: 0,
@@ -72,6 +74,10 @@ export class HUDManager {
         
         if (this.isPaused) {
             this.renderPauseScreen(renderer);
+        }
+        
+        if (this.message) {
+            this.renderMessage(renderer);
         }
     }
 
@@ -196,6 +202,38 @@ export class HUDManager {
         this.isPaused = paused;
     }
 
+    showMessage(text: string, duration: number = 3000): void {
+        this.message = text;
+        this.messageTimer = duration;
+    }
+    
+    update(deltaTime: number): void {
+        if (this.messageTimer > 0) {
+            this.messageTimer -= deltaTime;
+            if (this.messageTimer <= 0) {
+                this.message = null;
+            }
+        }
+    }
+    
+    private renderMessage(renderer: PixelRenderer): void {
+        const centerX = GAME_RESOLUTION.WIDTH / 2;
+        const centerY = GAME_RESOLUTION.HEIGHT / 2;
+        
+        // Draw message background
+        const bgWidth = 240;
+        const bgHeight = 60;
+        const bgX = centerX - bgWidth / 2;
+        const bgY = centerY - bgHeight / 2;
+        
+        renderer.drawRect(bgX, bgY, bgWidth, bgHeight, '#000000');
+        renderer.drawRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4, '#FFD700');
+        renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, '#000000');
+        
+        // Draw message text
+        renderer.drawTextCentered(this.message!, centerX, centerY - 4, '#FFD700');
+    }
+
     reset(): void {
         this.hudData = {
             score: 0,
@@ -204,5 +242,7 @@ export class HUDManager {
             coinsCollected: 0
         };
         this.isPaused = false;
+        this.message = null;
+        this.messageTimer = 0;
     }
 }
