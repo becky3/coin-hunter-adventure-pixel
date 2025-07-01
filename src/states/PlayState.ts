@@ -5,8 +5,7 @@ import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
 import { CameraController } from '../controllers/CameraController';
 import { HUDManager } from '../ui/HUDManager';
-import { ServiceLocator } from '../services/ServiceLocator';
-import { EventBus } from '../core/EventBus';
+import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
 
 interface Game {
@@ -48,13 +47,15 @@ export class PlayState implements GameState {
 
     constructor(game: Game) {
         this.game = game;
-        this.eventBus = ServiceLocator.get('EventBus');
-
-        // Initialize managers
-        this.entityManager = new EntityManager();
-        this.levelManager = new LevelManager();
-        this.cameraController = new CameraController();
-        this.hudManager = new HUDManager();
+        
+        // Initialize managers with game services
+        this.entityManager = new EntityManager(game);
+        this.levelManager = new LevelManager(game);
+        this.cameraController = new CameraController(game);
+        this.hudManager = new HUDManager(game);
+        
+        // Create own EventBus instance
+        this.eventBus = new EventBus();
 
         // Setup debug warp function
         if (typeof window !== 'undefined') {

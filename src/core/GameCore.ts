@@ -28,7 +28,7 @@ export class GameCore {
     private debugOverlay?: DebugOverlay;
     
     constructor() {
-        this._serviceLocator = new ServiceLocator();
+        this._serviceLocator = ServiceLocator.getInstance();
         this.gameLoop = new GameLoop();
     }
 

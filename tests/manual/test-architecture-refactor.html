@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Refactor Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: monospace;
+        }
+        #gameCanvas {
+            border: 2px solid #333;
+            display: block;
+            margin: 20px auto;
+        }
+        #status {
+            text-align: center;
+            margin: 20px;
+        }
+        .log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            margin: 10px auto;
+            max-width: 800px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .warning { color: #ffd93d; }
+    </style>
+</head>
+<body>
+    <div id="status">
+        <h1>Architecture Refactor Test</h1>
+        <p>PlayState分解後の動作確認</p>
+    </div>
+    
+    <div id="loadingScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; display: flex; justify-content: center; align-items: center; z-index: 1000;">
+        <div style="text-align: center;">
+            <h2>Loading...</h2>
+            <p>ゲームを初期化中です</p>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas" width="256" height="224"></canvas>
+    
+    <div class="log" id="log">
+        <h3>ログ:</h3>
+    </div>
+
+    <script type="module">
+        const logDiv = document.getElementById('log');
+        
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // グローバルエラーハンドラー
+        window.addEventListener('error', (event) => {
+            addLog(`Error: ${event.error?.message || event.message}`, 'error');
+            if (event.error?.stack) {
+                addLog(`Stack: ${event.error.stack}`, 'error');
+            }
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            addLog(`Unhandled Promise Rejection: ${event.reason}`, 'error');
+        });
+
+        // GameCoreを直接インポート
+        import('/src/core/GameCore.ts').then(async (module) => {
+            const { GameCore } = module;
+            
+            try {
+                addLog('Starting game initialization...', 'info');
+                const gameCore = new GameCore();
+                window.game = gameCore;
+                
+                addLog('Initializing GameCore...', 'info');
+                await gameCore.init();
+                
+                addLog('Starting game loop...', 'info');
+                gameCore.start();
+                
+                addLog('Game started successfully!', 'success');
+                
+                // ゲーム状態を監視
+                setInterval(() => {
+                    const state = gameCore.stateManager?.currentState;
+                    if (state) {
+                        const player = state.player;
+                        const entityManager = state.entityManager;
+                        
+                        document.getElementById('status').innerHTML = `
+                            <h1>Architecture Refactor Test</h1>
+                            <p>Current State: ${state.name}</p>
+                            <p>Player Exists: ${player ? 'Yes' : 'No'}</p>
+                            <p>EntityManager Exists: ${entityManager ? 'Yes' : 'No'}</p>
+                            ${player ? `<p>Player Position: (${Math.round(player.x)}, ${Math.round(player.y)})</p>` : ''}
+                        `;
+                    }
+                }, 100);
+                
+            } catch (error) {
+                addLog(`Failed to start game: ${error.message}`, 'error');
+                addLog(`Stack: ${error.stack}`, 'error');
+                
+                // Loading画面を非表示
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                }
+            }
+        }).catch(error => {
+            addLog(`Failed to import GameCore: ${error.message}`, 'error');
+        });
+    </script>
+</body>
+</html>

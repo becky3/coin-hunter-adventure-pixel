@@ -6,8 +6,7 @@ import { Spring } from '../entities/Spring';
 import { GoalFlag } from '../entities/GoalFlag';
 import { Slime } from '../entities/enemies/Slime';
 import { TILE_SIZE } from '../constants/gameConstants';
-import { ServiceLocator } from '../services/ServiceLocator';
-import { EventBus } from '../core/EventBus';
+import { EventBus } from '../services/EventBus';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 
 export interface EntityConfig {
@@ -27,12 +26,13 @@ export class EntityManager {
     private assetLoader: any; // TODO: Define proper type
     private inputSystem: any; // TODO: Define proper type
 
-    constructor() {
-        this.eventBus = ServiceLocator.get('EventBus');
-        this.physicsSystem = ServiceLocator.get('PhysicsSystem');
-        this.musicSystem = ServiceLocator.get('MusicSystem');
-        this.assetLoader = ServiceLocator.get('AssetLoader');
-        this.inputSystem = ServiceLocator.get('InputSystem');
+    constructor(game: any) {
+        // Get services from game proxy
+        this.eventBus = new EventBus(); // Create own instance
+        this.physicsSystem = game.physicsSystem;
+        this.musicSystem = game.musicSystem;
+        this.assetLoader = game.assetLoader;
+        this.inputSystem = game.inputSystem;
     }
 
     getPlayer(): Player | null {

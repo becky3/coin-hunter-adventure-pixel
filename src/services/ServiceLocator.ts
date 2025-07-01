@@ -17,6 +17,15 @@ export interface IServiceLocator {
 
 export class ServiceLocator implements IServiceLocator {
     private services: Map<string, any> = new Map();
+    private static instance: ServiceLocator;
+    
+    // Singleton pattern
+    static getInstance(): ServiceLocator {
+        if (!ServiceLocator.instance) {
+            ServiceLocator.instance = new ServiceLocator();
+        }
+        return ServiceLocator.instance;
+    }
     
     register<T>(name: string, service: T, override: boolean = false): void {
         if (this.services.has(name) && !override) {
@@ -48,6 +57,17 @@ export class ServiceLocator implements IServiceLocator {
     clear(): void {
         this.services.clear();
     }
+    
+    // Static helper methods for convenience
+    static get<T>(name: string): T {
+        return ServiceLocator.getInstance().get<T>(name);
+    }
+    
+    static register<T>(name: string, service: T, override: boolean = false): void {
+        ServiceLocator.getInstance().register(name, service, override);
+    }
+    
+    static has(name: string): boolean {
+        return ServiceLocator.getInstance().has(name);
+    }
 }
-
-export const serviceLocator = new ServiceLocator();

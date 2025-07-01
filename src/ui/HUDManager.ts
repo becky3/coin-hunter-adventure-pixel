@@ -1,7 +1,6 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { EventBus } from '../core/EventBus';
-import { ServiceLocator } from '../services/ServiceLocator';
+import { EventBus } from '../services/EventBus';
 
 export interface HUDData {
     score: number;
@@ -15,8 +14,8 @@ export class HUDManager {
     private hudData: HUDData;
     private isPaused: boolean = false;
 
-    constructor() {
-        this.eventBus = ServiceLocator.get('EventBus');
+    constructor(game: any) {
+        this.eventBus = new EventBus();
         
         this.hudData = {
             score: 0,

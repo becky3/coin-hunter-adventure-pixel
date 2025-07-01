@@ -1,6 +1,5 @@
 import { LevelLoader } from '../levels/LevelLoader';
-import { EventBus } from '../core/EventBus';
-import { ServiceLocator } from '../services/ServiceLocator';
+import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
 
 export interface LevelData {
@@ -26,10 +25,10 @@ export class LevelManager {
     private backgroundColor: string = '#5C94FC';
     private timeLimit: number = 300;
 
-    constructor() {
+    constructor(game: any) {
         this.levelLoader = new LevelLoader();
-        this.eventBus = ServiceLocator.get('EventBus');
-        this.physicsSystem = ServiceLocator.get('PhysicsSystem');
+        this.eventBus = new EventBus();
+        this.physicsSystem = game.physicsSystem;
     }
 
     async initialize(): Promise<void> {

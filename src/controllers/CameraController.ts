@@ -1,7 +1,6 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { Entity } from '../entities/Entity';
-import { EventBus } from '../core/EventBus';
-import { ServiceLocator } from '../services/ServiceLocator';
+import { EventBus } from '../services/EventBus';
 
 export interface Camera {
     x: number;
@@ -23,7 +22,7 @@ export class CameraController {
     private offsetY: number = 0;
     private bounds: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
 
-    constructor() {
+    constructor(game: any) {
         this.camera = {
             x: 0,
             y: 0,
@@ -31,7 +30,7 @@ export class CameraController {
             height: GAME_RESOLUTION.HEIGHT
         };
         
-        this.eventBus = ServiceLocator.get('EventBus');
+        this.eventBus = new EventBus();
         
         // Listen for level size changes
         this.eventBus.on('level:loaded', (data: any) => {
