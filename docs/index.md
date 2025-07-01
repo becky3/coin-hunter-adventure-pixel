@@ -42,18 +42,18 @@ npm install
 npm run dev
 ```
 
-詳しいセットアップ手順は[環境構築ガイド](./getting-started/setup.md)をご覧ください。
+詳しいセットアップ手順は[環境構築ガイド]({{ site.baseurl }}/getting-started/setup.html)をご覧ください。
 
 ## ドキュメント
 
-- [はじめに](./getting-started/) - 初めての方はこちらから
-- [開発者向けガイド](./development/) - 開発に参加する方向け
-- [ゲーム仕様](./specifications/) - 詳細な仕様書
-- [リソース](./resources/) - アセットやデザインガイド
+- [はじめに]({{ site.baseurl }}/getting-started/) - 初めての方はこちらから
+- [開発者向けガイド]({{ site.baseurl }}/development/) - 開発に参加する方向け
+- [ゲーム仕様]({{ site.baseurl }}/specifications/) - 詳細な仕様書
+- [リソース]({{ site.baseurl }}/resources/) - アセットやデザインガイド
 
 ## コントリビューション
 
-このプロジェクトへの貢献を歓迎します！詳しくは[開発ガイドライン](./development/guidelines.md)をご覧ください。
+このプロジェクトへの貢献を歓迎します！詳しくは[開発ガイドライン]({{ site.baseurl }}/development/guidelines.html)をご覧ください。
 
 ## ライセンス
 

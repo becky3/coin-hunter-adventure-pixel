@@ -53,4 +53,4 @@ npm install
 - ブラウザの開発者ツール（F12）でデバッグ可能
 - http://localhost:3000/test-core-systems.html でシステムテスト画面にアクセス可能
 
-次のステップ: [最初の一歩](./first-steps.md)に進む
+次のステップ: [最初の一歩]({{ site.baseurl }}/getting-started/first-steps.html)に進む

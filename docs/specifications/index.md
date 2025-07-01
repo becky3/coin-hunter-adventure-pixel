@@ -9,8 +9,8 @@ Coin Hunter Adventure Pixelの詳細な仕様書です。
 
 ## 目次
 
-1. [ゲーム仕様](./game.md) - ゲームプレイとメカニクス
-2. [技術仕様](./technical.md) - 技術的な実装詳細
+1. [ゲーム仕様]({{ site.baseurl }}/specifications/game.html) - ゲームプレイとメカニクス
+2. [技術仕様]({{ site.baseurl }}/specifications/technical.html) - 技術的な実装詳細
 
 ## 概要
 

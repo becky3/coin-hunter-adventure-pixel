@@ -9,8 +9,8 @@ Coin Hunter Adventure Pixelの開発を始めるためのガイドです。
 
 ## 目次
 
-1. [環境構築](./setup.md) - 開発環境のセットアップ
-2. [最初の一歩](./first-steps.md) - プロジェクトの基本的な使い方
+1. [環境構築]({{ site.baseurl }}/getting-started/setup.html) - 開発環境のセットアップ
+2. [最初の一歩]({{ site.baseurl }}/getting-started/first-steps.html) - プロジェクトの基本的な使い方
 
 ## プロジェクトについて
 
@@ -30,4 +30,4 @@ Coin Hunter Adventure Pixelの開発を始めるためのガイドです。
 - プロジェクトのドキュメントを確認
 - 開発者コミュニティに参加
 
-次のステップ: [環境構築](./setup.md)に進む
+次のステップ: [環境構築]({{ site.baseurl }}/getting-started/setup.html)に進む
