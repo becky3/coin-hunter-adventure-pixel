@@ -110,6 +110,14 @@ export class PlayState implements GameState {
                 this.gameOver();
             }
         });
+        
+        this.eventBus.on('enemy:defeated', (data: any) => {
+            console.log(`Enemy defeated! Score: ${data.score}`);
+            const player = this.entityManager.getPlayer();
+            if (player) {
+                this.hudManager.updateScore(player.score);
+            }
+        });
     }
 
     private async preloadSprites(): Promise<void> {

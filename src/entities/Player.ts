@@ -332,7 +332,8 @@ export class Player extends Entity {
     render(renderer: PixelRenderer): void {
         this.flipX = this.facing === 'left';
         
-        if (this.invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 0) {
+        // 無敵時は点滅させる（100ms間隔で表示/非表示を切り替え）
+        if (this.invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 1) {
             return;
         }
         

@@ -33,6 +33,18 @@ export class EntityManager {
         this.musicSystem = game.musicSystem;
         this.assetLoader = game.assetLoader;
         this.inputSystem = game.inputSystem;
+        
+        // 敵を倒した時のイベントリスナーを設定
+        this.setupEventListeners();
+    }
+    
+    private setupEventListeners(): void {
+        // 敵が倒された時の処理
+        this.eventBus.on('enemy:defeated', (_data: any) => {
+            if (this.musicSystem?.isInitialized) {
+                this.musicSystem.playEnemyDefeatSound();
+            }
+        });
     }
 
     getPlayer(): Player | null {
@@ -105,6 +117,7 @@ export class EntityManager {
                 config.y * TILE_SIZE
             );
             slime.direction = -1;
+            slime.setEventBus(this.eventBus);
             this.enemies.push(slime);
             this.physicsSystem.addEntity(slime, this.physicsSystem.layers.ENEMY);
             entity = slime;
@@ -123,11 +136,13 @@ export class EntityManager {
         // Test slimes
         const slime1 = new Slime(150, 180);
         slime1.direction = -1;
+        slime1.setEventBus(this.eventBus);
         this.enemies.push(slime1);
         this.physicsSystem.addEntity(slime1, this.physicsSystem.layers.ENEMY);
         
         const slime2 = new Slime(200, 100);
         slime2.direction = -1;
+        slime2.setEventBus(this.eventBus);
         this.enemies.push(slime2);
         this.physicsSystem.addEntity(slime2, this.physicsSystem.layers.ENEMY);
         

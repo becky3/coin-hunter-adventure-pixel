@@ -72,12 +72,11 @@ export class HUDManager {
     render(renderer: PixelRenderer): void {
         this.renderHUD(renderer);
         
-        if (this.isPaused) {
-            this.renderPauseScreen(renderer);
-        }
-        
+        // メッセージがある時はPAUSEメニューを表示しない
         if (this.message) {
             this.renderMessage(renderer);
+        } else if (this.isPaused) {
+            this.renderPauseScreen(renderer);
         }
     }
 
