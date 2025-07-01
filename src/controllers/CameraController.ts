@@ -22,7 +22,7 @@ export class CameraController {
     private offsetY: number = 0;
     private bounds: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
 
-    constructor(game: any) {
+    constructor(_game: any) {
         this.camera = {
             x: 0,
             y: 0,

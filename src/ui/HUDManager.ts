@@ -14,7 +14,7 @@ export class HUDManager {
     private hudData: HUDData;
     private isPaused: boolean = false;
 
-    constructor(game: any) {
+    constructor(_game: any) {
         this.eventBus = new EventBus();
         
         this.hudData = {
