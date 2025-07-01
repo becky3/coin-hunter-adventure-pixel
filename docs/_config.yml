@@ -3,6 +3,11 @@ description: ピクセルアートスタイルのコイン収集アドベンチ�
 theme: jekyll-theme-minimal
 lang: ja
 
+# GitHub Pages設定
+repository: becky3/coin-hunter-adventure-pixel
+baseurl: ""
+url: "https://becky3.github.io/coin-hunter-adventure-pixel"
+
 # ナビゲーション
 navigation:
   - title: ホーム
@@ -20,6 +25,7 @@ navigation:
 plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
+  - jekyll-github-metadata
 
 # 除外ファイル
 exclude:

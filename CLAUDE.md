@@ -6,15 +6,15 @@ SVGベースの「coin-hunter-adventure」をピクセルアート（Canvas）�
 
 ## 📚 ドキュメント
 
-**プロジェクトの詳細なドキュメントは `docs-site/` にあります。**
+**プロジェクトの詳細なドキュメントは `docs/` にあります。**
 
 GitHub Pages公開後は以下でアクセス可能になります：
 https://becky3.github.io/coin-hunter-adventure-pixel/
 
 ローカルで確認する場合：
-- **ホーム**: `docs-site/index.md`
-- **開発ガイド**: `docs-site/development/`
-- **仕様書**: `docs-site/specifications/`
+- **ホーム**: `docs/index.md`
+- **開発ガイド**: `docs/development/`
+- **仕様書**: `docs/specifications/`
 
 ### 引き継ぎ資料
 `handover-docs/` - 過去の作業詳細、解決した問題、学んだ教訓
@@ -37,7 +37,7 @@ https://becky3.github.io/coin-hunter-adventure-pixel/
 
 ### 作業開始前に必ず確認
 1. **このファイル（CLAUDE.md）** - プロジェクトの基本情報
-2. **docs-site/** - 開発ガイドラインと仕様書
+2. **docs/** - 開発ガイドラインと仕様書
 
 ### 必須作業
 1. **TodoList管理** - 作業開始時に必ずTodoListで計画を作成・管理
@@ -100,7 +100,7 @@ gh issue comment [Issue番号] --body "作業を開始します。
 作業内容に基づいてTodoWriteツールで作業計画を作成してください。
 
 ### 6. プロジェクト状況の確認
-- `docs-site/` - 開発ガイドラインと仕様書
+- `docs/` - 開発ガイドラインと仕様書
 - `handover-docs/` - 過去の作業履歴と引き継ぎ事項
 
 **重要**: 作業の優先順位はGitHub Issueによって管理されています。
@@ -110,7 +110,7 @@ gh issue comment [Issue番号] --body "作業を開始します。
 ### テキスト表示
 - **大文字英語のみ対応**（A-Z, 0-9, 一部記号）
 - 日本語、小文字は表示不可
-- 詳細は `docs-site/resources/pixel-art.md` を参照
+- 詳細は `docs/resources/pixel-art.md` を参照
 
 ### レンダリング
 - PixelRendererのメソッドを使用すること（drawRect, setCamera等）
