@@ -5,7 +5,7 @@ lang: ja
 
 # GitHub Pages設定
 repository: becky3/coin-hunter-adventure-pixel
-baseurl: ""
+baseurl: "/coin-hunter-adventure-pixel"
 url: "https://becky3.github.io/coin-hunter-adventure-pixel"
 
 # ナビゲーション

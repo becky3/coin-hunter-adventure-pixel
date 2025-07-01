@@ -9,7 +9,7 @@ title: リソース
 
 ## 目次
 
-1. [ピクセルアート仕様](./pixel-art.md) - グラフィックスのガイドライン
+1. [ピクセルアート仕様]({{ site.baseurl }}/resources/pixel-art.html) - グラフィックスのガイドライン
 
 ## 概要
 

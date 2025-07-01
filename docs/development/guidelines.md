@@ -120,6 +120,6 @@ async function loadAsset() {
 - 秘密情報のハードコーディング
 
 ## 参考資料
-- [ゲーム仕様](../specifications/game.md)
-- [技術仕様](../specifications/technical.md)
-- [アーキテクチャ](./architecture.md)
+- [ゲーム仕様]({{ site.baseurl }}/specifications/game.html)
+- [技術仕様]({{ site.baseurl }}/specifications/technical.html)
+- [アーキテクチャ]({{ site.baseurl }}/development/architecture.html)
