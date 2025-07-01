@@ -48,10 +48,6 @@ export class GameCore {
         this.debugOverlay = new DebugOverlay(this._serviceLocator);
         await this.debugOverlay.init();
 
-        console.log('GameCore: Setting initial state to menu...');
-        const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
-        await stateManager.setState('menu');
-
         console.log('GameCore: Hiding loading screen...');
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {
@@ -155,6 +151,7 @@ export class GameCore {
         console.log('GameCore: Starting game loop...');
         
         const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
+        const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
 
         this.gameLoop.start((deltaTime) => {
 
@@ -165,6 +162,10 @@ export class GameCore {
         });
         
         console.log('GameCore: Game loop started, running:', this.gameLoop.isRunning());
+        
+        // Set initial state to menu
+        stateManager.setState('menu');
+        console.log('GameCore: Initial state set to menu');
     }
 
     stop(): void {

@@ -6,7 +6,7 @@ import { Spring } from '../entities/Spring';
 import { GoalFlag } from '../entities/GoalFlag';
 import { Slime } from '../entities/enemies/Slime';
 import { TILE_SIZE } from '../constants/gameConstants';
-import { ServiceLocator } from '../core/ServiceLocator';
+import { ServiceLocator } from '../services/ServiceLocator';
 import { EventBus } from '../core/EventBus';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 

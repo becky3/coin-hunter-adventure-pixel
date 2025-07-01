@@ -1,6 +1,6 @@
 import { LevelLoader } from '../levels/LevelLoader';
 import { EventBus } from '../core/EventBus';
-import { ServiceLocator } from '../core/ServiceLocator';
+import { ServiceLocator } from '../services/ServiceLocator';
 import { TILE_SIZE } from '../constants/gameConstants';
 
 export interface LevelData {

@@ -5,7 +5,7 @@ import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
 import { CameraController } from '../controllers/CameraController';
 import { HUDManager } from '../ui/HUDManager';
-import { ServiceLocator } from '../core/ServiceLocator';
+import { ServiceLocator } from '../services/ServiceLocator';
 import { EventBus } from '../core/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
 
@@ -40,6 +40,11 @@ export class PlayState implements GameState {
     private isPaused: boolean = false;
     private lastTimeUpdate: number = 0;
     private inputListeners: Array<() => void> = [];
+
+    // Public getters for testing
+    public get player() {
+        return this.entityManager.getPlayer();
+    }
 
     constructor(game: Game) {
         this.game = game;

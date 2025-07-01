@@ -1,7 +1,7 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../core/EventBus';
-import { ServiceLocator } from '../core/ServiceLocator';
+import { ServiceLocator } from '../services/ServiceLocator';
 
 export interface HUDData {
     score: number;

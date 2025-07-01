@@ -1,7 +1,7 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { Entity } from '../entities/Entity';
 import { EventBus } from '../core/EventBus';
-import { ServiceLocator } from '../core/ServiceLocator';
+import { ServiceLocator } from '../services/ServiceLocator';
 
 export interface Camera {
     x: number;
