@@ -12,6 +12,8 @@
     "test:basic": "node tests/e2e/test-basic-flow.js",
     "test:performance": "node tests/e2e/test-performance.js",
     "test:stress": "node tests/e2e/test-stress.js",
+    "test:gameplay": "node tests/e2e/test-complete-gameplay.js",
+    "test:pre-push": "node tests/e2e/test-pre-push.js",
     "test:jest": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

@@ -27,7 +27,9 @@
 - `test-basic-flow.js` - 基本的なゲーム機能テスト
 - `test-performance.js` - パフォーマンス監視テスト
 - `test-stress.js` - 高速入力によるストレステスト
-- `run-all-tests.js` - テストスイート実行ツール
+- `test-complete-gameplay.js` - ゲーム開始からゴール到達までの完全なプレイテスト
+- `test-pre-push.js` - コードプッシュ前の必須テストスイート
+- `run-all-tests.js` - 全テストスイート実行ツール
 
 ## 使用方法
 
@@ -35,19 +37,29 @@
 
 ```bash
 # 基本フローテスト
-node tests/e2e/test-basic-flow.js
+npm run test:basic
 
 # パフォーマンステスト
-node tests/e2e/test-performance.js
+npm run test:performance
 
 # ストレステスト
-node tests/e2e/test-stress.js
+npm run test:stress
+
+# 完全なゲームプレイテスト
+npm run test:gameplay
+```
+
+### プッシュ前テスト（推奨）
+
+```bash
+# コードをプッシュする前に実行
+npm run test:pre-push
 ```
 
 ### 全テストの実行
 
 ```bash
-node tests/e2e/run-all-tests.js
+npm test
 ```
 
 ### 新しいテストの作成
@@ -194,6 +206,27 @@ const test = new GameTestHelpers({
 - [ ] Jest統合
 - [ ] 並列テスト実行
 - [ ] クラウドテストサービス統合
+
+## プッシュ前テスト
+
+`npm run test:pre-push` は以下のテストを実行します：
+
+1. **基本フローテスト** - ゲームの基本動作確認
+2. **完全なゲームプレイテスト** - スタートからゴールまでの自動プレイ
+3. **パフォーマンステスト** - 60FPS維持の確認
+
+これらのテストがすべて成功した場合のみ、コードをプッシュすることを推奨します。
+
+### 使用例
+
+```bash
+# 開発完了後
+npm run lint          # コード品質チェック
+npm run test:pre-push # プッシュ前テスト
+
+# 両方成功したら
+git push origin feature/your-branch
+```
 
 ## 効率化のポイント
 
