@@ -121,6 +121,7 @@ export class EntityManager {
                 config.y * TILE_SIZE
             );
             this.items.push(entity);
+            this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ITEM);
             break;
                 
         case 'slime': {
@@ -165,6 +166,7 @@ export class EntityManager {
         
         const goal = new GoalFlag(17 * TILE_SIZE, 12 * TILE_SIZE);
         this.items.push(goal);
+        this.physicsSystem.addEntity(goal, this.physicsSystem.layers.ITEM);
     }
 
     updateAll(deltaTime: number): void {
