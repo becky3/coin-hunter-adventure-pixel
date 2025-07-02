@@ -95,20 +95,10 @@ export class MenuState implements GameState {
                 const isValidJump = event.action === 'jump' && event.key === 'Space';
                 const isValidAction = event.action === 'action';
                 
-                console.log('MenuState: keyPress event', {
-                    action: event.action,
-                    key: event.key,
-                    isValidJump,
-                    isValidAction,
-                    optionsAlpha: this.optionsAlpha,
-                    showHowTo: this.showHowTo,
-                    showCredits: this.showCredits
-                });
                 
                 if ((isValidAction || isValidJump) && 
                     !this.showHowTo && !this.showCredits && 
                     this.optionsAlpha >= 1) {
-                    console.log('MenuState: Executing option...');
                     setTimeout(() => {
                         this.executeOption();
                     }, 0);
@@ -131,6 +121,7 @@ export class MenuState implements GameState {
                 }
             })
         );
+        
         this.inputListeners.push(
             this.game.inputSystem.on('keyPress', (event: InputEvent) => {
                 if (event.action === 'mute') {
@@ -289,7 +280,7 @@ export class MenuState implements GameState {
             try {
                 this.game.stateManager.setState('play');
             } catch (error) {
-                console.error('PlayState not yet implemented:', error);
+                console.error('Error transitioning to play state:', error);
             }
             break;
                 

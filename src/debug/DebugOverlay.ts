@@ -46,7 +46,7 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['Speed'];
+        const stats = ['Speed', 'State'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
@@ -63,10 +63,21 @@ export class DebugOverlay {
         helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset';
         this.debugElement!.appendChild(helpDiv);
         
+        // Initialize default values
+        this.updateStat('state', 'menu');
+        
         document.body.appendChild(this.debugElement);
     }
 
     private setupEventListeners(): void {
+        // Listen to state changes
+        const game = (window as any).game;
+        if (game?.stateManager) {
+            game.stateManager.addEventListener('stateChange', (event: any) => {
+                this.updateStat('state', event.data.to || 'unknown');
+            });
+        }
+        
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'F3') {
@@ -88,6 +99,7 @@ export class DebugOverlay {
                 e.preventDefault();
                 this.resetSpeed();
             }
+            
         });
     }
 
@@ -125,6 +137,7 @@ export class DebugOverlay {
         GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER = 1.0;
         this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
     }
+    
 
     destroy(): void {
         if (this.debugElement) {

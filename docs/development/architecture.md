@@ -28,12 +28,19 @@ Coin Hunter Adventure Pixelは、HTML5 Canvas APIを使用したブラウザベ�
 
 ### 主要コンポーネント
 
+#### コアシステム
 - **GameCore**: ゲーム全体の制御とシステム管理
 - **GameStateManager**: ゲーム状態の管理（メニュー、プレイ、ゲームオーバー）
 - **PixelRenderer**: 8ビットスタイルの描画システム
 - **PhysicsSystem**: 物理演算（重力、衝突判定）
-- **MusicSystem**: Web Audio APIによる音声管理
+- **MusicSystem**: Web Audio APIによる音声管理（統一インターフェース実装）
 - **InputSystem**: キーボード入力の統合管理
+
+#### マネージャーシステム
+- **EntityManager**: エンティティ（プレイヤー、敵、アイテム）の統合管理
+- **CameraController**: カメラの動作とビューポート制御
+- **LevelManager**: レベルデータとタイルマップの管理
+- **HUDManager**: UIとHUD（ヘッドアップディスプレイ）の処理
 
 ### ゲームループ
 
@@ -45,12 +52,16 @@ Input → Update (Logic/Physics) → Render → (60fps repeat)
 
 ```
 src/
+├── audio/         # 音声システム
+├── controllers/   # コントローラー（カメラ等）
+├── core/          # コアシステム
 ├── entities/      # ゲームエンティティ
 ├── levels/        # レベルデータとローダー
+├── managers/      # マネージャー（Entity、Level等）
 ├── physics/       # 物理エンジン
-├── renderer/      # 描画システム
+├── rendering/     # 描画システム
+├── services/      # サービス（EventBus、ServiceLocator）
 ├── states/        # ゲーム状態
-├── systems/       # 各種システム
 ├── ui/            # UI関連
 └── utils/         # ユーティリティ
 ```
@@ -79,7 +90,7 @@ src/
 3. 拡張性の向上
 4. テスタビリティの改善
 
-### 新アーキテクチャ構想
+### アーキテクチャパターン
 
 #### ServiceLocator
 - サービスの登録と取得を一元管理
@@ -88,10 +99,19 @@ src/
 #### EventBus
 - モジュール間の疎結合な通信
 - ゲームイベントの発行と購読
+- 型安全なイベントハンドラー
 
-#### リファクタリング対象
-- **Game.ts**: 3つのモジュールに分割予定
-- **PlayState.ts**: 5つのモジュールに分割予定
+#### マネージャーパターン
+- **PlayState**: 以下の4つのマネージャーに責任を分離
+  - EntityManager: エンティティ管理
+  - CameraController: カメラ制御
+  - LevelManager: レベル管理
+  - HUDManager: UI管理
+
+### 型安全性
+- GameServicesインターフェースによる依存性の型定義
+- EventBusコールバックの型安全性
+- 明示的な型定義によるコード品質向上
 
 ## 開発のポイント
 

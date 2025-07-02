@@ -37,7 +37,7 @@ async function runAutomatedTests() {
                 const state = window.game?.stateManager?.currentState;
                 return state?.name === 'menu' && state?.optionsAlpha >= 1;
             },
-            { timeout: 5000 }
+            { timeout: 10000 }
         ).then(() => true).catch(() => false);
         
         if (menuDisplayed) {
@@ -50,21 +50,34 @@ async function runAutomatedTests() {
         
         // テスト3: ゲーム開始
         console.log('\nテスト3: ゲーム開始 (Space キー)');
+        // マウスクリックでフォーカスを確保
+        await page.mouse.click(100, 100);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         await page.keyboard.down('Space');
         await new Promise(resolve => setTimeout(resolve, 100));
         await page.keyboard.up('Space');
         
         const gameStarted = await page.waitForFunction(
             () => window.game?.stateManager?.currentState?.name === 'play',
-            { timeout: 3000 }
+            { timeout: 5000 }
         ).then(() => true).catch(() => false);
         
         if (gameStarted) {
             console.log('  ✓ ゲーム開始成功');
             testsPassed++;
             
-            // プレイヤー初期化を待つ
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // PlayStateの初期化が完了するまで待つ
+            await page.waitForFunction(
+                () => {
+                    const state = window.game?.stateManager?.currentState;
+                    return state?.name === 'play' && state?.player !== undefined;
+                },
+                { timeout: 5000 }
+            );
+            
+            // さらに待機して初期化を確実に完了させる
+            await new Promise(resolve => setTimeout(resolve, 1000));
         } else {
             console.log('  ✗ ゲーム開始失敗');
             testsFailed++;

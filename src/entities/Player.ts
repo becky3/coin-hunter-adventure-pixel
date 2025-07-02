@@ -4,6 +4,7 @@ import { MusicSystem } from '../audio/MusicSystem.js';
 import { AssetLoader } from '../assets/AssetLoader';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 
+
 const PLAYER_CONFIG = {
     width: 16,
     height: 16,
@@ -138,6 +139,8 @@ export class Player extends Entity {
         
         if (!this.inputManager) return;
         
+        
+        
         const input = {
             left: this.inputManager.isActionPressed('left'),
             right: this.inputManager.isActionPressed('right'),
@@ -152,7 +155,8 @@ export class Player extends Entity {
         this.updateAnimationFrame(deltaTime);
         
         if (this.invulnerable) {
-            this.invulnerabilityTime -= deltaTime;
+            this.invulnerabilityTime -= deltaTime * 1000;
+            
             if (this.invulnerabilityTime <= 0) {
                 this.invulnerable = false;
                 this.invulnerabilityTime = 0;
@@ -191,7 +195,7 @@ export class Player extends Entity {
         }
         
         if (this.isJumping) {
-            this.jumpTime += deltaTime;
+            this.jumpTime += deltaTime * 1000;
             
             if (input.jump && this.canVariableJump) {
                 if (this.jumpTime < PLAYER_CONFIG.maxJumpTime && this.vy < 0) {
@@ -246,7 +250,7 @@ export class Player extends Entity {
     }
     
     private updateAnimationFrame(deltaTime: number): void {
-        this.animTimer += deltaTime;
+        this.animTimer += deltaTime * 1000;
         
         const speed = ANIMATION_CONFIG.speed[this.animState] || 200;
         
@@ -332,7 +336,8 @@ export class Player extends Entity {
     render(renderer: PixelRenderer): void {
         this.flipX = this.facing === 'left';
         
-        if (this.invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 0) {
+        // 無敵時は点滅させる（100ms間隔で表示/非表示を切り替え）
+        if (this.invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 1) {
             return;
         }
         

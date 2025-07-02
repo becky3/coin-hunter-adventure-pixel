@@ -22,10 +22,14 @@ type BGMType = 'title' | 'game' | null;
 type DrumType = 'kick' | 'snare' | 'hihat';
 type OscillatorType = OscillatorNode['type'];
 
+export type BGMName = 'title' | 'game' | 'victory' | 'gameover';
+export type SEName = 'coin' | 'jump' | 'damage' | 'button' | 'powerup';
+
 export class MusicSystem {
     private audioContext: AudioContext | null;
     private masterGain: GainNode | null;
-    public isInitialized: boolean;
+    private _isInitialized: boolean;
+    private listeners: Map<string, Array<(data: any) => void>>;
 
     private currentBGM: BGMType;
     private bgmLoopInterval: NodeJS.Timeout | null;
@@ -43,7 +47,8 @@ export class MusicSystem {
 
         this.audioContext = null;
         this.masterGain = null;
-        this.isInitialized = false;
+        this._isInitialized = false;
+        this.listeners = new Map();
 
         this.currentBGM = null;
         this.bgmLoopInterval = null;
@@ -704,6 +709,58 @@ export class MusicSystem {
             this.isInitialized = false;
         } catch (error) {
             console.error('音楽システムのクリーンアップエラー:', error);
+        }
+    }
+    
+    // 統一的なインターフェース
+    playBGM(name: BGMName): void {
+        if (!this.isInitialized) {
+            console.warn(`[MusicSystem] Cannot play BGM '${name}' - system not initialized`);
+            return;
+        }
+        
+        switch (name) {
+        case 'title':
+            this.playTitleBGM();
+            break;
+        case 'game':
+            this.playGameBGM();
+            break;
+        case 'victory':
+            this.playVictoryJingle();
+            break;
+        case 'gameover':
+            this.playGameOverJingle();
+            break;
+        default:
+            console.warn(`[MusicSystem] Unknown BGM: ${name}`);
+        }
+    }
+    
+    playSE(name: SEName): void {
+        if (!this.isInitialized) {
+            console.warn(`[MusicSystem] Cannot play SE '${name}' - system not initialized`);
+            return;
+        }
+        
+        switch (name) {
+        case 'coin':
+            this.playCoinSound();
+            break;
+        case 'jump':
+            this.playJumpSound();
+            break;
+        case 'damage':
+            this.playDamageSound();
+            break;
+        case 'button':
+            this.playButtonClickSound();
+            break;
+        case 'powerup':
+            this.playGoalSound(); // 仮にpowerupとして使用
+            break;
+        default:
+            console.warn(`[MusicSystem] Unknown SE: ${name}`);
         }
     }
 }

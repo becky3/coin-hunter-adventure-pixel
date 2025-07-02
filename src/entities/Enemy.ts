@@ -21,6 +21,7 @@ export class Enemy extends Entity {
     public animState: string;
     public facingRight: boolean;
     public canJump: boolean;
+    protected eventBus: any; // EventBus instance
 
     constructor(x: number, y: number, width: number = 16, height: number = 16) {
         super(x, y, width, height);
@@ -44,16 +45,20 @@ export class Enemy extends Entity {
         
         this.canJump = false;
     }
+    
+    setEventBus(eventBus: any): void {
+        this.eventBus = eventBus;
+    }
 
     update(deltaTime: number): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0) {
-            this.invincibleTime -= deltaTime;
+            this.invincibleTime -= deltaTime * 1000;
         }
         
         if (this.stateTimer > 0) {
-            this.stateTimer -= deltaTime;
+            this.stateTimer -= deltaTime * 1000;
         }
         
         this.updateAI(deltaTime);
@@ -110,6 +115,17 @@ export class Enemy extends Entity {
         if (wasAbove && isNowColliding && isFalling) {
             this.takeDamage(1, player);
             player.vy = -5;
+            // 敵を踏み潰した時のスコア加算とイベント発行
+            const scoreGained = 100;
+            player.addScore(scoreGained);
+            
+            if (this.eventBus) {
+                this.eventBus.emit('enemy:defeated', {
+                    enemy: this,
+                    score: scoreGained,
+                    position: { x: this.x, y: this.y }
+                });
+            }
         } else {
             if (player.takeDamage) {
                 player.takeDamage(this.damage);
