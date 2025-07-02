@@ -31,20 +31,20 @@ interface IRenderer {
 }
 
 export class PhysicsSystem {
-    public gravity: number;
-    public maxFallSpeed: number;
-    public friction: number;
-    public layers: PhysicsLayers;
+    private _gravity: number;
+    private _maxFallSpeed: number;
+    private _friction: number;
+    public readonly layers: PhysicsLayers;
     private collisionMatrix: CollisionMatrix;
-    public entities: Set<PhysicsEntity>;
+    private entities: Set<PhysicsEntity>;
     private tileMap: number[][] | null;
     private tileSize: number;
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
-        this.gravity = 0.65;
-        this.maxFallSpeed = 15;
-        this.friction = 0.8;
+        this._gravity = 0.65;
+        this._maxFallSpeed = 15;
+        this._friction = 0.8;
         this.layers = {
             TILE: 'tile',
             PLAYER: 'player',
@@ -64,6 +64,36 @@ export class PhysicsSystem {
         this.collisionPairs = new Map();
     }
     
+    get gravity(): number { return this._gravity; }
+    get maxFallSpeed(): number { return this._maxFallSpeed; }
+    get friction(): number { return this._friction; }
+    
+    setGravity(value: number): void {
+        if (value >= 0) {
+            this._gravity = value;
+        }
+    }
+    
+    setMaxFallSpeed(value: number): void {
+        if (value > 0) {
+            this._maxFallSpeed = value;
+        }
+    }
+    
+    setFriction(value: number): void {
+        if (value >= 0 && value <= 1) {
+            this._friction = value;
+        }
+    }
+    
+    getEntityCount(): number {
+        return this.entities.size;
+    }
+    
+    clearEntities(): void {
+        this.entities.clear();
+    }
+    
     setTileMap(tileMap: number[][], tileSize = 16): void {
         this.tileMap = tileMap;
         this.tileSize = tileSize;
@@ -80,6 +110,10 @@ export class PhysicsSystem {
     
     removeEntity(entity: PhysicsEntity): void {
         this.entities.delete(entity);
+    }
+    
+    hasEntity(entity: PhysicsEntity): boolean {
+        return this.entities.has(entity);
     }
     
     update(deltaTime: number): void {

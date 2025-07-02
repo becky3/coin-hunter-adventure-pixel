@@ -62,6 +62,10 @@ export class MusicSystem {
         this.sfxVolume = 0.5;
         this.isMuted = false;
     }
+    
+    get isInitialized(): boolean {
+        return this._isInitialized;
+    }
 
     async init(): Promise<boolean> {
         console.log('MusicSystem: init() called');
