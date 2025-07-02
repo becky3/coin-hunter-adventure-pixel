@@ -46,7 +46,7 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['Speed', 'Sound', 'State'];
+        const stats = ['Speed', 'State'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
@@ -60,11 +60,10 @@ export class DebugOverlay {
         helpDiv.style.marginTop = '10px';
         helpDiv.style.fontSize = '10px';
         helpDiv.style.color = '#888';
-        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset | D: Sound';
+        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset';
         this.debugElement!.appendChild(helpDiv);
         
         // Initialize default values
-        this.updateStat('sound', 'ON');
         this.updateStat('state', 'menu');
         
         document.body.appendChild(this.debugElement);
@@ -79,15 +78,6 @@ export class DebugOverlay {
             });
         }
         
-        // Listen to MusicSystem changes
-        // Check sound state periodically
-        setInterval(() => {
-            const currentGame = (window as any).game;
-            if (currentGame?.musicSystem) {
-                const soundState = currentGame.musicSystem.isInitialized ? 'ON' : 'OFF';
-                this.updateStat('sound', soundState);
-            }
-        }, 500);
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'F3') {
@@ -110,11 +100,6 @@ export class DebugOverlay {
                 this.resetSpeed();
             }
             
-            // Handle D key for sound toggle
-            if (e.key === 'd' || e.key === 'D') {
-                e.preventDefault();
-                this.toggleSound();
-            }
         });
     }
 
@@ -151,28 +136,6 @@ export class DebugOverlay {
     private resetSpeed(): void {
         GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER = 1.0;
         this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
-    }
-    
-    private toggleSound(): void {
-        const game = (window as any).game;
-        console.log('[DEBUG] toggleSound called, game:', game);
-        console.log('[DEBUG] musicSystem:', game?.musicSystem);
-        
-        if (game?.musicSystem) {
-            if (game.musicSystem.isInitialized) {
-                console.log('[DEBUG] Disabling MusicSystem');
-                game.musicSystem.stopBGM();
-                game.musicSystem.isInitialized = false;
-                this.updateStat('sound', 'OFF');
-            } else {
-                console.log('[DEBUG] Re-enabling MusicSystem');
-                game.musicSystem.isInitialized = true;
-                this.updateStat('sound', 'ON');
-            }
-            console.log('[DEBUG] musicSystem.isInitialized:', game.musicSystem.isInitialized);
-        } else {
-            console.log('[DEBUG] No musicSystem found');
-        }
     }
     
 
