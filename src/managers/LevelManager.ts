@@ -1,6 +1,7 @@
 import { LevelLoader } from '../levels/LevelLoader';
 import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
+import { PhysicsSystem } from '../physics/PhysicsSystem';
 
 export interface LevelData {
     width: number;
@@ -12,10 +13,15 @@ export interface LevelData {
     timeLimit?: number;
 }
 
+interface GameServices {
+    eventBus?: EventBus;
+    physicsSystem: PhysicsSystem;
+}
+
 export class LevelManager {
     private levelLoader: LevelLoader;
     private eventBus: EventBus;
-    private physicsSystem: any;
+    private physicsSystem: PhysicsSystem;
     
     private currentLevel: string | null = null;
     private levelData: LevelData | null = null;
@@ -25,7 +31,7 @@ export class LevelManager {
     private backgroundColor: string = '#5C94FC';
     private timeLimit: number = 300;
 
-    constructor(game: any) {
+    constructor(game: GameServices) {
         this.levelLoader = new LevelLoader();
         this.eventBus = game.eventBus || new EventBus();
         this.physicsSystem = game.physicsSystem;
@@ -71,6 +77,14 @@ export class LevelManager {
             
         } catch (error) {
             console.error('Failed to load level:', error);
+            
+            // Emit level load error event
+            this.eventBus.emit('level:load-error', {
+                levelName,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            
+            // Fall back to test level
             this.createTestLevel();
         }
     }

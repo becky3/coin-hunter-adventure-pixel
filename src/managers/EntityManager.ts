@@ -8,11 +8,23 @@ import { Slime } from '../entities/enemies/Slime';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { EventBus } from '../services/EventBus';
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { PhysicsSystem } from '../physics/PhysicsSystem';
+import { MusicSystem } from '../audio/MusicSystem';
+import { AssetLoader } from '../assets/AssetLoader';
+import { InputSystem } from '../core/InputSystem';
 
 export interface EntityConfig {
     type: string;
     x: number;
     y: number;
+}
+
+interface GameServices {
+    eventBus?: EventBus;
+    physicsSystem: PhysicsSystem;
+    musicSystem?: MusicSystem;
+    assetLoader?: AssetLoader;
+    inputSystem: InputSystem;
 }
 
 export class EntityManager {
@@ -21,12 +33,12 @@ export class EntityManager {
     private items: Entity[] = [];
     private platforms: Entity[] = [];
     private eventBus: EventBus;
-    private physicsSystem: any; // TODO: Define proper type
-    private musicSystem: any; // TODO: Define proper type
-    private assetLoader: any; // TODO: Define proper type
-    private inputSystem: any; // TODO: Define proper type
+    private physicsSystem: PhysicsSystem;
+    private musicSystem: MusicSystem | undefined;
+    private assetLoader: AssetLoader | undefined;
+    private inputSystem: InputSystem;
 
-    constructor(game: any) {
+    constructor(game: GameServices) {
         // Get services from game proxy
         this.eventBus = game.eventBus || new EventBus(); // Use shared instance if available
         this.physicsSystem = game.physicsSystem;
@@ -40,7 +52,7 @@ export class EntityManager {
     
     private setupEventListeners(): void {
         // 敵が倒された時の処理
-        this.eventBus.on('enemy:defeated', (_data: any) => {
+        this.eventBus.on('enemy:defeated', (_data: unknown) => {
             if (this.musicSystem?.isInitialized) {
                 this.musicSystem.playEnemyDefeatSound();
             }
@@ -156,29 +168,36 @@ export class EntityManager {
     }
 
     updateAll(deltaTime: number): void {
-        if (this.player) {
-            this.player.update(deltaTime);
+        try {
+            if (this.player) {
+                this.player.update(deltaTime);
+            }
+            
+            this.enemies.forEach(enemy => {
+                if (enemy.update) {
+                    enemy.update(deltaTime);
+                }
+            });
+            
+            this.items.forEach(item => {
+                if (item.update) {
+                    item.update(deltaTime);
+                }
+            });
+        } catch (error) {
+            console.error('Error during entity update:', error);
+            this.eventBus.emit('entity:update-error', { error });
         }
-        
-        this.enemies.forEach(enemy => {
-            if (enemy.update) {
-                enemy.update(deltaTime);
-            }
-        });
-        
-        this.items.forEach(item => {
-            if (item.update) {
-                item.update(deltaTime);
-            }
-        });
     }
 
     checkItemCollisions(): void {
         if (!this.player) return;
         
         this.items.forEach((item) => {
+            if (!this.player) return;
+            
             if (item.constructor.name === 'Coin' && !(item as Coin).isCollected()) {
-                if (item.collidesWith(this.player!)) {
+                if (item.collidesWith(this.player)) {
                     const scoreGained = (item as Coin).collect();
                     
                     this.eventBus.emit('coin:collected', {
@@ -192,7 +211,7 @@ export class EntityManager {
                 }
             }
             else if (item.constructor.name === 'GoalFlag' && !(item as GoalFlag).isCleared()) {
-                if (item.collidesWith(this.player!)) {
+                if (item.collidesWith(this.player)) {
                     (item as GoalFlag).clear();
                     
                     this.eventBus.emit('goal:reached', {

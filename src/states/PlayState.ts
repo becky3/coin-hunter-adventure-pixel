@@ -279,8 +279,8 @@ export class PlayState implements GameState {
     }
 
     exit(): void {
-        this.isPaused = false;
-        this.isCleared = false;
+        // Reset game state
+        this.gameState = 'playing';
 
         // Clear stage clear timer if exists
         if (this.stageClearTimer) {

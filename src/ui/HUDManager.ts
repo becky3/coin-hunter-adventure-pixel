@@ -9,6 +9,10 @@ export interface HUDData {
     coinsCollected: number;
 }
 
+interface GameServices {
+    eventBus?: EventBus;
+}
+
 export class HUDManager {
     private eventBus: EventBus;
     private hudData: HUDData;
@@ -16,7 +20,7 @@ export class HUDManager {
     private _message: string | null = null;
     private _messageTimer: number = 0;
 
-    constructor(_game: any) {
+    constructor(_game: GameServices) {
         this.eventBus = _game.eventBus || new EventBus();
         
         this.hudData = {
@@ -31,16 +35,16 @@ export class HUDManager {
 
     private setupEventListeners(): void {
         // Listen for game events
-        this.eventBus.on('coin:collected', (data: any) => {
+        this.eventBus.on('coin:collected', (data: { score: number }) => {
             this.hudData.score += data.score;
             this.hudData.coinsCollected++;
         });
 
-        this.eventBus.on('player:health-changed', (data: any) => {
+        this.eventBus.on('player:health-changed', (data: { health: number }) => {
             this.hudData.lives = data.health;
         });
 
-        this.eventBus.on('game:time-updated', (data: any) => {
+        this.eventBus.on('game:time-updated', (data: { time: number }) => {
             this.hudData.time = data.time;
         });
 

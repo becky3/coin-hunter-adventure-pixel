@@ -9,6 +9,10 @@ export interface Camera {
     height: number;
 }
 
+interface GameServices {
+    eventBus?: EventBus;
+}
+
 export class CameraController {
     private camera: Camera;
     private eventBus: EventBus;
@@ -22,7 +26,7 @@ export class CameraController {
     private offsetY: number = 0;
     private bounds: { minX: number; minY: number; maxX: number; maxY: number } | null = null;
 
-    constructor(_game: any) {
+    constructor(_game: GameServices) {
         this.camera = {
             x: 0,
             y: 0,
@@ -33,7 +37,7 @@ export class CameraController {
         this.eventBus = _game.eventBus || new EventBus();
         
         // Listen for level size changes
-        this.eventBus.on('level:loaded', (data: any) => {
+        this.eventBus.on('level:loaded', (data: { width: number; height: number }) => {
             this.setLevelBounds(data.width, data.height);
         });
     }
