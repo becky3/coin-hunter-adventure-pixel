@@ -9,6 +9,7 @@ coverage/
 tests/screenshots/
 tests/test-report.html
 test-report.html
+test-reports/
 
 # Production
 build/
