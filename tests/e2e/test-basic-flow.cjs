@@ -93,11 +93,6 @@ async function runTest() {
         const coins = await t.getCoins();
         console.log(`Found ${coins.length} coins`);
         
-        // Performance check
-        console.log('\n--- Quick Performance Check ---');
-        const perfReport = await t.measurePerformance(3000);
-        console.log('Performance:', perfReport);
-        
         // Final screenshot
         await t.screenshot('test-complete');
         

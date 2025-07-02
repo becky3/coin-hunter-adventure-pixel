@@ -40,11 +40,16 @@ npm run build
 
 #### E2Eテスト
 ```bash
-# クイックテスト（約10秒）
-npm run test:e2e
+# スモークテスト（約10秒）
+npm run test:smoke
 
 # フルテストスイート（約1-2分）
 npm test
+
+# 個別テスト
+npm run test:basic       # 基本フローテスト
+npm run test:performance # パフォーマンステスト
+npm run test:stress      # ストレステスト
 ```
 
 #### Git Pushフックでの自動テスト
