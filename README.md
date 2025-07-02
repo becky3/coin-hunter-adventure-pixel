@@ -36,6 +36,33 @@ npm run dev
 npm run build
 ```
 
+### Testing
+
+#### E2Eテスト
+```bash
+# スモークテスト（約10秒）
+npm run test:smoke
+
+# フルテストスイート（約1-2分）
+npm test
+
+# 個別テスト
+npm run test:basic       # 基本フローテスト
+npm run test:performance # パフォーマンステスト
+npm run test:stress      # ストレステスト
+```
+
+#### Git Pushフックでの自動テスト
+```bash
+# 通常のpush（クイックテストのみ）
+git push
+
+# フルテストを含むpush
+RUN_FULL_TESTS=true git push
+```
+
+詳細は [E2Eテストドキュメント](tests/e2e/README.md) を参照してください。
+
 ## 📖 Documentation
 
 See the `docs/` directory for detailed documentation:
