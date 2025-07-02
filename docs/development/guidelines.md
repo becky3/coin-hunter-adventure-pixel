@@ -51,8 +51,9 @@ private position: Vector2D;
 
 ### TypeScript必須ルール
 - すべての関数パラメータと戻り値に型を明示
-- `any`型の使用は禁止
+- `any`型の使用は禁止（`unknown`型を推奨）
 - strictモードを有効化
+- インターフェースを活用した型定義
 
 ### コメントのルール
 **原則：実装内容の説明コメントは書かない**
@@ -63,9 +64,20 @@ private position: Vector2D;
 - TODO/FIXMEコメント
 - なぜその実装を選んだかの理由
 
-### System vs Manager
+### アーキテクチャパターン
+
+#### System vs Manager
 - **System**: 低レベルの処理（例：InputSystem、RenderSystem）
 - **Manager**: ライフサイクル管理（例：GameStateManager、AssetManager）
+
+#### EventBusパターン
+- モジュール間の疎結合な通信に使用
+- イベント名は明確で一貫性のある命名を使用
+- 型安全なイベントハンドラーの実装を推奨
+
+#### 依存性注入
+- GameServicesインターフェースを通じた依存性の注入
+- コンストラクタでの依存性受け取りを推奨
 
 ## 品質保証
 
@@ -97,6 +109,13 @@ npm run dev
 - 画面外のオブジェクトをスキップ
 
 ## エラーハンドリング
+
+### 基本原則
+- try-catchブロックの適切な使用
+- エラーイベントの発行による通知
+- null/undefinedチェックの徹底
+
+### 実装例
 ```typescript
 // 防御的プログラミング
 if (renderer.hasSprite && !renderer.hasSprite(key)) {
@@ -108,9 +127,14 @@ async function loadAsset() {
     try {
         await fetch(url);
     } catch (error) {
-        // エラー処理
+        console.error('Asset load error:', error);
+        eventBus.emit('asset:load-error', { error });
     }
 }
+
+// null安全性
+if (!this.player) return;
+// 非null表明(!)の使用は避ける
 ```
 
 ## 禁止事項
