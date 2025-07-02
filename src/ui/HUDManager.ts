@@ -13,8 +13,8 @@ export class HUDManager {
     private eventBus: EventBus;
     private hudData: HUDData;
     private isPaused: boolean = false;
-    private message: string | null = null;
-    private messageTimer: number = 0;
+    private _message: string | null = null;
+    private _messageTimer: number = 0;
 
     constructor(_game: any) {
         this.eventBus = _game.eventBus || new EventBus();
@@ -68,12 +68,20 @@ export class HUDManager {
     getHUDData(): HUDData {
         return this.hudData;
     }
+    
+    get message(): string | null {
+        return this._message;
+    }
+    
+    get messageTimer(): number {
+        return this._messageTimer;
+    }
 
     render(renderer: PixelRenderer): void {
         this.renderHUD(renderer);
         
         // メッセージがある時はPAUSEメニューを表示しない
-        if (this.message) {
+        if (this._message) {
             this.renderMessage(renderer);
         } else if (this.isPaused) {
             this.renderPauseScreen(renderer);
@@ -202,15 +210,15 @@ export class HUDManager {
     }
 
     showMessage(text: string, duration: number = 3000): void {
-        this.message = text;
-        this.messageTimer = duration;
+        this._message = text;
+        this._messageTimer = duration;
     }
     
     update(deltaTime: number): void {
-        if (this.messageTimer > 0) {
-            this.messageTimer -= deltaTime;
-            if (this.messageTimer <= 0) {
-                this.message = null;
+        if (this._messageTimer > 0) {
+            this._messageTimer -= deltaTime * 1000;
+            if (this._messageTimer <= 0) {
+                this._message = null;
             }
         }
     }
@@ -230,7 +238,7 @@ export class HUDManager {
         renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, '#000000');
         
         // Draw message text
-        renderer.drawTextCentered(this.message!, centerX, centerY - 4, '#FFD700');
+        renderer.drawTextCentered(this._message!, centerX, centerY - 4, '#FFD700');
     }
 
     reset(): void {
@@ -241,7 +249,7 @@ export class HUDManager {
             coinsCollected: 0
         };
         this.isPaused = false;
-        this.message = null;
-        this.messageTimer = 0;
+        this._message = null;
+        this._messageTimer = 0;
     }
 }

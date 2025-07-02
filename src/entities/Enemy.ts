@@ -54,11 +54,11 @@ export class Enemy extends Entity {
         if (!this.active) return;
         
         if (this.invincibleTime > 0) {
-            this.invincibleTime -= deltaTime;
+            this.invincibleTime -= deltaTime * 1000;
         }
         
         if (this.stateTimer > 0) {
-            this.stateTimer -= deltaTime;
+            this.stateTimer -= deltaTime * 1000;
         }
         
         this.updateAI(deltaTime);

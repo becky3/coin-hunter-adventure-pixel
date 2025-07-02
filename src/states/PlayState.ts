@@ -37,9 +37,10 @@ export class PlayState implements GameState {
     private hudManager: HUDManager;
 
     // Game state
-    private isPaused: boolean = false;
+    private gameState: 'playing' | 'paused' | 'cleared' | 'gameover' = 'playing';
     private lastTimeUpdate: number = 0;
     private inputListeners: Array<() => void> = [];
+    private stageClearTimer: number | null = null;
 
     // Public getters for testing
     public get player() {
@@ -97,7 +98,6 @@ export class PlayState implements GameState {
         });
 
         this.eventBus.on('goal:reached', () => {
-            console.log('Stage Clear!');
             this.stageClear();
         });
 
@@ -140,7 +140,8 @@ export class PlayState implements GameState {
     }
 
     async enter(params: any = {}): Promise<void> {
-        console.log('PlayState: enter() called with params:', params);
+        console.log('[PlayState] enter() called with params:', params);
+        console.log('[PlayState] Starting initialization...');
 
         // Preload sprites
         await this.preloadSprites();
@@ -194,18 +195,24 @@ export class PlayState implements GameState {
         this.lastTimeUpdate = Date.now();
 
         // Play BGM
-        console.log('PlayState: MusicSystem status:', {
+        console.log('[PlayState] MusicSystem status:', {
             exists: !!this.game.musicSystem,
             isInitialized: this.game.musicSystem?.isInitialized
         });
         if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
-            console.log('PlayState: Playing game BGM...');
+            console.log('[PlayState] Playing game BGM...');
             this.game.musicSystem.playGameBGM();
         }
+        
+        console.log('[PlayState] enter() completed');
     }
 
     update(deltaTime: number): void {
-        if (this.isPaused) return;
+        // Always update HUD (even when paused or cleared, for messages)
+        this.hudManager.update(deltaTime);
+        
+        // Only update game logic when playing
+        if (this.gameState !== 'playing') return;
 
         // Update timer
         this.updateTimer();
@@ -241,9 +248,6 @@ export class PlayState implements GameState {
 
         // Update camera
         this.cameraController.update(deltaTime);
-        
-        // Update HUD
-        this.hudManager.update(deltaTime);
 
         // Check game over conditions
         const hudData = this.hudManager.getHUDData();
@@ -276,6 +280,13 @@ export class PlayState implements GameState {
 
     exit(): void {
         this.isPaused = false;
+        this.isCleared = false;
+
+        // Clear stage clear timer if exists
+        if (this.stageClearTimer) {
+            clearTimeout(this.stageClearTimer);
+            this.stageClearTimer = null;
+        }
 
         // Remove input listeners
         this.removeInputListeners();
@@ -309,7 +320,7 @@ export class PlayState implements GameState {
 
         this.inputListeners.push(
             this.game.inputSystem.on('keyPress', (event: InputEvent) => {
-                if (this.isPaused && event.key === 'KeyQ') {
+                if (this.gameState === 'paused' && event.key === 'KeyQ') {
                     this.gameOver();
                 }
             })
@@ -366,44 +377,52 @@ export class PlayState implements GameState {
     }
 
     private togglePause(): void {
-        this.isPaused = !this.isPaused;
-        this.hudManager.setPaused(this.isPaused);
-        
-        if (this.isPaused) {
+        if (this.gameState === 'playing') {
+            this.gameState = 'paused';
+            this.hudManager.setPaused(true);
             this.eventBus.emit('game:paused');
             if (this.game.musicSystem) {
                 this.game.musicSystem.pauseBGM();
             }
-        } else {
+        } else if (this.gameState === 'paused') {
+            this.gameState = 'playing';
+            this.hudManager.setPaused(false);
             this.eventBus.emit('game:resumed');
             if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
                 this.game.musicSystem.resumeBGM();
             }
         }
+        // Don't toggle pause during cleared or gameover states
     }
 
     private gameOver(): void {
+        if (this.gameState === 'gameover') return;
+        
         console.log('Game Over!');
+        this.gameState = 'gameover';
         this.game.stateManager.setState('menu');
     }
 
     private stageClear(): void {
-        console.log('Stage Clear!');
-        this.isPaused = true;
-        
-        // Stop the timer
-        this.hudManager.setPaused(true);
-        
-        // Play clear sound
-        if (this.game.musicSystem?.isInitialized) {
-            this.game.musicSystem.playVictorySound();
+        // 既にクリア済みならスキップ
+        if (this.stageClearTimer !== null) {
+            return;
         }
         
-        // Show clear message
-        this.hudManager.showMessage('STAGE CLEAR!');
+        this.gameState = 'cleared';
+        
+        // Stop the timer (but don't show pause menu)
+        // this.hudManager.setPaused(true);
+        
+        // Play clear sound
+        this.game.musicSystem?.playVictoryJingle();
+        
+        // Show clear message (until state changes)
+        this.hudManager.showMessage('STAGE CLEAR!', 999999);
         
         // Transition to menu after 3 seconds
-        setTimeout(() => {
+        this.stageClearTimer = window.setTimeout(() => {
+            this.stageClearTimer = null;
             this.game.stateManager.setState('menu');
         }, 3000);
     }

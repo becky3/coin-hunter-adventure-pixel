@@ -199,9 +199,7 @@ export class EntityManager {
                         position: { x: item.x, y: item.y }
                     });
                     
-                    if (this.musicSystem && this.musicSystem.isInitialized) {
-                        this.musicSystem.playGoalSound();
-                    }
+                    // Goal sound is played in PlayState.stageClear()
                 }
             }
         });
