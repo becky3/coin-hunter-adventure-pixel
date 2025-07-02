@@ -1,4 +1,4 @@
-const GameTestHelpers = require('./utils/GameTestHelpers');
+const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 
 // Complete gameplay test - from start to goal
 async function runTest() {

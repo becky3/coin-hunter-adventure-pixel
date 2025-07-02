@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-07-02T12:18:42.543Z",
+  "summary": {
+    "total": 3,
+    "passed": 1,
+    "failed": 2,
+    "totalDuration": 66079,
+    "criticalFailure": true
+  },
+  "results": [
+    {
+      "name": "Basic Flow Test",
+      "file": "./test-basic-flow.cjs",
+      "success": true,
+      "duration": 26728,
+      "critical": true,
+      "error": null
+    },
+    {
+      "name": "Performance Test",
+      "file": "./test-performance.cjs",
+      "success": false,
+      "duration": 31661,
+      "critical": true,
+      "error": "Waiting failed: 5000ms exceeded"
+    },
+    {
+      "name": "Stress Test",
+      "file": "./test-stress.cjs",
+      "success": false,
+      "duration": 7690,
+      "critical": false,
+      "error": "Waiting failed: 5000ms exceeded"
+    }
+  ]
+}

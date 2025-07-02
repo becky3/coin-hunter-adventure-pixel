@@ -1,24 +1,39 @@
 const puppeteer = require('puppeteer');
 
-(async () => {
-    // ヘッドレスを無効にして実際のブラウザで確認
+async function test() {
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: false,  // Show browser
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     
     const page = await browser.newPage();
-    
-    console.log('ブラウザを開いています...');
     await page.goto('http://localhost:3000');
     
-    console.log('手動で以下を確認してください:');
-    console.log('1. メニューが表示されるか');
-    console.log('2. SpaceキーでSTART GAMEが実行されるか');
-    console.log('3. PlayStateに遷移するか');
-    console.log('4. キャラクターが動くか');
-    console.log('\nCtrl+Cで終了します');
+    // Wait for game to load
+    await page.waitForFunction(() => window.game?.gameLoop?.running, { timeout: 10000 });
+    console.log('Game loaded');
     
-    // ブラウザを開いたままにする
-    await new Promise(() => {});
-})();
+    // Get initial state
+    let state = await page.evaluate(() => window.game?.stateManager?.currentState?.name);
+    console.log('Initial state:', state);
+    
+    // Press Space
+    await page.keyboard.press('Space');
+    await new Promise(r => setTimeout(r, 1000));
+    
+    // Check state after Space
+    state = await page.evaluate(() => window.game?.stateManager?.currentState?.name);
+    console.log('State after Space:', state);
+    
+    // Take screenshot
+    await page.screenshot({ path: 'tests/screenshots/simple-test.png' });
+    
+    // Wait before closing to see what happens
+    console.log('Waiting 5 seconds before closing...');
+    await new Promise(r => setTimeout(r, 5000));
+    
+    await browser.close();
+    console.log('Test complete');
+}
+
+test().catch(console.error);

@@ -1,4 +1,4 @@
-const GameTestHelpers = require('./utils/GameTestHelpers');
+const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 
 // Performance monitoring test
 async function runTest() {
@@ -11,6 +11,7 @@ async function runTest() {
     await test.runTest(async (t) => {
         // Initialize
         await t.init('Performance Test');
+        await t.injectErrorTracking();
         await t.navigateToGame();
         await t.waitForGameInitialization();
         

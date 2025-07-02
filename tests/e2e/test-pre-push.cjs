@@ -6,19 +6,19 @@ const path = require('path');
 const tests = [
     {
         name: 'Basic Flow Test',
-        file: './test-basic-flow.js',
+        file: './test-basic-flow.cjs',
         critical: true,
         timeout: 30000
     },
     {
         name: 'Complete Gameplay Test',
-        file: './test-complete-gameplay.js', 
+        file: './test-complete-gameplay.cjs', 
         critical: true,
         timeout: 120000
     },
     {
         name: 'Performance Test',
-        file: './test-performance.js',
+        file: './test-performance.cjs',
         critical: true,
         timeout: 60000
     }

@@ -5,17 +5,17 @@ const path = require('path');
 const tests = [
     {
         name: 'Basic Flow Test',
-        file: './test-basic-flow.js',
+        file: './test-basic-flow.cjs',
         critical: true
     },
     {
         name: 'Performance Test',
-        file: './test-performance.js',
+        file: './test-performance.cjs',
         critical: true
     },
     {
         name: 'Stress Test',
-        file: './test-stress.js',
+        file: './test-stress.cjs',
         critical: false
     }
 ];

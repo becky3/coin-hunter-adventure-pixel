@@ -1,4 +1,4 @@
-const GameTestHelpers = require('./utils/GameTestHelpers');
+const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 
 // Stress test - rapid state changes and inputs
 async function runTest() {

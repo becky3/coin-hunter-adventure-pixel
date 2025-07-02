@@ -179,10 +179,12 @@ class TestFramework {
             await this.browser.close();
         }
         
-        const duration = Date.now() - this.startTime;
-        console.log(`\n${'='.repeat(50)}`);
-        console.log(`Test completed in: ${(duration / 1000).toFixed(2)}s`);
-        console.log(`${'='.repeat(50)}\n`);
+        if (this.startTime) {
+            const duration = Date.now() - this.startTime;
+            console.log(`\n${'='.repeat(50)}`);
+            console.log(`Test completed in: ${(duration / 1000).toFixed(2)}s`);
+            console.log(`${'='.repeat(50)}\n`);
+        }
     }
 
     async runTest(testFunction) {
@@ -192,7 +194,9 @@ class TestFramework {
         } catch (error) {
             console.error('\n❌ TEST FAILED\n');
             console.error(error);
-            await this.screenshot('test-failure');
+            if (this.page) {
+                await this.screenshot('test-failure');
+            }
             throw error;
         } finally {
             await this.cleanup();
