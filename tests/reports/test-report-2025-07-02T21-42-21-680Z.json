@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-07-02T21:42:21.681Z",
+  "summary": {
+    "total": 3,
+    "passed": 0,
+    "failed": 3,
+    "totalDuration": 40857,
+    "criticalFailure": true
+  },
+  "results": [
+    {
+      "name": "Basic Flow Test",
+      "file": "./test-basic-flow.cjs",
+      "success": false,
+      "duration": 24339,
+      "critical": true,
+      "error": "Waiting failed: 5000ms exceeded"
+    },
+    {
+      "name": "Performance Test",
+      "file": "./test-performance.cjs",
+      "success": false,
+      "duration": 16511,
+      "critical": true,
+      "error": "Waiting failed: 5000ms exceeded"
+    },
+    {
+      "name": "Stress Test",
+      "file": "./test-stress.cjs",
+      "success": false,
+      "duration": 7,
+      "critical": false,
+      "error": "testModule is not a function"
+    }
+  ]
+}

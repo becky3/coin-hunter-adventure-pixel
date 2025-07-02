@@ -30,6 +30,7 @@ async function runTest() {
         
         // Verify game state
         await t.assertState('play');
+        await t.wait(1000); // Wait for entities to initialize
         await t.assertPlayerExists();
         
         // Get initial player stats
