@@ -720,20 +720,20 @@ export class MusicSystem {
         }
         
         switch (name) {
-            case 'title':
-                this.playTitleBGM();
-                break;
-            case 'game':
-                this.playGameBGM();
-                break;
-            case 'victory':
-                this.playVictoryJingle();
-                break;
-            case 'gameover':
-                this.playGameOverJingle();
-                break;
-            default:
-                console.warn(`[MusicSystem] Unknown BGM: ${name}`);
+        case 'title':
+            this.playTitleBGM();
+            break;
+        case 'game':
+            this.playGameBGM();
+            break;
+        case 'victory':
+            this.playVictoryJingle();
+            break;
+        case 'gameover':
+            this.playGameOverJingle();
+            break;
+        default:
+            console.warn(`[MusicSystem] Unknown BGM: ${name}`);
         }
     }
     
@@ -744,23 +744,23 @@ export class MusicSystem {
         }
         
         switch (name) {
-            case 'coin':
-                this.playCoinSound();
-                break;
-            case 'jump':
-                this.playJumpSound();
-                break;
-            case 'damage':
-                this.playDamageSound();
-                break;
-            case 'button':
-                this.playButtonClickSound();
-                break;
-            case 'powerup':
-                this.playGoalSound(); // 仮にpowerupとして使用
-                break;
-            default:
-                console.warn(`[MusicSystem] Unknown SE: ${name}`);
+        case 'coin':
+            this.playCoinSound();
+            break;
+        case 'jump':
+            this.playJumpSound();
+            break;
+        case 'damage':
+            this.playDamageSound();
+            break;
+        case 'button':
+            this.playButtonClickSound();
+            break;
+        case 'powerup':
+            this.playGoalSound(); // 仮にpowerupとして使用
+            break;
+        default:
+            console.warn(`[MusicSystem] Unknown SE: ${name}`);
         }
     }
 }
