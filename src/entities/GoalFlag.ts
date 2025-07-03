@@ -3,6 +3,9 @@ import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 
+// Constants for animation calculations
+const WAVE_SPEED_MULTIPLIER = 0.03; // Multiplier to adjust wave speed relative to deltaTime
+
 export class GoalFlag extends Entity {
     private cleared: boolean;
     declare animationTime: number;
@@ -40,7 +43,7 @@ export class GoalFlag extends Entity {
     onUpdate(deltaTime: number): void {
         if (this.cleared) return;
         
-        this.waveOffset += this.waveSpeed * deltaTime * 0.03; // Adjust speed for the config values
+        this.waveOffset += this.waveSpeed * deltaTime * WAVE_SPEED_MULTIPLIER;
         
         this.animationTime += deltaTime;
     }

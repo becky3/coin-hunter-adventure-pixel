@@ -99,18 +99,19 @@ export class Player extends Entity {
         }
         
         const config = playerConfig ? {
+            ...DEFAULT_PLAYER_CONFIG,
             width: playerConfig.physics.width,
             height: playerConfig.physics.height,
-            speed: playerConfig.physics.speed || DEFAULT_PLAYER_CONFIG.speed,
-            jumpPower: playerConfig.physics.jumpPower || DEFAULT_PLAYER_CONFIG.jumpPower,
-            minJumpTime: playerConfig.physics.minJumpTime || DEFAULT_PLAYER_CONFIG.minJumpTime,
-            maxJumpTime: playerConfig.physics.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime,
+            speed: playerConfig.physics.speed ?? DEFAULT_PLAYER_CONFIG.speed,
+            jumpPower: playerConfig.physics.jumpPower ?? DEFAULT_PLAYER_CONFIG.jumpPower,
+            minJumpTime: playerConfig.physics.minJumpTime ?? DEFAULT_PLAYER_CONFIG.minJumpTime,
+            maxJumpTime: playerConfig.physics.maxJumpTime ?? DEFAULT_PLAYER_CONFIG.maxJumpTime,
             maxHealth: playerConfig.stats.maxHealth,
-            invulnerabilityTime: playerConfig.stats.invulnerabilityTime || DEFAULT_PLAYER_CONFIG.invulnerabilityTime,
-            spawnX: playerConfig.spawn?.x || DEFAULT_PLAYER_CONFIG.spawnX,
-            spawnY: playerConfig.spawn?.y || DEFAULT_PLAYER_CONFIG.spawnY,
-            knockbackVertical: playerConfig.knockback?.vertical || DEFAULT_PLAYER_CONFIG.knockbackVertical,
-            knockbackHorizontal: playerConfig.knockback?.horizontal || DEFAULT_PLAYER_CONFIG.knockbackHorizontal
+            invulnerabilityTime: playerConfig.stats.invulnerabilityTime ?? DEFAULT_PLAYER_CONFIG.invulnerabilityTime,
+            spawnX: playerConfig.spawn?.x ?? DEFAULT_PLAYER_CONFIG.spawnX,
+            spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY,
+            knockbackVertical: playerConfig.knockback?.vertical ?? DEFAULT_PLAYER_CONFIG.knockbackVertical,
+            knockbackHorizontal: playerConfig.knockback?.horizontal ?? DEFAULT_PLAYER_CONFIG.knockbackHorizontal
         } : DEFAULT_PLAYER_CONFIG;
         
         super(x ?? config.spawnX, y ?? config.spawnY, config.width, config.height);
@@ -153,7 +154,11 @@ export class Player extends Entity {
         
         // Store configs for later use
         this.playerConfig = config;
-        this.animationConfig = playerConfig?.animations || DEFAULT_ANIMATION_CONFIG;
+        // Merge animation config with defaults
+        this.animationConfig = playerConfig?.animations ? {
+            speed: { ...DEFAULT_ANIMATION_CONFIG.speed, ...playerConfig.animations.speed },
+            frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
+        } : DEFAULT_ANIMATION_CONFIG;
     }
     
     setInputManager(inputManager: InputSystem): void {

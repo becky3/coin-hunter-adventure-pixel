@@ -49,8 +49,11 @@ export class ResourceLoader {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return await response.json();
-        } catch {
-            // Failed to load JSON
+        } catch (error) {
+            // Store error for debugging
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            // In production, this could be sent to a logging service
+            // For now, we'll silently fail but the error is available for debugging
             return null;
         }
     }

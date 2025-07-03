@@ -3,6 +3,10 @@ import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 
+// Constants for animation calculations
+const FLOAT_SPEED_MULTIPLIER = 0.1; // Multiplier to adjust float speed relative to deltaTime
+const PIXELS_PER_UNIT = 16; // Conversion factor from amplitude units to pixels
+
 export class Coin extends Entity {
     private collected: boolean;
     declare animationTime: number;
@@ -46,8 +50,8 @@ export class Coin extends Entity {
     onUpdate(deltaTime: number): void {
         if (this.collected) return;
         
-        this.floatOffset += this.floatSpeed * deltaTime * 0.1; // Adjust speed for the config values
-        this.y = this.baseY + Math.sin(this.floatOffset) * this.floatAmplitude * 16; // Convert amplitude to pixels
+        this.floatOffset += this.floatSpeed * deltaTime * FLOAT_SPEED_MULTIPLIER;
+        this.y = this.baseY + Math.sin(this.floatOffset) * this.floatAmplitude * PIXELS_PER_UNIT;
         
         this.animationTime += deltaTime * 1000;
     }
