@@ -863,32 +863,34 @@ export class MusicSystem {
         
         // Play each track
         config.tracks.forEach(track => {
-            this.playTrack(track, beatLength, config.loop || false);
+            this.playTrack(track, beatLength, config.loop || false, config);
         });
     }
     
-    private playTrack(track: TrackConfig, beatLength: number, loop: boolean): void {
+    private playTrack(track: TrackConfig, beatLength: number, loop: boolean, config: MusicConfig): void {
         if (!this.audioContext) return;
         
-        const playPattern = () => {
+        let nextScheduleTime = 0;
+        const loopDuration = (track.pattern.duration || 4) * beatLength; // Default 4 beats
+        
+        const schedulePattern = (startTime: number) => {
             if (!this.isInitialized || this.isMuted || !this.audioContext) return;
             
-            const now = this.audioContext.currentTime;
             const pattern = track.pattern;
             
             // Handle different pattern types
             if (pattern.beats && track.instrument.type === 'drums') {
                 // Drum pattern
                 pattern.beats.forEach(beat => {
-                    this.playDrum(beat.type, now + beat.time * beatLength);
+                    this.playDrum(beat.type, startTime + beat.time * beatLength);
                 });
             } else if (pattern.notes) {
                 // Melodic pattern
-                let currentTime = now + (pattern.startAt || 0) * beatLength;
+                let currentTime = startTime + (pattern.startAt || 0) * beatLength;
                 
                 pattern.notes.forEach((note, index) => {
                     const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
-                    const time = pattern.times ? now + pattern.times[index] : currentTime;
+                    const time = pattern.times ? startTime + pattern.times[index] : currentTime;
                     
                     this.playNoteWithEnvelope(
                         this.getNoteFrequency(note),
@@ -905,11 +907,11 @@ export class MusicSystem {
                 });
             } else if (pattern.chords) {
                 // Chord pattern
-                let currentTime = now;
+                let currentTime = startTime;
                 
                 pattern.chords.forEach((chord, index) => {
                     const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
-                    const time = pattern.times ? now + pattern.times[index] : currentTime;
+                    const time = pattern.times ? startTime + pattern.times[index] : currentTime;
                     
                     this.playChord(
                         chord,
@@ -927,7 +929,7 @@ export class MusicSystem {
                 // Frequency-based pattern (for sound effects)
                 pattern.frequencies.forEach((freq, index) => {
                     const duration = pattern.durations ? pattern.durations[index] : 0.1;
-                    const time = pattern.times ? now + pattern.times[index] : now;
+                    const time = pattern.times ? startTime + pattern.times[index] : startTime;
                     
                     this.playFrequencyRamp(
                         freq,
@@ -941,23 +943,35 @@ export class MusicSystem {
             }
         };
         
-        // Play immediately
-        playPattern();
-        
-        // Set up looping if needed
-        if (loop && track.pattern.loop !== false) {
-            const loopDuration = track.pattern.duration || 4; // Default 4 beats
-            const interval = setInterval(() => {
-                if (!this.currentMusicConfig || this.currentMusicConfig !== config) {
-                    clearInterval(interval);
+        // Schedule the pattern using Web Audio API timing
+        const scheduleNext = () => {
+            if (!this.audioContext || !this.currentMusicConfig || this.currentMusicConfig !== config) {
+                this.trackIntervals.delete(track.name);
+                return;
+            }
+            
+            const now = this.audioContext.currentTime;
+            
+            // Schedule ahead by 100ms to ensure smooth playback
+            while (nextScheduleTime < now + 0.1) {
+                schedulePattern(nextScheduleTime);
+                nextScheduleTime += loopDuration;
+                
+                // If not looping, schedule only once
+                if (!loop || track.pattern.loop === false) {
                     this.trackIntervals.delete(track.name);
                     return;
                 }
-                playPattern();
-            }, loopDuration * beatLength * 1000);
+            }
             
-            this.trackIntervals.set(track.name, interval);
-        }
+            // Use setTimeout with a shorter interval for checking
+            const timeoutId = setTimeout(scheduleNext, 50);
+            this.trackIntervals.set(track.name, timeoutId as unknown as NodeJS.Timeout);
+        };
+        
+        // Start scheduling
+        nextScheduleTime = this.audioContext.currentTime;
+        scheduleNext();
     }
     
     private playNoteWithEnvelope(

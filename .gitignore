@@ -10,6 +10,7 @@ tests/screenshots/
 tests/test-report.html
 test-report.html
 test-reports/
+tests/reports/
 
 # Production
 build/
