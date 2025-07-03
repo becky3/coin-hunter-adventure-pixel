@@ -1,6 +1,7 @@
 
 import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { ResourceLoader } from '../config/ResourceLoader';
 
 export class GoalFlag extends Entity {
     private cleared: boolean;
@@ -10,26 +11,31 @@ export class GoalFlag extends Entity {
     private waveAmplitude: number;
 
     constructor(x: number, y: number) {
-        super(x, y, 16, 16);
+        // Load config from ResourceLoader if available
+        const resourceLoader = ResourceLoader.getInstance();
+        const goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
+        
+        const width = goalConfig?.physics.width || 32;
+        const height = goalConfig?.physics.height || 32;
+        
+        super(x, y, width, height);
         
         this.gravity = false;
-        
         this.physicsEnabled = false;
-        
-        this.solid = false;
+        this.solid = goalConfig?.physics.solid || false;
         
         this.cleared = false;
         
         this.animationTime = 0;
         this.waveOffset = 0;
-        this.waveSpeed = 0.003;
-        this.waveAmplitude = 5;
+        this.waveSpeed = goalConfig?.properties.waveSpeed || 0.1;
+        this.waveAmplitude = goalConfig?.properties.waveAmplitude || 5;
     }
 
     onUpdate(deltaTime: number): void {
         if (this.cleared) return;
         
-        this.waveOffset += this.waveSpeed * deltaTime;
+        this.waveOffset += this.waveSpeed * deltaTime * 0.03; // Adjust speed for the config values
         
         this.animationTime += deltaTime;
     }

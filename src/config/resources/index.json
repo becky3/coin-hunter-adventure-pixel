@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "description": "Resource configuration for Coin Hunter Adventure Pixel",
+  "configs": {
+    "sprites": "./sprites.json",
+    "characters": "./characters.json",
+    "audio": "./audio.json",
+    "objects": "./objects.json"
+  },
+  "paths": {
+    "sprites": "/src/assets/sprites/",
+    "levels": "/src/levels/data/",
+    "fonts": "/src/assets/fonts/"
+  },
+  "settings": {
+    "defaultPalette": "default",
+    "pixelSize": 16,
+    "tileSize": 16
+  }
+}

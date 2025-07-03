@@ -3,6 +3,7 @@ import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
+import { ResourceLoader } from '../config/ResourceLoader';
 
 export class Spring extends Entity {
     private bouncePower: number;
@@ -14,21 +15,25 @@ export class Spring extends Entity {
     private _debugCount?: number;
 
     constructor(x: number, y: number) {
-        super(x, y, 16, 16);
+        // Load config from ResourceLoader if available
+        const resourceLoader = ResourceLoader.getInstance();
+        const springConfig = resourceLoader.getObjectConfig('items', 'spring');
+        
+        const width = springConfig?.physics.width || 16;
+        const height = springConfig?.physics.height || 16;
+        
+        super(x, y, width, height);
         
         this.gravity = false;
-        
         this.physicsEnabled = false;
+        this.solid = springConfig?.physics.solid ?? true;
         
-        this.solid = true;
-        
-        this.bouncePower = 14;
+        this.bouncePower = springConfig?.properties.bouncePower || 14;
         this.compression = 0;
         this.triggered = false;
-        this.animationSpeed = 0.14;
+        this.animationSpeed = springConfig?.properties.expansionSpeed || 0.2;
         
         this.animationTime = 0;
-        
         this.physicsSystem = null;
     }
 

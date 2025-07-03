@@ -1,6 +1,7 @@
 
 import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { ResourceLoader } from '../config/ResourceLoader';
 
 export class Coin extends Entity {
     private collected: boolean;
@@ -12,32 +13,36 @@ export class Coin extends Entity {
     public scoreValue: number;
 
     constructor(x: number, y: number) {
-        super(x, y, 16, 16);
+        // Load config from ResourceLoader if available
+        const resourceLoader = ResourceLoader.getInstance();
+        const coinConfig = resourceLoader.getObjectConfig('items', 'coin');
+        
+        const width = coinConfig?.physics.width || 16;
+        const height = coinConfig?.physics.height || 16;
+        
+        super(x, y, width, height);
         
         this.gravity = false;
-        
         this.physicsEnabled = false;
-        
-        this.solid = false;
+        this.solid = coinConfig?.physics.solid || false;
         
         this.collected = false;
-        
         this.animationTime = 0;
         this.flipX = false;
         
         this.floatOffset = 0;
-        this.floatSpeed = 0.002;
-        this.floatAmplitude = 2;
+        this.floatSpeed = coinConfig?.properties.floatSpeed || 0.03;
+        this.floatAmplitude = coinConfig?.properties.floatAmplitude || 0.1;
         this.baseY = y;
         
-        this.scoreValue = 10;
+        this.scoreValue = coinConfig?.properties.scoreValue || 10;
     }
 
     onUpdate(deltaTime: number): void {
         if (this.collected) return;
         
-        this.floatOffset += this.floatSpeed * deltaTime;
-        this.y = this.baseY + Math.sin(this.floatOffset) * this.floatAmplitude;
+        this.floatOffset += this.floatSpeed * deltaTime * 0.1; // Adjust speed for the config values
+        this.y = this.baseY + Math.sin(this.floatOffset) * this.floatAmplitude * 16; // Convert amplitude to pixels
         
         this.animationTime += deltaTime * 1000;
     }
