@@ -138,7 +138,7 @@ export class PlayState implements GameState {
         await this.preloadSprites();
 
         // Initialize level with GameController
-        const levelName = params.level || 'tutorial';
+        const levelName = params.level || 'stage1-1';
         await this.gameController.initializeLevel(levelName);
         
         // Setup level bounds for camera
