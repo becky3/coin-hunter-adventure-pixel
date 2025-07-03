@@ -98,7 +98,7 @@ export class Slime extends Enemy {
 
     protected onDeath(): void {
 
-        console.log('Slime defeated!');
+        // Slime defeated!
         
         // TODO: 死亡エフェクトの生成
         // TODO: アイテムドロップ（コインなど）

@@ -146,9 +146,9 @@ export class AssetLoader {
                 spriteData.data,
                 colors
             );
-            console.log(`Sprite loaded and added to renderer: ${spriteKey}`);
+            // Sprite loaded and added to renderer
         } else {
-            console.warn(`Renderer not set when loading sprite: ${category}/${name}`);
+            // Renderer not set when loading sprite
         }
         
         return {
@@ -176,9 +176,9 @@ export class AssetLoader {
                 colors,
                 frameDuration
             );
-            console.log(`Animation loaded and added to renderer: ${animKey}`);
+            // Animation loaded and added to renderer
         } else {
-            console.warn(`Renderer not set when loading animation: ${category}/${baseName}`);
+            // Renderer not set when loading animation
         }
         
         return {
