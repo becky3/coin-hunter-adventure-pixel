@@ -1,0 +1,76 @@
+{
+  "basePath": "/src/assets/sprites/",
+  "categories": {
+    "player": {
+      "sprites": [
+        {
+          "name": "idle",
+          "type": "sprite"
+        }
+      ],
+      "animations": [
+        {
+          "name": "walk",
+          "frameCount": 4,
+          "frameDuration": 100
+        },
+        {
+          "name": "jump",
+          "frameCount": 2,
+          "frameDuration": 100
+        }
+      ]
+    },
+    "enemies": {
+      "sprites": [
+        {
+          "name": "slime",
+          "type": "sprite"
+        }
+      ],
+      "animations": [
+        {
+          "name": "slime_jump",
+          "frameCount": 3,
+          "frameDuration": 150
+        }
+      ]
+    },
+    "items": {
+      "sprites": [],
+      "animations": [
+        {
+          "name": "coin_spin",
+          "frameCount": 4,
+          "frameDuration": 100
+        }
+      ]
+    },
+    "terrain": {
+      "sprites": [
+        {
+          "name": "spring",
+          "type": "sprite"
+        },
+        {
+          "name": "goal_flag",
+          "type": "sprite"
+        }
+      ],
+      "animations": []
+    },
+    "ui": {
+      "sprites": [
+        {
+          "name": "heart",
+          "type": "sprite"
+        },
+        {
+          "name": "heart_empty",
+          "type": "sprite"
+        }
+      ],
+      "animations": []
+    }
+  }
+}

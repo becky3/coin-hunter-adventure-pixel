@@ -1,0 +1,63 @@
+{
+  "player": {
+    "physics": {
+      "width": 16,
+      "height": 16,
+      "speed": 1.17,
+      "jumpPower": 10,
+      "minJumpTime": 8,
+      "maxJumpTime": 20
+    },
+    "stats": {
+      "maxHealth": 3,
+      "invulnerabilityTime": 2000
+    },
+    "spawn": {
+      "x": 100,
+      "y": 300
+    },
+    "knockback": {
+      "vertical": -5,
+      "horizontal": 3
+    },
+    "animations": {
+      "idle": {
+        "speed": 500,
+        "frameCount": 2
+      },
+      "walk": {
+        "speed": 100,
+        "frameCount": 4
+      },
+      "jump": {
+        "speed": 200,
+        "frameCount": 1
+      },
+      "fall": {
+        "speed": 200,
+        "frameCount": 1
+      }
+    }
+  },
+  "enemies": {
+    "slime": {
+      "physics": {
+        "width": 16,
+        "height": 16,
+        "moveSpeed": 0.25,
+        "jumpHeight": 5,
+        "jumpInterval": 1000
+      },
+      "stats": {
+        "maxHealth": 1,
+        "damage": 1,
+        "scoreValue": 100
+      },
+      "ai": {
+        "type": "patrol",
+        "detectRange": 100,
+        "attackRange": 20
+      }
+    }
+  }
+}

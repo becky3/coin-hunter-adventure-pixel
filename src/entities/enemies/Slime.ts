@@ -1,5 +1,6 @@
 import { Enemy } from '../Enemy';
 import { PixelRenderer } from '../../rendering/PixelRenderer';
+import { ResourceLoader } from '../../config/ResourceLoader';
 
 export class Slime extends Enemy {
     private jumpHeight: number;
@@ -10,22 +11,42 @@ export class Slime extends Enemy {
     declare friction: number;
 
     constructor(x: number, y: number) {
-        super(x, y, 16, 16);
+        // Load config from ResourceLoader if available
+        let slimeConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            slimeConfig = resourceLoader.getCharacterConfig('enemies', 'slime');
+        } catch {
+            // ResourceLoader not initialized yet, use defaults
+        }
         
-        this.maxHealth = 1;
+        const width = slimeConfig?.physics.width || 16;
+        const height = slimeConfig?.physics.height || 16;
+        
+        super(x, y, width, height);
+        
+        // Apply configuration values
+        this.maxHealth = slimeConfig?.stats.maxHealth || 1;
         this.health = this.maxHealth;
-        this.damage = 1;
-        this.moveSpeed = 0.25;
+        this.damage = slimeConfig?.stats.damage || 1;
+        this.moveSpeed = slimeConfig?.physics.moveSpeed || 0.25;
         
-        this.jumpHeight = 5;
+        this.jumpHeight = slimeConfig?.physics.jumpHeight || 5;
         this.jumpCooldown = 0;
-        this.jumpInterval = 1000;
+        this.jumpInterval = slimeConfig?.physics.jumpInterval || 1000;
         
         this.spriteKey = 'slime';
         this.animState = 'idle';
         
         this.bounceHeight = 0.3;
         this.friction = 0.8;
+        
+        // Apply AI configuration if available
+        if (slimeConfig?.ai) {
+            this.aiType = slimeConfig.ai.type as any || 'patrol';
+            this.detectRange = slimeConfig.ai.detectRange || 100;
+            this.attackRange = slimeConfig.ai.attackRange || 20;
+        }
     }
     
     protected updateAI(deltaTime: number): void {
@@ -82,7 +103,7 @@ export class Slime extends Enemy {
 
     protected onDeath(): void {
 
-        console.log('Slime defeated!');
+        // Slime defeated!
         
         // TODO: 死亡エフェクトの生成
         // TODO: アイテムドロップ（コインなど）

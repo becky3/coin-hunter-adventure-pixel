@@ -1,6 +1,7 @@
 import { SpriteLoader } from '../utils/spriteLoader';
 import { getColorPalette } from '../utils/pixelArtPalette';
 import { PixelArtRenderer } from '../utils/pixelArt';
+import { ResourceLoader } from '../config/ResourceLoader';
 
 export interface LoadedAsset {
     key: string;
@@ -98,17 +99,12 @@ export class AssetLoader {
     }
     
     async preloadGameAssets(progressCallback?: ProgressCallback): Promise<void> {
-        const assetsToLoad: AssetToLoad[] = [
-            { type: 'sprite', category: 'player', name: 'idle' },
-            { type: 'animation', category: 'player', baseName: 'walk', frameCount: 4 },
-            { type: 'animation', category: 'player', baseName: 'jump', frameCount: 2 },
-            
-            { type: 'animation', category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 200 },
-            
-            { type: 'sprite', category: 'terrain', name: 'spring' },
-            { type: 'sprite', category: 'terrain', name: 'goal_flag' },
-
-        ];
+        // Initialize ResourceLoader
+        const resourceLoader = ResourceLoader.getInstance();
+        await resourceLoader.initialize();
+        
+        // Get all sprite assets from configuration
+        const assetsToLoad = resourceLoader.getAllSpriteAssets();
         
         this.totalAssets = assetsToLoad.length;
         this.loadedCount = 0;
@@ -150,9 +146,9 @@ export class AssetLoader {
                 spriteData.data,
                 colors
             );
-            console.log(`Sprite loaded and added to renderer: ${spriteKey}`);
+            // Sprite loaded and added to renderer
         } else {
-            console.warn(`Renderer not set when loading sprite: ${category}/${name}`);
+            // Renderer not set when loading sprite
         }
         
         return {
@@ -180,9 +176,9 @@ export class AssetLoader {
                 colors,
                 frameDuration
             );
-            console.log(`Animation loaded and added to renderer: ${animKey}`);
+            // Animation loaded and added to renderer
         } else {
-            console.warn(`Renderer not set when loading animation: ${category}/${baseName}`);
+            // Renderer not set when loading animation
         }
         
         return {

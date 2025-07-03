@@ -4,9 +4,11 @@ import { MusicSystem } from '../audio/MusicSystem.js';
 import { AssetLoader } from '../assets/AssetLoader';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../services/EventBus';
+import { ResourceLoader } from '../config/ResourceLoader';
 
 
-const PLAYER_CONFIG = {
+// Default config as fallback if ResourceLoader is not available
+const DEFAULT_PLAYER_CONFIG = {
     width: 16,
     height: 16,
     speed: 1.17,
@@ -21,7 +23,7 @@ const PLAYER_CONFIG = {
     knockbackHorizontal: 3
 } as const;
 
-const ANIMATION_CONFIG = {
+const DEFAULT_ANIMATION_CONFIG = {
     speed: {
         idle: 500,
         walk: 100,
@@ -58,6 +60,8 @@ interface PlayerState {
 }
 
 export class Player extends Entity {
+    private playerConfig: any;
+    private animationConfig: any;
     private speed: number;
     private jumpPower: number;
     private spriteKey: string | null;
@@ -84,16 +88,41 @@ export class Player extends Entity {
     private assetLoader: AssetLoader | null;
     private eventBus: EventBus | null;
 
-    constructor(x: number = PLAYER_CONFIG.spawnX, y: number = PLAYER_CONFIG.spawnY) {
-        super(x, y, PLAYER_CONFIG.width, PLAYER_CONFIG.height);
+    constructor(x?: number, y?: number) {
+        // Load config from ResourceLoader if available
+        let playerConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            playerConfig = resourceLoader.getCharacterConfig('player', 'main');
+        } catch {
+            // ResourceLoader not initialized yet, use defaults
+        }
         
-        this.speed = PLAYER_CONFIG.speed;
-        this.jumpPower = PLAYER_CONFIG.jumpPower;
+        const config = playerConfig ? {
+            ...DEFAULT_PLAYER_CONFIG,
+            width: playerConfig.physics.width,
+            height: playerConfig.physics.height,
+            speed: playerConfig.physics.speed ?? DEFAULT_PLAYER_CONFIG.speed,
+            jumpPower: playerConfig.physics.jumpPower ?? DEFAULT_PLAYER_CONFIG.jumpPower,
+            minJumpTime: playerConfig.physics.minJumpTime ?? DEFAULT_PLAYER_CONFIG.minJumpTime,
+            maxJumpTime: playerConfig.physics.maxJumpTime ?? DEFAULT_PLAYER_CONFIG.maxJumpTime,
+            maxHealth: playerConfig.stats.maxHealth,
+            invulnerabilityTime: playerConfig.stats.invulnerabilityTime ?? DEFAULT_PLAYER_CONFIG.invulnerabilityTime,
+            spawnX: playerConfig.spawn?.x ?? DEFAULT_PLAYER_CONFIG.spawnX,
+            spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY,
+            knockbackVertical: playerConfig.knockback?.vertical ?? DEFAULT_PLAYER_CONFIG.knockbackVertical,
+            knockbackHorizontal: playerConfig.knockback?.horizontal ?? DEFAULT_PLAYER_CONFIG.knockbackHorizontal
+        } : DEFAULT_PLAYER_CONFIG;
+        
+        super(x ?? config.spawnX, y ?? config.spawnY, config.width, config.height);
+        
+        this.speed = config.speed;
+        this.jumpPower = config.jumpPower;
         
         this.spriteKey = null;
         
-        this._health = PLAYER_CONFIG.maxHealth;
-        this._maxHealth = PLAYER_CONFIG.maxHealth;
+        this._health = config.maxHealth;
+        this._maxHealth = config.maxHealth;
         this._isDead = false;
         this._invulnerable = false;
         this.invulnerabilityTime = 0;
@@ -122,6 +151,14 @@ export class Player extends Entity {
         this.assetLoader = null;
         
         this.eventBus = null;
+        
+        // Store configs for later use
+        this.playerConfig = config;
+        // Merge animation config with defaults
+        this.animationConfig = playerConfig?.animations ? {
+            speed: { ...DEFAULT_ANIMATION_CONFIG.speed, ...playerConfig.animations.speed },
+            frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
+        } : DEFAULT_ANIMATION_CONFIG;
     }
     
     setInputManager(inputManager: InputSystem): void {
@@ -216,13 +253,13 @@ export class Player extends Entity {
             this.jumpTime += deltaTime * 1000;
             
             if (input.jump && this.canVariableJump) {
-                if (this.jumpTime < PLAYER_CONFIG.maxJumpTime && this.vy < 0) {
+                if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime) && this.vy < 0) {
                     this.vy -= this.gravityStrength * 0.5;
-                } else if (this.jumpTime >= PLAYER_CONFIG.maxJumpTime) {
+                } else if (this.jumpTime >= (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
                     this.canVariableJump = false;
                 }
             } else {
-                if (this.jumpTime >= PLAYER_CONFIG.minJumpTime && this.vy < 0) {
+                if (this.jumpTime >= (this.playerConfig.minJumpTime || DEFAULT_PLAYER_CONFIG.minJumpTime) && this.vy < 0) {
                     this.vy *= 0.5;
                 }
                 this.jumpButtonPressed = false;
@@ -270,12 +307,12 @@ export class Player extends Entity {
     private updateAnimationFrame(deltaTime: number): void {
         this.animTimer += deltaTime * 1000;
         
-        const speed = ANIMATION_CONFIG.speed[this._animState] || 200;
+        const speed = (this.animationConfig.speed && this.animationConfig.speed[this._animState]) || DEFAULT_ANIMATION_CONFIG.speed[this._animState] || 200;
         
         if (this.animTimer >= speed) {
             this.animTimer = 0;
             
-            const frames = ANIMATION_CONFIG.frameCount[this._animState] || 1;
+            const frames = (this.animationConfig.frameCount && this.animationConfig.frameCount[this._animState]) || DEFAULT_ANIMATION_CONFIG.frameCount[this._animState] || 1;
             this.animFrame = (this.animFrame + 1) % frames;
         }
     }
@@ -290,10 +327,10 @@ export class Player extends Entity {
             this.die();
         } else {
             this._invulnerable = true;
-            this.invulnerabilityTime = PLAYER_CONFIG.invulnerabilityTime;
+            this.invulnerabilityTime = this.playerConfig.invulnerabilityTime || DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
             
-            this.vy = PLAYER_CONFIG.knockbackVertical;
-            this.vx = this._facing === 'right' ? -PLAYER_CONFIG.knockbackHorizontal : PLAYER_CONFIG.knockbackHorizontal;
+            this.vy = this.playerConfig.knockbackVertical || DEFAULT_PLAYER_CONFIG.knockbackVertical;
+            this.vx = this._facing === 'right' ? -(this.playerConfig.knockbackHorizontal || DEFAULT_PLAYER_CONFIG.knockbackHorizontal) : (this.playerConfig.knockbackHorizontal || DEFAULT_PLAYER_CONFIG.knockbackHorizontal);
             
             if (this.eventBus) {
                 this.eventBus.emit('player:health-changed', { health: this._health, maxHealth: this._maxHealth });

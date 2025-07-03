@@ -1,0 +1,94 @@
+{
+  "bgm": {
+    "title": {
+      "type": "generated",
+      "tempo": 120,
+      "volume": 0.3,
+      "instruments": ["bass", "lead", "drums"],
+      "description": "8-bit style title theme"
+    },
+    "game": {
+      "type": "generated",
+      "tempo": 140,
+      "volume": 0.3,
+      "instruments": ["bass", "lead", "arpeggio", "drums"],
+      "description": "Upbeat game background music"
+    },
+    "victory": {
+      "type": "generated",
+      "tempo": 160,
+      "volume": 0.4,
+      "duration": 3000,
+      "description": "Victory fanfare"
+    },
+    "gameover": {
+      "type": "generated",
+      "tempo": 80,
+      "volume": 0.4,
+      "duration": 3000,
+      "description": "Game over jingle"
+    }
+  },
+  "se": {
+    "coin": {
+      "type": "generated",
+      "waveform": "square",
+      "frequency": {
+        "start": 800,
+        "end": 1200
+      },
+      "duration": 0.2,
+      "volume": 0.3
+    },
+    "jump": {
+      "type": "generated",
+      "waveform": "square",
+      "frequency": {
+        "start": 200,
+        "end": 400
+      },
+      "duration": 0.15,
+      "volume": 0.2
+    },
+    "damage": {
+      "type": "generated",
+      "waveform": "sawtooth",
+      "frequency": {
+        "start": 400,
+        "end": 80
+      },
+      "duration": 0.5,
+      "volume": 0.7
+    },
+    "enemyDefeat": {
+      "type": "generated",
+      "waveform": "square",
+      "frequency": {
+        "start": 800,
+        "end": 200
+      },
+      "duration": 0.2,
+      "volume": 0.2
+    },
+    "spring": {
+      "type": "generated",
+      "waveform": "triangle",
+      "frequency": {
+        "start": 300,
+        "end": 600
+      },
+      "duration": 0.3,
+      "volume": 0.25
+    },
+    "button": {
+      "type": "generated",
+      "waveform": "square",
+      "frequency": {
+        "start": 440,
+        "end": 440
+      },
+      "duration": 0.1,
+      "volume": 0.15
+    }
+  }
+}

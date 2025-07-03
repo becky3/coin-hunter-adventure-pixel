@@ -1,3 +1,5 @@
+import { ResourceLoader } from '../config/ResourceLoader';
+
 interface ActiveNode {
     oscillator: OscillatorNode | AudioBufferSourceNode;
     gainNode: GainNode;
@@ -481,18 +483,44 @@ export class MusicSystem {
     playJumpSound(): void {
         if (!this.isInitialized || this.isMuted) return;
         
-        this.playSoundEffect(
-            440,
-            0.1,
-            'square',
-            0.3,
-            { attack: 0.01, decayTime: 0.03, decay: 0.7, sustain: 0.5, release: 0.06 }
-        );
+        let jumpConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            jumpConfig = resourceLoader.getAudioConfig('sfx', 'jump');
+        } catch {
+            // ResourceLoader not initialized yet
+        }
         
-        setTimeout(() => {
-            if (!this.isInitialized || this.isMuted) return;
-            this.playSoundEffect(880, 0.08, 'sine', 0.15);
-        }, 20);
+        if (jumpConfig && jumpConfig.waveform && jumpConfig.frequency) {
+            this.playSoundEffect(
+                jumpConfig.frequency.start,
+                jumpConfig.duration || 0.1,
+                jumpConfig.waveform as OscillatorType,
+                jumpConfig.volume,
+                { attack: 0.01, decayTime: 0.03, decay: 0.7, sustain: 0.5, release: 0.06 }
+            );
+            
+            if (jumpConfig.frequency.end) {
+                setTimeout(() => {
+                    if (!this.isInitialized || this.isMuted) return;
+                    this.playSoundEffect(jumpConfig.frequency.end || 880, 0.08, 'sine', 0.15);
+                }, 20);
+            }
+        } else {
+            // Fallback to hardcoded values
+            this.playSoundEffect(
+                440,
+                0.1,
+                'square',
+                0.3,
+                { attack: 0.01, decayTime: 0.03, decay: 0.7, sustain: 0.5, release: 0.06 }
+            );
+            
+            setTimeout(() => {
+                if (!this.isInitialized || this.isMuted) return;
+                this.playSoundEffect(880, 0.08, 'sine', 0.15);
+            }, 20);
+        }
     }
 
     playCoinSound(): void {
@@ -520,23 +548,38 @@ export class MusicSystem {
     playDamageSound(): void {
         if (!this.isInitialized || this.isMuted || !this.audioContext || !this.masterGain) return;
         
+        let damageConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            damageConfig = resourceLoader.getAudioConfig('sfx', 'damage');
+        } catch {
+            // ResourceLoader not initialized yet
+        }
+        
         const now = this.audioContext.currentTime;
-
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
         
-        oscillator.type = 'sawtooth';
-        oscillator.frequency.setValueAtTime(400, now);
-        oscillator.frequency.exponentialRampToValueAtTime(80, now + 0.5);
+        if (damageConfig && damageConfig.waveform && damageConfig.frequency) {
+            oscillator.type = damageConfig.waveform as OscillatorType;
+            oscillator.frequency.setValueAtTime(damageConfig.frequency.start, now);
+            oscillator.frequency.exponentialRampToValueAtTime(damageConfig.frequency.end || 80, now + (damageConfig.duration || 0.5));
+            gainNode.gain.setValueAtTime(damageConfig.volume, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + (damageConfig.duration || 0.5));
+        } else {
+            // Fallback to hardcoded values
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(400, now);
+            oscillator.frequency.exponentialRampToValueAtTime(80, now + 0.5);
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        }
         
         oscillator.connect(gainNode);
         gainNode.connect(this.masterGain);
         
-        gainNode.gain.setValueAtTime(0.3, now);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-        
         oscillator.start(now);
-        oscillator.stop(now + 0.5);
+        oscillator.stop(now + (damageConfig?.duration || 0.5));
     }
 
     playButtonClickSound(): void {

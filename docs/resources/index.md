@@ -10,6 +10,7 @@ title: リソース
 ## 目次
 
 1. [ピクセルアート仕様]({{ site.baseurl }}/resources/pixel-art.html) - グラフィックスのガイドライン
+2. [リソース設定システム]({{ site.baseurl }}/resource-configuration.html) - 外部設定ファイルによるリソース管理
 
 ## 概要
 
