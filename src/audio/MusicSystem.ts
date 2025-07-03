@@ -483,8 +483,13 @@ export class MusicSystem {
     playJumpSound(): void {
         if (!this.isInitialized || this.isMuted) return;
         
-        const resourceLoader = ResourceLoader.getInstance();
-        const jumpConfig = resourceLoader.getAudioConfig('sfx', 'jump');
+        let jumpConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            jumpConfig = resourceLoader.getAudioConfig('sfx', 'jump');
+        } catch {
+            // ResourceLoader not initialized yet
+        }
         
         if (jumpConfig && jumpConfig.waveform && jumpConfig.frequency) {
             this.playSoundEffect(
@@ -543,8 +548,13 @@ export class MusicSystem {
     playDamageSound(): void {
         if (!this.isInitialized || this.isMuted || !this.audioContext || !this.masterGain) return;
         
-        const resourceLoader = ResourceLoader.getInstance();
-        const damageConfig = resourceLoader.getAudioConfig('sfx', 'damage');
+        let damageConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            damageConfig = resourceLoader.getAudioConfig('sfx', 'damage');
+        } catch {
+            // ResourceLoader not initialized yet
+        }
         
         const now = this.audioContext.currentTime;
         const oscillator = this.audioContext.createOscillator();

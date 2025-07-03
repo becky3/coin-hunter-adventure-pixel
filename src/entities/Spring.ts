@@ -16,8 +16,13 @@ export class Spring extends Entity {
 
     constructor(x: number, y: number) {
         // Load config from ResourceLoader if available
-        const resourceLoader = ResourceLoader.getInstance();
-        const springConfig = resourceLoader.getObjectConfig('items', 'spring');
+        let springConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            springConfig = resourceLoader.getObjectConfig('items', 'spring');
+        } catch {
+            // ResourceLoader not initialized yet, use defaults
+        }
         
         const width = springConfig?.physics.width || 16;
         const height = springConfig?.physics.height || 16;

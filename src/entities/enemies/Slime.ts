@@ -12,8 +12,13 @@ export class Slime extends Enemy {
 
     constructor(x: number, y: number) {
         // Load config from ResourceLoader if available
-        const resourceLoader = ResourceLoader.getInstance();
-        const slimeConfig = resourceLoader.getCharacterConfig('enemies', 'slime');
+        let slimeConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            slimeConfig = resourceLoader.getCharacterConfig('enemies', 'slime');
+        } catch {
+            // ResourceLoader not initialized yet, use defaults
+        }
         
         const width = slimeConfig?.physics.width || 16;
         const height = slimeConfig?.physics.height || 16;

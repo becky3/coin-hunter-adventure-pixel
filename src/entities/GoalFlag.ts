@@ -12,8 +12,13 @@ export class GoalFlag extends Entity {
 
     constructor(x: number, y: number) {
         // Load config from ResourceLoader if available
-        const resourceLoader = ResourceLoader.getInstance();
-        const goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
+        let goalConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
+        } catch {
+            // ResourceLoader not initialized yet, use defaults
+        }
         
         const width = goalConfig?.physics.width || 32;
         const height = goalConfig?.physics.height || 32;

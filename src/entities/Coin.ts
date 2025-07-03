@@ -14,8 +14,13 @@ export class Coin extends Entity {
 
     constructor(x: number, y: number) {
         // Load config from ResourceLoader if available
-        const resourceLoader = ResourceLoader.getInstance();
-        const coinConfig = resourceLoader.getObjectConfig('items', 'coin');
+        let coinConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            coinConfig = resourceLoader.getObjectConfig('items', 'coin');
+        } catch {
+            // ResourceLoader not initialized yet, use defaults
+        }
         
         const width = coinConfig?.physics.width || 16;
         const height = coinConfig?.physics.height || 16;

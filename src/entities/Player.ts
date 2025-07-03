@@ -90,8 +90,13 @@ export class Player extends Entity {
 
     constructor(x?: number, y?: number) {
         // Load config from ResourceLoader if available
-        const resourceLoader = ResourceLoader.getInstance();
-        const playerConfig = resourceLoader.getCharacterConfig('player', 'main');
+        let playerConfig = null;
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            playerConfig = resourceLoader.getCharacterConfig('player', 'main');
+        } catch {
+            // ResourceLoader not initialized yet, use defaults
+        }
         
         const config = playerConfig ? {
             width: playerConfig.physics.width,
