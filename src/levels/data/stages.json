@@ -10,9 +10,17 @@
       "cleared": false
     },
     {
+      "id": "forest-1-1",
+      "name": "FOREST 1-1",
+      "description": "The adventure begins",
+      "filename": "forest-1-1.json",
+      "unlocked": false,
+      "cleared": false
+    },
+    {
       "id": "level1",
       "name": "GRASSLAND 1-1",
-      "description": "The adventure begins",
+      "description": "Test stage",
       "filename": "level1.json",
       "unlocked": false,
       "cleared": false
