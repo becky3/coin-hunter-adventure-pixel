@@ -54,9 +54,10 @@ export class ResourceLoader {
             return await response.json();
         } catch (error) {
             // Store error for debugging
-            const _errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            // eslint-disable-next-line no-console
+            console.error(`Failed to load resource: ${path}`, errorMessage);
             // In production, this could be sent to a logging service
-            // For now, we'll silently fail but the error is available for debugging
             return null;
         }
     }
@@ -92,6 +93,8 @@ export class ResourceLoader {
     private async loadMusicPatterns(): Promise<void> {
         if (!this.resourceIndex) return;
         
+        // Loading music patterns
+        
         // Load all BGM and SE files
         const bgmFiles = ['title', 'game', 'victory', 'gameover'];
         const seFiles = ['coin', 'jump', 'damage', 'button', 'gameStart', 'goal', 'enemyDefeat'];
@@ -107,6 +110,7 @@ export class ResourceLoader {
             const bgmData = await this.loadJSON(bgmPath);
             if (bgmData) {
                 this.musicPatterns.bgm[file] = bgmData;
+                // Loaded BGM: ${file}
             }
         }
         
@@ -116,8 +120,11 @@ export class ResourceLoader {
             const seData = await this.loadJSON(sePath);
             if (seData) {
                 this.musicPatterns.se[file] = seData;
+                // Loaded SE: ${file}
             }
         }
+        
+        // Music patterns loaded successfully
     }
   
     // Getter methods
