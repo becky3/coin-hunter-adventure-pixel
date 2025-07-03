@@ -93,8 +93,6 @@ export class ResourceLoader {
     private async loadMusicPatterns(): Promise<void> {
         if (!this.resourceIndex) return;
         
-        // Loading music patterns
-        
         // Load all BGM and SE files
         const bgmFiles = ['title', 'game', 'victory', 'gameover'];
         const seFiles = ['coin', 'jump', 'damage', 'button', 'gameStart', 'goal', 'enemyDefeat'];
@@ -110,7 +108,6 @@ export class ResourceLoader {
             const bgmData = await this.loadJSON(bgmPath);
             if (bgmData) {
                 this.musicPatterns.bgm[file] = bgmData;
-                // Loaded BGM: ${file}
             }
         }
         
@@ -120,11 +117,8 @@ export class ResourceLoader {
             const seData = await this.loadJSON(sePath);
             if (seData) {
                 this.musicPatterns.se[file] = seData;
-                // Loaded SE: ${file}
             }
         }
-        
-        // Music patterns loaded successfully
     }
   
     // Getter methods
