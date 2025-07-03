@@ -54,7 +54,7 @@ export class EntityManager {
         // 敵が倒された時の処理
         this.eventBus.on('enemy:defeated', (_data: unknown) => {
             if (this.musicSystem?.isInitialized) {
-                this.musicSystem.playEnemyDefeatSound();
+                this.musicSystem.playSEFromPattern('enemyDefeat');
             }
         });
     }
@@ -209,7 +209,7 @@ export class EntityManager {
                     });
                     
                     if (this.musicSystem && this.musicSystem.isInitialized) {
-                        this.musicSystem.playCoinSound();
+                        this.musicSystem.playSEFromPattern('coin');
                     }
                 }
             }

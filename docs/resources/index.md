@@ -11,6 +11,7 @@ title: リソース
 
 1. [ピクセルアート仕様]({{ site.baseurl }}/resources/pixel-art.html) - グラフィックスのガイドライン
 2. [リソース設定システム]({{ site.baseurl }}/resource-configuration.html) - 外部設定ファイルによるリソース管理
+3. [音楽パターンシステム]({{ site.baseurl }}/music-pattern-system.html) - BGMと効果音の外部データ管理
 
 ## 概要
 

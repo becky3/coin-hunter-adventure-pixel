@@ -53,7 +53,7 @@ export class MenuState implements GameState {
         this.showHowTo = false;
         this.showCredits = false;
         if (this.game.musicSystem?.isInitialized) {
-            this.game.musicSystem.playTitleBGM();
+            this.game.musicSystem.playBGMFromPattern('title');
         }
     }
     
@@ -85,7 +85,7 @@ export class MenuState implements GameState {
                     }
                     
                     if (this.game.musicSystem) {
-                        this.game.musicSystem.playButtonClickSound();
+                        this.game.musicSystem.playSEFromPattern('button');
                     }
                 }
             })
@@ -116,7 +116,7 @@ export class MenuState implements GameState {
                     this.showHowTo = false;
                     this.showCredits = false;
                     if (this.game.musicSystem) {
-                        this.game.musicSystem.playButtonClickSound();
+                        this.game.musicSystem.playSEFromPattern('button');
                     }
                 }
             })
@@ -127,7 +127,7 @@ export class MenuState implements GameState {
                 if (event.action === 'mute') {
                     if (this.game.musicSystem) {
                         this.game.musicSystem.toggleMute();
-                        this.game.musicSystem.playButtonClickSound();
+                        this.game.musicSystem.playSEFromPattern('button');
                     }
                 }
             })
@@ -275,7 +275,7 @@ export class MenuState implements GameState {
         switch (option.action) {
         case 'start':
             if (this.game.musicSystem) {
-                this.game.musicSystem.playGameStartSound();
+                this.game.musicSystem.playSEFromPattern('gameStart');
             }
             try {
                 this.game.stateManager.setState('play');
@@ -286,14 +286,14 @@ export class MenuState implements GameState {
                 
         case 'howto':
             if (this.game.musicSystem) {
-                this.game.musicSystem.playButtonClickSound();
+                this.game.musicSystem.playSEFromPattern('button');
             }
             this.showHowTo = true;
             break;
                 
         case 'credits':
             if (this.game.musicSystem) {
-                this.game.musicSystem.playButtonClickSound();
+                this.game.musicSystem.playSEFromPattern('button');
             }
             this.showCredits = true;
             break;

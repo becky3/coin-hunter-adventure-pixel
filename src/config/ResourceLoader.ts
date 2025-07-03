@@ -5,6 +5,7 @@ import {
     AudioConfig,
     ObjectConfig
 } from './ResourceConfig';
+import { MusicPatternConfig, MusicConfig } from './MusicPatternConfig';
 
 export class ResourceLoader {
     private static instance: ResourceLoader;
@@ -13,6 +14,7 @@ export class ResourceLoader {
     private characters: { [key: string]: any } | null = null;
     private audio: { [key: string]: any } | null = null;
     private objects: { [key: string]: any } | null = null;
+    private musicPatterns: MusicPatternConfig | null = null;
   
     private constructor() {}
   
@@ -36,7 +38,8 @@ export class ResourceLoader {
             this.loadSprites(),
             this.loadCharacters(),
             this.loadAudio(),
-            this.loadObjects()
+            this.loadObjects(),
+            this.loadMusicPatterns()
         ]);
   
         // Resource configuration loaded successfully
@@ -84,6 +87,13 @@ export class ResourceLoader {
     
         const objectsPath = '/src/config/resources/objects.json';
         this.objects = await this.loadJSON(objectsPath);
+    }
+    
+    private async loadMusicPatterns(): Promise<void> {
+        if (!this.resourceIndex) return;
+        
+        const musicPatternsPath = '/src/config/resources/music-patterns.json';
+        this.musicPatterns = await this.loadJSON(musicPatternsPath);
     }
   
     // Getter methods
@@ -149,5 +159,17 @@ export class ResourceLoader {
         }
     
         return assets;
+    }
+    
+    // Music pattern methods
+    getMusicPattern(type: 'bgm' | 'se', name: string): MusicConfig | null {
+        if (!this.musicPatterns || !this.musicPatterns[type]) {
+            return null;
+        }
+        return this.musicPatterns[type][name] || null;
+    }
+    
+    getAllMusicPatterns(): MusicPatternConfig | null {
+        return this.musicPatterns;
     }
 }

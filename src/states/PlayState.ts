@@ -165,7 +165,7 @@ export class PlayState implements GameState {
         });
         if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
             console.log('[PlayState] Playing game BGM...');
-            this.game.musicSystem.playGameBGM();
+            this.game.musicSystem.playBGMFromPattern('game');
         }
         
         console.log('[PlayState] enter() completed');
@@ -379,7 +379,7 @@ export class PlayState implements GameState {
         // this.hudManager.setPaused(true);
         
         // Play clear sound
-        this.game.musicSystem?.playVictoryJingle();
+        this.game.musicSystem?.playBGMFromPattern('victory');
         
         // Show clear message (until state changes)
         this.hudManager.showMessage('STAGE CLEAR!', 999999);
