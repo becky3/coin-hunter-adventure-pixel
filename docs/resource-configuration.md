@@ -1,26 +1,26 @@
-# Resource Configuration System
+# リソース設定システム
 
-## Overview
+## 概要
 
-The resource configuration system allows game resources (sprites, characters, audio, objects) to be defined externally in JSON files, making it easy to modify game assets without changing code.
+リソース設定システムは、ゲームリソース（スプライト、キャラクター、音声、オブジェクト）を外部のJSONファイルで定義できるようにし、コードを変更することなくゲームアセットを簡単に修正できるようにします。
 
-## Structure
+## 構造
 
-All resource configurations are located in `/src/config/resources/`:
+すべてのリソース設定は `/src/config/resources/` に配置されています：
 
 ```
 /src/config/resources/
-├── index.json       # Main configuration index
-├── sprites.json     # Sprite and animation definitions
-├── characters.json  # Character stats and physics
-├── audio.json       # Sound effects and music definitions
-└── objects.json     # Game object configurations
+├── index.json       # メイン設定インデックス
+├── sprites.json     # スプライトとアニメーション定義
+├── characters.json  # キャラクターのステータスと物理設定
+├── audio.json       # 効果音と音楽の定義
+└── objects.json     # ゲームオブジェクトの設定
 ```
 
-## Configuration Files
+## 設定ファイル
 
 ### index.json
-The main index file that references all other configuration files and contains global settings.
+他のすべての設定ファイルを参照し、グローバル設定を含むメインインデックスファイル。
 
 ```json
 {
@@ -44,7 +44,7 @@ The main index file that references all other configuration files and contains g
 ```
 
 ### sprites.json
-Defines all sprites and animations in the game, organized by category.
+ゲーム内のすべてのスプライトとアニメーションをカテゴリ別に定義。
 
 ```json
 {
@@ -63,7 +63,7 @@ Defines all sprites and animations in the game, organized by category.
 ```
 
 ### characters.json
-Contains physics properties, stats, and behavior configuration for all characters.
+すべてのキャラクターの物理プロパティ、ステータス、動作設定を含む。
 
 ```json
 {
@@ -99,7 +99,7 @@ Contains physics properties, stats, and behavior configuration for all character
 ```
 
 ### audio.json
-Defines background music and sound effects with their properties.
+BGMと効果音をそのプロパティとともに定義。
 
 ```json
 {
@@ -126,7 +126,7 @@ Defines background music and sound effects with their properties.
 ```
 
 ### objects.json
-Configuration for interactive game objects like coins, springs, and goals.
+コイン、スプリング、ゴールなどのインタラクティブなゲームオブジェクトの設定。
 
 ```json
 {
@@ -147,60 +147,60 @@ Configuration for interactive game objects like coins, springs, and goals.
 }
 ```
 
-## Usage
+## 使用方法
 
 ### ResourceLoader
 
-The `ResourceLoader` class provides access to all resource configurations:
+`ResourceLoader` クラスはすべてのリソース設定へのアクセスを提供します：
 
 ```typescript
 import { ResourceLoader } from '../config/ResourceLoader';
 
-// Get singleton instance
+// シングルトンインスタンスを取得
 const resourceLoader = ResourceLoader.getInstance();
 
-// Initialize (loads all configs)
+// 初期化（すべての設定を読み込み）
 await resourceLoader.initialize();
 
-// Get specific configurations
+// 特定の設定を取得
 const playerConfig = resourceLoader.getCharacterConfig('player', 'main');
 const coinConfig = resourceLoader.getObjectConfig('items', 'coin');
 const jumpSound = resourceLoader.getAudioConfig('sfx', 'jump');
 ```
 
-### Automatic Loading in Entities
+### エンティティでの自動読み込み
 
-Entities automatically load their configuration when created:
+エンティティは作成時に自動的に設定を読み込みます：
 
 ```typescript
-// Player loads config in constructor
+// プレイヤーはコンストラクタで設定を読み込む
 const player = new Player(x, y);
-// Automatically uses values from characters.json
+// characters.jsonの値を自動的に使用
 
-// Coin loads config in constructor  
+// コインはコンストラクタで設定を読み込む  
 const coin = new Coin(x, y);
-// Automatically uses values from objects.json
+// objects.jsonの値を自動的に使用
 ```
 
-## Adding New Resources
+## 新しいリソースの追加
 
-1. **Add sprite files** to `/src/assets/sprites/[category]/`
-2. **Update sprites.json** with sprite/animation definitions
-3. **Update relevant config files** (characters.json, objects.json, etc.)
-4. **No code changes needed** - entities will automatically use new values
+1. **スプライトファイルを追加** `/src/assets/sprites/[category]/` へ
+2. **sprites.jsonを更新** スプライト/アニメーション定義を追加
+3. **関連する設定ファイルを更新** (characters.json、objects.jsonなど)
+4. **コード変更は不要** - エンティティは自動的に新しい値を使用
 
-## Benefits
+## メリット
 
-- **Easy customization**: Change game balance, physics, visuals without coding
-- **Mod support**: External configuration makes modding straightforward
-- **Rapid iteration**: Test different values quickly
-- **Version control**: Track configuration changes separately from code
-- **Localization ready**: Can easily extend for multiple languages
+- **簡単なカスタマイズ**: コーディングなしでゲームバランス、物理、ビジュアルを変更
+- **MODサポート**: 外部設定によりMOD作成が簡単
+- **迅速な反復**: 異なる値を素早くテスト
+- **バージョン管理**: 設定の変更をコードとは別に追跡
+- **ローカライズ対応**: 複数言語への拡張が容易
 
-## Best Practices
+## ベストプラクティス
 
-1. **Always provide defaults**: Entities should have fallback values if config fails
-2. **Validate values**: Check for reasonable ranges (e.g., health > 0)
-3. **Document properties**: Add comments in JSON files explaining values
-4. **Test changes**: Verify game still works after config modifications
-5. **Version configs**: Update version number when making breaking changes
+1. **常にデフォルト値を提供**: 設定が失敗した場合のフォールバック値をエンティティに持たせる
+2. **値を検証**: 妥当な範囲をチェック（例：health > 0）
+3. **プロパティを文書化**: JSONファイルに値を説明するコメントを追加
+4. **変更をテスト**: 設定変更後もゲームが動作することを確認
+5. **設定をバージョン管理**: 破壊的変更を行う際はバージョン番号を更新
