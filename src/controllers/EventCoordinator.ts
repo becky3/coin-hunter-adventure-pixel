@@ -1,7 +1,7 @@
 import { EventBus } from '../services/EventBus';
 import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
-import { TILE_SIZE } from '../core/constants';
+import { TILE_SIZE } from '../constants/gameConstants';
 
 export interface EventCoordinatorConfig {
     eventBus: EventBus;
@@ -104,7 +104,8 @@ export class EventCoordinator {
         if (player) {
             // Save checkpoint position
             console.log('Checkpoint reached at:', data.position);
-            this.levelManager.setCheckpoint(data.position);
+            // TODO: Implement checkpoint functionality in LevelManager
+            // this.levelManager.setCheckpoint(data.position);
         }
     }
     

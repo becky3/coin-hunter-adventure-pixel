@@ -68,6 +68,34 @@ export class HUDManager {
     updateScore(score: number): void {
         this.hudData.score = score;
     }
+    
+    updateHealth(health: number, _maxHealth: number): void {
+        this.hudData.lives = health;
+    }
+    
+    updateCoins(coins: number): void {
+        this.hudData.coinsCollected = coins;
+    }
+    
+    updateTimer(time: number): void {
+        this.hudData.time = time;
+    }
+    
+    initialize(): void {
+        // Initialize HUD
+    }
+    
+    cleanup(): void {
+        // Cleanup HUD resources
+    }
+    
+    showPauseOverlay(): void {
+        this.isPaused = true;
+    }
+    
+    hidePauseOverlay(): void {
+        this.isPaused = false;
+    }
 
     getHUDData(): HUDData {
         return this.hudData;

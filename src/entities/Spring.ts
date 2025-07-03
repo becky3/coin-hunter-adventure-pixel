@@ -46,7 +46,7 @@ export class Spring extends Entity {
         this.checkPlayerContact();
         
         if (this.triggered && this.physicsSystem) {
-            const entities = Array.from(this.physicsSystem.entities);
+            const entities = Array.from(this.physicsSystem.getEntities());
             const player = entities.find(e => e.constructor.name === 'Player') as unknown as Player | undefined;
             if (player) {
                 const playerBottom = player.y + player.height;
@@ -62,7 +62,7 @@ export class Spring extends Entity {
         
         if (!this.physicsSystem) return;
         
-        const entities = Array.from(this.physicsSystem.entities);
+        const entities = Array.from(this.physicsSystem.getEntities());
         const player = entities.find(e => e.constructor.name === 'Player') as Player | undefined;
         if (!player) return;
         
@@ -92,7 +92,7 @@ export class Spring extends Entity {
                 this.compression = 1;
                 this.triggered = true;
 
-                if (this.physicsSystem && this.physicsSystem.entities) {
+                if (this.physicsSystem) {
                     // TODO: Implement sound effect playback
                 }
             } else if (!onTopOfSpring && playerBottom > this.y && player.y < this.y + this.height) {

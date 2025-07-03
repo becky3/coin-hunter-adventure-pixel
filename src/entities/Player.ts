@@ -136,6 +136,10 @@ export class Player extends Entity {
         this.assetLoader = assetLoader;
     }
     
+    setEventBus(eventBus: EventBus): void {
+        this.eventBus = eventBus;
+    }
+    
     get health(): number { return this._health; }
     get maxHealth(): number { return this._maxHealth; }
     get isDead(): boolean { return this._isDead; }

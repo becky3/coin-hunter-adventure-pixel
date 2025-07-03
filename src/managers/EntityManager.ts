@@ -80,6 +80,7 @@ export class EntityManager {
         this.player.setInputManager(this.inputSystem);
         this.player.setMusicSystem(this.musicSystem);
         this.player.setAssetLoader(this.assetLoader);
+        this.player.setEventBus(this.eventBus);
         
         this.physicsSystem.addEntity(this.player, this.physicsSystem.layers.PLAYER);
         

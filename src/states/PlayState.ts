@@ -72,7 +72,7 @@ export class PlayState implements GameState {
         this.eventBus = new EventBus();
         
         // Create extended game object with eventBus
-        const extendedGame = {
+        const extendedGame: any = {
             ...game,
             eventBus: this.eventBus
         };

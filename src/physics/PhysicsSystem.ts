@@ -90,6 +90,10 @@ export class PhysicsSystem {
         return this.entities.size;
     }
     
+    getEntities(): Set<PhysicsEntity> {
+        return new Set(this.entities);
+    }
+    
     clearEntities(): void {
         this.entities.clear();
     }

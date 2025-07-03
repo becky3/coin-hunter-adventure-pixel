@@ -1,10 +1,16 @@
-import { GameServices } from '../services/GameServices';
 import { EntityManager } from '../managers/EntityManager';
 import { CameraController } from './CameraController';
 import { LevelManager } from '../managers/LevelManager';
 import { HUDManager } from '../ui/HUDManager';
 import { EventBus } from '../services/EventBus';
-import { TILE_SIZE } from '../core/constants';
+import { TILE_SIZE } from '../constants/gameConstants';
+
+export interface GameServices {
+    physicsSystem: any;
+    renderer: any;
+    inputSystem: any;
+    eventBus: EventBus;
+}
 
 export interface GameControllerConfig {
     services: GameServices;
@@ -120,7 +126,7 @@ export class GameController {
         this.hudManager.updateTimer(this.gameTime);
         
         // Update game systems
-        this.entityManager.update(deltaTime);
+        this.entityManager.updateAll(deltaTime);
         this.cameraController.update(deltaTime);
         this.hudManager.update(deltaTime);
         
@@ -132,10 +138,10 @@ export class GameController {
         const renderer = this.services.renderer;
         
         // Render level
-        this.levelManager.render(renderer);
+        this.levelManager.renderTileMap(renderer);
         
         // Render entities
-        this.entityManager.render(renderer);
+        this.entityManager.renderAll(renderer);
         
         // Render HUD (always on top)
         this.hudManager.render(renderer);

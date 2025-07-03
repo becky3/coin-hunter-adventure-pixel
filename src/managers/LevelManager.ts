@@ -200,4 +200,9 @@ export class LevelManager {
         this.backgroundColor = '#5C94FC';
         this.timeLimit = 300;
     }
+    
+    renderTileMap(_renderer: any): void {
+        // Tile map rendering is handled by PlayState
+        // This method is here for compatibility with GameController
+    }
 }

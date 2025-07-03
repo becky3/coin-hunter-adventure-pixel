@@ -32,7 +32,7 @@ async function startGame() {
             loadingScreen.style.display = 'none';
         }
         // エラーメッセージを表示
-        const canvas = document.getElementById('gameCanvas');
+        const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
