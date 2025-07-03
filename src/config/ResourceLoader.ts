@@ -24,27 +24,22 @@ export class ResourceLoader {
     }
   
     async initialize(): Promise<void> {
-        try {
-            // Load resource index
-            this.resourceIndex = await this.loadJSON('/src/config/resources/index.json');
-      
-            if (!this.resourceIndex) {
-                throw new Error('Failed to load resource index');
-            }
-      
-            // Load all resource configs
-            await Promise.all([
-                this.loadSprites(),
-                this.loadCharacters(),
-                this.loadAudio(),
-                this.loadObjects()
-            ]);
-      
-            // Resource configuration loaded successfully
-        } catch (error) {
-            // Failed to load resource configuration
-            throw error;
+        // Load resource index
+        this.resourceIndex = await this.loadJSON('/src/config/resources/index.json');
+  
+        if (!this.resourceIndex) {
+            throw new Error('Failed to load resource index');
         }
+  
+        // Load all resource configs
+        await Promise.all([
+            this.loadSprites(),
+            this.loadCharacters(),
+            this.loadAudio(),
+            this.loadObjects()
+        ]);
+  
+        // Resource configuration loaded successfully
     }
   
     private async loadJSON(path: string): Promise<any> {
@@ -54,7 +49,7 @@ export class ResourceLoader {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return await response.json();
-        } catch (error) {
+        } catch {
             // Failed to load JSON
             return null;
         }
