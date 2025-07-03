@@ -62,10 +62,14 @@ export class MusicSystem {
         this.sfxVolume = 0.5;
         this.isMuted = false;
     }
+    
+    get isInitialized(): boolean {
+        return this._isInitialized;
+    }
 
     async init(): Promise<boolean> {
         console.log('MusicSystem: init() called');
-        if (this.isInitialized) {
+        if (this._isInitialized) {
             console.log('MusicSystem: Already initialized');
             return true;
         }
@@ -99,7 +103,7 @@ export class MusicSystem {
             this.masterGain.connect(this.audioContext.destination);
             this.masterGain.gain.value = this.bgmVolume;
             
-            this.isInitialized = true;
+            this._isInitialized = true;
             console.log('Music system initialized successfully');
             return true;
         } catch (error: any) {
@@ -109,7 +113,7 @@ export class MusicSystem {
             } else {
                 console.warn('音楽システムの初期化エラー:', error);
             }
-            this.isInitialized = false;
+            this._isInitialized = false;
             return false;
         }
     }
@@ -706,10 +710,44 @@ export class MusicSystem {
                     console.error('AudioContext closing error:', error);
                 });
             }
-            this.isInitialized = false;
+            this._isInitialized = false;
         } catch (error) {
             console.error('音楽システムのクリーンアップエラー:', error);
         }
+    }
+    
+    playEnemyDefeatSound(): void {
+        if (!this._isInitialized || this.isMuted || !this.audioContext || !this.masterGain) return;
+        
+        const now = this.audioContext.currentTime;
+
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(800, now);
+        oscillator.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+        oscillator.frequency.exponentialRampToValueAtTime(200, now + 0.2);
+        
+        gainNode.gain.setValueAtTime(this.sfxVolume * 0.2, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.masterGain);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.2);
+        
+        this.activeNodes.push({ oscillator, gainNode });
+        
+        oscillator.onended = () => {
+            const index = this.activeNodes.findIndex(node => node.oscillator === oscillator);
+            if (index !== -1) {
+                this.activeNodes.splice(index, 1);
+            }
+            oscillator.disconnect();
+            gainNode.disconnect();
+        };
     }
     
     // 統一的なインターフェース

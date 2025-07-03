@@ -6,6 +6,8 @@ import { LevelManager } from '../managers/LevelManager';
 import { CameraController } from '../controllers/CameraController';
 import { HUDManager } from '../ui/HUDManager';
 import { EventBus } from '../services/EventBus';
+import { GameController } from '../controllers/GameController';
+import { EventCoordinator } from '../controllers/EventCoordinator';
 import { TILE_SIZE } from '../constants/gameConstants';
 
 interface Game {
@@ -35,6 +37,10 @@ export class PlayState implements GameState {
     private levelManager: LevelManager;
     private cameraController: CameraController;
     private hudManager: HUDManager;
+    
+    // Controllers
+    private gameController: GameController;
+    private eventCoordinator: EventCoordinator;
 
     // Game state
     private gameState: 'playing' | 'paused' | 'cleared' | 'gameover' = 'playing';
@@ -66,7 +72,7 @@ export class PlayState implements GameState {
         this.eventBus = new EventBus();
         
         // Create extended game object with eventBus
-        const extendedGame = {
+        const extendedGame: any = {
             ...game,
             eventBus: this.eventBus
         };
@@ -76,48 +82,33 @@ export class PlayState implements GameState {
         this.levelManager = new LevelManager(extendedGame);
         this.cameraController = new CameraController(extendedGame);
         this.hudManager = new HUDManager(extendedGame);
+        
+        // Initialize controllers
+        this.gameController = new GameController({
+            services: extendedGame,
+            entityManager: this.entityManager,
+            cameraController: this.cameraController,
+            levelManager: this.levelManager,
+            hudManager: this.hudManager
+        });
+        
+        this.eventCoordinator = new EventCoordinator({
+            eventBus: this.eventBus,
+            entityManager: this.entityManager,
+            levelManager: this.levelManager,
+            onStageClear: () => this.stageClear(),
+            onGameOver: () => this.gameOver()
+        });
 
         // Setup debug warp function
         if (typeof window !== 'undefined') {
             window.debugWarp = (x: number, y: number, tileCoords?: boolean) => 
                 this.debugWarp(x, y, tileCoords);
         }
-
-        this.setupEventListeners();
     }
 
     private setupEventListeners(): void {
-        // Listen for game events
-        this.eventBus.on('coin:collected', (data: any) => {
-            console.log(`Coin collected! Score: ${data.score}`);
-            const player = this.entityManager.getPlayer();
-            if (player) {
-                player.score += data.score;
-                this.hudManager.updateScore(player.score);
-            }
-        });
-
-        this.eventBus.on('goal:reached', () => {
-            this.stageClear();
-        });
-
-        this.eventBus.on('player:died', () => {
-            const player = this.entityManager.getPlayer();
-            if (player && player.health > 0) {
-                const spawn = this.levelManager.getPlayerSpawn();
-                player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
-            } else {
-                this.gameOver();
-            }
-        });
-        
-        this.eventBus.on('enemy:defeated', (data: any) => {
-            console.log(`Enemy defeated! Score: ${data.score}`);
-            const player = this.entityManager.getPlayer();
-            if (player) {
-                this.hudManager.updateScore(player.score);
-            }
-        });
+        // Event handling is now managed by EventCoordinator
     }
 
     private async preloadSprites(): Promise<void> {
@@ -146,44 +137,17 @@ export class PlayState implements GameState {
         // Preload sprites
         await this.preloadSprites();
 
-        // Clear physics system
-        this.game.physicsSystem.entities.clear();
-
-        // Initialize level manager
-        await this.levelManager.initialize();
-
-        // Load level
+        // Initialize level with GameController
         const levelName = params.level || 'tutorial';
-        console.log('PlayState: Loading level:', levelName);
-        await this.levelManager.loadLevel(levelName);
-
-        // Initialize entities based on level data
-        const levelData = this.levelManager.getLevelData();
-        if (levelData) {
-            // Create player
-            const spawn = this.levelManager.getPlayerSpawn();
-            this.entityManager.createPlayer(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
-            
-            // Create entities from level data
-            const entities = this.levelManager.getEntities();
-            if (entities.length > 0) {
-                this.entityManager.createEntitiesFromConfig(entities);
-            } else {
-                // Create test entities if no level entities
-                this.entityManager.createTestEntities();
-            }
-        }
-
-        // Setup camera
-        const player = this.entityManager.getPlayer();
-        if (player) {
-            this.cameraController.setTarget(player);
-            const dimensions = this.levelManager.getLevelDimensions();
-            this.cameraController.setLevelBounds(dimensions.width, dimensions.height);
-        }
+        await this.gameController.initializeLevel(levelName);
+        
+        // Setup level bounds for camera
+        const dimensions = this.levelManager.getLevelDimensions();
+        this.cameraController.setLevelBounds(dimensions.width, dimensions.height);
 
         // Initialize HUD with level data
         this.hudManager.updateTime(this.levelManager.getTimeLimit());
+        const player = this.entityManager.getPlayer();
         if (player) {
             this.hudManager.updateLives(player.health);
         }
