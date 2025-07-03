@@ -1,0 +1,23 @@
+{
+  "name": "Goal Reached",
+  "tracks": [
+    {
+      "instrument": {
+        "type": "square",
+        "volume": 0.4,
+        "envelope": {
+          "attack": 0.01,
+          "decayTime": 0.1,
+          "decay": 0.7,
+          "sustain": 0.5,
+          "release": 0.2
+        }
+      },
+      "pattern": {
+        "notes": ["G4", "G4", "G4", "D5", "E5", "D5", "C5", "G5"],
+        "durations": [0.15, 0.15, 0.15, 0.4, 0.15, 0.15, 0.15, 0.6],
+        "times": [0, 0.15, 0.3, 0.45, 0.85, 1.0, 1.15, 1.3]
+      }
+    }
+  ]
+}

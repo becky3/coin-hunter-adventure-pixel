@@ -1,0 +1,16 @@
+{
+  "name": "Game Start",
+  "tracks": [
+    {
+      "instrument": {
+        "type": "sine",
+        "volume": 0.6
+      },
+      "pattern": {
+        "notes": ["C4", "E4", "G4", "C5"],
+        "durations": [0.1, 0.1, 0.1, 0.3],
+        "times": [0, 0.1, 0.2, 0.3]
+      }
+    }
+  ]
+}

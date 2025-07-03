@@ -5,6 +5,7 @@ import {
     AudioConfig,
     ObjectConfig
 } from './ResourceConfig';
+import { MusicPatternConfig, MusicConfig } from './MusicPatternConfig';
 
 export class ResourceLoader {
     private static instance: ResourceLoader;
@@ -13,6 +14,7 @@ export class ResourceLoader {
     private characters: { [key: string]: any } | null = null;
     private audio: { [key: string]: any } | null = null;
     private objects: { [key: string]: any } | null = null;
+    private musicPatterns: MusicPatternConfig | null = null;
   
     private constructor() {}
   
@@ -36,7 +38,8 @@ export class ResourceLoader {
             this.loadSprites(),
             this.loadCharacters(),
             this.loadAudio(),
-            this.loadObjects()
+            this.loadObjects(),
+            this.loadMusicPatterns()
         ]);
   
         // Resource configuration loaded successfully
@@ -51,9 +54,10 @@ export class ResourceLoader {
             return await response.json();
         } catch (error) {
             // Store error for debugging
-            const _errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            // eslint-disable-next-line no-console
+            console.error(`Failed to load resource: ${path}`, errorMessage);
             // In production, this could be sent to a logging service
-            // For now, we'll silently fail but the error is available for debugging
             return null;
         }
     }
@@ -84,6 +88,37 @@ export class ResourceLoader {
     
         const objectsPath = '/src/config/resources/objects.json';
         this.objects = await this.loadJSON(objectsPath);
+    }
+    
+    private async loadMusicPatterns(): Promise<void> {
+        if (!this.resourceIndex) return;
+        
+        // Load all BGM and SE files
+        const bgmFiles = ['title', 'game', 'victory', 'gameover'];
+        const seFiles = ['coin', 'jump', 'damage', 'button', 'gameStart', 'goal', 'enemyDefeat'];
+        
+        this.musicPatterns = {
+            bgm: {},
+            se: {}
+        };
+        
+        // Load BGM files
+        for (const file of bgmFiles) {
+            const bgmPath = `/src/config/resources/bgm/${file}.json`;
+            const bgmData = await this.loadJSON(bgmPath);
+            if (bgmData) {
+                this.musicPatterns.bgm[file] = bgmData;
+            }
+        }
+        
+        // Load SE files
+        for (const file of seFiles) {
+            const sePath = `/src/config/resources/se/${file}.json`;
+            const seData = await this.loadJSON(sePath);
+            if (seData) {
+                this.musicPatterns.se[file] = seData;
+            }
+        }
     }
   
     // Getter methods
@@ -149,5 +184,17 @@ export class ResourceLoader {
         }
     
         return assets;
+    }
+    
+    // Music pattern methods
+    getMusicPattern(type: 'bgm' | 'se', name: string): MusicConfig | null {
+        if (!this.musicPatterns || !this.musicPatterns[type]) {
+            return null;
+        }
+        return this.musicPatterns[type][name] || null;
+    }
+    
+    getAllMusicPatterns(): MusicPatternConfig | null {
+        return this.musicPatterns;
     }
 }

@@ -1,0 +1,19 @@
+{
+  "name": "Game Over",
+  "tempo": 80,
+  "loop": false,
+  "tracks": [
+    {
+      "name": "melody",
+      "instrument": {
+        "type": "sine",
+        "volume": 0.3
+      },
+      "pattern": {
+        "notes": ["C4", "B3", "A3", "G3"],
+        "durations": [0.3, 0.3, 0.3, 0.6],
+        "times": [0, 0.3, 0.6, 0.9]
+      }
+    }
+  ]
+}

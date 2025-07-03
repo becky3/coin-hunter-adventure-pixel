@@ -245,7 +245,7 @@ export class Player extends Entity {
             this.jumpStartY = this.y;
             
             if (this.musicSystem) {
-                this.musicSystem.playJumpSound();
+                this.musicSystem.playSEFromPattern('jump');
             }
         }
         
@@ -337,7 +337,7 @@ export class Player extends Entity {
             }
             
             if (this.musicSystem) {
-                this.musicSystem.playDamageSound();
+                this.musicSystem.playSEFromPattern('damage');
             }
         }
     }

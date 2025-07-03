@@ -1,0 +1,20 @@
+{
+  "name": "Enemy Defeat",
+  "tracks": [
+    {
+      "instrument": {
+        "type": "square",
+        "volume": 0.2
+      },
+      "pattern": {
+        "frequencies": [
+          { "start": 800, "end": 800 },
+          { "start": 800, "end": 400 },
+          { "start": 400, "end": 200 }
+        ],
+        "durations": [0.1, 0.1, 0.1],
+        "times": [0, 0.1, 0.2]
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Damage",
+  "tracks": [
+    {
+      "instrument": {
+        "type": "sawtooth",
+        "volume": 0.3
+      },
+      "pattern": {
+        "frequencies": [{ "start": 400, "end": 80 }],
+        "durations": [0.5],
+        "times": [0]
+      }
+    }
+  ]
+}

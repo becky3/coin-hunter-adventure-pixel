@@ -1,4 +1,5 @@
 import { ResourceLoader } from '../config/ResourceLoader';
+import { MusicConfig, TrackConfig, FrequencyRamp } from '../config/MusicPatternConfig';
 
 interface ActiveNode {
     oscillator: OscillatorNode | AudioBufferSourceNode;
@@ -45,6 +46,10 @@ export class MusicSystem {
     private sfxVolume: number;
     private isMuted: boolean;
     
+    // For pattern-based playback
+    private currentMusicConfig: MusicConfig | null;
+    private trackIntervals: Map<string, NodeJS.Timeout>;
+    
     constructor() {
 
         this.audioContext = null;
@@ -63,6 +68,9 @@ export class MusicSystem {
         this.bgmVolume = 0.3;
         this.sfxVolume = 0.5;
         this.isMuted = false;
+        
+        this.currentMusicConfig = null;
+        this.trackIntervals = new Map();
     }
     
     get isInitialized(): boolean {
@@ -702,7 +710,7 @@ export class MusicSystem {
 
     stopBGM(): void {
 
-        if (!this.currentBGM && !this.bgmLoopInterval) {
+        if (!this.currentBGM && !this.bgmLoopInterval && this.trackIntervals.size === 0) {
             return;
         }
         
@@ -711,6 +719,7 @@ export class MusicSystem {
             this.bgmLoopInterval = null;
         }
         
+        this.stopPatternPlayback();
         this.stopAllActiveNodes();
 
         this.currentBGM = null;
@@ -842,6 +851,234 @@ export class MusicSystem {
             break;
         default:
             console.warn(`[MusicSystem] Unknown SE: ${name}`);
+        }
+    }
+    
+    // Pattern-based music playback methods
+    private playMusicPattern(config: MusicConfig): void {
+        if (!this.isInitialized || !this.audioContext) return;
+        
+        const beatLength = config.tempo ? 60 / config.tempo : 0.5;
+        this.currentMusicConfig = config;
+        
+        // Play each track
+        config.tracks.forEach(track => {
+            this.playTrack(track, beatLength, config.loop || false, config);
+        });
+    }
+    
+    private playTrack(track: TrackConfig, beatLength: number, loop: boolean, config: MusicConfig): void {
+        if (!this.audioContext) return;
+        
+        let nextScheduleTime = 0;
+        const loopDuration = (track.pattern.duration || 4) * beatLength; // Default 4 beats
+        
+        const schedulePattern = (startTime: number) => {
+            if (!this.isInitialized || this.isMuted || !this.audioContext) return;
+            
+            const pattern = track.pattern;
+            
+            // Handle different pattern types
+            if (pattern.beats && track.instrument.type === 'drums') {
+                // Drum pattern
+                pattern.beats.forEach(beat => {
+                    this.playDrum(beat.type, startTime + beat.time * beatLength);
+                });
+            } else if (pattern.notes) {
+                // Melodic pattern
+                let currentTime = startTime + (pattern.startAt || 0) * beatLength;
+                
+                pattern.notes.forEach((note, index) => {
+                    const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
+                    const time = pattern.times ? startTime + pattern.times[index] : currentTime;
+                    
+                    this.playNoteWithEnvelope(
+                        this.getNoteFrequency(note),
+                        duration,
+                        time,
+                        track.instrument.type as OscillatorType,
+                        track.instrument.volume,
+                        track.instrument.envelope
+                    );
+                    
+                    if (!pattern.times) {
+                        currentTime += duration;
+                    }
+                });
+            } else if (pattern.chords) {
+                // Chord pattern
+                let currentTime = startTime;
+                
+                pattern.chords.forEach((chord, index) => {
+                    const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
+                    const time = pattern.times ? startTime + pattern.times[index] : currentTime;
+                    
+                    this.playChord(
+                        chord,
+                        duration,
+                        time,
+                        track.instrument.type as OscillatorType,
+                        track.instrument.volume
+                    );
+                    
+                    if (!pattern.times) {
+                        currentTime += duration;
+                    }
+                });
+            } else if (pattern.frequencies) {
+                // Frequency-based pattern (for sound effects)
+                pattern.frequencies.forEach((freq, index) => {
+                    const duration = pattern.durations ? pattern.durations[index] : 0.1;
+                    const time = pattern.times ? startTime + pattern.times[index] : startTime;
+                    
+                    this.playFrequencyRamp(
+                        freq,
+                        duration,
+                        time,
+                        track.instrument.type as OscillatorType,
+                        track.instrument.volume,
+                        track.instrument.envelope
+                    );
+                });
+            }
+        };
+        
+        // Schedule the pattern using Web Audio API timing
+        const scheduleNext = () => {
+            if (!this.audioContext || !this.currentMusicConfig || this.currentMusicConfig !== config) {
+                this.trackIntervals.delete(track.name);
+                return;
+            }
+            
+            const now = this.audioContext.currentTime;
+            
+            // Schedule ahead by 100ms to ensure smooth playback
+            while (nextScheduleTime < now + 0.1) {
+                schedulePattern(nextScheduleTime);
+                nextScheduleTime += loopDuration;
+                
+                // If not looping, schedule only once
+                if (!loop || track.pattern.loop === false) {
+                    this.trackIntervals.delete(track.name);
+                    return;
+                }
+            }
+            
+            // Use setTimeout with a shorter interval for checking
+            const timeoutId = setTimeout(scheduleNext, 50);
+            this.trackIntervals.set(track.name, timeoutId as unknown as NodeJS.Timeout);
+        };
+        
+        // Start scheduling
+        nextScheduleTime = this.audioContext.currentTime;
+        scheduleNext();
+    }
+    
+    private playNoteWithEnvelope(
+        frequency: number, 
+        duration: number, 
+        startTime: number, 
+        type: OscillatorType, 
+        volume: number,
+        envelope?: EnvelopeSettings
+    ): void {
+        if (envelope) {
+            this.playSoundEffect(frequency, duration, type, volume, envelope);
+        } else {
+            this.playNote(frequency, duration, startTime, type, volume);
+        }
+    }
+    
+    private playFrequencyRamp(
+        freq: FrequencyRamp,
+        duration: number,
+        startTime: number,
+        type: OscillatorType,
+        volume: number,
+        envelope?: EnvelopeSettings
+    ): void {
+        if (!this.audioContext || !this.masterGain) return;
+        
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(freq.start, startTime);
+        if (freq.end !== freq.start) {
+            oscillator.frequency.exponentialRampToValueAtTime(freq.end, startTime + duration);
+        }
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.masterGain);
+        
+        if (envelope) {
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(volume, startTime + envelope.attack);
+            gainNode.gain.exponentialRampToValueAtTime(volume * envelope.decay, startTime + envelope.attack + envelope.decayTime);
+            gainNode.gain.setValueAtTime(volume * envelope.sustain, startTime + duration - envelope.release);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+        } else {
+            gainNode.gain.setValueAtTime(volume, startTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+        }
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+        
+        this.activeNodes.push({ oscillator, gainNode });
+        
+        oscillator.addEventListener('ended', () => {
+            const index = this.activeNodes.findIndex(node => node.oscillator === oscillator);
+            if (index !== -1) {
+                this.activeNodes.splice(index, 1);
+            }
+        });
+    }
+    
+    private stopPatternPlayback(): void {
+        // Stop all track intervals
+        this.trackIntervals.forEach(interval => clearInterval(interval));
+        this.trackIntervals.clear();
+        this.currentMusicConfig = null;
+    }
+    
+    // New unified methods using patterns
+    playBGMFromPattern(name: BGMName): void {
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            const musicConfig = resourceLoader.getMusicPattern('bgm', name);
+            
+            if (musicConfig) {
+                this.stopBGM();
+                this.stopPatternPlayback();
+                this.currentBGM = name as BGMType;
+                this.playMusicPattern(musicConfig);
+            } else {
+                // Fallback to existing implementation
+                this.playBGM(name);
+            }
+        } catch {
+            // ResourceLoader not initialized, use existing implementation
+            this.playBGM(name);
+        }
+    }
+    
+    playSEFromPattern(name: string): void {
+        try {
+            const resourceLoader = ResourceLoader.getInstance();
+            const seConfig = resourceLoader.getMusicPattern('se', name);
+            
+            if (seConfig) {
+                this.playMusicPattern(seConfig);
+            } else {
+                // Fallback to existing implementation
+                this.playSE(name as SEName);
+            }
+        } catch {
+            // ResourceLoader not initialized, use existing implementation
+            if (['coin', 'jump', 'damage', 'button', 'powerup'].includes(name)) {
+                this.playSE(name as SEName);
+            }
         }
     }
 }

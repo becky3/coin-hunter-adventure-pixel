@@ -1,0 +1,23 @@
+{
+  "name": "Button Click",
+  "tracks": [
+    {
+      "instrument": {
+        "type": "square",
+        "volume": 0.2,
+        "envelope": {
+          "attack": 0.01,
+          "decayTime": 0.02,
+          "decay": 0.5,
+          "sustain": 0.3,
+          "release": 0.02
+        }
+      },
+      "pattern": {
+        "frequencies": [{ "start": 800, "end": 800 }],
+        "durations": [0.05],
+        "times": [0]
+      }
+    }
+  ]
+}
