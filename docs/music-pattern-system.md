@@ -6,7 +6,24 @@
 
 ## ファイル構造
 
-音楽パターンは `/src/config/resources/music-patterns.json` に定義されています。
+音楽パターンは個別のJSONファイルとして以下のディレクトリに配置されています：
+
+```
+/src/config/resources/
+├── bgm/           # BGMファイル
+│   ├── title.json
+│   ├── game.json
+│   ├── victory.json
+│   └── gameover.json
+└── se/            # 効果音ファイル
+    ├── coin.json
+    ├── jump.json
+    ├── damage.json
+    ├── button.json
+    ├── gameStart.json
+    ├── goal.json
+    └── enemyDefeat.json
+```
 
 ## データフォーマット
 
@@ -131,15 +148,17 @@
 
 ### 新しいBGMの追加
 
-1. `music-patterns.json` の `bgm` セクションに新しいエントリを追加
+1. `/src/config/resources/bgm/` に新しいJSONファイルを作成（例: `boss.json`）
 2. 必要なトラック（bass、drums、melodyなど）を定義
-3. ゲームコードで `musicSystem.playBGMFromPattern('bgm名')` を呼び出し
+3. ResourceLoaderの `bgmFiles` 配列に新しいファイル名を追加
+4. ゲームコードで `musicSystem.playBGMFromPattern('boss')` を呼び出し
 
 ### 新しい効果音の追加
 
-1. `music-patterns.json` の `se` セクションに新しいエントリを追加
+1. `/src/config/resources/se/` に新しいJSONファイルを作成（例: `powerup.json`）
 2. 音のパターンを定義
-3. ゲームコードで `musicSystem.playSEFromPattern('se名')` を呼び出し
+3. ResourceLoaderの `seFiles` 配列に新しいファイル名を追加
+4. ゲームコードで `musicSystem.playSEFromPattern('powerup')` を呼び出し
 
 ## 利用可能な音符
 

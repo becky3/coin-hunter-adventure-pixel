@@ -1,0 +1,27 @@
+{
+  "name": "Coin Collect",
+  "tracks": [
+    {
+      "instrument": {
+        "type": "sine",
+        "volume": 0.5
+      },
+      "pattern": {
+        "notes": ["A5", "C6", "E6"],
+        "durations": [0.08, 0.08, 0.12],
+        "times": [0, 0.04, 0.08]
+      }
+    },
+    {
+      "instrument": {
+        "type": "triangle",
+        "volume": 0.3
+      },
+      "pattern": {
+        "notes": ["A6"],
+        "durations": [0.1],
+        "times": [0.06]
+      }
+    }
+  ]
+}

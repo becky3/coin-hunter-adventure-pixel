@@ -1,0 +1,70 @@
+{
+  "name": "Game Theme",
+  "tempo": 140,
+  "loop": true,
+  "tracks": [
+    {
+      "name": "drums",
+      "instrument": {
+        "type": "drums",
+        "volume": 0.3
+      },
+      "pattern": {
+        "beats": [
+          { "type": "kick", "time": 0 },
+          { "type": "hihat", "time": 0 },
+          { "type": "hihat", "time": 0.5 },
+          { "type": "kick", "time": 1 },
+          { "type": "snare", "time": 1 },
+          { "type": "hihat", "time": 1 },
+          { "type": "hihat", "time": 1.5 },
+          { "type": "kick", "time": 2 },
+          { "type": "hihat", "time": 2 },
+          { "type": "hihat", "time": 2.5 },
+          { "type": "kick", "time": 3 },
+          { "type": "snare", "time": 3 },
+          { "type": "hihat", "time": 3 },
+          { "type": "hihat", "time": 3.5 }
+        ],
+        "duration": 4,
+        "loop": true
+      }
+    },
+    {
+      "name": "bass",
+      "instrument": {
+        "type": "sawtooth",
+        "volume": 0.3
+      },
+      "pattern": {
+        "notes": [
+          "C3", "E3", "G3", "E3",
+          "F3", "A3", "C4", "A3",
+          "G3", "B3", "D4", "B3",
+          "C3", "E3", "G3", "E3"
+        ],
+        "durations": [
+          0.25, 0.25, 0.25, 0.25,
+          0.25, 0.25, 0.25, 0.25,
+          0.25, 0.25, 0.25, 0.25,
+          0.25, 0.25, 0.25, 0.25
+        ],
+        "loop": true
+      }
+    },
+    {
+      "name": "lead",
+      "instrument": {
+        "type": "square",
+        "volume": 0.25
+      },
+      "pattern": {
+        "notes": ["G5", "E5", "C5", "E5", "G5", "A5", "G5"],
+        "durations": [0.5, 0.5, 0.5, 0.5, 1, 0.5, 0.5],
+        "startAt": 4,
+        "repeatEvery": 8,
+        "loop": true
+      }
+    }
+  ]
+}

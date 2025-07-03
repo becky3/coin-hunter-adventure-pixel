@@ -92,8 +92,32 @@ export class ResourceLoader {
     private async loadMusicPatterns(): Promise<void> {
         if (!this.resourceIndex) return;
         
-        const musicPatternsPath = '/src/config/resources/music-patterns.json';
-        this.musicPatterns = await this.loadJSON(musicPatternsPath);
+        // Load all BGM and SE files
+        const bgmFiles = ['title', 'game', 'victory', 'gameover'];
+        const seFiles = ['coin', 'jump', 'damage', 'button', 'gameStart', 'goal', 'enemyDefeat'];
+        
+        this.musicPatterns = {
+            bgm: {},
+            se: {}
+        };
+        
+        // Load BGM files
+        for (const file of bgmFiles) {
+            const bgmPath = `/src/config/resources/bgm/${file}.json`;
+            const bgmData = await this.loadJSON(bgmPath);
+            if (bgmData) {
+                this.musicPatterns.bgm[file] = bgmData;
+            }
+        }
+        
+        // Load SE files
+        for (const file of seFiles) {
+            const sePath = `/src/config/resources/se/${file}.json`;
+            const seData = await this.loadJSON(sePath);
+            if (seData) {
+                this.musicPatterns.se[file] = seData;
+            }
+        }
     }
   
     // Getter methods
