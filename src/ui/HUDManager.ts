@@ -145,19 +145,19 @@ export class HUDManager {
         // Bottom border of HUD
         this.renderHorizontalBorder(renderer, 24);
 
-        // Render HUD text
+        // Render HUD text - First line
         renderer.drawText(`SCORE: ${this.hudData.score}`, 8, 8, '#FFFFFF');
         renderer.drawText(`LIVES: ${this.hudData.lives}`, 88, 8, '#FFFFFF');
         
+        // Render HUD text - Second line
         const minutes = Math.floor(this.hudData.time / 60);
         const seconds = this.hudData.time % 60;
         const timeStr = `TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-        renderer.drawText(timeStr, 152, 8, '#FFFFFF');
+        renderer.drawText(timeStr, 8, 16, '#FFFFFF');
         
-        
-        // Render stage name
+        // Render stage name on second line
         if (this.hudData.stageName) {
-            renderer.drawText(this.hudData.stageName, 240, 8, '#FFFFFF');
+            renderer.drawText(this.hudData.stageName, 120, 16, '#FFFFFF');
         }
     }
 

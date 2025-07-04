@@ -156,6 +156,11 @@ export class GameCore {
         this.gameLoop.start((deltaTime) => {
 
             systemManager.updateSystems(deltaTime);
+            
+            // Update debug overlay directly if it exists
+            if (this.debugOverlay) {
+                this.debugOverlay.update(deltaTime);
+            }
 
             const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
             systemManager.renderSystems(renderer);

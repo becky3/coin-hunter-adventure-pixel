@@ -42,6 +42,37 @@ async function runTest() {
         const startPos = await t.getPlayerPosition();
         console.log(`Start position: (${startPos.x.toFixed(2)}, ${startPos.y.toFixed(2)})`);
         
+        // Check initial debug display
+        const initialDebugDisplay = await t.page.evaluate(() => {
+            const debugElement = document.getElementById('debug-info');
+            if (!debugElement) return null;
+            
+            // Debug: Check all div elements
+            const allDivs = debugElement.querySelectorAll('div');
+            const divContents = [];
+            allDivs.forEach((div, index) => {
+                divContents.push(`${index}: ${div.textContent}`);
+            });
+            
+            // Find Player X and Player Y divs by text content
+            let playerXSpan = null;
+            let playerYSpan = null;
+            allDivs.forEach(div => {
+                if (div.textContent.startsWith('Player X:')) {
+                    playerXSpan = div.querySelector('span');
+                } else if (div.textContent.startsWith('Player Y:')) {
+                    playerYSpan = div.querySelector('span');
+                }
+            });
+            
+            return {
+                playerX: playerXSpan?.textContent || 'NOT FOUND',
+                playerY: playerYSpan?.textContent || 'NOT FOUND',
+                divContents: divContents
+            };
+        });
+        console.log(`Debug display - Initial X: ${initialDebugDisplay?.playerX}, Y: ${initialDebugDisplay?.playerY}`);
+        
         // Move right
         await t.movePlayer('right', 1000);
         await t.wait(500);
@@ -51,6 +82,45 @@ async function runTest() {
         if (afterRightPos.x <= startPos.x) {
             throw new Error('Player did not move right');
         }
+        
+        // Check debug display after movement
+        const afterMoveDebugDisplay = await t.page.evaluate(() => {
+            const debugElement = document.getElementById('debug-info');
+            if (!debugElement) return null;
+            
+            // Find Player X and Player Y divs by text content
+            const allDivs = debugElement.querySelectorAll('div');
+            let playerXSpan = null;
+            let playerYSpan = null;
+            allDivs.forEach(div => {
+                if (div.textContent.startsWith('Player X:')) {
+                    playerXSpan = div.querySelector('span');
+                } else if (div.textContent.startsWith('Player Y:')) {
+                    playerYSpan = div.querySelector('span');
+                }
+            });
+            
+            return {
+                playerX: playerXSpan?.textContent || 'NOT FOUND',
+                playerY: playerYSpan?.textContent || 'NOT FOUND'
+            };
+        });
+        console.log(`Debug display - After move X: ${afterMoveDebugDisplay?.playerX}, Y: ${afterMoveDebugDisplay?.playerY}`);
+        
+        // Verify debug display is updating
+        if (!initialDebugDisplay || initialDebugDisplay.playerX === 'NOT FOUND') {
+            throw new Error('Debug display not found or player X coordinate not displayed');
+        }
+        
+        if (!afterMoveDebugDisplay || afterMoveDebugDisplay.playerX === 'NOT FOUND') {
+            throw new Error('Debug display not found after movement or player X coordinate not displayed');
+        }
+        
+        if (initialDebugDisplay.playerX === afterMoveDebugDisplay.playerX) {
+            throw new Error(`Debug display X coordinate did not update. Initial: ${initialDebugDisplay.playerX}, After move: ${afterMoveDebugDisplay.playerX}`);
+        }
+        
+        console.log('✅ Debug display is updating correctly');
         
         // Test jump (simplified - just check if we can press the button)
         console.log('\n--- Testing Jump ---');

@@ -2,11 +2,13 @@
 
 import { ServiceLocator } from '../services/ServiceLocator';
 import { GAME_CONSTANTS } from '../config/GameConstants';
+import { PlayState } from '../states/PlayState';
 
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
     private debugElement?: HTMLDivElement;
     private statsElements: Map<string, HTMLElement> = new Map();
+    private updateLogged = false;
     
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
@@ -21,6 +23,19 @@ export class DebugOverlay {
         }
         
         (window as any).debugOverlay = this;
+        
+        // Add test functions to window for debugging
+        (window as any).testDebugUpdate = () => {
+            console.log('[DebugOverlay] Manual update test');
+            this.update(0);
+        };
+        
+        (window as any).checkDebugStats = () => {
+            console.log('[DebugOverlay] Stats elements:', this.statsElements);
+            this.statsElements.forEach((element, key) => {
+                console.log(`  ${key}: ${element.textContent}`);
+            });
+        };
     }
 
     private createDebugUI(): void {
@@ -51,7 +66,9 @@ export class DebugOverlay {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
             this.debugElement!.appendChild(statElement);
-            this.statsElements.set(stat.toLowerCase().replace(' ', '_'), statElement.querySelector('span')!);
+            const key = stat.toLowerCase().replace(' ', '_');
+            this.statsElements.set(key, statElement.querySelector('span')!);
+            console.log(`[DebugOverlay] Registered stat: ${stat} with key: ${key}`);
         });
         
         this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
@@ -104,6 +121,12 @@ export class DebugOverlay {
     }
 
     update(_deltaTime: number): void {
+        // Log once to check if update is being called
+        if (!this.updateLogged) {
+            console.log('[DebugOverlay] update() is being called');
+            this.updateLogged = true;
+        }
+        
         // Update player position if available
         const game = (window as any).game;
         if (!game) {
@@ -114,6 +137,8 @@ export class DebugOverlay {
         const currentState = game.stateManager?.currentState;
         if (!currentState) {
             console.warn('[DebugOverlay] currentState is not available');
+            console.warn('[DebugOverlay] game.stateManager:', game.stateManager);
+            console.warn('[DebugOverlay] game.stateManager?.currentState:', game.stateManager?.currentState);
             return;
         }
         
@@ -128,13 +153,18 @@ export class DebugOverlay {
         
         // Check if the current state is PlayState (has player getter)
         if (currentState && currentState.name === 'play') {
-            // Access player through the public getter
-            const player = currentState.player;
+            // Cast to PlayState to access player property
+            const playState = currentState as PlayState;
+            console.log('[DebugOverlay] PlayState cast:', playState);
+            console.log('[DebugOverlay] playState.player:', playState.player);
+            
+            const player = playState.player;
             if (player) {
                 this.updateStat('player_x', Math.floor(player.x).toString());
                 this.updateStat('player_y', Math.floor(player.y).toString());
             } else {
                 // Player not available yet
+                console.warn('[DebugOverlay] Player not available in PlayState');
                 this.updateStat('player_x', '-');
                 this.updateStat('player_y', '-');
             }

@@ -147,6 +147,16 @@ export class PixelRenderer {
         const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
         const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
         
+        // Check if text will be drawn outside the game resolution bounds
+        const textWidth = text.length * FONT.GRID;
+        const textHeight = FONT.SIZE;
+        
+        if (snappedX < 0 || snappedY < 0 || 
+            snappedX + textWidth > GAME_RESOLUTION.WIDTH || 
+            snappedY + textHeight > GAME_RESOLUTION.HEIGHT) {
+            console.warn(`[PixelRenderer] Text "${text}" is being drawn outside screen bounds at (${x}, ${y}). Game resolution: ${GAME_RESOLUTION.WIDTH}x${GAME_RESOLUTION.HEIGHT}`);
+        }
+        
         const drawX = Math.floor((snappedX - this.cameraX) * this.scale);
         const drawY = Math.floor((snappedY - this.cameraY) * this.scale);
         const scaledSize = FONT.SIZE * this.scale;
