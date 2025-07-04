@@ -151,6 +151,12 @@ export class PlayState implements GameState {
         if (player) {
             this.hudManager.updateLives(player.health);
         }
+        
+        // Set stage name in HUD
+        const levelData = this.levelManager.getLevelData();
+        if (levelData && levelData.name) {
+            this.hudManager.updateStageName(levelData.name);
+        }
 
         // Setup input listeners
         this.setupInputListeners();
@@ -192,6 +198,9 @@ export class PlayState implements GameState {
         if (player) {
             // Update HUD lives
             this.hudManager.updateLives(player.health);
+            
+            // Update player position in HUD (for debug display)
+            this.hudManager.updatePlayerPosition(player.x, player.y);
 
             // Boundary checks
             const dimensions = this.levelManager.getLevelDimensions();
@@ -202,8 +211,14 @@ export class PlayState implements GameState {
 
             // Death by falling
             if (player.y > dimensions.height) {
-                player.takeDamage(player.maxHealth);
-                this.eventBus.emit('player:died');
+                player.takeDamage(1);  // Take 1 damage instead of all health
+                
+                // Respawn at the start of the level
+                const spawn = this.levelManager.getPlayerSpawn();
+                player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
+                
+                // Reset camera to player position
+                this.cameraController.update(0);
             }
         }
 
@@ -364,7 +379,19 @@ export class PlayState implements GameState {
         
         console.log('Game Over!');
         this.gameState = 'gameover';
-        this.game.stateManager.setState('menu');
+        
+        // Stop the BGM
+        if (this.game.musicSystem) {
+            this.game.musicSystem.stopBGM();
+        }
+        
+        // Show game over message
+        this.hudManager.showMessage('GAME OVER', 999999);
+        
+        // Transition to menu after 2 seconds
+        setTimeout(() => {
+            this.game.stateManager.setState('menu');
+        }, 2000);
     }
 
     private stageClear(): void {

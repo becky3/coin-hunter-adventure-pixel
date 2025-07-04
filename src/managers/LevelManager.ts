@@ -4,6 +4,7 @@ import { TILE_SIZE } from '../constants/gameConstants';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 
 export interface LevelData {
+    name?: string;
     width: number;
     height: number;
     tileSize: number;
@@ -128,6 +129,10 @@ export class LevelManager {
 
     getEntities(): Array<{ type: string; x: number; y: number }> {
         return this.levelData?.entities || [];
+    }
+    
+    getLevelLoader(): LevelLoader {
+        return this.levelLoader;
     }
 
     // Get tile at world position

@@ -159,6 +159,10 @@ export class Player extends Entity {
             speed: { ...DEFAULT_ANIMATION_CONFIG.speed, ...playerConfig.animations.speed },
             frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
         } : DEFAULT_ANIMATION_CONFIG;
+        
+        // Reduce gravity to extend air time (about half of default)
+        // This makes jumps feel more floaty without changing the jump height
+        this.gravityStrength = 0.35;
     }
     
     setInputManager(inputManager: InputSystem): void {

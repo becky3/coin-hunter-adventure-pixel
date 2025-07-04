@@ -7,6 +7,9 @@ export interface HUDData {
     lives: number;
     time: number;
     coinsCollected: number;
+    playerX?: number;
+    playerY?: number;
+    stageName?: string;
 }
 
 interface GameServices {
@@ -81,6 +84,15 @@ export class HUDManager {
         this.hudData.time = time;
     }
     
+    updatePlayerPosition(x: number, y: number): void {
+        this.hudData.playerX = Math.floor(x);
+        this.hudData.playerY = Math.floor(y);
+    }
+    
+    updateStageName(stageName: string): void {
+        this.hudData.stageName = stageName;
+    }
+    
     initialize(): void {
         // Initialize HUD
     }
@@ -141,6 +153,16 @@ export class HUDManager {
         const seconds = this.hudData.time % 60;
         const timeStr = `TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
         renderer.drawText(timeStr, 152, 8, '#FFFFFF');
+        
+        // Render player coordinates for debugging
+        if (this.hudData.playerX !== undefined && this.hudData.playerY !== undefined) {
+            renderer.drawText(`X:${this.hudData.playerX} Y:${this.hudData.playerY}`, 8, 16, '#FFFF00');
+        }
+        
+        // Render stage name
+        if (this.hudData.stageName) {
+            renderer.drawText(this.hudData.stageName, 240, 8, '#FFFFFF');
+        }
     }
 
     private renderPauseScreen(renderer: PixelRenderer): void {

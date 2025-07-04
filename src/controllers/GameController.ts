@@ -83,6 +83,19 @@ export class GameController {
                 // Create test entities if no level entities
                 this.entityManager.createTestEntities();
             }
+            
+            // Create goal if defined in level data
+            const levelLoader = this.levelManager.getLevelLoader();
+            if (levelLoader) {
+                const goalPosition = levelLoader.getGoalPosition(levelData);
+                if (goalPosition) {
+                    this.entityManager.createEntityFromConfig({
+                        type: 'goal',
+                        x: goalPosition.x,
+                        y: goalPosition.y
+                    });
+                }
+            }
         }
         
         // Setup camera
