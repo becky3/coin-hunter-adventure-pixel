@@ -215,7 +215,9 @@ export class PlayState implements GameState {
 
             // Death by falling
             if (player.y > dimensions.height) {
+                console.log(`[PlayState] Player fell! Health before: ${player.health}`);
                 player.takeDamage(1);  // Take 1 damage instead of all health
+                console.log(`[PlayState] Health after damage: ${player.health}`);
                 
                 // Respawn at the start of the level
                 const spawn = this.levelManager.getPlayerSpawn();
@@ -329,7 +331,7 @@ export class PlayState implements GameState {
     private renderTileMap(renderer: PixelRenderer): void {
         const tileMap = this.levelManager.getTileMap();
         if (!tileMap || tileMap.length === 0) {
-            console.warn('No tileMap available');
+            // TileMap not loaded yet, this is normal during initialization
             return;
         }
         
