@@ -143,7 +143,7 @@ export class PixelRenderer {
         }
     }
     
-    drawText(text: string, x: number, y: number, color: string = '#FFFFFF', alpha: number = 1): void {
+    drawText(text: string, x: number, y: number, color: string = '#FFFFFF', alpha: number = 1, suppressWarning: boolean = false): void {
         const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
         const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
         
@@ -151,9 +151,9 @@ export class PixelRenderer {
         const textWidth = text.length * FONT.GRID;
         const textHeight = FONT.SIZE;
         
-        if (snappedX < 0 || snappedY < 0 || 
+        if (!suppressWarning && (snappedX < 0 || snappedY < 0 || 
             snappedX + textWidth > GAME_RESOLUTION.WIDTH || 
-            snappedY + textHeight > GAME_RESOLUTION.HEIGHT) {
+            snappedY + textHeight > GAME_RESOLUTION.HEIGHT)) {
             console.warn(`[PixelRenderer] Text "${text}" is being drawn outside screen bounds at (${x}, ${y}). Game resolution: ${GAME_RESOLUTION.WIDTH}x${GAME_RESOLUTION.HEIGHT}`);
         }
         
@@ -171,10 +171,10 @@ export class PixelRenderer {
         this.ctx.restore();
     }
     
-    drawTextCentered(text: string, centerX: number, y: number, color: string = '#FFFFFF', alpha: number = 1): void {
+    drawTextCentered(text: string, centerX: number, y: number, color: string = '#FFFFFF', alpha: number = 1, suppressWarning: boolean = false): void {
         const textWidth = text.length * FONT.GRID;
         const x = centerX - Math.floor(textWidth / 2);
-        this.drawText(text, x, y, color, alpha);
+        this.drawText(text, x, y, color, alpha, suppressWarning);
     }
     
     drawLine(x1: number, y1: number, x2: number, y2: number, color: string = '#FFFFFF', width: number = 1): void {

@@ -180,8 +180,8 @@ export class MenuState implements GameState {
     private drawTitleLogo(renderer: PixelRenderer): void {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         const titleY = this.logoY;
-        renderer.drawTextCentered('COIN HUNTER', centerX, titleY, '#FFD700');
-        renderer.drawTextCentered('ADVENTURE', centerX, titleY + 16, '#FF6B6B');
+        renderer.drawTextCentered('COIN HUNTER', centerX, titleY, '#FFD700', 1, true);
+        renderer.drawTextCentered('ADVENTURE', centerX, titleY + 16, '#FF6B6B', 1, true);
     }
     
     private drawMenuOptions(renderer: PixelRenderer): void {
