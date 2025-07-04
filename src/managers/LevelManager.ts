@@ -206,23 +206,4 @@ export class LevelManager {
         // This method is here for compatibility with GameController
     }
     
-    getStageInfo(stageId: string) {
-        return this.levelLoader.getStageInfo(stageId);
-    }
-    
-    getFirstUnlockedStage(): string {
-        // Ensure stage list is loaded
-        if (!this.levelLoader.getStageList().length) {
-            return 'tutorial';
-        }
-        
-        const stages = this.levelLoader.getStageList();
-        // Find the first unlocked non-tutorial stage
-        const firstStage = stages.find(s => s.unlocked && s.id !== 'tutorial' && s.id !== 'performance-test');
-        if (firstStage) {
-            return firstStage.id;
-        }
-        // Fall back to tutorial if no other stages are unlocked
-        return 'tutorial';
-    }
 }

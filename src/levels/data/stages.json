@@ -5,26 +5,19 @@
       "id": "tutorial",
       "name": "TUTORIAL",
       "description": "Learn basic controls",
-      "filename": "tutorial.json",
-      "unlocked": true,
-      "cleared": false
+      "filename": "tutorial.json"
     },
     {
       "id": "stage1-1",
       "name": "STAGE 1-1",
       "description": "The adventure begins",
-      "filename": "stage1-1.json",
-      "unlocked": true,
-      "cleared": false
+      "filename": "stage1-1.json"
     },
     {
       "id": "performance-test",
       "name": "PERFORMANCE TEST",
       "description": "Test with many coins",
-      "filename": "performance-test.json",
-      "unlocked": true,
-      "cleared": false
+      "filename": "performance-test.json"
     }
-  ],
-  "currentStage": "tutorial"
+  ]
 }

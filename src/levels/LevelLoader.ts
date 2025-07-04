@@ -3,17 +3,10 @@ interface StageInfo {
     name: string;
     description: string;
     filename: string;
-    unlocked: boolean;
-    cleared?: boolean;
-    bestScore?: number;
-    bestTime?: number;
-    maxCoins?: number;
-    minDeaths?: number;
 }
 
 interface StageList {
     stages: StageInfo[];
-    currentStage: string;
 }
 
 interface StageData {
@@ -36,26 +29,6 @@ interface EntityData {
     [key: string]: any;
 }
 
-interface ClearInfo {
-    score: number;
-    time: number;
-    coins: number;
-    deaths: number;
-}
-
-interface SavedProgress {
-    version: number;
-    lastPlayed: number;
-    stages: Array<{
-        id: string;
-        unlocked: boolean;
-        cleared: boolean;
-        bestScore: number;
-        bestTime: number;
-        maxCoins: number;
-        minDeaths: number;
-    }>;
-}
 
 export class LevelLoader {
     private stages: StageInfo[] | null;
@@ -83,8 +56,6 @@ export class LevelLoader {
             this.stages = data.stages;
             this.stageList = data;
             
-            this.loadProgress();
-            
             return data;
         } catch (error) {
             console.error('ステージリスト読み込み失敗:', error);
@@ -95,18 +66,15 @@ export class LevelLoader {
                         id: 'tutorial',
                         name: 'TUTORIAL',
                         description: 'LEARN BASIC CONTROLS',
-                        filename: 'tutorial.json',
-                        unlocked: true
+                        filename: 'tutorial.json'
                     },
                     {
-                        id: 'level1',
-                        name: 'GRASSLAND 1-1',
+                        id: 'stage1-1',
+                        name: 'STAGE 1-1',
                         description: 'THE ADVENTURE BEGINS',
-                        filename: 'level1.json',
-                        unlocked: false
+                        filename: 'stage1-1.json'
                     }
-                ],
-                currentStage: 'tutorial'
+                ]
             };
             
             this.stages = fallbackData.stages;
@@ -187,106 +155,6 @@ export class LevelLoader {
         return this.stages![currentIndex + 1].id;
     }
     
-    updateStageClearInfo(stageId: string, clearInfo: ClearInfo): void {
-        const stage = this.stages?.find(s => s.id === stageId);
-        if (!stage) return;
-        
-        const { score, time, coins, deaths } = clearInfo;
-        
-        if (!stage.bestScore || score > stage.bestScore) {
-            stage.bestScore = score;
-        }
-        if (!stage.bestTime || time < stage.bestTime) {
-            stage.bestTime = time;
-        }
-        if (!stage.maxCoins || coins > stage.maxCoins) {
-            stage.maxCoins = coins;
-        }
-        if (!stage.minDeaths || deaths < stage.minDeaths) {
-            stage.minDeaths = deaths;
-        }
-        
-        stage.cleared = true;
-        
-        const currentIndex = this.stages!.findIndex(s => s.id === stageId);
-        if (currentIndex >= 0 && currentIndex < this.stages!.length - 1) {
-            this.stages![currentIndex + 1].unlocked = true;
-        }
-        
-        this.saveProgress();
-    }
-    
-    private saveProgress(): void {
-        if (!this.stages) return;
-        
-        const progress: SavedProgress = {
-            version: 1,
-            lastPlayed: Date.now(),
-            stages: this.stages.map(s => ({
-                id: s.id,
-                unlocked: s.unlocked || false,
-                cleared: s.cleared || false,
-                bestScore: s.bestScore || 0,
-                bestTime: s.bestTime || 0,
-                maxCoins: s.maxCoins || 0,
-                minDeaths: s.minDeaths || 0
-            }))
-        };
-        
-        try {
-            localStorage.setItem('pixelAdventureProgress', JSON.stringify(progress));
-        } catch (error) {
-            console.error('進行状況の保存に失敗:', error);
-        }
-    }
-    
-    private loadProgress(): void {
-        try {
-            const saved = localStorage.getItem('pixelAdventureProgress');
-            if (!saved) return;
-            
-            const progress = JSON.parse(saved) as SavedProgress;
-            if (!progress.stages || !this.stages) return;
-            
-            if (progress.version !== 1) {
-                console.warn('進行状況のバージョンが異なります');
-                return;
-            }
-            
-            progress.stages.forEach(savedStage => {
-                const stage = this.stages!.find(s => s.id === savedStage.id);
-                if (stage) {
-                    stage.unlocked = savedStage.unlocked;
-                    stage.cleared = savedStage.cleared;
-                    stage.bestScore = savedStage.bestScore || 0;
-                    stage.bestTime = savedStage.bestTime || 0;
-                    stage.maxCoins = savedStage.maxCoins || 0;
-                    stage.minDeaths = savedStage.minDeaths || 0;
-                }
-            });
-        } catch (error) {
-            console.error('進行状況の読み込みに失敗:', error);
-        }
-    }
-    
-    resetProgress(): void {
-        if (!this.stages) return;
-        
-        this.stages.forEach((stage, index) => {
-            stage.unlocked = index === 0;
-            stage.cleared = false;
-            stage.bestScore = 0;
-            stage.bestTime = 0;
-            stage.maxCoins = 0;
-            stage.minDeaths = 0;
-        });
-        
-        try {
-            localStorage.removeItem('pixelAdventureProgress');
-        } catch (error) {
-            console.error('進行状況のリセットに失敗:', error);
-        }
-    }
     
     getStageList(): StageInfo[] {
         return this.stages || [];
