@@ -15,7 +15,8 @@ async function runAutomatedTests() {
     try {
         // テスト1: ゲーム初期化
         console.log('テスト1: ゲーム初期化');
-        await page.goto('http://localhost:3000/', { waitUntil: 'networkidle0' });
+        // stage0-1をURLパラメータで指定
+        await page.goto('http://localhost:3000/?stage=0&area=1', { waitUntil: 'networkidle0' });
         
         const initialized = await page.waitForFunction(
             () => window.game?.gameLoop?.running,

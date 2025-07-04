@@ -2,6 +2,7 @@ import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { GameState } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputEvent } from '../core/InputSystem';
+import { URLParams } from '../utils/urlParams';
 
 interface MenuOption {
     text: string;
@@ -278,7 +279,16 @@ export class MenuState implements GameState {
                 this.game.musicSystem.playSEFromPattern('gameStart');
             }
             try {
-                this.game.stateManager.setState('play');
+                // URLパラメータからステージIDを取得
+                const urlParams = new URLParams();
+                const stageId = urlParams.getStageId();
+                
+                if (stageId) {
+                    console.log(`Starting stage from URL parameter: ${stageId}`);
+                    this.game.stateManager.setState('play', { level: stageId });
+                } else {
+                    this.game.stateManager.setState('play');
+                }
             } catch (error) {
                 console.error('Error transitioning to play state:', error);
             }
