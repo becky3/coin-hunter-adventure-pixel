@@ -78,7 +78,7 @@ async function runAutomatedTests() {
             );
             
             // さらに待機して初期化を確実に完了させる
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 2000));
         } else {
             console.log('  ✗ ゲーム開始失敗');
             testsFailed++;
