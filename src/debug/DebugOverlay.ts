@@ -46,12 +46,12 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['Speed', 'State'];
+        const stats = ['Speed', 'State', 'Player X', 'Player Y'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
             this.debugElement!.appendChild(statElement);
-            this.statsElements.set(stat.toLowerCase(), statElement.querySelector('span')!);
+            this.statsElements.set(stat.toLowerCase().replace(' ', '_'), statElement.querySelector('span')!);
         });
         
         this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
@@ -104,6 +104,13 @@ export class DebugOverlay {
     }
 
     update(_deltaTime: number): void {
+        // Update player position if available
+        const game = (window as any).game;
+        if (game?.stateManager?.currentState?.player) {
+            const player = game.stateManager.currentState.player;
+            this.updateStat('player_x', Math.floor(player.x).toString());
+            this.updateStat('player_y', Math.floor(player.y).toString());
+        }
     }
 
     toggle(): void {

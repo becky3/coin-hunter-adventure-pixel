@@ -154,8 +154,12 @@ export class PlayState implements GameState {
         
         // Set stage name in HUD
         const levelData = this.levelManager.getLevelData();
+        console.log('[PlayState] levelData:', levelData);
         if (levelData && levelData.name) {
             this.hudManager.updateStageName(levelData.name);
+        } else {
+            // Fallback to using the level ID
+            this.hudManager.updateStageName(levelName.toUpperCase().replace('-', ' '));
         }
 
         // Setup input listeners
@@ -198,9 +202,6 @@ export class PlayState implements GameState {
         if (player) {
             // Update HUD lives
             this.hudManager.updateLives(player.health);
-            
-            // Update player position in HUD (for debug display)
-            this.hudManager.updatePlayerPosition(player.x, player.y);
 
             // Boundary checks
             const dimensions = this.levelManager.getLevelDimensions();
@@ -216,9 +217,6 @@ export class PlayState implements GameState {
                 // Respawn at the start of the level
                 const spawn = this.levelManager.getPlayerSpawn();
                 player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
-                
-                // Reset camera to player position
-                this.cameraController.update(0);
             }
         }
 

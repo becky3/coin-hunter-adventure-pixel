@@ -312,6 +312,11 @@ export class MenuState implements GameState {
     
     exit(): void {
         this.removeInputListeners();
+        
+        // Stop menu BGM when leaving menu
+        if (this.game.musicSystem) {
+            this.game.musicSystem.stopBGM();
+        }
     }
     
     destroy(): void {

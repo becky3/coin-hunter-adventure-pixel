@@ -154,10 +154,6 @@ export class HUDManager {
         const timeStr = `TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
         renderer.drawText(timeStr, 152, 8, '#FFFFFF');
         
-        // Render player coordinates for debugging
-        if (this.hudData.playerX !== undefined && this.hudData.playerY !== undefined) {
-            renderer.drawText(`X:${this.hudData.playerX} Y:${this.hudData.playerY}`, 8, 16, '#FFFF00');
-        }
         
         // Render stage name
         if (this.hudData.stageName) {
