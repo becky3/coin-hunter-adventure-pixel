@@ -2,10 +2,10 @@
   "version": 1,
   "stages": [
     {
-      "id": "tutorial",
-      "name": "TUTORIAL",
-      "description": "Learn basic controls",
-      "filename": "tutorial.json"
+      "id": "stage0-1",
+      "name": "STAGE 0-1",
+      "description": "Test stage for E2E testing",
+      "filename": "stage0-1.json"
     },
     {
       "id": "stage1-1",
