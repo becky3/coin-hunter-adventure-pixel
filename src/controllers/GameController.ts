@@ -89,7 +89,7 @@ export class GameController {
             if (levelLoader) {
                 const goalPosition = levelLoader.getGoalPosition(levelData);
                 if (goalPosition) {
-                    this.entityManager.createEntityFromConfig({
+                    this.entityManager.createEntity({
                         type: 'goal',
                         x: goalPosition.x,
                         y: goalPosition.y
