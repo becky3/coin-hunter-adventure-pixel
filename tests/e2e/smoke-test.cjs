@@ -71,7 +71,7 @@ async function runAutomatedTests() {
             await page.waitForFunction(
                 () => {
                     const state = window.game?.stateManager?.currentState;
-                    return state?.name === 'play' && state?.entityManager?.getPlayer() !== undefined;
+                    return state?.name === 'play' && state?.player !== undefined;
                 },
                 { timeout: 5000 }
             );
@@ -87,7 +87,7 @@ async function runAutomatedTests() {
         console.log('\nテスト4: プレイヤー存在確認');
         const playerExists = await page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
-            const player = state?.entityManager?.getPlayer();
+            const player = state?.player;
             return !!player && player.x !== undefined && player.y !== undefined;
         });
         
@@ -103,7 +103,7 @@ async function runAutomatedTests() {
         console.log('\nテスト5: プレイヤー移動');
         const initialX = await page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
-            return state?.entityManager?.getPlayer()?.x;
+            return state?.player?.x;
         });
         
         await page.keyboard.down('ArrowRight');
@@ -112,7 +112,7 @@ async function runAutomatedTests() {
         
         const finalX = await page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
-            return state?.entityManager?.getPlayer()?.x;
+            return state?.player?.x;
         });
         
         if (finalX > initialX) {
