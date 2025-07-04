@@ -12,6 +12,13 @@ export class URLParams {
      * ステージ番号とエリア番号からステージIDを生成
      */
     getStageId(): string | null {
+        // 簡潔な形式: ?s=1-1
+        const shortForm = this.params.get('s');
+        if (shortForm) {
+            return `stage${shortForm}`;
+        }
+        
+        // 個別指定形式: ?stage=1&area=1
         const stage = this.params.get('stage');
         const area = this.params.get('area');
         
@@ -19,7 +26,7 @@ export class URLParams {
             return `stage${stage}-${area}`;
         }
         
-        // 旧形式のサポート（直接ステージID指定）
+        // 完全な形式: ?level=stage0-1
         const directStage = this.params.get('level');
         if (directStage) {
             return directStage;
