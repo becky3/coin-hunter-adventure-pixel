@@ -18,20 +18,6 @@ export class URLParams {
             return `stage${shortForm}`;
         }
         
-        // 個別指定形式: ?stage=1&area=1
-        const stage = this.params.get('stage');
-        const area = this.params.get('area');
-        
-        if (stage && area) {
-            return `stage${stage}-${area}`;
-        }
-        
-        // 完全な形式: ?level=stage0-1
-        const directStage = this.params.get('level');
-        if (directStage) {
-            return directStage;
-        }
-        
         return null;
     }
     
