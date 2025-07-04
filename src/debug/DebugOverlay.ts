@@ -106,17 +106,46 @@ export class DebugOverlay {
     update(_deltaTime: number): void {
         // Update player position if available
         const game = (window as any).game;
-        const currentState = game?.stateManager?.currentState;
+        if (!game) {
+            console.warn('[DebugOverlay] game is not available');
+            return;
+        }
+        
+        const currentState = game.stateManager?.currentState;
+        if (!currentState) {
+            console.warn('[DebugOverlay] currentState is not available');
+            return;
+        }
+        
+        // Debug log once per state change
+        if (this.lastStateName !== currentState.name) {
+            this.lastStateName = currentState.name;
+            console.log('[DebugOverlay] State changed to:', currentState.name);
+            console.log('[DebugOverlay] currentState object:', currentState);
+            console.log('[DebugOverlay] Has player property:', 'player' in currentState);
+            console.log('[DebugOverlay] Player value:', currentState.player);
+        }
         
         // Check if the current state is PlayState (has player getter)
-        if (currentState && currentState.name === 'play' && currentState.player) {
+        if (currentState && currentState.name === 'play') {
+            // Access player through the public getter
             const player = currentState.player;
             if (player) {
                 this.updateStat('player_x', Math.floor(player.x).toString());
                 this.updateStat('player_y', Math.floor(player.y).toString());
+            } else {
+                // Player not available yet
+                this.updateStat('player_x', '-');
+                this.updateStat('player_y', '-');
             }
+        } else {
+            // Not in play state, clear player position
+            this.updateStat('player_x', '-');
+            this.updateStat('player_y', '-');
         }
     }
+    
+    private lastStateName?: string;
 
     toggle(): void {
         this.toggleVisibility();
