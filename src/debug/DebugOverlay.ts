@@ -106,10 +106,15 @@ export class DebugOverlay {
     update(_deltaTime: number): void {
         // Update player position if available
         const game = (window as any).game;
-        if (game?.stateManager?.currentState?.player) {
-            const player = game.stateManager.currentState.player;
-            this.updateStat('player_x', Math.floor(player.x).toString());
-            this.updateStat('player_y', Math.floor(player.y).toString());
+        const currentState = game?.stateManager?.currentState;
+        
+        // Check if the current state is PlayState (has player getter)
+        if (currentState && currentState.name === 'play' && currentState.player) {
+            const player = currentState.player;
+            if (player) {
+                this.updateStat('player_x', Math.floor(player.x).toString());
+                this.updateStat('player_y', Math.floor(player.y).toString());
+            }
         }
     }
 

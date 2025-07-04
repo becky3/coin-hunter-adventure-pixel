@@ -139,7 +139,7 @@ export class PlayState implements GameState {
 
         // Initialize level with GameController
         const levelName = params.level || 'stage1-1';
-        await this.gameController.initializeLevel(levelName);
+        const levelData = await this.gameController.initializeLevel(levelName);
         
         // Setup level bounds for camera
         const dimensions = this.levelManager.getLevelDimensions();
@@ -153,13 +153,16 @@ export class PlayState implements GameState {
         }
         
         // Set stage name in HUD
-        const levelData = this.levelManager.getLevelData();
         console.log('[PlayState] levelData:', levelData);
+        console.log('[PlayState] levelData.name:', levelData?.name);
         if (levelData && levelData.name) {
             this.hudManager.updateStageName(levelData.name);
+            console.log('[PlayState] Stage name set to:', levelData.name);
         } else {
             // Fallback to using the level ID
-            this.hudManager.updateStageName(levelName.toUpperCase().replace('-', ' '));
+            const stageName = levelName.toUpperCase().replace('-', ' ');
+            this.hudManager.updateStageName(stageName);
+            console.log('[PlayState] Stage name set to fallback:', stageName);
         }
 
         // Setup input listeners

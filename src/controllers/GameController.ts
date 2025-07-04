@@ -58,7 +58,7 @@ export class GameController {
         });
     }
     
-    async initializeLevel(levelName: string): Promise<void> {
+    async initializeLevel(levelName: string): Promise<any> {
         // Clear physics system
         this.services.physicsSystem.clearEntities();
         
@@ -110,6 +110,9 @@ export class GameController {
         this.hudManager.updateHealth(player?.health || 0, player?.maxHealth || 0);
         this.hudManager.updateCoins(player?.coins || 0);
         this.hudManager.updateTimer(this.gameTime);
+        
+        // Return the loaded level data
+        return levelData;
     }
     
     update(deltaTime: number): void {
