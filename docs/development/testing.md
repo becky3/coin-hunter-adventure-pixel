@@ -8,23 +8,30 @@ parent: 開発者向け
 
 ## 自動テスト
 
-### クイックスタート
+### E2Eテスト実行
 ```bash
-# コミット前の包括的チェック（推奨）
-./scripts/check-before-commit.sh
+# 全テストを実行
+npm test
+
+# 個別テストを実行
+npm run test:e2e -- tests/e2e/test-basic-flow.cjs
+npm run test:e2e -- tests/e2e/test-enemy-damage.cjs
+npm run test:e2e -- tests/e2e/test-fall-damage.cjs
+npm run test:e2e -- tests/e2e/test-performance.cjs
+npm run test:e2e -- tests/e2e/test-stress.cjs
+
+# スモークテスト（簡易チェック）
+npm run test:e2e -- tests/e2e/smoke-test.cjs
 ```
 
-### 個別テスト
-```bash
-# 基本動作確認
-node tests/puppeteer/simple-test.js
+### テストログ
+- テスト実行時のログは `tests/logs/` に自動保存
+- ファイル名: `[テスト名]-[タイムスタンプ].log`
+- スクリーンショット: `tests/screenshots/` に保存
 
-# ゲームプレイ検証
-node tests/puppeteer/gameplay-test.js
-
-# 物理演算シミュレーション
-node tests/enemy-physics-simulation.js
-```
+### 既知の問題
+- E2EテストがPlayState ready timeoutで失敗することがある
+- ゲーム自体は正常に動作するため、テスト環境固有の問題の可能性
 
 ## 手動テスト
 
