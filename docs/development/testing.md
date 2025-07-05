@@ -29,9 +29,46 @@ npm run test:e2e -- tests/e2e/smoke-test.cjs
 - ファイル名: `[テスト名]-[タイムスタンプ].log`
 - スクリーンショット: `tests/screenshots/` に保存
 
-### 既知の問題
-- E2EテストがPlayState ready timeoutで失敗することがある
-- ゲーム自体は正常に動作するため、テスト環境固有の問題の可能性
+### 既知の問題と解決策
+
+#### タイムアウトエラー
+- **問題**: E2EテストがPlayState ready timeoutで失敗することがある
+- **原因**: 
+  - Vite開発サーバーでのアセット読み込み遅延（300-1600ms/ファイル）
+  - 前のテストのリソースが適切にクリーンアップされていない
+- **解決策**: 
+  - アセットバンドリング（`spriteData.ts`、`bundledData.ts`）により読み込み時間を短縮
+  - テスト間に2秒の遅延を追加してリソースクリーンアップを確保
+
+#### 敵が地面から落下する
+- **問題**: テスト環境で敵（特にスライム）が地面をすり抜ける
+- **原因**: エンティティの自動ジャンプロジックがフレーム3で発動
+- **解決策**: 不要なジャンプロジックを削除（スライムはジャンプ不要）
+
+### テスト実行のベストプラクティス
+
+#### 個別テストの実行を推奨
+```bash
+# 問題のあるテストを個別に実行
+node tests/e2e/test-enemy-damage.cjs
+
+# ログを直接確認
+tail -f tests/logs/enemy-damage-test-*.log
+```
+
+#### テストログの活用
+```bash
+# 最新のログファイルを確認
+ls -la tests/logs/ | tail -10
+
+# エラー箇所を特定
+grep -n "ERROR\\|FAILED" tests/logs/*.log
+```
+
+#### テストランナーの改善
+- クリティカルテスト失敗時に即座に停止
+- 各テストに60秒のタイムアウトを設定
+- テスト間に2秒の遅延を追加
 
 ## 手動テスト
 
@@ -79,6 +116,21 @@ game.stateManager.setState('play');
 - [ ] プレイヤーが床をすり抜けない
 - [ ] 重力が正しく働く
 - [ ] 衝突判定が機能する
+- [ ] 敵が地面に正しく配置される
+
+#### 物理エンジンのデバッグ
+```javascript
+// PhysicsSystemにデバッグログを追加
+// src/physics/PhysicsSystem.ts の update() メソッドに追加
+if (this.frameCount <= 3) {
+    console.log(`[PhysicsSystem] Frame ${this.frameCount}, deltaTime=${deltaTime.toFixed(4)}, entities=${this.entities.size}`);
+    for (const entity of this.entities) {
+        if (entity.constructor.name === 'Slime') {
+            console.log(`[PhysicsSystem]   Slime at y=${entity.y.toFixed(2)}, vy=${entity.vy.toFixed(2)}, grounded=${entity.grounded}`);
+        }
+    }
+}
+```
 
 ## トラブルシューティング
 

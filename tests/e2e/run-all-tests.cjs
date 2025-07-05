@@ -50,13 +50,48 @@ async function runAllTests() {
         
         try {
             const testModule = require(test.file);
-            await testModule();
+            
+            // Set a timeout for each test (60 seconds)
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Test timeout after 60 seconds')), 60000);
+            });
+            
+            // Run test with timeout
+            await Promise.race([
+                testModule(),
+                timeoutPromise
+            ]);
+            
             success = true;
+            
+            // Add a delay between tests to ensure cleanup
+            if (tests.indexOf(test) < tests.length - 1) {
+                console.log('\n⏳ Waiting 2 seconds before next test...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
         } catch (err) {
             error = err;
             if (test.critical) {
                 failedCritical = true;
             }
+        }
+        
+        // If a critical test failed, stop immediately
+        if (error && test.critical) {
+            console.log(`\n❌ ${test.name} - FAILED`);
+            console.error(`Error: ${error.message}`);
+            console.log('\n🛑 Stopping test suite due to critical test failure');
+            
+            results.push({
+                name: test.name,
+                file: test.file,
+                success: false,
+                duration: Date.now() - startTime,
+                critical: test.critical,
+                error: error.message
+            });
+            
+            break; // Exit the test loop
         }
         
         const duration = Date.now() - startTime;

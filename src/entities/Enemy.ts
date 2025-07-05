@@ -44,6 +44,11 @@ export class Enemy extends Entity {
         this.facingRight = true;
         
         this.canJump = false;
+        
+        // Debug: Log initial position
+        if (this.constructor.name === 'Slime') {
+            console.log(`[Enemy] Created at x=${x}, y=${y}`);
+        }
     }
     
     setEventBus(eventBus: any): void {
