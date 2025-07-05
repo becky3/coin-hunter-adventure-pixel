@@ -9,8 +9,13 @@ const tests = [
         critical: true
     },
     {
-        name: 'Damage and Death Test',
-        file: './test-damage-and-death.cjs',
+        name: 'Enemy Damage Test',
+        file: './test-enemy-damage.cjs',
+        critical: true
+    },
+    {
+        name: 'Fall Damage Test',
+        file: './test-fall-damage.cjs',
         critical: true
     },
     {
