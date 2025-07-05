@@ -115,9 +115,8 @@ export class Player extends Entity {
             spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY
         } : DEFAULT_PLAYER_CONFIG;
         
-        // 左下座標基準で受け取るので、左上座標に変換
-        const topY = (y ?? config.spawnY) - config.height;
-        super(x ?? config.spawnX, topY, config.width, config.height);
+        // yはすでにピクセル座標（左下基準）で渡されているので、高さを引いて左上座標に変換
+        super(x ?? config.spawnX, (y ?? config.spawnY) - config.height, config.width, config.height);
         
         this.speed = config.speed;
         this.jumpPower = config.jumpPower;
@@ -341,7 +340,7 @@ export class Player extends Entity {
         this.width = DEFAULT_PLAYER_CONFIG.width;
         this.height = DEFAULT_PLAYER_CONFIG.height;
         
-        // 左下座標基準で受け取るので、左上座標に変換
+        // yはすでにピクセル座標（左下基準）で渡されているので、高さを引いて左上座標に変換
         this.x = x;
         this.y = y - this.height;
         this.vx = 0;
