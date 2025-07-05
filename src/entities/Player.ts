@@ -119,7 +119,9 @@ export class Player extends Entity {
             knockbackHorizontal: playerConfig.knockback?.horizontal ?? DEFAULT_PLAYER_CONFIG.knockbackHorizontal
         } : DEFAULT_PLAYER_CONFIG;
         
-        super(x ?? config.spawnX, y ?? config.spawnY, config.width, config.height);
+        // 左下座標基準で受け取るので、左上座標に変換
+        const topY = (y ?? config.spawnY) - config.height;
+        super(x ?? config.spawnX, topY, config.width, config.height);
         
         this.speed = config.speed;
         this.jumpPower = config.jumpPower;
@@ -338,8 +340,14 @@ export class Player extends Entity {
     
     
     respawn(x: number, y: number): void {
+        // Reset to large size first
+        this.isSmall = false;
+        this.width = DEFAULT_PLAYER_CONFIG.width;
+        this.height = DEFAULT_PLAYER_CONFIG.height;
+        
+        // 左下座標基準で受け取るので、左上座標に変換
         this.x = x;
-        this.y = y;
+        this.y = y - this.height;
         this.vx = 0;
         this.vy = 0;
         this._isDead = false;
@@ -354,10 +362,6 @@ export class Player extends Entity {
         this.grounded = false;
         this._health = this._maxHealth;
         
-        // Reset to large size
-        this.isSmall = false;
-        this.width = DEFAULT_PLAYER_CONFIG.width;
-        this.height = DEFAULT_PLAYER_CONFIG.height;
         this.updateSprite();
     }
     

@@ -11,6 +11,7 @@ tests/test-report.html
 test-report.html
 test-reports/
 tests/reports/
+tests/logs/
 
 # Production
 build/

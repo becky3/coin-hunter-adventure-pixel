@@ -10,6 +10,8 @@ class TestFramework {
             devtools: options.devtools ?? false,
             screenshotPath: options.screenshotPath ?? 'tests/screenshots',
             timeout: options.timeout ?? 30000,
+            logToFile: options.logToFile ?? true,
+            logPath: options.logPath ?? 'tests/logs',
             ...options
         };
         
@@ -17,11 +19,20 @@ class TestFramework {
         this.page = null;
         this.testName = '';
         this.startTime = null;
+        this.logStream = null;
+        this.originalConsoleLog = console.log;
+        this.originalConsoleError = console.error;
+        this.originalConsoleWarn = console.warn;
     }
 
     async init(testName) {
         this.testName = testName;
         this.startTime = Date.now();
+        
+        // Setup log file if enabled
+        if (this.options.logToFile) {
+            this.setupLogFile();
+        }
         
         console.log(`\n${'='.repeat(50)}`);
         console.log(`Starting test: ${testName}`);
@@ -247,6 +258,69 @@ class TestFramework {
             console.log(`\n${'='.repeat(50)}`);
             console.log(`Test completed in: ${(duration / 1000).toFixed(2)}s`);
             console.log(`${'='.repeat(50)}\n`);
+        }
+        
+        // Close log file if enabled
+        if (this.logStream) {
+            this.cleanupLogFile();
+        }
+    }
+    
+    setupLogFile() {
+        // Create logs directory if it doesn't exist
+        const logsDir = path.resolve(this.options.logPath);
+        if (!fs.existsSync(logsDir)) {
+            fs.mkdirSync(logsDir, { recursive: true });
+        }
+        
+        // Generate log filename from test name
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const safeTestName = this.testName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+        const logFileName = `${safeTestName}-${timestamp}.log`;
+        const logFilePath = path.join(logsDir, logFileName);
+        
+        // Create write stream
+        this.logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
+        
+        // Override console methods to also write to file
+        const self = this;
+        console.log = function(...args) {
+            const message = args.join(' ');
+            self.originalConsoleLog.apply(console, args);
+            if (self.logStream) {
+                self.logStream.write(`[LOG] ${message}\n`);
+            }
+        };
+        
+        console.error = function(...args) {
+            const message = args.join(' ');
+            self.originalConsoleError.apply(console, args);
+            if (self.logStream) {
+                self.logStream.write(`[ERROR] ${message}\n`);
+            }
+        };
+        
+        console.warn = function(...args) {
+            const message = args.join(' ');
+            self.originalConsoleWarn.apply(console, args);
+            if (self.logStream) {
+                self.logStream.write(`[WARN] ${message}\n`);
+            }
+        };
+        
+        console.log(`Log file created: ${logFilePath}`);
+    }
+    
+    cleanupLogFile() {
+        // Restore original console methods
+        console.log = this.originalConsoleLog;
+        console.error = this.originalConsoleError;
+        console.warn = this.originalConsoleWarn;
+        
+        // Close stream
+        if (this.logStream) {
+            this.logStream.end();
+            this.logStream = null;
         }
     }
 

@@ -3,9 +3,8 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 // Test for fall damage mechanics
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: true,
-        slowMo: 0,
-        verbose: false
+        headless: false,
+        verbose: true
     });
 
     await test.runTest(async (t) => {

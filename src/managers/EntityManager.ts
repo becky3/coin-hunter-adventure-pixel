@@ -102,6 +102,12 @@ export class EntityManager {
     createEntity(config: EntityConfig): Entity | null {
         let entity: Entity | null = null;
         
+        // Check if entity spawn position is valid
+        const tileMap = this.physicsSystem.tileMap;
+        if (tileMap && tileMap[config.y] && tileMap[config.y][config.x] === 1) {
+            console.warn(`[EntityManager] 警告: エンティティ(${config.type})のスポーン位置(${config.x}, ${config.y})が地面の中です！`);
+        }
+        
         switch (config.type) {
         case 'coin':
             entity = new Coin(
