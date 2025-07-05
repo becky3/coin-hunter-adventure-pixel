@@ -361,7 +361,7 @@ export class Player extends Entity {
         this.updateSprite();
     }
     
-    takeDamage(_damage: number = 1): boolean {
+    takeDamage(): boolean {
         if (this._invulnerable || this._isDead) {
             return false;
         }

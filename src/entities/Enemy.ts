@@ -128,7 +128,7 @@ export class Enemy extends Entity {
             }
         } else {
             if (player.takeDamage) {
-                player.takeDamage(this.damage);
+                player.takeDamage();
             }
         }
     }
