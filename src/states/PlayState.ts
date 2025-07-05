@@ -240,7 +240,7 @@ export class PlayState implements GameState {
 
             // Death by falling (instant death, lose a life)
             if (player.y > dimensions.height) {
-                console.log(`[PlayState] Player fell! Instant death.`);
+                console.log('[PlayState] Player fell! Instant death.');
                 this.handlePlayerDeath();
             }
         }
