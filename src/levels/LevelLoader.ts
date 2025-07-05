@@ -1,3 +1,5 @@
+import { bundledStageData } from '../data/bundledData';
+
 interface StageInfo {
     id: string;
     name: string;
@@ -47,7 +49,23 @@ export class LevelLoader {
     
     async loadStageList(): Promise<StageList> {
         try {
-            const response = await fetch(this.basePath + 'stages.json');
+            const url = this.basePath + 'stages.json';
+            
+            // Check bundled data first
+            if (bundledStageData[url]) {
+                console.log(`[LevelLoader] Using bundled data for: ${url}`);
+                const data = bundledStageData[url] as StageList;
+                this.stages = data.stages;
+                this.stageList = data;
+                return data;
+            }
+            
+            // Fall back to fetch
+            const startTime = performance.now();
+            const response = await fetch(url);
+            const fetchTime = performance.now() - startTime;
+            console.log(`[LevelLoader] Fetched ${url} in ${fetchTime.toFixed(2)}ms`);
+            
             if (!response.ok) {
                 throw new Error(`ステージリスト読み込みエラー: ${response.status}`);
             }
@@ -70,7 +88,24 @@ export class LevelLoader {
                 throw new Error(`ステージ情報が見つかりません: ${stageId}`);
             }
             
-            const response = await fetch(this.basePath + stageInfo.filename);
+            const url = this.basePath + stageInfo.filename;
+            
+            // Check bundled data first
+            if (bundledStageData[url]) {
+                console.log(`[LevelLoader] Using bundled data for: ${url}`);
+                const stageData = bundledStageData[url] as StageData;
+                this.validateStageData(stageData);
+                this.currentStageData = stageData;
+                this.currentStageId = stageId;
+                return stageData;
+            }
+            
+            // Fall back to fetch
+            const startTime = performance.now();
+            const response = await fetch(url);
+            const fetchTime = performance.now() - startTime;
+            console.log(`[LevelLoader] Fetched ${url} in ${fetchTime.toFixed(2)}ms`);
+            
             if (!response.ok) {
                 throw new Error(`ステージデータ読み込みエラー: ${response.status}`);
             }

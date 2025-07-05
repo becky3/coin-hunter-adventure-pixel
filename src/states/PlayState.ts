@@ -118,35 +118,53 @@ export class PlayState implements GameState {
             return;
         }
         
+        const startTime = performance.now();
+        
         try {
-            console.log('[PlayState] Preloading sprites...');
+            console.log('[PlayState] Checking/loading sprites...');
             
-            // Player sprites (large)
-            await this.game.assetLoader.loadSprite('player', 'idle');
-            await this.game.assetLoader.loadAnimation('player', 'walk', 4, 100);
-            await this.game.assetLoader.loadAnimation('player', 'jump', 2, 100);
-            
-            // Player sprites (small)
-            await this.game.assetLoader.loadSprite('player', 'idle_small');
-            await this.game.assetLoader.loadAnimation('player', 'walk_small', 4, 100);
-            await this.game.assetLoader.loadAnimation('player', 'jump_small', 2, 100);
+            // Load sprites in parallel for better performance
+            const loadPromises = [
+                // Player sprites (large)
+                this.game.assetLoader.loadSprite('player', 'idle'),
+                this.game.assetLoader.loadAnimation('player', 'walk', 4, 100),
+                this.game.assetLoader.loadAnimation('player', 'jump', 2, 100),
+                
+                // Player sprites (small)
+                this.game.assetLoader.loadSprite('player', 'idle_small'),
+                this.game.assetLoader.loadAnimation('player', 'walk_small', 4, 100),
+                this.game.assetLoader.loadAnimation('player', 'jump_small', 2, 100),
 
-            // Terrain sprites
-            await this.game.assetLoader.loadSprite('terrain', 'spring');
-            await this.game.assetLoader.loadSprite('terrain', 'goal_flag');
+                // Terrain sprites
+                this.game.assetLoader.loadSprite('terrain', 'spring'),
+                this.game.assetLoader.loadSprite('terrain', 'goal_flag'),
 
-            // Item sprites
-            await this.game.assetLoader.loadAnimation('items', 'coin_spin', 4, 100);
+                // Item sprites
+                this.game.assetLoader.loadAnimation('items', 'coin_spin', 4, 100),
+
+                // Enemy sprites
+                this.game.assetLoader.loadSprite('enemies', 'slime'),
+                this.game.assetLoader.loadAnimation('enemies', 'slime_idle', 2, 500),
+                this.game.assetLoader.loadAnimation('enemies', 'bird_fly', 2, 200)
+            ];
             
-            console.log('[PlayState] Sprites preloaded successfully');
+            await Promise.all(loadPromises);
+            
+            const endTime = performance.now();
+            console.log(`[PlayState] Sprites loaded successfully in ${(endTime - startTime).toFixed(2)}ms`);
         } catch (error) {
-            console.error('Failed to preload sprites:', error);
+            console.error('Failed to load sprites:', error);
         }
     }
 
     async enter(params: any = {}): Promise<void> {
+        const enterStartTime = performance.now();
         console.log('[PlayState] enter() called with params:', params);
         console.log('[PlayState] Starting initialization...');
+
+        // Reset game state for new game
+        this.gameState = 'playing';
+        this.lives = 3;
 
         // Preload sprites
         await this.preloadSprites();
@@ -209,7 +227,8 @@ export class PlayState implements GameState {
             console.error('[PlayState] Player creation failed!');
         }
         
-        console.log('[PlayState] enter() completed');
+        const enterEndTime = performance.now();
+        console.log(`[PlayState] enter() completed in ${(enterEndTime - enterStartTime).toFixed(2)}ms`);
     }
 
     update(deltaTime: number): void {
@@ -283,6 +302,7 @@ export class PlayState implements GameState {
     exit(): void {
         // Reset game state
         this.gameState = 'playing';
+        this.lives = 3; // Reset lives to initial value
 
         // Clear stage clear timer if exists
         if (this.stageClearTimer) {

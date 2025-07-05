@@ -3,9 +3,6 @@ import { PixelRenderer } from '../../rendering/PixelRenderer';
 import { ResourceLoader } from '../../config/ResourceLoader';
 
 export class Slime extends Enemy {
-    private jumpHeight: number;
-    private jumpCooldown: number;
-    private jumpInterval: number;
     public spriteKey: string;
     private bounceHeight: number;
     declare friction: number;
@@ -31,9 +28,6 @@ export class Slime extends Enemy {
         this.damage = slimeConfig?.stats.damage || 1;
         this.moveSpeed = slimeConfig?.physics.moveSpeed || 0.25;
         
-        this.jumpHeight = slimeConfig?.physics.jumpHeight || 5;
-        this.jumpCooldown = 0;
-        this.jumpInterval = slimeConfig?.physics.jumpInterval || 1000;
         
         this.spriteKey = 'slime';
         this.animState = 'idle';
@@ -49,39 +43,20 @@ export class Slime extends Enemy {
         }
     }
     
-    protected updateAI(deltaTime: number): void {
+    protected updateAI(_deltaTime: number): void {
         if (this.state === 'dead' || this.state === 'hurt') {
             return;
         }
-        
-        if (this.jumpCooldown > 0) {
-            this.jumpCooldown -= deltaTime;
-        }
 
         if (this.grounded) {
-
             this.vx = this.moveSpeed * this.direction;
-
-            if (this.jumpCooldown <= 0) {
-                this.jump();
-                this.jumpCooldown = this.jumpInterval;
-            }
-
             this.animState = 'move';
         } else {
-
             this.animState = 'jump';
         }
 
         // TODO: PhysicsSystemのレイキャスト実装後に有効化
 
-    }
-
-    private jump(): void {
-        if (this.grounded) {
-            this.vy = -this.jumpHeight;
-            this.grounded = false;
-        }
     }
 
     checkWallAhead(): boolean {

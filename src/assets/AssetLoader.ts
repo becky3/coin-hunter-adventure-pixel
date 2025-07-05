@@ -135,6 +135,7 @@ export class AssetLoader {
     }
     
     private async _loadSpriteInternal(category: string, name: string): Promise<LoadedAsset> {
+        const startTime = performance.now();
         const spriteData = await this.spriteLoader.loadSprite(category, name);
         
         if (this.renderer) {
@@ -147,6 +148,8 @@ export class AssetLoader {
                 colors
             );
             // Sprite loaded and added to renderer
+            const endTime = performance.now();
+            console.log(`[AssetLoader] Loaded sprite ${spriteKey} in ${(endTime - startTime).toFixed(2)}ms`);
         } else {
             // Renderer not set when loading sprite
         }
@@ -158,6 +161,7 @@ export class AssetLoader {
     }
     
     private async _loadAnimationInternal(category: string, baseName: string, frameCount: number, frameDuration: number): Promise<LoadedAsset> {
+        const startTime = performance.now();
         const frames: number[][][] = [];
         
         for (let i = 1; i <= frameCount; i++) {
@@ -177,6 +181,8 @@ export class AssetLoader {
                 frameDuration
             );
             // Animation loaded and added to renderer
+            const endTime = performance.now();
+            console.log(`[AssetLoader] Loaded animation ${animKey} (${frameCount} frames) in ${(endTime - startTime).toFixed(2)}ms`);
         } else {
             // Renderer not set when loading animation
         }

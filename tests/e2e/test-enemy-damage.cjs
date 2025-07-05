@@ -49,19 +49,106 @@ async function runTest() {
             const entityManager = state?.entityManager;
             if (!entityManager) return { error: 'No EntityManager' };
             
+            const enemyDetails = entityManager.enemies ? entityManager.enemies.map(e => ({
+                type: e.constructor.name,
+                position: { x: e.x, y: e.y },
+                size: { width: e.width, height: e.height },
+                velocity: { vx: e.vx, vy: e.vy },
+                alive: !e.isDead,
+                visible: e.visible !== false
+            })) : [];
+            
             return {
                 enemies: entityManager.enemies ? entityManager.enemies.length : 0,
                 items: entityManager.items ? entityManager.items.length : 0,
                 enemyTypes: entityManager.enemies ? entityManager.enemies.map(e => e.constructor.name) : [],
-                levelEntities: state?.levelManager?.getEntities?.() || []
+                levelEntities: state?.levelManager?.getEntities?.() || [],
+                enemyDetails: enemyDetails
             };
         });
         console.log('Entity info:', enemyInfo);
         
         if (enemyInfo.enemies === 0) {
-            console.error('No enemies found in level! Stage may not have loaded correctly.');
-            await t.screenshot('no-enemies-found');
+            throw new Error('No enemies found in level! Stage may not have loaded correctly.');
         }
+        
+        // Check enemy positions
+        console.log('Enemy positions:');
+        enemyInfo.enemyDetails.forEach((enemy, index) => {
+            console.log(`  Enemy ${index + 1} (${enemy.type}): x=${enemy.position.x}, y=${enemy.position.y}, alive=${enemy.alive}`);
+        });
+        
+        // Check level entities from stage data
+        const levelInfo = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const levelManager = state?.levelManager || state?.getLevelManager?.();
+            return {
+                entities: levelManager?.levelData?.entities || [],
+                dimensions: levelManager?.getLevelDimensions?.() || { width: 0, height: 0 },
+                tileSize: levelManager?.levelData?.tileSize || 16
+            };
+        });
+        console.log('Level entities from stage data:', levelInfo.entities);
+        console.log('Level dimensions:', levelInfo.dimensions);
+        console.log('Expected enemy Y in pixels:', levelInfo.entities[0]?.y * levelInfo.tileSize);
+        
+        // Check tile map at enemy spawn position
+        const tileCheck = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const levelManager = state?.levelManager || state?.getLevelManager?.();
+            const tileMap = levelManager?.getTileMap?.() || [];
+            const spawn = { x: 8, y: 12 }; // First slime spawn
+            
+            return {
+                tileMapHeight: tileMap.length,
+                tileAtSpawn: tileMap[spawn.y] ? tileMap[spawn.y][spawn.x] : 'out of bounds',
+                tileBelowSpawn: tileMap[spawn.y + 1] ? tileMap[spawn.y + 1][spawn.x] : 'out of bounds',
+                row12: tileMap[12] ? tileMap[12].slice(0, 10).join('') : 'row not found',
+                row13: tileMap[13] ? tileMap[13].slice(0, 10).join('') : 'row not found'
+            };
+        });
+        console.log('Tile check at enemy spawn:', tileCheck);
+        
+        // Check physics system state via service locator
+        const physicsState = await t.page.evaluate(() => {
+            const game = window.game;
+            if (!game || !game.serviceLocator) return { error: 'No game or service locator' };
+            
+            const physicsSystem = game.serviceLocator.get('physics');
+            if (!physicsSystem) return { error: 'No physics system in service locator' };
+            
+            return {
+                entityCount: physicsSystem.getEntityCount?.() || 0,
+                hasTileMap: physicsSystem.tileMap !== null && physicsSystem.tileMap !== undefined,
+                tileMapRows: physicsSystem.tileMap ? physicsSystem.tileMap.length : 0,
+                gravity: physicsSystem.gravity,
+                tileSize: physicsSystem.tileSize,
+                entities: physicsSystem.getEntities ? Array.from(physicsSystem.getEntities()).length : 0
+            };
+        });
+        console.log('Physics system state:', physicsState);
+        
+        // Wait a frame to ensure physics has been applied
+        await t.wait(100);
+        
+        // Re-check enemy positions after physics update
+        const enemyPositionsAfterPhysics = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const entityManager = state?.entityManager;
+            if (!entityManager || !entityManager.enemies) return [];
+            
+            return entityManager.enemies.map((e, i) => ({
+                index: i,
+                x: Math.round(e.x),
+                y: Math.round(e.y),
+                vy: e.vy,
+                grounded: e.grounded
+            }));
+        });
+        console.log('Enemy positions after physics update:');
+        enemyPositionsAfterPhysics.forEach(e => {
+            console.log(`  Enemy ${e.index + 1}: x=${e.x}, y=${e.y}, vy=${e.vy}, grounded=${e.grounded}`);
+        });
         
         // Get player size before damage
         const beforeDamageSize = await t.page.evaluate(() => {

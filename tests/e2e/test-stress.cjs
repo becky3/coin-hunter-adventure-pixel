@@ -3,7 +3,7 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 // Stress test - rapid inputs and memory checks
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false,
+        headless: true,  // Run headless for better performance
         slowMo: 0  // No slow motion for stress testing
     });
 
@@ -21,10 +21,19 @@ async function runTest() {
         const menuStartTime = Date.now();
         let menuKeyCount = 0;
         
+        // Temporarily disable verbose logging during stress test
+        const originalPressKey = t.pressKey.bind(t);
+        t.pressKey = async (key, options) => {
+            await t.page.keyboard.press(key, options);
+        };
+        
         while (Date.now() - menuStartTime < 3000) { // 3 seconds
             await t.pressKey(Math.random() > 0.5 ? 'ArrowUp' : 'ArrowDown');
             menuKeyCount++;
         }
+        
+        // Restore original pressKey method
+        t.pressKey = originalPressKey;
         
         console.log(`✅ Menu stress: ${menuKeyCount} keys in 3s (${(menuKeyCount / 3).toFixed(1)} keys/sec)`);
         
@@ -33,6 +42,10 @@ async function runTest() {
         if (menuState.currentState !== 'menu') {
             throw new Error(`Menu broken - unexpected state: ${menuState.currentState}`);
         }
+        
+        // Add a stabilization period after stress test
+        console.log('Waiting for menu to stabilize...');
+        await t.wait(1000); // Wait 1 second for menu to stabilize
         
         // Test 2: Start game normally (not part of stress)
         console.log('\nTest 2: Starting game for gameplay stress test');
@@ -47,13 +60,9 @@ async function runTest() {
             'menu ready'
         );
         
-        // Navigate to top and start
-        await t.pressKey('ArrowUp');
-        await t.wait(200);
-        await t.pressKey('ArrowUp');
-        await t.wait(200);
-        await t.pressKey('Enter');
-        await t.wait(1500); // Wait for transition
+        // Use startNewGame helper instead of manual navigation
+        // This is more reliable after stress testing
+        await t.startNewGame();
         
         const gameState = await t.getGameState();
         if (gameState.currentState === 'play') {
@@ -64,12 +73,21 @@ async function runTest() {
             const gameStartTime = Date.now();
             let gameKeyCount = 0;
             
+            // Temporarily disable verbose logging during gameplay stress
+            const originalPressKey2 = t.pressKey.bind(t);
+            t.pressKey = async (key, options) => {
+                await t.page.keyboard.press(key, options);
+            };
+            
             while (Date.now() - gameStartTime < 5000) { // 5 seconds
                 const actions = ['ArrowLeft', 'ArrowRight', 'Space', 'ArrowUp', 'ArrowDown'];
                 const randomAction = actions[Math.floor(Math.random() * actions.length)];
                 await t.pressKey(randomAction);
                 gameKeyCount++;
             }
+            
+            // Restore original pressKey method
+            t.pressKey = originalPressKey2;
             
             console.log(`✅ Gameplay stress: ${gameKeyCount} inputs in 5s (${(gameKeyCount / 5).toFixed(1)} inputs/sec)`);
             

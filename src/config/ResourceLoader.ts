@@ -6,6 +6,7 @@ import {
     ObjectConfig
 } from './ResourceConfig';
 import { MusicPatternConfig, MusicConfig } from './MusicPatternConfig';
+import { bundledResourceData, bundledMusicData } from '../data/bundledData';
 
 export class ResourceLoader {
     private static instance: ResourceLoader;
@@ -46,8 +47,20 @@ export class ResourceLoader {
     }
   
     private async loadJSON(path: string): Promise<any> {
+        // Check bundled data first
+        const allBundled = { ...bundledResourceData, ...bundledMusicData };
+        if (allBundled[path]) {
+            console.log(`[ResourceLoader] Using bundled data for: ${path}`);
+            return allBundled[path];
+        }
+        
+        // Fall back to fetch
         try {
+            const startTime = performance.now();
             const response = await fetch(path);
+            const fetchTime = performance.now() - startTime;
+            console.log(`[ResourceLoader] Fetched ${path} in ${fetchTime.toFixed(2)}ms`);
+            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

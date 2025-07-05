@@ -77,7 +77,7 @@ export class GameController {
             if (tileMap && tileMap[spawn.y] && tileMap[spawn.y][spawn.x] === 1) {
                 console.error(`[GameController] エラー: プレイヤーのスポーン位置(${spawn.x}, ${spawn.y})が地面の中です！`);
                 console.error(`[GameController] ステージ: ${levelName}`);
-                console.error(`[GameController] 注意: スポーン座標はプレイヤーの左下（足元）の位置です`);
+                console.error('[GameController] 注意: スポーン座標はプレイヤーの左下（足元）の位置です');
                 throw new Error(`Invalid player spawn position: (${spawn.x}, ${spawn.y}) is inside solid tile`);
             }
             

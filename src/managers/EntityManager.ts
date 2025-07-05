@@ -143,6 +143,11 @@ export class EntityManager {
             slime.direction = -1;
             slime.setEventBus(this.eventBus);
             this.enemies.push(slime);
+            
+            // Debug: Check physics system state before adding entity
+            console.log(`[EntityManager] Creating slime at (${config.x * TILE_SIZE}, ${config.y * TILE_SIZE})`);
+            console.log(`[EntityManager] Physics system has tilemap: ${this.physicsSystem.tileMap !== null}`);
+            
             this.physicsSystem.addEntity(slime, this.physicsSystem.layers.ENEMY);
             entity = slime;
             break;
