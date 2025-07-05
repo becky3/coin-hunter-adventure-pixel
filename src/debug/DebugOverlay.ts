@@ -43,6 +43,7 @@ export class DebugOverlay {
         
         (window as any).debugOverlay = this;
         
+        console.log(`[DebugOverlay] Initialized with stage: ${this.stageList[this.selectedStageIndex]} (index: ${this.selectedStageIndex})`);
     }
 
     private createDebugUI(): void {
@@ -136,26 +137,35 @@ export class DebugOverlay {
             const game = (window as any).game;
             const currentState = game?.stateManager?.currentState;
             
+            // Debug: Log all arrow key presses in menu
+            if (currentState && currentState.name === 'menu' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                console.log(`[DebugOverlay] Arrow key pressed: ${e.key}, defaultPrevented: ${e.defaultPrevented}`);
+            }
+            
             if (currentState && currentState.name === 'menu') {
                 if (e.key === 'ArrowLeft') {
                     e.preventDefault();
+                    e.stopPropagation();
                     this.selectedStageIndex--;
                     if (this.selectedStageIndex < 0) {
                         this.selectedStageIndex = this.stageList.length - 1;
                     }
                     this.updateStageDisplay();
+                    console.log(`[DebugOverlay] Stage left: ${this.stageList[this.selectedStageIndex]}`);
                 }
                 
                 if (e.key === 'ArrowRight') {
                     e.preventDefault();
+                    e.stopPropagation();
                     this.selectedStageIndex++;
                     if (this.selectedStageIndex >= this.stageList.length) {
                         this.selectedStageIndex = 0;
                     }
                     this.updateStageDisplay();
+                    console.log(`[DebugOverlay] Stage right: ${this.stageList[this.selectedStageIndex]}`);
                 }
             }
-        });
+        }, true);  // Use capture phase to handle events before InputSystem
     }
 
     update(_deltaTime: number): void {
