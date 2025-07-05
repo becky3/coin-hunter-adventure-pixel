@@ -15,7 +15,7 @@ async function runTest() {
         // Setup error tracking
         await t.injectErrorTracking();
         
-        await t.navigateToGame();
+        await t.navigateToGame('http://localhost:3000?s=0-1');
         await t.waitForGameInitialization();
         
         // Take initial screenshot
