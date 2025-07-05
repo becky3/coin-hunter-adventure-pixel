@@ -71,8 +71,19 @@ class TestFramework {
 
     async navigateToGame(url = 'http://localhost:3000') {
         console.log(`Navigating to: ${url}`);
-        await this.page.goto(url, { waitUntil: 'networkidle0' });
+        await this.page.goto(url, { waitUntil: 'load' });
         console.log('✅ Page loaded');
+    }
+
+    async safeScreenshot(name) {
+        try {
+            await Promise.race([
+                this.screenshot(name),
+                this.wait(2000).then(() => { throw new Error('Screenshot timed out'); })
+            ]);
+        } catch (screenshotError) {
+            console.error(`Failed to take screenshot: ${screenshotError.message}`);
+        }
     }
 
     async waitForGameInitialization(timeout = 10000) {
@@ -91,7 +102,7 @@ class TestFramework {
             return true;
         } catch (error) {
             console.error('❌ Game initialization timeout');
-            await this.screenshot('game-init-timeout');
+            await this.safeScreenshot('game-init-timeout');
             throw error;
         }
     }
@@ -112,7 +123,7 @@ class TestFramework {
             return true;
         } catch (error) {
             console.error(`❌ State change timeout for: ${stateName}`);
-            await this.screenshot(`state-timeout-${stateName}`);
+            await this.safeScreenshot(`state-timeout-${stateName}`);
             throw error;
         }
     }
@@ -195,7 +206,7 @@ class TestFramework {
             console.error('\n❌ TEST FAILED\n');
             console.error(error);
             if (this.page) {
-                await this.screenshot('test-failure');
+                await this.safeScreenshot('test-failure');
             }
             throw error;
         } finally {
