@@ -112,7 +112,8 @@
                 <input type="range" id="variableBoost" min="0" max="1" step="0.01" value="0.23">
             </div>
             
-            <button onclick="applyChanges()">Apply Changes</button>
+            <button onclick="toggleAutoApply()" id="autoApplyBtn">Auto Apply: ON</button>
+            <button onclick="toggleAutoJump()" id="autoJumpBtn">Auto Jump: OFF</button>
             <button onclick="resetToDefault()">Reset to Default</button>
             <button onclick="resetToOriginal()">Reset to Original</button>
             
@@ -165,11 +166,19 @@
             variableBoost: 0.23
         };
         
+        let autoApply = true;
+        let autoJump = false;
+        let autoJumpInterval = null;
+        
         function updateValue(id) {
             const slider = document.getElementById(id);
             const valueSpan = document.getElementById(id + 'Value');
             valueSpan.textContent = slider.value;
             calculateStats();
+            
+            if (autoApply) {
+                applyChanges(false);  // Apply without alert
+            }
         }
         
         function calculateStats() {
@@ -193,11 +202,11 @@
             document.getElementById('timeRatio').textContent = timeRatio + '%';
         }
         
-        function applyChanges() {
+        function applyChanges(showAlert = true) {
             const gameWindow = document.getElementById('gameFrame').contentWindow;
             
             if (!gameWindow.game) {
-                alert('Game not loaded yet. Please wait for the game to load.');
+                if (showAlert) alert('Game not loaded yet. Please wait for the game to load.');
                 return;
             }
             
@@ -231,7 +240,75 @@
             }
             
             console.log('Applied changes:', { gravity, jumpPower, maxFallSpeed, variableBoost });
-            alert('Changes applied! Test the jump in the game.');
+            if (showAlert) alert('Changes applied! Test the jump in the game.');
+        }
+        
+        function toggleAutoApply() {
+            autoApply = !autoApply;
+            document.getElementById('autoApplyBtn').textContent = `Auto Apply: ${autoApply ? 'ON' : 'OFF'}`;
+            if (autoApply) {
+                applyChanges(false);
+            }
+        }
+        
+        function toggleAutoJump() {
+            autoJump = !autoJump;
+            document.getElementById('autoJumpBtn').textContent = `Auto Jump: ${autoJump ? 'ON' : 'OFF'}`;
+            
+            if (autoJump) {
+                startAutoJump();
+            } else {
+                stopAutoJump();
+            }
+        }
+        
+        function startAutoJump() {
+            const gameWindow = document.getElementById('gameFrame').contentWindow;
+            
+            if (!gameWindow.game) {
+                alert('Game not loaded yet. Please wait for the game to load.');
+                autoJump = false;
+                document.getElementById('autoJumpBtn').textContent = 'Auto Jump: OFF';
+                return;
+            }
+            
+            // Simulate jump key press every 2 seconds
+            autoJumpInterval = setInterval(() => {
+                const currentState = gameWindow.game.stateManager.currentState;
+                if (currentState && currentState.name === 'play' && currentState.player) {
+                    // Check if player is grounded
+                    if (currentState.player.grounded) {
+                        // Simulate jump key press
+                        const inputSystem = gameWindow.game.serviceLocator.get('input');
+                        if (inputSystem) {
+                            // Trigger jump by dispatching keyboard event to the game window
+                            const event = new KeyboardEvent('keydown', {
+                                code: 'Space',
+                                key: ' ',
+                                bubbles: true
+                            });
+                            gameWindow.dispatchEvent(event);
+                            
+                            // Release after 100ms for a medium jump
+                            setTimeout(() => {
+                                const releaseEvent = new KeyboardEvent('keyup', {
+                                    code: 'Space',
+                                    key: ' ',
+                                    bubbles: true
+                                });
+                                gameWindow.dispatchEvent(releaseEvent);
+                            }, 100);
+                        }
+                    }
+                }
+            }, 2000);
+        }
+        
+        function stopAutoJump() {
+            if (autoJumpInterval) {
+                clearInterval(autoJumpInterval);
+                autoJumpInterval = null;
+            }
         }
         
         function resetToDefault() {
@@ -271,6 +348,10 @@
             const gameWindow = document.getElementById('gameFrame').contentWindow;
             if (gameWindow.game) {
                 console.log('Game loaded, ready for testing!');
+                // Apply initial values
+                if (autoApply) {
+                    applyChanges(false);
+                }
             }
         }, 3000);
     </script>
