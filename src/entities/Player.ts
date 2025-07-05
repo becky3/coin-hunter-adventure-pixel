@@ -20,9 +20,7 @@ const DEFAULT_PLAYER_CONFIG = {
     maxHealth: 3,
     invulnerabilityTime: 2000,
     spawnX: 100,
-    spawnY: 300,
-    knockbackVertical: -5,
-    knockbackHorizontal: 3
+    spawnY: 300
 } as const;
 
 const DEFAULT_ANIMATION_CONFIG = {
@@ -114,9 +112,7 @@ export class Player extends Entity {
             maxHealth: playerConfig.stats.maxHealth,
             invulnerabilityTime: playerConfig.stats.invulnerabilityTime ?? DEFAULT_PLAYER_CONFIG.invulnerabilityTime,
             spawnX: playerConfig.spawn?.x ?? DEFAULT_PLAYER_CONFIG.spawnX,
-            spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY,
-            knockbackVertical: playerConfig.knockback?.vertical ?? DEFAULT_PLAYER_CONFIG.knockbackVertical,
-            knockbackHorizontal: playerConfig.knockback?.horizontal ?? DEFAULT_PLAYER_CONFIG.knockbackHorizontal
+            spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY
         } : DEFAULT_PLAYER_CONFIG;
         
         // 左下座標基準で受け取るので、左上座標に変換
@@ -388,12 +384,6 @@ export class Player extends Entity {
         this.y += DEFAULT_PLAYER_CONFIG.height - DEFAULT_PLAYER_CONFIG.smallHeight;
         this.updateSprite();
         
-        
-        // Apply knockback
-        this.vy = this.playerConfig?.knockbackVertical || DEFAULT_PLAYER_CONFIG.knockbackVertical;
-        this.vx = this._facing === 'right' ? 
-            -(this.playerConfig?.knockbackHorizontal || DEFAULT_PLAYER_CONFIG.knockbackHorizontal) : 
-            (this.playerConfig?.knockbackHorizontal || DEFAULT_PLAYER_CONFIG.knockbackHorizontal);
         
         // Make invulnerable after taking damage
         this._invulnerable = true;
