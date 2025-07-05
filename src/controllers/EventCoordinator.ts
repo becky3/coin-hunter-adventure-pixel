@@ -1,7 +1,6 @@
 import { EventBus } from '../services/EventBus';
 import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
-import { TILE_SIZE } from '../constants/gameConstants';
 
 export interface EventCoordinatorConfig {
     eventBus: EventBus;
