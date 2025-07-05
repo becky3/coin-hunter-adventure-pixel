@@ -69,6 +69,24 @@ export class LevelLoader {
                         filename: 'tutorial.json'
                     },
                     {
+                        id: 'stage0-1',
+                        name: 'STAGE 0-1',
+                        description: 'TEST STAGE',
+                        filename: 'stage0-1.json'
+                    },
+                    {
+                        id: 'stage0-2',
+                        name: 'STAGE 0-2',
+                        description: 'ENEMY DAMAGE TEST',
+                        filename: 'stage0-2.json'
+                    },
+                    {
+                        id: 'stage0-3',
+                        name: 'STAGE 0-3',
+                        description: 'FALL DAMAGE TEST',
+                        filename: 'stage0-3.json'
+                    },
+                    {
                         id: 'stage1-1',
                         name: 'STAGE 1-1',
                         description: 'THE ADVENTURE BEGINS',

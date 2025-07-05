@@ -1,11 +1,11 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 
-// Test fall damage
+// Test for fall damage mechanics
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false,  // Show browser to see what's happening
-        slowMo: 100,      // Slow down for observation
-        verbose: true
+        headless: true,
+        slowMo: 0,
+        verbose: false
     });
 
     await test.runTest(async (t) => {
@@ -15,81 +15,152 @@ async function runTest() {
         // Setup error tracking
         await t.injectErrorTracking();
         
-        // Navigate to game with stage parameter
-        await t.navigateToGame('http://localhost:3000/?s=0-1');
+        // Navigate to game with stage 0-3 (fall damage test stage)
+        await t.navigateToGame('http://localhost:3000?s=0-3');
         await t.waitForGameInitialization();
+        
+        // Take initial screenshot
+        await t.screenshot('test-initialized');
         
         // Start new game
         await t.startNewGame();
-        await t.wait(2000); // Wait for game to fully initialize
+        await t.screenshot('game-started');
+        
+        // Verify game state
+        await t.assertState('play');
+        await t.assertPlayerExists();
         
         // Get initial player stats
         const initialStats = await t.getPlayerStats();
-        console.log('\n--- Initial Player Stats ---');
-        console.log(`Health: ${initialStats.health}`);
-        console.log(`Position: (${initialStats.position.x}, ${initialStats.position.y})`);
+        console.log('Initial player stats:', initialStats);
         
-        // Check console logs for fall damage
-        await t.page.evaluate(() => {
-            // Override console.log to capture fall damage logs
-            const originalLog = console.log;
-            window.fallDamageLogs = [];
-            console.log = function(...args) {
-                const message = args.join(' ');
-                if (message.includes('[PlayState] Player fell') || message.includes('Health')) {
-                    window.fallDamageLogs.push(message);
-                }
-                originalLog.apply(console, args);
-            };
+        // Get initial lives
+        const initialLives = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            return state?.lives || 0;
+        });
+        console.log('Initial lives:', initialLives);
+        
+        // Test 1: Fall into pit
+        console.log('\n--- Test 1: First Fall ---');
+        
+        // Move player to fall into pit
+        console.log('Moving player to fall into pit...');
+        await t.movePlayer('right', 800); // Move to the pit at x=5-11
+        await t.wait(2000); // Wait for fall and respawn
+        
+        // Check if player respawned
+        const afterFirstFall = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const player = state?.player || state?.entityManager?.getPlayer?.();
+            return player ? {
+                position: { x: player.x, y: player.y },
+                isSmall: player.isSmall
+            } : null;
         });
         
-        // Move player to a pit (assuming there's one in stage1-1)
-        console.log('\n--- Moving player towards pit ---');
-        await t.movePlayer('right', 3000);
-        await t.wait(1000);
+        console.log('Player after first fall:', afterFirstFall);
         
-        // Jump into pit
-        console.log('\n--- Attempting to fall into pit ---');
-        await t.jumpPlayer();
-        await t.movePlayer('right', 1000);
-        await t.wait(3000); // Wait for fall
+        // Check lives decreased
+        const livesAfterFirstFall = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            return state?.lives || 0;
+        });
+        console.log('Lives after first fall:', livesAfterFirstFall);
         
-        // Get player stats after fall
-        const afterFallStats = await t.getPlayerStats();
-        console.log('\n--- After Fall Player Stats ---');
-        console.log(`Health: ${afterFallStats.health}`);
-        console.log(`Position: (${afterFallStats.position.x}, ${afterFallStats.position.y})`);
-        
-        // Check if player took damage
-        if (initialStats.health > afterFallStats.health) {
-            console.log(`✅ Player took damage: ${initialStats.health} -> ${afterFallStats.health}`);
-        } else {
-            console.log(`⚠️  Player health unchanged: ${afterFallStats.health}`);
+        if (livesAfterFirstFall !== initialLives - 1) {
+            throw new Error(`Lives did not decrease correctly. Expected: ${initialLives - 1}, Got: ${livesAfterFirstFall}`);
         }
         
-        // Get fall damage logs
-        const logs = await t.page.evaluate(() => window.fallDamageLogs);
-        console.log('\n--- Fall Damage Logs ---');
-        logs.forEach(log => console.log(log));
+        // Check HUD display for lives
+        await t.wait(500); // Wait for HUD to update
         
-        // Check HUD display
-        const hudLives = await t.page.evaluate(() => {
-            const hudElement = document.querySelector('#game-canvas');
-            if (!hudElement) return null;
+        // Take screenshot to verify HUD
+        await t.screenshot('after-first-fall');
+        
+        // Get debug info
+        const debugInfo = await t.page.evaluate(() => {
+            const debugElement = document.getElementById('debug-info');
+            return debugElement ? debugElement.textContent : 'Debug info not found';
+        });
+        console.log('Debug info:', debugInfo);
+        
+        // Test 2: Fall multiple times
+        console.log('\n--- Test 2: Multiple Falls ---');
+        
+        let currentLives = livesAfterFirstFall;
+        let fallCount = 1;
+        
+        while (currentLives > 0 && fallCount < 4) {
+            fallCount++;
+            console.log(`Fall attempt ${fallCount} - Current lives: ${currentLives}`);
             
-            // Try to get HUD data from game state
-            const game = window.game;
-            const hudManager = game?.stateManager?.currentState?.hudManager;
-            return hudManager?.getHUDData()?.lives;
+            // Wait for respawn
+            await t.wait(1000);
+            
+            // Move to fall again
+            await t.movePlayer('right', 800);
+            await t.wait(2000);
+            
+            // Check lives
+            currentLives = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                return state?.lives || 0;
+            });
+            console.log(`Lives after fall ${fallCount}: ${currentLives}`);
+            
+            // Check game state
+            const gameState = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                return state?.gameState || 'unknown';
+            });
+            console.log(`Game state: ${gameState}`);
+            
+            if (gameState === 'gameover') {
+                console.log('✅ Game over triggered correctly after losing all lives');
+                break;
+            }
+            
+            await t.screenshot(`after-fall-${fallCount}`);
+        }
+        
+        // Test 3: Verify HUD shows correct lives
+        console.log('\n--- Test 3: HUD Verification ---');
+        
+        // Get current internal lives
+        const finalLives = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            return state?.lives || 0;
         });
         
-        console.log(`\n--- HUD Lives Display: ${hudLives} ---`);
+        // Check if HUD is rendering lives correctly
+        const hudData = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const hudManager = state?.hudManager || state?.getHudManager?.();
+            return hudManager ? hudManager.getHUDData() : null;
+        });
         
-        // Keep browser open for manual inspection
-        console.log('\n--- Keeping browser open for 5 seconds for manual inspection ---');
-        await t.wait(5000);
+        console.log('Final lives (internal):', finalLives);
+        console.log('HUD data:', hudData);
+        
+        if (hudData && hudData.lives !== finalLives) {
+            throw new Error(`HUD shows incorrect lives. Internal: ${finalLives}, HUD: ${hudData.lives}`);
+        }
+        
+        // Final screenshot
+        await t.screenshot('test-complete');
+        
+        // Check for any errors
+        await t.checkForErrors();
     });
 }
 
 // Run the test
-runTest().catch(console.error);
+if (require.main === module) {
+    runTest().catch(error => {
+        console.error('Test failed:', error);
+        process.exit(1);
+    });
+}
+
+module.exports = runTest;
