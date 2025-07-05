@@ -116,7 +116,7 @@ class GameTestHelpers extends TestFramework {
             
             // Try different possible locations for player
             let player = state.player || 
-                        state.entityManager?.getPlayer?.() || 
+                        state.entityManager?.player || 
                         state.entities?.find(e => e.type === 'player');
             
             if (!player) return null;
@@ -136,7 +136,7 @@ class GameTestHelpers extends TestFramework {
             
             // Try different possible locations for player
             let player = state.player || 
-                        state.entityManager?.getPlayer?.() || 
+                        state.entityManager?.player || 
                         state.entities?.find(e => e.type === 'player');
             
             if (!player) return null;

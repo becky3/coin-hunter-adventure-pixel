@@ -33,7 +33,8 @@ class TestFramework {
             headless: this.options.headless,
             slowMo: this.options.slowMo,
             devtools: this.options.devtools,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            protocolTimeout: 180000 // 3 minutes timeout for protocol operations
         });
 
         this.page = await this.browser.newPage();
@@ -79,19 +80,46 @@ class TestFramework {
         console.log('Waiting for game initialization...');
         
         try {
-            await this.page.waitForFunction(
-                () => {
-                    return window.game && 
-                           window.game.gameLoop && 
-                           window.game.gameLoop.running === true;
-                },
+            // Debug: Check if window.game exists
+            const gameExists = await this.page.evaluate(() => {
+                return typeof window.game !== 'undefined';
+            });
+            console.log('Game object exists:', gameExists);
+            
+            if (!gameExists) {
+                // Wait a bit and check again
+                await this.wait(1000);
+            }
+            
+            // Use the same approach as smoke-test.cjs which is working
+            const initialized = await this.page.waitForFunction(
+                () => window.game?.gameLoop?.running,
                 { timeout }
-            );
+            ).then(() => true).catch((error) => {
+                console.error('waitForFunction error:', error.message);
+                return false;
+            });
+            
+            if (!initialized) {
+                // Get debug info
+                const debugInfo = await this.page.evaluate(() => {
+                    return {
+                        game: typeof window.game,
+                        gameLoop: window.game ? typeof window.game.gameLoop : 'no game',
+                        running: window.game?.gameLoop?.running
+                    };
+                });
+                console.log('Debug info:', debugInfo);
+                throw new Error('Game initialization failed');
+            }
+            
             console.log('✅ Game initialized');
             return true;
         } catch (error) {
             console.error('❌ Game initialization timeout');
-            await this.screenshot('game-init-timeout');
+            await this.screenshot('game-init-timeout').catch(e => {
+                console.error('Screenshot failed:', e.message);
+            });
             throw error;
         }
     }

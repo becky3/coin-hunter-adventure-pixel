@@ -410,9 +410,9 @@ export class Player extends Entity {
         if (this._animState === 'idle') {
             this.spriteKey = 'player/idle';
         } else if (this._animState === 'walk') {
-            this.spriteKey = 'player/walk_anim';
+            this.spriteKey = 'player/walk';
         } else if (this._animState === 'jump' || this._animState === 'fall') {
-            this.spriteKey = 'player/jump_anim';
+            this.spriteKey = 'player/jump';
         }
     }
     
@@ -443,7 +443,7 @@ export class Player extends Entity {
             }
             
             if (this._animState === 'jump' || this._animState === 'fall') {
-                const animation = renderer.pixelArtRenderer.animations.get('player/jump_anim');
+                const animation = renderer.pixelArtRenderer.animations.get('player/jump');
                 if (animation) {
                     animation.update(Date.now());
                     animation.draw(
