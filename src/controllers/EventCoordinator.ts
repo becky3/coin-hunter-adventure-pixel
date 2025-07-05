@@ -46,16 +46,8 @@ export class EventCoordinator {
             this.onStageClear();
         });
         
-        // Player death event
-        this.addListener('player:died', () => {
-            const player = this.entityManager.getPlayer();
-            if (player && player.health > 0) {
-                const spawn = this.levelManager.getPlayerSpawn();
-                player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
-            } else {
-                this.onGameOver();
-            }
-        });
+        // Player death event is handled entirely by PlayState
+        // which manages lives, respawn, and game over
         
         // Enemy defeated event
         this.addListener('enemy:defeated', (data: any) => {

@@ -43,9 +43,6 @@ export class HUDManager {
             this.hudData.coinsCollected++;
         });
 
-        this.eventBus.on('player:health-changed', (data: { health: number }) => {
-            this.hudData.lives = data.health;
-        });
 
         this.eventBus.on('game:time-updated', (data: { time: number }) => {
             this.hudData.time = data.time;
@@ -72,9 +69,6 @@ export class HUDManager {
         this.hudData.score = score;
     }
     
-    updateHealth(health: number, _maxHealth: number): void {
-        this.hudData.lives = health;
-    }
     
     updateCoins(coins: number): void {
         this.hudData.coinsCollected = coins;

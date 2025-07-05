@@ -334,10 +334,6 @@ export class Player extends Entity {
     
     heal(amount: number = 1): void {
         this._health = Math.min(this._health + amount, this._maxHealth);
-        
-        if (this.eventBus) {
-            this.eventBus.emit('player:health-changed', { health: this._health, maxHealth: this._maxHealth });
-        }
     }
     
     
@@ -363,10 +359,6 @@ export class Player extends Entity {
         this.width = DEFAULT_PLAYER_CONFIG.width;
         this.height = DEFAULT_PLAYER_CONFIG.height;
         this.updateSprite();
-        
-        if (this.eventBus) {
-            this.eventBus.emit('player:health-changed', { health: this._health, maxHealth: this._maxHealth });
-        }
     }
     
     takeDamage(damage: number = 1): boolean {
@@ -374,9 +366,8 @@ export class Player extends Entity {
             return false;
         }
         
-        this._health -= damage;
-        
-        if (this._health <= 0) {
+        // 小さい状態で攻撃を受けたら死亡
+        if (this.isSmall) {
             this._health = 0;
             this._isDead = true;
             if (this.eventBus) {
@@ -385,15 +376,14 @@ export class Player extends Entity {
             return true; // Player died
         }
         
-        // Change to small form when damaged (but not dead)
-        if (this._health < this._maxHealth && !this.isSmall) {
-            this.isSmall = true;
-            this.width = DEFAULT_PLAYER_CONFIG.smallWidth;
-            this.height = DEFAULT_PLAYER_CONFIG.smallHeight;
-            // Adjust Y position to keep feet at same level
-            this.y += DEFAULT_PLAYER_CONFIG.height - DEFAULT_PLAYER_CONFIG.smallHeight;
-            this.updateSprite();
-        }
+        // 大きい状態で攻撃を受けたら小さくなる
+        this.isSmall = true;
+        this.width = DEFAULT_PLAYER_CONFIG.smallWidth;
+        this.height = DEFAULT_PLAYER_CONFIG.smallHeight;
+        // Adjust Y position to keep feet at same level
+        this.y += DEFAULT_PLAYER_CONFIG.height - DEFAULT_PLAYER_CONFIG.smallHeight;
+        this.updateSprite();
+        
         
         // Apply knockback
         this.vy = this.playerConfig?.knockbackVertical || DEFAULT_PLAYER_CONFIG.knockbackVertical;
@@ -410,9 +400,6 @@ export class Player extends Entity {
             this.musicSystem.playSE('damage');
         }
         
-        if (this.eventBus) {
-            this.eventBus.emit('player:health-changed', { health: this._health, maxHealth: this._maxHealth });
-        }
         
         return false; // Player survived
     }

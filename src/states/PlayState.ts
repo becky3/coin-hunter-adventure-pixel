@@ -447,14 +447,12 @@ export class PlayState implements GameState {
         
         this.lives--;
         this.hudManager.updateLives(this.lives);
-        console.log(`[PlayState] Lives remaining: ${this.lives}`);
         
         if (this.lives <= 0) {
             this.gameOver();
         } else {
             const spawn = this.levelManager.getPlayerSpawn();
             player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
-            console.log(`[PlayState] Player respawned with full health: ${player.health}`);
         }
     }
 

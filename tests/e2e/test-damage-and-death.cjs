@@ -121,6 +121,74 @@ async function runTest() {
             console.log('Lives after damage:', livesAfterDamage);
             
             await t.screenshot('after-first-damage');
+            
+            // Test 1.5: Check if player takes damage while invulnerable
+            console.log('\n--- Test 1.5: Second Damage While Invulnerable ---');
+            
+            // Wait a bit then move into enemy again
+            await t.wait(500);
+            
+            // Check invulnerability
+            const invulnerableCheck = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                const player = state?.player || state?.entityManager?.getPlayer?.();
+                return player ? {
+                    invulnerable: player.invulnerable,
+                    invulnerabilityTime: player.invulnerabilityTime,
+                    health: player.health,
+                    lives: state.lives
+                } : null;
+            });
+            
+            console.log('Player invulnerability status:', invulnerableCheck);
+            
+            // Move into enemy again while invulnerable
+            await t.movePlayer('left', 100);
+            await t.movePlayer('right', 500);
+            await t.wait(500);
+            
+            const afterSecondContact = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                const player = state?.player || state?.entityManager?.getPlayer?.();
+                return player ? {
+                    health: player.health,
+                    lives: state.lives
+                } : null;
+            });
+            
+            console.log('After second contact:', afterSecondContact);
+            
+            if (afterSecondContact && invulnerableCheck) {
+                if (afterSecondContact.health === invulnerableCheck.health) {
+                    console.log('✅ No damage taken while invulnerable');
+                } else {
+                    console.log('❌ Damage taken while invulnerable!');
+                }
+            } else {
+                console.log('⚠️ Player or state not found after second contact');
+            }
+            
+            // Wait for invulnerability to end
+            console.log('\n--- Test 1.6: Damage After Invulnerability Ends ---');
+            await t.wait(2500); // Wait for invulnerability to expire
+            
+            // Move into enemy again
+            await t.movePlayer('left', 100);
+            await t.movePlayer('right', 500);
+            await t.wait(500);
+            
+            const afterThirdContact = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                const player = state?.player || state?.entityManager?.getPlayer?.();
+                return player ? {
+                    health: player.health,
+                    isDead: player.isDead,
+                    lives: state.lives
+                } : null;
+            });
+            
+            console.log('After third contact (should be dead):', afterThirdContact);
+            
         } else {
             console.warn('No enemies found in stage 0-1, skipping damage test');
         }

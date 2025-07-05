@@ -49,9 +49,6 @@ export class GameController {
             this.hudManager.updateScore(data.score);
         });
         
-        this.eventBus.on('player:health-changed', (data: any) => {
-            this.hudManager.updateHealth(data.health, data.maxHealth);
-        });
         
         this.eventBus.on('player:coins-changed', (data: any) => {
             this.hudManager.updateCoins(data.coins);
@@ -107,7 +104,6 @@ export class GameController {
         // Initialize HUD
         this.hudManager.initialize();
         this.hudManager.updateScore(player?.score || 0);
-        this.hudManager.updateHealth(player?.health || 0, player?.maxHealth || 0);
         this.hudManager.updateCoins(player?.coins || 0);
         this.hudManager.updateTimer(this.gameTime);
         
