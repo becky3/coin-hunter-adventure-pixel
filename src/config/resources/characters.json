@@ -4,7 +4,7 @@
       "width": 16,
       "height": 32,
       "speed": 1.17,
-      "jumpPower": 8.165,
+      "jumpPower": 6.83,
       "minJumpTime": 8,
       "maxJumpTime": 20
     },

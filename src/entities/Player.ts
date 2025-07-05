@@ -264,8 +264,8 @@ export class Player extends Entity {
             
             if (input.jump && this.canVariableJump) {
                 if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime) && this.vy < 0) {
-                    // Apply additional upward force for variable jump (reduced to compensate for lower gravity)
-                    this.vy -= this.gravityStrength * 0.33;
+                    // Apply additional upward force for variable jump (adjusted for 70% height)
+                    this.vy -= this.gravityStrength * 0.23;
                 } else if (this.jumpTime >= (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
                     this.canVariableJump = false;
                 }
