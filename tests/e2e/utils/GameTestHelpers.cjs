@@ -23,15 +23,15 @@ class GameTestHelpers extends TestFramework {
             'menu fade in'
         );
         
-        // Now try to start the game
-        // First select the menu item if needed
-        await this.pressKey('ArrowDown');
-        await this.wait(200);
-        await this.pressKey('ArrowUp');
-        await this.wait(200);
-        
-        // Press Enter to start
-        await this.pressKey('Enter');
+        // Click to focus
+        await this.clickAt(100, 100);
+        await this.wait(100);
+
+        // Press Space to start, with a delay, like in smoke-test
+        console.log('Pressing key: Space (down/up with delay)');
+        await this.page.keyboard.down('Space');
+        await this.wait(100);
+        await this.page.keyboard.up('Space');
         await this.wait(500);  // Wait for state transition
         
         // Wait for play state

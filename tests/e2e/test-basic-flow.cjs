@@ -3,8 +3,8 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 // Basic game flow test using the new framework
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false,  // Set to true for CI
-        slowMo: 50,      // Slow down for debugging
+        headless: true,  // Set to true for CI
+        slowMo: 0,      // Slow down for debugging
         verbose: false   // Set to true for more console logs
     });
 

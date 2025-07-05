@@ -71,7 +71,7 @@ class TestFramework {
 
     async navigateToGame(url = 'http://localhost:3000') {
         console.log(`Navigating to: ${url}`);
-        await this.page.goto(url, { waitUntil: 'networkidle0' });
+        await this.page.goto(url, { waitUntil: 'load' });
         console.log('✅ Page loaded');
     }
 
