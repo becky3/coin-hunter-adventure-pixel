@@ -76,6 +76,8 @@ export class EntityManager {
     }
 
     createPlayer(spawnX: number, spawnY: number): Player {
+        console.log(`[EntityManager] Creating player at (${spawnX}, ${spawnY})`);
+        
         this.player = new Player(spawnX, spawnY);
         this.player.setInputManager(this.inputSystem);
         this.player.setMusicSystem(this.musicSystem);
@@ -85,6 +87,8 @@ export class EntityManager {
         this.physicsSystem.addEntity(this.player, this.physicsSystem.layers.PLAYER);
         
         this.eventBus.emit('player:created', { player: this.player });
+        
+        console.log(`[EntityManager] Player created: ${this.player ? 'success' : 'failed'}`);
         
         return this.player;
     }
@@ -97,6 +101,12 @@ export class EntityManager {
 
     createEntity(config: EntityConfig): Entity | null {
         let entity: Entity | null = null;
+        
+        // Check if entity spawn position is valid
+        const tileMap = this.physicsSystem.tileMap;
+        if (tileMap && tileMap[config.y] && tileMap[config.y][config.x] === 1) {
+            console.warn(`[EntityManager] 警告: エンティティ(${config.type})のスポーン位置(${config.x}, ${config.y})が地面の中です！`);
+        }
         
         switch (config.type) {
         case 'coin':

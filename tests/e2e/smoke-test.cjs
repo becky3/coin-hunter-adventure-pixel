@@ -15,7 +15,8 @@ async function runAutomatedTests() {
     try {
         // テスト1: ゲーム初期化
         console.log('テスト1: ゲーム初期化');
-        await page.goto('http://localhost:3000/', { waitUntil: 'networkidle0' });
+        // stage0-1をURLパラメータで指定
+        await page.goto('http://localhost:3000/?s=0-1', { waitUntil: 'networkidle0' });
         
         const initialized = await page.waitForFunction(
             () => window.game?.gameLoop?.running,
@@ -77,7 +78,7 @@ async function runAutomatedTests() {
             );
             
             // さらに待機して初期化を確実に完了させる
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 2000));
         } else {
             console.log('  ✗ ゲーム開始失敗');
             testsFailed++;

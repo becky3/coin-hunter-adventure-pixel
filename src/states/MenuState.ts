@@ -2,6 +2,7 @@ import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { GameState } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputEvent } from '../core/InputSystem';
+import { URLParams } from '../utils/urlParams';
 
 interface MenuOption {
     text: string;
@@ -179,8 +180,8 @@ export class MenuState implements GameState {
     private drawTitleLogo(renderer: PixelRenderer): void {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         const titleY = this.logoY;
-        renderer.drawTextCentered('COIN HUNTER', centerX, titleY, '#FFD700');
-        renderer.drawTextCentered('ADVENTURE', centerX, titleY + 16, '#FF6B6B');
+        renderer.drawTextCentered('COIN HUNTER', centerX, titleY, '#FFD700', 1, true);
+        renderer.drawTextCentered('ADVENTURE', centerX, titleY + 16, '#FF6B6B', 1, true);
     }
     
     private drawMenuOptions(renderer: PixelRenderer): void {
@@ -278,7 +279,16 @@ export class MenuState implements GameState {
                 this.game.musicSystem.playSEFromPattern('gameStart');
             }
             try {
-                this.game.stateManager.setState('play');
+                // URLパラメータからステージIDを取得
+                const urlParams = new URLParams();
+                const stageId = urlParams.getStageId();
+                
+                if (stageId) {
+                    console.log(`Starting stage from URL parameter: ${stageId}`);
+                    this.game.stateManager.setState('play', { level: stageId });
+                } else {
+                    this.game.stateManager.setState('play');
+                }
             } catch (error) {
                 console.error('Error transitioning to play state:', error);
             }
@@ -302,6 +312,11 @@ export class MenuState implements GameState {
     
     exit(): void {
         this.removeInputListeners();
+        
+        // Stop menu BGM when leaving menu
+        if (this.game.musicSystem) {
+            this.game.musicSystem.stopBGM();
+        }
     }
     
     destroy(): void {

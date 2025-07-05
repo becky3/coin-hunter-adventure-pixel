@@ -47,8 +47,8 @@ type EventListener = (event: StateEvent) => void;
 
 export class GameStateManager {
     private states: Map<string, GameState>;
-    private currentState: GameState | null;
-    private currentStateName?: string;
+    private _currentState: GameState | null;
+    private _currentStateName?: string;
     private previousState: GameState | null;
     private stateHistory: GameSnapshot[];
     private maxHistory: number;
@@ -57,7 +57,7 @@ export class GameStateManager {
 
     constructor() {
         this.states = new Map();
-        this.currentState = null;
+        this._currentState = null;
         this.previousState = null;
         this.stateHistory = [];
         this.maxHistory = 1000;
@@ -77,16 +77,16 @@ export class GameStateManager {
             throw new Error(`State "${name}" not found`);
         }
         
-        if (this.currentState) {
-            if (this.currentState.exit) {
-                this.currentState.exit();
+        if (this._currentState) {
+            if (this._currentState.exit) {
+                this._currentState.exit();
             }
-            this.previousState = this.currentState;
+            this.previousState = this._currentState;
         }
-        this.currentState = this.states.get(name)!;
-        this.currentStateName = name;
-        if (this.currentState.enter) {
-            this.currentState.enter(params);
+        this._currentState = this.states.get(name)!;
+        this._currentStateName = name;
+        if (this._currentState.enter) {
+            this._currentState.enter(params);
         }
         this.recordEvent('stateChange', { from: this.previousState?.name, to: name, params });
     }
@@ -96,14 +96,14 @@ export class GameStateManager {
     }
     
     update(deltaTime: number): void {
-        if (this.currentState && this.currentState.update) {
-            this.currentState.update(deltaTime);
+        if (this._currentState && this._currentState.update) {
+            this._currentState.update(deltaTime);
         }
     }
     
     render(renderer: PixelRenderer): void {
-        if (this.currentState && this.currentState.render) {
-            this.currentState.render(renderer);
+        if (this._currentState && this._currentState.render) {
+            this._currentState.render(renderer);
         }
     }
     
@@ -113,7 +113,7 @@ export class GameStateManager {
         const snapshot: GameSnapshot = {
             timestamp: Date.now(),
             frame: game.frameCount || 0,
-            currentState: this.currentState?.name,
+            currentState: this._currentState?.name,
             player: game.player ? {
                 x: game.player.x,
                 y: game.player.y,
@@ -202,14 +202,22 @@ export class GameStateManager {
         });
     }
     
+    get currentState(): GameState | null {
+        return this._currentState;
+    }
+    
+    get currentStateName(): string | undefined {
+        return this._currentStateName;
+    }
+    
     destroy(): void {
-        if (this.currentState && this.currentState.exit) {
-            this.currentState.exit();
+        if (this._currentState && this._currentState.exit) {
+            this._currentState.exit();
         }
         this.states.clear();
         this.listeners.clear();
         this.stateHistory = [];
-        this.currentState = null;
+        this._currentState = null;
         this.previousState = null;
     }
 }

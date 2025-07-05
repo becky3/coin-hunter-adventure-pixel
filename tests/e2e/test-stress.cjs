@@ -11,7 +11,7 @@ async function runTest() {
         // Setup
         await t.init('Stress Test');
         await t.injectErrorTracking();
-        await t.navigateToGame();
+        await t.navigateToGame('http://localhost:3000?s=0-1');
         await t.waitForGameInitialization();
         
         console.log('\n--- Starting Stress Test ---\n');

@@ -26,7 +26,7 @@ type DrumType = 'kick' | 'snare' | 'hihat';
 type OscillatorType = OscillatorNode['type'];
 
 export type BGMName = 'title' | 'game' | 'victory' | 'gameover';
-export type SEName = 'coin' | 'jump' | 'damage' | 'button' | 'powerup';
+export type SEName = 'coin' | 'jump' | 'damage' | 'button' | 'powerup' | 'gameStart';
 
 export class MusicSystem {
     private audioContext: AudioContext | null;
@@ -849,6 +849,9 @@ export class MusicSystem {
         case 'powerup':
             this.playGoalSound(); // 仮にpowerupとして使用
             break;
+        case 'gameStart':
+            this.playGameStartSound();
+            break;
         default:
             console.warn(`[MusicSystem] Unknown SE: ${name}`);
         }
@@ -1076,7 +1079,7 @@ export class MusicSystem {
             }
         } catch {
             // ResourceLoader not initialized, use existing implementation
-            if (['coin', 'jump', 'damage', 'button', 'powerup'].includes(name)) {
+            if (['coin', 'jump', 'damage', 'button', 'powerup', 'gameStart'].includes(name)) {
                 this.playSE(name as SEName);
             }
         }

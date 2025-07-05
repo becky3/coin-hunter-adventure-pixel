@@ -7,6 +7,9 @@ export interface HUDData {
     lives: number;
     time: number;
     coinsCollected: number;
+    playerX?: number;
+    playerY?: number;
+    stageName?: string;
 }
 
 interface GameServices {
@@ -40,9 +43,6 @@ export class HUDManager {
             this.hudData.coinsCollected++;
         });
 
-        this.eventBus.on('player:health-changed', (data: { health: number }) => {
-            this.hudData.lives = data.health;
-        });
 
         this.eventBus.on('game:time-updated', (data: { time: number }) => {
             this.hudData.time = data.time;
@@ -69,9 +69,6 @@ export class HUDManager {
         this.hudData.score = score;
     }
     
-    updateHealth(health: number, _maxHealth: number): void {
-        this.hudData.lives = health;
-    }
     
     updateCoins(coins: number): void {
         this.hudData.coinsCollected = coins;
@@ -79,6 +76,15 @@ export class HUDManager {
     
     updateTimer(time: number): void {
         this.hudData.time = time;
+    }
+    
+    updatePlayerPosition(x: number, y: number): void {
+        this.hudData.playerX = Math.floor(x);
+        this.hudData.playerY = Math.floor(y);
+    }
+    
+    updateStageName(stageName: string): void {
+        this.hudData.stageName = stageName;
     }
     
     initialize(): void {
@@ -133,14 +139,20 @@ export class HUDManager {
         // Bottom border of HUD
         this.renderHorizontalBorder(renderer, 24);
 
-        // Render HUD text
+        // Render HUD text - First line
         renderer.drawText(`SCORE: ${this.hudData.score}`, 8, 8, '#FFFFFF');
         renderer.drawText(`LIVES: ${this.hudData.lives}`, 88, 8, '#FFFFFF');
         
+        // Render HUD text - Second line
         const minutes = Math.floor(this.hudData.time / 60);
         const seconds = this.hudData.time % 60;
         const timeStr = `TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-        renderer.drawText(timeStr, 152, 8, '#FFFFFF');
+        renderer.drawText(timeStr, 8, 16, '#FFFFFF');
+        
+        // Render stage name on second line
+        if (this.hudData.stageName) {
+            renderer.drawText(this.hudData.stageName, 120, 16, '#FFFFFF');
+        }
     }
 
     private renderPauseScreen(renderer: PixelRenderer): void {

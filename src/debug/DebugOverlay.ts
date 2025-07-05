@@ -2,6 +2,7 @@
 
 import { ServiceLocator } from '../services/ServiceLocator';
 import { GAME_CONSTANTS } from '../config/GameConstants';
+import { PlayState } from '../states/PlayState';
 
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
@@ -21,6 +22,7 @@ export class DebugOverlay {
         }
         
         (window as any).debugOverlay = this;
+        
     }
 
     private createDebugUI(): void {
@@ -46,12 +48,13 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['Speed', 'State'];
+        const stats = ['Speed', 'State', 'Player X', 'Player Y'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
             this.debugElement!.appendChild(statElement);
-            this.statsElements.set(stat.toLowerCase(), statElement.querySelector('span')!);
+            const key = stat.toLowerCase().replace(' ', '_');
+            this.statsElements.set(key, statElement.querySelector('span')!);
         });
         
         this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
@@ -104,6 +107,36 @@ export class DebugOverlay {
     }
 
     update(_deltaTime: number): void {
+        // Update player position if available
+        const game = (window as any).game;
+        if (!game) {
+            return;
+        }
+        
+        const currentState = game.stateManager?.currentState;
+        if (!currentState) {
+            return;
+        }
+        
+        // Check if the current state is PlayState (has player getter)
+        if (currentState && currentState.name === 'play') {
+            // Cast to PlayState to access player property
+            const playState = currentState as PlayState;
+            
+            const player = playState.player;
+            if (player) {
+                this.updateStat('player_x', Math.floor(player.x).toString());
+                this.updateStat('player_y', Math.floor(player.y).toString());
+            } else {
+                // Player not available yet
+                this.updateStat('player_x', '-');
+                this.updateStat('player_y', '-');
+            }
+        } else {
+            // Not in play state, clear player position
+            this.updateStat('player_x', '-');
+            this.updateStat('player_y', '-');
+        }
     }
 
     toggle(): void {

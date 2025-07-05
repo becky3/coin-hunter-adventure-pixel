@@ -12,7 +12,7 @@ async function runTest() {
         // Initialize
         await t.init('Performance Test');
         await t.injectErrorTracking();
-        await t.navigateToGame();
+        await t.navigateToGame('http://localhost:3000?s=0-1');
         await t.waitForGameInitialization();
         
         // Start game

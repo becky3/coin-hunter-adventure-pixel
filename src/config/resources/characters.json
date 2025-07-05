@@ -2,7 +2,7 @@
   "player": {
     "physics": {
       "width": 16,
-      "height": 16,
+      "height": 32,
       "speed": 1.17,
       "jumpPower": 10,
       "minJumpTime": 8,

@@ -49,16 +49,13 @@ export class GameController {
             this.hudManager.updateScore(data.score);
         });
         
-        this.eventBus.on('player:health-changed', (data: any) => {
-            this.hudManager.updateHealth(data.health, data.maxHealth);
-        });
         
         this.eventBus.on('player:coins-changed', (data: any) => {
             this.hudManager.updateCoins(data.coins);
         });
     }
     
-    async initializeLevel(levelName: string): Promise<void> {
+    async initializeLevel(levelName: string): Promise<any> {
         // Clear physics system
         this.services.physicsSystem.clearEntities();
         
@@ -73,6 +70,23 @@ export class GameController {
         if (levelData) {
             // Create player
             const spawn = this.levelManager.getPlayerSpawn();
+            
+            // Check if spawn position is valid (player's feet position should not be inside solid tiles)
+            const tileMap = this.levelManager.getTileMap();
+            // spawn.y is the bottom position of the player in tile coordinates
+            if (tileMap && tileMap[spawn.y] && tileMap[spawn.y][spawn.x] === 1) {
+                console.error(`[GameController] エラー: プレイヤーのスポーン位置(${spawn.x}, ${spawn.y})が地面の中です！`);
+                console.error(`[GameController] ステージ: ${levelName}`);
+                console.error(`[GameController] 注意: スポーン座標はプレイヤーの左下（足元）の位置です`);
+                throw new Error(`Invalid player spawn position: (${spawn.x}, ${spawn.y}) is inside solid tile`);
+            }
+            
+            // Also check if player would be standing on air (no ground below)
+            const belowY = spawn.y + 1;
+            if (tileMap && belowY < tileMap.length && tileMap[belowY] && tileMap[belowY][spawn.x] !== 1) {
+                console.warn(`[GameController] 警告: プレイヤーのスポーン位置(${spawn.x}, ${spawn.y})の下に地面がありません`);
+            }
+            
             this.entityManager.createPlayer(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
             
             // Create entities from level data
@@ -82,6 +96,19 @@ export class GameController {
             } else {
                 // Create test entities if no level entities
                 this.entityManager.createTestEntities();
+            }
+            
+            // Create goal if defined in level data
+            const levelLoader = this.levelManager.getLevelLoader();
+            if (levelLoader) {
+                const goalPosition = levelLoader.getGoalPosition(levelData);
+                if (goalPosition) {
+                    this.entityManager.createEntity({
+                        type: 'goal',
+                        x: goalPosition.x,
+                        y: goalPosition.y
+                    });
+                }
             }
         }
         
@@ -94,9 +121,11 @@ export class GameController {
         // Initialize HUD
         this.hudManager.initialize();
         this.hudManager.updateScore(player?.score || 0);
-        this.hudManager.updateHealth(player?.health || 0, player?.maxHealth || 0);
         this.hudManager.updateCoins(player?.coins || 0);
         this.hudManager.updateTimer(this.gameTime);
+        
+        // Return the loaded level data
+        return levelData;
     }
     
     update(deltaTime: number): void {

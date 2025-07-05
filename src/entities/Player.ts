@@ -10,7 +10,9 @@ import { ResourceLoader } from '../config/ResourceLoader';
 // Default config as fallback if ResourceLoader is not available
 const DEFAULT_PLAYER_CONFIG = {
     width: 16,
-    height: 16,
+    height: 32,
+    smallWidth: 16,
+    smallHeight: 16,
     speed: 1.17,
     jumpPower: 10,
     minJumpTime: 8,
@@ -18,9 +20,7 @@ const DEFAULT_PLAYER_CONFIG = {
     maxHealth: 3,
     invulnerabilityTime: 2000,
     spawnX: 100,
-    spawnY: 300,
-    knockbackVertical: -5,
-    knockbackHorizontal: 3
+    spawnY: 300
 } as const;
 
 const DEFAULT_ANIMATION_CONFIG = {
@@ -77,6 +77,9 @@ export class Player extends Entity {
     private _isJumping: boolean;
     private jumpButtonPressed: boolean;
     private jumpTime: number;
+    private originalWidth: number;
+    private originalHeight: number;
+    private isSmall: boolean;
     private canVariableJump: boolean;
     private jumpButtonHoldTime: number;
     private jumpMaxHeight: number;
@@ -109,12 +112,11 @@ export class Player extends Entity {
             maxHealth: playerConfig.stats.maxHealth,
             invulnerabilityTime: playerConfig.stats.invulnerabilityTime ?? DEFAULT_PLAYER_CONFIG.invulnerabilityTime,
             spawnX: playerConfig.spawn?.x ?? DEFAULT_PLAYER_CONFIG.spawnX,
-            spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY,
-            knockbackVertical: playerConfig.knockback?.vertical ?? DEFAULT_PLAYER_CONFIG.knockbackVertical,
-            knockbackHorizontal: playerConfig.knockback?.horizontal ?? DEFAULT_PLAYER_CONFIG.knockbackHorizontal
+            spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY
         } : DEFAULT_PLAYER_CONFIG;
         
-        super(x ?? config.spawnX, y ?? config.spawnY, config.width, config.height);
+        // yはすでにピクセル座標（左下基準）で渡されているので、高さを引いて左上座標に変換
+        super(x ?? config.spawnX, (y ?? config.spawnY) - config.height, config.width, config.height);
         
         this.speed = config.speed;
         this.jumpPower = config.jumpPower;
@@ -132,6 +134,11 @@ export class Player extends Entity {
         this._animState = 'idle';
         this.animFrame = 0;
         this.animTimer = 0;
+        
+        // Size management
+        this.originalWidth = config.width;
+        this.originalHeight = config.height;
+        this.isSmall = false;
         
         this._isJumping = false;
         this.jumpButtonPressed = false;
@@ -159,6 +166,10 @@ export class Player extends Entity {
             speed: { ...DEFAULT_ANIMATION_CONFIG.speed, ...playerConfig.animations.speed },
             frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
         } : DEFAULT_ANIMATION_CONFIG;
+        
+        // Reduce gravity to extend air time (about half of default)
+        // This makes jumps feel more floaty without changing the jump height
+        this.gravityStrength = 0.35;
     }
     
     setInputManager(inputManager: InputSystem): void {
@@ -317,52 +328,21 @@ export class Player extends Entity {
         }
     }
     
-    takeDamage(damage: number = 1): void {
-        if (this._invulnerable || this._isDead) return;
-        
-        this._health -= damage;
-        
-        if (this._health <= 0) {
-            this._health = 0;
-            this.die();
-        } else {
-            this._invulnerable = true;
-            this.invulnerabilityTime = this.playerConfig.invulnerabilityTime || DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
-            
-            this.vy = this.playerConfig.knockbackVertical || DEFAULT_PLAYER_CONFIG.knockbackVertical;
-            this.vx = this._facing === 'right' ? -(this.playerConfig.knockbackHorizontal || DEFAULT_PLAYER_CONFIG.knockbackHorizontal) : (this.playerConfig.knockbackHorizontal || DEFAULT_PLAYER_CONFIG.knockbackHorizontal);
-            
-            if (this.eventBus) {
-                this.eventBus.emit('player:health-changed', { health: this._health, maxHealth: this._maxHealth });
-            }
-            
-            if (this.musicSystem) {
-                this.musicSystem.playSEFromPattern('damage');
-            }
-        }
-    }
     
     heal(amount: number = 1): void {
         this._health = Math.min(this._health + amount, this._maxHealth);
-        
-        if (this.eventBus) {
-            this.eventBus.emit('player:health-changed', { health: this._health, maxHealth: this._maxHealth });
-        }
     }
     
-    private die(): void {
-        this._isDead = true;
-        this.vy = -8;
-        
-        if (this.musicSystem) {
-            // TODO: Add playPlayerDeathSound to MusicSystem
-
-        }
-    }
     
     respawn(x: number, y: number): void {
+        // Reset to large size first
+        this.isSmall = false;
+        this.width = DEFAULT_PLAYER_CONFIG.width;
+        this.height = DEFAULT_PLAYER_CONFIG.height;
+        
+        // yはすでにピクセル座標（左下基準）で渡されているので、高さを引いて左上座標に変換
         this.x = x;
-        this.y = y;
+        this.y = y - this.height;
         this.vx = 0;
         this.vy = 0;
         this._isDead = false;
@@ -377,9 +357,44 @@ export class Player extends Entity {
         this.grounded = false;
         this._health = this._maxHealth;
         
-        if (this.eventBus) {
-            this.eventBus.emit('player:health-changed', { health: this._health, maxHealth: this._maxHealth });
+        this.updateSprite();
+    }
+    
+    takeDamage(): boolean {
+        if (this._invulnerable || this._isDead) {
+            return false;
         }
+        
+        // 小さい状態で攻撃を受けたら死亡
+        if (this.isSmall) {
+            this._health = 0;
+            this._isDead = true;
+            if (this.eventBus) {
+                this.eventBus.emit('player:died');
+            }
+            return true; // Player died
+        }
+        
+        // 大きい状態で攻撃を受けたら小さくなる
+        this.isSmall = true;
+        this.width = DEFAULT_PLAYER_CONFIG.smallWidth;
+        this.height = DEFAULT_PLAYER_CONFIG.smallHeight;
+        // Adjust Y position to keep feet at same level
+        this.y += DEFAULT_PLAYER_CONFIG.height - DEFAULT_PLAYER_CONFIG.smallHeight;
+        this.updateSprite();
+        
+        
+        // Make invulnerable after taking damage
+        this._invulnerable = true;
+        this.invulnerabilityTime = DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
+        
+        // Play damage sound
+        if (this.musicSystem) {
+            this.musicSystem.playSE('damage');
+        }
+        
+        
+        return false; // Player survived
     }
     
     addScore(points: number): void {
@@ -403,12 +418,14 @@ export class Player extends Entity {
     }
     
     private updateSprite(): void {
+        const sizePrefix = this.isSmall ? '_small' : '';
+        
         if (this._animState === 'idle') {
-            this.spriteKey = 'player/idle';
+            this.spriteKey = `player/idle${sizePrefix}`;
         } else if (this._animState === 'walk') {
-            this.spriteKey = 'player/walk';
+            this.spriteKey = `player/walk${sizePrefix}`;
         } else if (this._animState === 'jump' || this._animState === 'fall') {
-            this.spriteKey = 'player/jump';
+            this.spriteKey = `player/jump${sizePrefix}`;
         }
     }
     
@@ -424,7 +441,8 @@ export class Player extends Entity {
             const screenPos = renderer.worldToScreen(this.x, this.y);
             
             if (this._animState === 'walk') {
-                const animation = renderer.pixelArtRenderer.animations.get('player/walk');
+                const sizePrefix = this.isSmall ? '_small' : '';
+                const animation = renderer.pixelArtRenderer.animations.get(`player/walk${sizePrefix}`);
                 if (animation) {
                     animation.update(Date.now());
                     animation.draw(
@@ -439,7 +457,8 @@ export class Player extends Entity {
             }
             
             if (this._animState === 'jump' || this._animState === 'fall') {
-                const animation = renderer.pixelArtRenderer.animations.get('player/jump');
+                const sizePrefix = this.isSmall ? '_small' : '';
+                const animation = renderer.pixelArtRenderer.animations.get(`player/jump${sizePrefix}`);
                 if (animation) {
                     animation.update(Date.now());
                     animation.draw(

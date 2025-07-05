@@ -10,6 +10,8 @@ class TestFramework {
             devtools: options.devtools ?? false,
             screenshotPath: options.screenshotPath ?? 'tests/screenshots',
             timeout: options.timeout ?? 30000,
+            logToFile: options.logToFile ?? true,
+            logPath: options.logPath ?? 'tests/logs',
             ...options
         };
         
@@ -17,11 +19,20 @@ class TestFramework {
         this.page = null;
         this.testName = '';
         this.startTime = null;
+        this.logStream = null;
+        this.originalConsoleLog = console.log;
+        this.originalConsoleError = console.error;
+        this.originalConsoleWarn = console.warn;
     }
 
     async init(testName) {
         this.testName = testName;
         this.startTime = Date.now();
+        
+        // Setup log file if enabled
+        if (this.options.logToFile) {
+            this.setupLogFile();
+        }
         
         console.log(`\n${'='.repeat(50)}`);
         console.log(`Starting test: ${testName}`);
@@ -33,7 +44,8 @@ class TestFramework {
             headless: this.options.headless,
             slowMo: this.options.slowMo,
             devtools: this.options.devtools,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            protocolTimeout: 180000 // 3 minutes timeout for protocol operations
         });
 
         this.page = await this.browser.newPage();
@@ -56,8 +68,9 @@ class TestFramework {
                 console.error(`[Browser Console ERROR] ${text}`);
             } else if (type === 'warning') {
                 console.warn(`[Browser Console WARN] ${text}`);
-            } else if (this.options.verbose) {
-                console.log(`[Browser Console] ${text}`);
+            } else {
+                // Always log for debugging
+                console.log(`[Browser Console ${type}] ${text}`);
             }
         });
 
@@ -90,14 +103,39 @@ class TestFramework {
         console.log('Waiting for game initialization...');
         
         try {
-            await this.page.waitForFunction(
-                () => {
-                    return window.game && 
-                           window.game.gameLoop && 
-                           window.game.gameLoop.running === true;
-                },
+            // Debug: Check if window.game exists
+            const gameExists = await this.page.evaluate(() => {
+                return typeof window.game !== 'undefined';
+            });
+            console.log('Game object exists:', gameExists);
+            
+            if (!gameExists) {
+                // Wait a bit and check again
+                await this.wait(1000);
+            }
+            
+            // Use the same approach as smoke-test.cjs which is working
+            const initialized = await this.page.waitForFunction(
+                () => window.game?.gameLoop?.running,
                 { timeout }
-            );
+            ).then(() => true).catch((error) => {
+                console.error('waitForFunction error:', error.message);
+                return false;
+            });
+            
+            if (!initialized) {
+                // Get debug info
+                const debugInfo = await this.page.evaluate(() => {
+                    return {
+                        game: typeof window.game,
+                        gameLoop: window.game ? typeof window.game.gameLoop : 'no game',
+                        running: window.game?.gameLoop?.running
+                    };
+                });
+                console.log('Debug info:', debugInfo);
+                throw new Error('Game initialization failed');
+            }
+            
             console.log('✅ Game initialized');
             return true;
         } catch (error) {
@@ -133,17 +171,42 @@ class TestFramework {
             const game = window.game;
             if (!game) return null;
 
+            const state = game.stateManager?.currentState;
+            let player = null;
+            
+            // Try different ways to find the player
+            if (state) {
+                player = state.player || 
+                        state.getEntityManager?.()?.getPlayer?.() ||
+                        state.entityManager?.getPlayer?.() || 
+                        state.entities?.find(e => e.type === 'player');
+                
+                // Debug logging
+                if (!player) {
+                    console.log('[TestFramework] Player not found. Debug info:', {
+                        stateName: state.name,
+                        hasStatePlayer: !!state.player,
+                        hasGetEntityManager: !!state.getEntityManager,
+                        hasEntityManager: !!state.entityManager,
+                        getEntityManagerResult: state.getEntityManager?.(),
+                        hasGetPlayer: !!state.entityManager?.getPlayer,
+                        getPlayerResult: state.entityManager?.getPlayer?.(),
+                        entityManagerPlayer: state.entityManager?.player
+                    });
+                }
+            }
+
             return {
                 running: game.gameLoop?.running,
                 currentState: game.stateManager?.currentState?.name,
                 states: game.stateManager?.states ? Object.keys(game.stateManager.states) : [],
-                player: game.stateManager?.currentState?.player ? {
-                    position: game.stateManager.currentState.player.position,
-                    velocity: game.stateManager.currentState.player.velocity,
-                    grounded: game.stateManager.currentState.player.grounded,
-                    health: game.stateManager.currentState.player.health
+                player: player ? {
+                    position: { x: player.x, y: player.y },
+                    velocity: { x: player.vx || 0, y: player.vy || 0 },
+                    grounded: player.grounded,
+                    health: player.health
                 } : null,
-                entities: game.stateManager?.currentState?.entities?.length || 0
+                entities: state?.entityManager?.entities?.length || state?.entities?.length || 0
             };
         });
     }
@@ -195,6 +258,69 @@ class TestFramework {
             console.log(`\n${'='.repeat(50)}`);
             console.log(`Test completed in: ${(duration / 1000).toFixed(2)}s`);
             console.log(`${'='.repeat(50)}\n`);
+        }
+        
+        // Close log file if enabled
+        if (this.logStream) {
+            this.cleanupLogFile();
+        }
+    }
+    
+    setupLogFile() {
+        // Create logs directory if it doesn't exist
+        const logsDir = path.resolve(this.options.logPath);
+        if (!fs.existsSync(logsDir)) {
+            fs.mkdirSync(logsDir, { recursive: true });
+        }
+        
+        // Generate log filename from test name
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const safeTestName = this.testName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+        const logFileName = `${safeTestName}-${timestamp}.log`;
+        const logFilePath = path.join(logsDir, logFileName);
+        
+        // Create write stream
+        this.logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
+        
+        // Override console methods to also write to file
+        const self = this;
+        console.log = function(...args) {
+            const message = args.join(' ');
+            self.originalConsoleLog.apply(console, args);
+            if (self.logStream) {
+                self.logStream.write(`[LOG] ${message}\n`);
+            }
+        };
+        
+        console.error = function(...args) {
+            const message = args.join(' ');
+            self.originalConsoleError.apply(console, args);
+            if (self.logStream) {
+                self.logStream.write(`[ERROR] ${message}\n`);
+            }
+        };
+        
+        console.warn = function(...args) {
+            const message = args.join(' ');
+            self.originalConsoleWarn.apply(console, args);
+            if (self.logStream) {
+                self.logStream.write(`[WARN] ${message}\n`);
+            }
+        };
+        
+        console.log(`Log file created: ${logFilePath}`);
+    }
+    
+    cleanupLogFile() {
+        // Restore original console methods
+        console.log = this.originalConsoleLog;
+        console.error = this.originalConsoleError;
+        console.warn = this.originalConsoleWarn;
+        
+        // Close stream
+        if (this.logStream) {
+            this.logStream.end();
+            this.logStream = null;
         }
     }
 
@@ -250,6 +376,7 @@ class TestFramework {
             throw error;
         }
     }
+    
 
     async measurePerformance(duration = 5000) {
         console.log(`Measuring performance for ${duration}ms...`);
