@@ -45,15 +45,21 @@ async function runTest() {
         console.log('\n--- Test 1: First Enemy Damage (Large -> Small) ---');
         
         // Check if enemies exist
-        const enemyCount = await t.page.evaluate(() => {
+        const enemyInfo = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
-            const entities = state?.entityManager?.entities || [];
-            const enemies = entities.filter(e => e.constructor.name === 'Slime' || e.constructor.name === 'Enemy');
-            return enemies.length;
+            const entityManager = state?.entityManager;
+            if (!entityManager) return { error: 'No EntityManager' };
+            
+            return {
+                enemies: entityManager.enemies ? entityManager.enemies.length : 0,
+                items: entityManager.items ? entityManager.items.length : 0,
+                enemyTypes: entityManager.enemies ? entityManager.enemies.map(e => e.constructor.name) : [],
+                levelEntities: state?.levelManager?.getEntities?.() || []
+            };
         });
-        console.log('Number of enemies in level:', enemyCount);
+        console.log('Entity info:', enemyInfo);
         
-        if (enemyCount === 0) {
+        if (enemyInfo.enemies === 0) {
             console.error('No enemies found in level! Stage may not have loaded correctly.');
             await t.screenshot('no-enemies-found');
         }
@@ -126,7 +132,9 @@ async function runTest() {
             return player ? {
                 position: { x: player.x, y: player.y },
                 isSmall: player.isSmall,
-                isDead: player.isDead
+                isDead: player.isDead,
+                invulnerable: player.invulnerable,
+                invulnerabilityTime: player.invulnerabilityTime
             } : null;
         });
         

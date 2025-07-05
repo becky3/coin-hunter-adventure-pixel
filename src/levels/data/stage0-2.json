@@ -7,11 +7,11 @@
   "backgroundColor": "#5C94FC",
   "playerSpawn": {
     "x": 2,
-    "y": 12
+    "y": 11
   },
   "goal": {
     "x": 17,
-    "y": 12
+    "y": 11
   },
   "timeLimit": 300,
   "tilemap": [
@@ -39,17 +39,17 @@
     {
       "type": "slime",
       "x": 7,
-      "y": 12
+      "y": 11
     },
     {
       "type": "slime",
       "x": 10,
-      "y": 12
+      "y": 11
     },
     {
       "type": "slime",
       "x": 13,
-      "y": 12
+      "y": 11
     }
   ]
 }
