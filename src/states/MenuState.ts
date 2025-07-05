@@ -31,10 +31,6 @@ export class MenuState implements GameState {
     private inputListeners: Array<() => void>;
     private _firstUpdateLogged: boolean = false;
     
-    // Debug stage selection
-    private debugMode: boolean = false;
-    private stageList: string[] = [];
-    private selectedStageIndex: number = 0;
 
     constructor(game: Game) {
         this.game = game;
@@ -51,13 +47,6 @@ export class MenuState implements GameState {
         this.showCredits = false;
         this.titleAnimTimer = 0;
         this.inputListeners = [];
-        
-        // Initialize stage list
-        this.stageList = [
-            'stage1-1', 'stage1-2', 'stage1-3',
-            'stage0-1', 'stage0-2', 'stage0-3',
-            'performance-test'
-        ];
     }
     
     private init(): void {
@@ -146,43 +135,6 @@ export class MenuState implements GameState {
                 }
             })
         );
-        
-        // Debug mode toggle (D key)
-        this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
-                if (event.key === 'KeyD' && !this.showHowTo && !this.showCredits) {
-                    this.debugMode = !this.debugMode;
-                    if (this.game.musicSystem) {
-                        this.game.musicSystem.playSEFromPattern('button');
-                    }
-                }
-            })
-        );
-        
-        // Stage selection in debug mode (Left/Right arrows)
-        this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
-                if (this.debugMode && !this.showHowTo && !this.showCredits) {
-                    if (event.action === 'left') {
-                        this.selectedStageIndex--;
-                        if (this.selectedStageIndex < 0) {
-                            this.selectedStageIndex = this.stageList.length - 1;
-                        }
-                        if (this.game.musicSystem) {
-                            this.game.musicSystem.playSEFromPattern('button');
-                        }
-                    } else if (event.action === 'right') {
-                        this.selectedStageIndex++;
-                        if (this.selectedStageIndex >= this.stageList.length) {
-                            this.selectedStageIndex = 0;
-                        }
-                        if (this.game.musicSystem) {
-                            this.game.musicSystem.playSEFromPattern('button');
-                        }
-                    }
-                }
-            })
-        );
     }
     
     private removeInputListeners(): void {
@@ -225,11 +177,6 @@ export class MenuState implements GameState {
         }
         this.drawMuteButton(renderer);
         renderer.drawText('v0.1.0', 8, GAME_RESOLUTION.HEIGHT - 16, '#666666');
-        
-        // Draw debug overlay
-        if (this.debugMode) {
-            this.drawDebugOverlay(renderer);
-        }
     }
     
     private drawTitleLogo(renderer: PixelRenderer): void {
@@ -325,23 +272,6 @@ export class MenuState implements GameState {
         renderer.drawText('(M)', x + 16, y + 8, '#666666');
     }
     
-    private drawDebugOverlay(renderer: PixelRenderer): void {
-        // Debug panel background
-        renderer.drawRect(4, 4, 120, 40, '#000000', true);
-        renderer.drawRect(4, 4, 120, 40, '#00FF00', false);
-        
-        // Debug mode indicator
-        renderer.drawText('DEBUG MODE', 8, 8, '#00FF00');
-        
-        // Stage selection
-        renderer.drawText('STAGE:', 8, 20, '#00FF00');
-        const stageName = this.stageList[this.selectedStageIndex];
-        renderer.drawText(stageName, 56, 20, '#FFFF00');
-        
-        // Navigation hint
-        renderer.drawText('< > SELECT', 8, 32, '#888888');
-    }
-    
     private executeOption(): void {
         const option = this.options[this.selectedOption];
         
@@ -355,15 +285,19 @@ export class MenuState implements GameState {
                 const urlParams = new URLParams();
                 const stageId = urlParams.getStageId();
                 
+                // Check if debug overlay has a selected stage
+                const debugOverlay = (window as any).debugOverlay;
+                const debugSelectedStage = debugOverlay?.getSelectedStage?.();
+                
+                // Determine which stage to use (debug selection takes priority)
+                const selectedStage = debugSelectedStage || stageId;
+                
                 // Determine if stage progression should be enabled based on environment
                 const enableProgression = GameEnvironment.shouldEnableStageProgression();
                 console.log(`Environment: ${GameEnvironment.getEnvironmentName()}, Stage progression: ${enableProgression ? 'ENABLED' : 'DISABLED'}`);
                 
-                // Check if debug mode stage selection overrides
-                const selectedStage = this.debugMode ? this.stageList[this.selectedStageIndex] : stageId;
-                
                 if (selectedStage) {
-                    console.log(`Starting stage: ${selectedStage} (debug mode: ${this.debugMode})`);
+                    console.log(`Starting stage: ${selectedStage} (source: ${debugSelectedStage ? 'debug overlay' : 'URL parameter'})`);
                     this.game.stateManager.setState('play', { 
                         level: selectedStage,
                         enableProgression: enableProgression 

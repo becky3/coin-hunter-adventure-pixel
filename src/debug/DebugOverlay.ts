@@ -9,6 +9,15 @@ export class DebugOverlay {
     private debugElement?: HTMLDivElement;
     private statsElements: Map<string, HTMLElement> = new Map();
     
+    // Stage selection
+    private stageList: string[] = [
+        'stage1-1', 'stage1-2', 'stage1-3',
+        'stage0-1', 'stage0-2', 'stage0-3',
+        'performance-test'
+    ];
+    private selectedStageIndex: number = 0;
+    private stageSelectElement?: HTMLElement;
+    
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
     }
@@ -59,11 +68,20 @@ export class DebugOverlay {
         
         this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
         
+        // Add stage selection UI
+        const stageDiv = document.createElement('div');
+        stageDiv.style.marginTop = '10px';
+        stageDiv.style.paddingTop = '10px';
+        stageDiv.style.borderTop = '1px solid #444';
+        stageDiv.innerHTML = `Stage: <span style="color: #ffff00">${this.stageList[this.selectedStageIndex]}</span>`;
+        this.debugElement!.appendChild(stageDiv);
+        this.stageSelectElement = stageDiv.querySelector('span')!;
+        
         const helpDiv = document.createElement('div');
         helpDiv.style.marginTop = '10px';
         helpDiv.style.fontSize = '10px';
         helpDiv.style.color = '#888';
-        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset';
+        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset<br>D: Toggle Stage Select | ←→: Select';
         this.debugElement!.appendChild(helpDiv);
         
         // Initialize default values
@@ -103,6 +121,29 @@ export class DebugOverlay {
                 this.resetSpeed();
             }
             
+            // Stage selection controls
+            const game = (window as any).game;
+            const currentState = game?.stateManager?.currentState;
+            
+            if (currentState && currentState.name === 'menu') {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.selectedStageIndex--;
+                    if (this.selectedStageIndex < 0) {
+                        this.selectedStageIndex = this.stageList.length - 1;
+                    }
+                    this.updateStageDisplay();
+                }
+                
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.selectedStageIndex++;
+                    if (this.selectedStageIndex >= this.stageList.length) {
+                        this.selectedStageIndex = 0;
+                    }
+                    this.updateStageDisplay();
+                }
+            }
         });
     }
 
@@ -171,6 +212,23 @@ export class DebugOverlay {
         this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
     }
     
+    private updateStageDisplay(): void {
+        if (this.stageSelectElement) {
+            this.stageSelectElement.textContent = this.stageList[this.selectedStageIndex];
+        }
+    }
+    
+    getSelectedStage(): string | null {
+        const game = (window as any).game;
+        const currentState = game?.stateManager?.currentState;
+        
+        // Only return selected stage if we're in menu state
+        if (currentState && currentState.name === 'menu') {
+            return this.stageList[this.selectedStageIndex];
+        }
+        
+        return null;
+    }
 
     destroy(): void {
         if (this.debugElement) {
