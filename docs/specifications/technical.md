@@ -18,7 +18,9 @@ parent: 仕様書
 ### 解像度
 - **論理解像度**: 256×240ピクセル
 - **表示解像度**: 768×720ピクセル (3倍スケール)
-- **座標系**: 左上原点 (0,0)、X軸右正、Y軸下正
+- **座標系**: 
+  - 物理エンジン内部: 左上原点 (0,0)、X軸右正、Y軸下正
+  - ステージデータ: エンティティのスポーン座標は左下基準（足元の位置）
 
 ### レンダリング設定
 ```typescript
@@ -85,14 +87,37 @@ Entity {
 ### データ形式（JSON）
 ```json
 {
-    "name": "ステージ名",
-    "width": 幅,
-    "height": 高さ,
-    "playerSpawn": { "x": 100, "y": 150 },
-    "goal": { "x": 2800, "y": 150 },
-    "platforms": [],
-    "enemies": [],
-    "coins": []
+    "id": "stage1-1",
+    "name": "STAGE 1-1",
+    "width": 180,
+    "height": 15,
+    "tileSize": 16,
+    "backgroundColor": "#87CEEB",
+    "playerSpawn": { "x": 2, "y": 11 },  // タイル座標（左下基準）
+    "goal": { "x": 177, "y": 11 },       // タイル座標（左下基準）
+    "timeLimit": 400,
+    "tilemap": [[...], ...],
+    "entities": [
+        {
+            "type": "coin",
+            "x": 5,   // タイル座標（左下基準）
+            "y": 11   // タイル座標（左下基準）
+        }
+    ]
+}
+```
+
+### ステージリスト（stages.json）
+```json
+{
+    "stages": [
+        {
+            "id": "stage1-1",
+            "name": "STAGE 1-1",
+            "description": "First stage",
+            "filename": "stage1-1.json"
+        }
+    ]
 }
 ```
 
@@ -122,8 +147,13 @@ DEBUG = {
 ## 開発環境
 
 - **ビルドツール**: Vite
-- **テスト**: Puppeteer
+- **テスト**: Puppeteer (E2Eテスト)
 - **対応ブラウザ**: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
+
+### テスト環境
+- **E2Eテスト**: `tests/e2e/` ディレクトリ
+- **テストログ**: `tests/logs/` に自動保存
+- **スクリーンショット**: `tests/screenshots/` に保存
 
 ## エラーハンドリング
 
