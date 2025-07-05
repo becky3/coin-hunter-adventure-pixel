@@ -76,6 +76,8 @@ export class EntityManager {
     }
 
     createPlayer(spawnX: number, spawnY: number): Player {
+        console.log(`[EntityManager] Creating player at (${spawnX}, ${spawnY})`);
+        
         this.player = new Player(spawnX, spawnY);
         this.player.setInputManager(this.inputSystem);
         this.player.setMusicSystem(this.musicSystem);
@@ -85,6 +87,8 @@ export class EntityManager {
         this.physicsSystem.addEntity(this.player, this.physicsSystem.layers.PLAYER);
         
         this.eventBus.emit('player:created', { player: this.player });
+        
+        console.log(`[EntityManager] Player created: ${this.player ? 'success' : 'failed'}`);
         
         return this.player;
     }

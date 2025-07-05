@@ -57,8 +57,9 @@ class TestFramework {
                 console.error(`[Browser Console ERROR] ${text}`);
             } else if (type === 'warning') {
                 console.warn(`[Browser Console WARN] ${text}`);
-            } else if (this.options.verbose) {
-                console.log(`[Browser Console] ${text}`);
+            } else {
+                // Always log for debugging
+                console.log(`[Browser Console ${type}] ${text}`);
             }
         });
 
@@ -159,17 +160,42 @@ class TestFramework {
             const game = window.game;
             if (!game) return null;
 
+            const state = game.stateManager?.currentState;
+            let player = null;
+            
+            // Try different ways to find the player
+            if (state) {
+                player = state.player || 
+                        state.getEntityManager?.()?.getPlayer?.() ||
+                        state.entityManager?.getPlayer?.() || 
+                        state.entities?.find(e => e.type === 'player');
+                
+                // Debug logging
+                if (!player) {
+                    console.log('[TestFramework] Player not found. Debug info:', {
+                        stateName: state.name,
+                        hasStatePlayer: !!state.player,
+                        hasGetEntityManager: !!state.getEntityManager,
+                        hasEntityManager: !!state.entityManager,
+                        getEntityManagerResult: state.getEntityManager?.(),
+                        hasGetPlayer: !!state.entityManager?.getPlayer,
+                        getPlayerResult: state.entityManager?.getPlayer?.(),
+                        entityManagerPlayer: state.entityManager?.player
+                    });
+                }
+            }
+
             return {
                 running: game.gameLoop?.running,
                 currentState: game.stateManager?.currentState?.name,
                 states: game.stateManager?.states ? Object.keys(game.stateManager.states) : [],
-                player: game.stateManager?.currentState?.player ? {
-                    position: game.stateManager.currentState.player.position,
-                    velocity: game.stateManager.currentState.player.velocity,
-                    grounded: game.stateManager.currentState.player.grounded,
-                    health: game.stateManager.currentState.player.health
+                player: player ? {
+                    position: { x: player.x, y: player.y },
+                    velocity: { x: player.vx || 0, y: player.vy || 0 },
+                    grounded: player.grounded,
+                    health: player.health
                 } : null,
-                entities: game.stateManager?.currentState?.entities?.length || 0
+                entities: state?.entityManager?.entities?.length || state?.entities?.length || 0
             };
         });
     }
@@ -276,6 +302,7 @@ class TestFramework {
             throw error;
         }
     }
+    
 
     async measurePerformance(duration = 5000) {
         console.log(`Measuring performance for ${duration}ms...`);

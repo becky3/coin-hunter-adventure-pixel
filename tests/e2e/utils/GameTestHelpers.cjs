@@ -9,6 +9,15 @@ class GameTestHelpers extends TestFramework {
     async startNewGame() {
         console.log('Starting new game...');
         
+        // PlayState準備完了イベントのリスナーを事前に設定
+        await this.page.evaluate(() => {
+            window.__playStateReady = false;
+            window.addEventListener('playstate:ready', (event) => {
+                window.__playStateReady = true;
+                console.log('PlayState ready event received:', event.detail);
+            });
+        });
+        
         // Wait for menu state
         await this.waitForState('menu');
         
@@ -37,7 +46,14 @@ class GameTestHelpers extends TestFramework {
         // Wait for play state
         await this.waitForState('play');
         
-        console.log('✅ New game started');
+        // PlayStateの準備完了を待つ
+        await this.waitForCondition(
+            () => window.__playStateReady === true,
+            5000,
+            'PlayState ready'
+        );
+        
+        console.log('✅ New game started and ready');
     }
 
     async pauseGame() {

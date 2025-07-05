@@ -47,6 +47,7 @@ export class PlayState implements GameState {
     private lastTimeUpdate: number = 0;
     private inputListeners: Array<() => void> = [];
     private stageClearTimer: number | null = null;
+    private lives: number = 3; // 残機はPlayStateで管理
 
     // Public getters for testing
     public get player() {
@@ -112,11 +113,23 @@ export class PlayState implements GameState {
     }
 
     private async preloadSprites(): Promise<void> {
+        if (!this.game.assetLoader) {
+            console.warn('[PlayState] AssetLoader not available, skipping sprite preload');
+            return;
+        }
+        
         try {
-            // Player sprites
+            console.log('[PlayState] Preloading sprites...');
+            
+            // Player sprites (large)
             await this.game.assetLoader.loadSprite('player', 'idle');
             await this.game.assetLoader.loadAnimation('player', 'walk', 4, 100);
             await this.game.assetLoader.loadAnimation('player', 'jump', 2, 100);
+            
+            // Player sprites (small)
+            await this.game.assetLoader.loadSprite('player', 'idle_small');
+            await this.game.assetLoader.loadAnimation('player', 'walk_small', 4, 100);
+            await this.game.assetLoader.loadAnimation('player', 'jump_small', 2, 100);
 
             // Terrain sprites
             await this.game.assetLoader.loadSprite('terrain', 'spring');
@@ -125,6 +138,7 @@ export class PlayState implements GameState {
             // Item sprites
             await this.game.assetLoader.loadAnimation('items', 'coin_spin', 4, 100);
             
+            console.log('[PlayState] Sprites preloaded successfully');
         } catch (error) {
             console.error('Failed to preload sprites:', error);
         }
@@ -147,10 +161,10 @@ export class PlayState implements GameState {
 
         // Initialize HUD with level data
         this.hudManager.updateTime(this.levelManager.getTimeLimit());
-        const player = this.entityManager.getPlayer();
-        if (player) {
-            this.hudManager.updateLives(player.health);
-        }
+        this.hudManager.updateLives(this.lives);
+        
+        // Setup player death listener
+        this.eventBus.on('player:died', () => this.handlePlayerDeath());
         
         // Set stage name in HUD
         console.log('[PlayState] levelData:', levelData);
@@ -181,6 +195,20 @@ export class PlayState implements GameState {
             this.game.musicSystem.playBGMFromPattern('game');
         }
         
+        // プレイヤーが作成されたことを確認
+        const player = this.entityManager.getPlayer();
+        if (player) {
+            console.log('[PlayState] Player created successfully');
+            // グローバルイベントとして通知（テスト用）
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('playstate:ready', { 
+                    detail: { player: true } 
+                }));
+            }
+        } else {
+            console.error('[PlayState] Player creation failed!');
+        }
+        
         console.log('[PlayState] enter() completed');
     }
 
@@ -203,9 +231,6 @@ export class PlayState implements GameState {
         // Update player-specific logic
         const player = this.entityManager.getPlayer();
         if (player) {
-            // Update HUD lives
-            this.hudManager.updateLives(player.health);
-
             // Boundary checks
             const dimensions = this.levelManager.getLevelDimensions();
             if (player.x < 0) player.x = 0;
@@ -213,15 +238,10 @@ export class PlayState implements GameState {
                 player.x = dimensions.width - player.width;
             }
 
-            // Death by falling
+            // Death by falling (instant death, lose a life)
             if (player.y > dimensions.height) {
-                console.log(`[PlayState] Player fell! Health before: ${player.health}`);
-                player.takeDamage(1);  // Take 1 damage instead of all health
-                console.log(`[PlayState] Health after damage: ${player.health}`);
-                
-                // Respawn at the start of the level
-                const spawn = this.levelManager.getPlayerSpawn();
-                player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
+                console.log(`[PlayState] Player fell! Instant death.`);
+                this.handlePlayerDeath();
             }
         }
 
@@ -233,7 +253,7 @@ export class PlayState implements GameState {
 
         // Check game over conditions
         const hudData = this.hudManager.getHUDData();
-        if (hudData.time <= 0 || hudData.lives <= 0) {
+        if (hudData.time <= 0 || this.lives <= 0) {
             this.gameOver();
         }
     }
@@ -419,6 +439,23 @@ export class PlayState implements GameState {
             this.stageClearTimer = null;
             this.game.stateManager.setState('menu');
         }, 3000);
+    }
+
+    private handlePlayerDeath(): void {
+        const player = this.entityManager.getPlayer();
+        if (!player) return;
+        
+        this.lives--;
+        this.hudManager.updateLives(this.lives);
+        console.log(`[PlayState] Lives remaining: ${this.lives}`);
+        
+        if (this.lives <= 0) {
+            this.gameOver();
+        } else {
+            const spawn = this.levelManager.getPlayerSpawn();
+            player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
+            console.log(`[PlayState] Player respawned with full health: ${player.health}`);
+        }
     }
 
     private debugWarp(x: number, y: number, tileCoords: boolean = false): void {
