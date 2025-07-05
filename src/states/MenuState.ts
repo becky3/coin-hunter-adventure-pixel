@@ -3,6 +3,7 @@ import { GameState } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputEvent } from '../core/InputSystem';
 import { URLParams } from '../utils/urlParams';
+import { GameEnvironment } from '../utils/gameEnvironment';
 
 interface MenuOption {
     text: string;
@@ -283,11 +284,20 @@ export class MenuState implements GameState {
                 const urlParams = new URLParams();
                 const stageId = urlParams.getStageId();
                 
+                // Determine if stage progression should be enabled based on environment
+                const enableProgression = GameEnvironment.shouldEnableStageProgression();
+                console.log(`Environment: ${GameEnvironment.getEnvironmentName()}, Stage progression: ${enableProgression ? 'ENABLED' : 'DISABLED'}`);
+                
                 if (stageId) {
                     console.log(`Starting stage from URL parameter: ${stageId}`);
-                    this.game.stateManager.setState('play', { level: stageId });
+                    this.game.stateManager.setState('play', { 
+                        level: stageId,
+                        enableProgression: enableProgression 
+                    });
                 } else {
-                    this.game.stateManager.setState('play');
+                    this.game.stateManager.setState('play', { 
+                        enableProgression: enableProgression 
+                    });
                 }
             } catch (error) {
                 console.error('Error transitioning to play state:', error);

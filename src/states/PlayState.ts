@@ -48,6 +48,7 @@ export class PlayState implements GameState {
     private inputListeners: Array<() => void> = [];
     private stageClearTimer: number | null = null;
     private lives: number = 3; // 残機はPlayStateで管理
+    private stageProgressionEnabled: boolean = false; // ステージ遷移フラグ
 
     // Public getters for testing
     public get player() {
@@ -101,8 +102,9 @@ export class PlayState implements GameState {
             onGameOver: () => this.gameOver()
         });
 
-        // Setup debug warp function
+        // Setup debug functions
         if (typeof window !== 'undefined') {
+            // Debug warp function
             window.debugWarp = (x: number, y: number, tileCoords?: boolean) => 
                 this.debugWarp(x, y, tileCoords);
         }
@@ -165,6 +167,10 @@ export class PlayState implements GameState {
         // Reset game state for new game
         this.gameState = 'playing';
         this.lives = 3;
+        
+        // Store progression mode from params (default: disabled for testing)
+        this.stageProgressionEnabled = params.enableProgression || false;
+        console.log(`[PlayState] Stage progression: ${this.stageProgressionEnabled ? 'ENABLED' : 'DISABLED'}`);
 
         // Preload sprites
         await this.preloadSprites();
@@ -454,11 +460,47 @@ export class PlayState implements GameState {
         // Show clear message (until state changes)
         this.hudManager.showMessage('STAGE CLEAR!', 999999);
         
-        // Transition to menu after 3 seconds
+        // Check if stage progression is enabled
+        if (!this.stageProgressionEnabled) {
+            // Return to menu instead of progressing
+            this.stageClearTimer = window.setTimeout(() => {
+                this.stageClearTimer = null;
+                this.game.stateManager.setState('menu');
+            }, 3000);
+            return;
+        }
+        
+        // Get next level from LevelManager
+        const nextLevel = this.levelManager.getNextLevel();
+        
+        // Transition after 3 seconds
         this.stageClearTimer = window.setTimeout(() => {
             this.stageClearTimer = null;
-            this.game.stateManager.setState('menu');
+            
+            if (nextLevel) {
+                // Load next level
+                this.game.stateManager.setState('play', { level: nextLevel });
+            } else {
+                // No more levels - show ending
+                this.showEnding();
+            }
         }, 3000);
+    }
+    
+    private showEnding(): void {
+        // Stop any playing music
+        this.game.musicSystem?.stopBGM();
+        
+        // Play ending music
+        this.game.musicSystem?.playBGMFromPattern('victory');
+        
+        // Show ending message
+        this.hudManager.showMessage('CONGRATULATIONS! GAME COMPLETE!', 999999);
+        
+        // Return to menu after 5 seconds
+        setTimeout(() => {
+            this.game.stateManager.setState('menu');
+        }, 5000);
     }
 
     private handlePlayerDeath(): void {
