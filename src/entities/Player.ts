@@ -385,8 +385,8 @@ export class Player extends Entity {
             return true; // Player died
         }
         
-        // Change to small form when damaged
-        if (this._health === 1 && !this.isSmall) {
+        // Change to small form when damaged (but not dead)
+        if (this._health < this._maxHealth && !this.isSmall) {
             this.isSmall = true;
             this.width = DEFAULT_PLAYER_CONFIG.smallWidth;
             this.height = DEFAULT_PLAYER_CONFIG.smallHeight;

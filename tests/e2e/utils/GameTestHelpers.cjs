@@ -232,8 +232,12 @@ class GameTestHelpers extends TestFramework {
             const state = window.game?.stateManager?.currentState;
             if (!state) return [];
             
-            // Check entityManager for enemies
-            const enemies = state.entityManager?.enemies || [];
+            // Try to get entityManager
+            const entityManager = state.getEntityManager?.() || state.entityManager;
+            if (!entityManager) return [];
+            
+            // Get enemies
+            const enemies = entityManager.getEnemies?.() || entityManager.enemies || [];
             
             return enemies.map(enemy => ({
                 id: enemy.id,

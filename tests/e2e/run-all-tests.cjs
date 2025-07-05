@@ -9,6 +9,11 @@ const tests = [
         critical: true
     },
     {
+        name: 'Damage and Death Test',
+        file: './test-damage-and-death.cjs',
+        critical: true
+    },
+    {
         name: 'Performance Test',
         file: './test-performance.cjs',
         critical: true
