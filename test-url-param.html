@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>URL Parameter Test</title>
+</head>
+<body>
+    <h1>URL Parameter Test</h1>
+    <p>Click links to test URL parameter integration with debug overlay:</p>
+    <ul>
+        <li><a href="http://localhost:3001/?stage=stage1-1">Stage 1-1 (default)</a></li>
+        <li><a href="http://localhost:3001/?stage=stage1-2">Stage 1-2</a></li>
+        <li><a href="http://localhost:3001/?stage=stage1-3">Stage 1-3</a></li>
+        <li><a href="http://localhost:3001/?stage=stage0-1">Stage 0-1</a></li>
+        <li><a href="http://localhost:3001/?stage=performance-test">Performance Test</a></li>
+    </ul>
+    <p>After clicking, check that:</p>
+    <ol>
+        <li>Debug overlay shows the correct stage from URL</li>
+        <li>When you press Enter/Space, it loads that stage</li>
+        <li>Arrow keys still work to change selection</li>
+    </ol>
+</body>
+</html>

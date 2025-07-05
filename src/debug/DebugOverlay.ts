@@ -3,6 +3,7 @@
 import { ServiceLocator } from '../services/ServiceLocator';
 import { GAME_CONSTANTS } from '../config/GameConstants';
 import { PlayState } from '../states/PlayState';
+import { URLParams } from '../utils/urlParams';
 
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
@@ -20,6 +21,16 @@ export class DebugOverlay {
     
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
+        
+        // Initialize selected stage from URL parameters
+        const urlParams = new URLParams();
+        const urlStage = urlParams.getStageId();
+        if (urlStage) {
+            const stageIndex = this.stageList.indexOf(urlStage);
+            if (stageIndex !== -1) {
+                this.selectedStageIndex = stageIndex;
+            }
+        }
     }
 
     async init(): Promise<void> {
