@@ -167,9 +167,8 @@ export class Player extends Entity {
             frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
         } : DEFAULT_ANIMATION_CONFIG;
         
-        // Reduce gravity to extend air time (about half of default)
-        // This makes jumps feel more floaty without changing the jump height
-        this.gravityStrength = 0.35;
+        // Gravity strength adjustment removed - now handled by PhysicsSystem
+        this.gravityStrength = 1.0;
     }
     
     setInputManager(inputManager: InputSystem): void {
@@ -265,7 +264,8 @@ export class Player extends Entity {
             
             if (input.jump && this.canVariableJump) {
                 if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime) && this.vy < 0) {
-                    this.vy -= this.gravityStrength * 0.5;
+                    // Apply additional upward force for variable jump (reduced to compensate for lower gravity)
+                    this.vy -= this.gravityStrength * 0.33;
                 } else if (this.jumpTime >= (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
                     this.canVariableJump = false;
                 }
