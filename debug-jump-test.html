@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Hunter Adventure - Jump Debug Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #222;
+            color: white;
+            font-family: monospace;
+        }
+        #game-container {
+            border: 2px solid #555;
+            margin-bottom: 20px;
+        }
+        .debug-info {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            width: 800px;
+            margin-bottom: 10px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #0f0;
+        }
+        .key {
+            background-color: #555;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jump Height Debug Test</h1>
+    
+    <div class="debug-info">
+        <h2>Debug Controls</h2>
+        <div class="controls">
+            <div>
+                <p><span class="key">Arrow Keys</span> - Move</p>
+                <p><span class="key">Space</span> - Jump (hold for higher jump)</p>
+                <p><span class="key">D</span> - Toggle debug display</p>
+            </div>
+            <div>
+                <p><span class="key">1-9</span> - Set jump power (2, 4, 6... 18)</p>
+                <p><span class="key">Console</span> - View detailed jump logs</p>
+                <p>Current config jump power: 6.83</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="game-container"></div>
+    
+    <div class="debug-info">
+        <h2>Debug Output</h2>
+        <p>Open browser console (F12) to see:</p>
+        <ul>
+            <li>Jump power configuration on load</li>
+            <li>Jump initiation details (Y position, velocity, power)</li>
+            <li>Maximum jump height achieved</li>
+            <li>Gravity application per frame</li>
+            <li>Visual markers showing jump trajectory (when debug mode is on)</li>
+        </ul>
+    </div>
+    
+    <script type="module">
+        // Enable debug mode globally
+        window.debugMode = true;
+        
+        // Import and start the game
+        import('./dist/index.js').then(module => {
+            console.log('[Debug] Game module loaded, debug mode enabled');
+        });
+    </script>
+</body>
+</html>

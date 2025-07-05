@@ -45,6 +45,11 @@ export class PhysicsSystem {
         this._gravity = 0.433; // Reduced from 0.65 to exactly 2/3 for 1.5x air time
         this._maxFallSpeed = 10; // Reduced to maintain feel
         this._friction = 0.8;
+        
+        console.log('[PhysicsSystem] Initialized with:');
+        console.log('  - Gravity:', this._gravity);
+        console.log('  - Max fall speed:', this._maxFallSpeed);
+        console.log('  - Friction:', this._friction);
         this.layers = {
             TILE: 'tile',
             PLAYER: 'player',
@@ -160,7 +165,18 @@ export class PhysicsSystem {
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
         
+        const previousVy = entity.vy;
         entity.vy += this.gravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
+        
+        // Debug logging for Player entity
+        if (entity.constructor.name === 'Player' && (entity as any)._isJumping) {
+            console.log('[PhysicsSystem] Gravity applied to Player:');
+            console.log('  - Previous vy:', previousVy);
+            console.log('  - Gravity applied:', this.gravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER);
+            console.log('  - New vy:', entity.vy);
+            console.log('  - Current Y:', entity.y);
+        }
+        
         if (entity.vy > this.maxFallSpeed) {
             entity.vy = this.maxFallSpeed;
         }
