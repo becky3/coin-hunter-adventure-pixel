@@ -42,8 +42,8 @@ export class PhysicsSystem {
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
-        this._gravity = 0.65;
-        this._maxFallSpeed = 15;
+        this._gravity = 0.43; // Reduced from 0.65 to ~66% for 1.5x air time
+        this._maxFallSpeed = 10; // Reduced to maintain feel
         this._friction = 0.8;
         this.layers = {
             TILE: 'tile',
