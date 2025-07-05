@@ -44,6 +44,20 @@ async function runTest() {
         // Test 1: First damage should make player small
         console.log('\n--- Test 1: First Enemy Damage (Large -> Small) ---');
         
+        // Check if enemies exist
+        const enemyCount = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const entities = state?.entityManager?.entities || [];
+            const enemies = entities.filter(e => e.constructor.name === 'Slime' || e.constructor.name === 'Enemy');
+            return enemies.length;
+        });
+        console.log('Number of enemies in level:', enemyCount);
+        
+        if (enemyCount === 0) {
+            console.error('No enemies found in level! Stage may not have loaded correctly.');
+            await t.screenshot('no-enemies-found');
+        }
+        
         // Get player size before damage
         const beforeDamageSize = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
@@ -99,7 +113,9 @@ async function runTest() {
         // Wait for invulnerability to end
         await t.wait(2500);
         
-        // Move into enemy again
+        // Move back and then into enemy again
+        await t.movePlayer('left', 500);
+        await t.wait(200);
         await t.movePlayer('right', 1000);
         await t.wait(500);
         
