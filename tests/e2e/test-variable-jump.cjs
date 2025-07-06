@@ -93,9 +93,12 @@ async function runTest() {
         
         // ジャンプの最高点を追跡しながら長押し
         let longJumpMaxHeight = 0;
-        let frameCount = 0;
+        let elapsedTime = 0;
+        const frameTime = 16; // 約60FPS
+        const holdDuration = 300; // 300ms長押し
         
-        const trackingInterval = setInterval(async () => {
+        // 再帰的なsetTimeoutを使用してシリアル実行を保証
+        const trackJump = async () => {
             try {
                 const height = await t.page.evaluate((startY) => {
                     const state = window.game.stateManager.currentState;
@@ -106,17 +109,22 @@ async function runTest() {
                     longJumpMaxHeight = height;
                 }
                 
-                frameCount++;
+                elapsedTime += frameTime;
                 
                 // 300ms経過したらボタンを離す
-                if (frameCount * 16 >= 300) {
+                if (elapsedTime >= holdDuration) {
                     await t.page.keyboard.up(' ');
-                    clearInterval(trackingInterval);
+                } else {
+                    // まだ時間が残っている場合は次のフレームをスケジュール
+                    setTimeout(trackJump, frameTime);
                 }
             } catch (e) {
-                clearInterval(trackingInterval);
+                console.error('Error tracking jump:', e);
             }
-        }, 16); // 約60FPS
+        };
+        
+        // トラッキング開始
+        setTimeout(trackJump, frameTime);
         
         // ジャンプが完了するまで待つ
         await t.wait(1500);

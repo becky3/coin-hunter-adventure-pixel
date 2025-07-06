@@ -106,7 +106,10 @@ export class Player extends Entity {
             playerConfig = resourceLoader.getCharacterConfig('player', 'main');
             physicsConfig = resourceLoader.getPhysicsConfig('player');
         } catch {
-            throw new Error('[Player] ResourceLoader not initialized. Please ensure all resources are loaded before creating Player.');
+            // Fall back to default config for standalone tests
+            Logger.warn('[Player] ResourceLoader not available, using default configuration');
+            playerConfig = null;
+            physicsConfig = null;
         }
         
         const config = playerConfig ? {
@@ -200,31 +203,36 @@ export class Player extends Entity {
         } : DEFAULT_ANIMATION_CONFIG;
         
         // Load physics settings from physics.json
-        if (!physicsConfig) {
-            throw new Error('[Player] Physics configuration not found for player.');
+        if (physicsConfig) {
+            this.jumpPower = physicsConfig.jumpPower;
+            this.variableJumpBoost = physicsConfig.variableJumpBoost;
+            this.variableJumpBoostMultiplier = physicsConfig.variableJumpBoostMultiplier;
+        } else {
+            // Use default values if physics config not available
+            this.jumpPower = config.jumpPower;
+            this.variableJumpBoost = 0.5;  // Default variable jump boost
+            this.variableJumpBoostMultiplier = 0.4;  // Default multiplier
         }
-        
-        this.jumpPower = physicsConfig.jumpPower;
-        this.variableJumpBoost = physicsConfig.variableJumpBoost;
-        this.variableJumpBoostMultiplier = physicsConfig.variableJumpBoostMultiplier;
         
         // Override minJumpTime/maxJumpTime from physics.json if available
-        if (physicsConfig.minJumpTime !== undefined) {
-            this.playerConfig.minJumpTime = physicsConfig.minJumpTime;
-        }
-        if (physicsConfig.maxJumpTime !== undefined) {
-            this.playerConfig.maxJumpTime = physicsConfig.maxJumpTime;
-        }
-        
-        // Apply physics properties
-        if (physicsConfig.airResistance !== undefined) {
-            this.airResistance = physicsConfig.airResistance;
-        }
-        if (physicsConfig.gravityScale !== undefined) {
-            this.gravityScale = physicsConfig.gravityScale;
-        }
-        if (physicsConfig.defaultMaxFallSpeed !== undefined) {
-            this.maxFallSpeed = physicsConfig.defaultMaxFallSpeed;
+        if (physicsConfig) {
+            if (physicsConfig.minJumpTime !== undefined) {
+                this.playerConfig.minJumpTime = physicsConfig.minJumpTime;
+            }
+            if (physicsConfig.maxJumpTime !== undefined) {
+                this.playerConfig.maxJumpTime = physicsConfig.maxJumpTime;
+            }
+            
+            // Apply physics properties
+            if (physicsConfig.airResistance !== undefined) {
+                this.airResistance = physicsConfig.airResistance;
+            }
+            if (physicsConfig.gravityScale !== undefined) {
+                this.gravityScale = physicsConfig.gravityScale;
+            }
+            if (physicsConfig.defaultMaxFallSpeed !== undefined) {
+                this.maxFallSpeed = physicsConfig.defaultMaxFallSpeed;
+            }
         }
         
         // Gravity strength adjustment removed - now handled by PhysicsSystem

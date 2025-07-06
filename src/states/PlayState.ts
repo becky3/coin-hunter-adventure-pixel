@@ -112,6 +112,15 @@ export class PlayState implements GameState {
         }
     }
 
+    private resetGameState(): void {
+        // Reset core game state to initial values
+        this.gameState = 'playing';
+        this.lives = 3;
+        this.isHandlingDeath = false;
+        // Note: lastTimeUpdate, stageClearTimer, and stageProgressionEnabled 
+        // are handled separately as they have specific initialization requirements
+    }
+
     private setupEventListeners(): void {
         // Event handling is now managed by EventCoordinator
     }
@@ -166,8 +175,7 @@ export class PlayState implements GameState {
         Logger.log('[PlayState] Starting initialization...');
 
         // Reset game state for new game
-        this.gameState = 'playing';
-        this.lives = 3;
+        this.resetGameState();
         
         // Store progression mode from params (default: disabled for testing)
         this.stageProgressionEnabled = params.enableProgression || false;
@@ -312,9 +320,8 @@ export class PlayState implements GameState {
     }
 
     exit(): void {
-        // Reset game state
-        this.gameState = 'playing';
-        this.lives = 3; // Reset lives to initial value
+        // Reset game state for next play session
+        this.resetGameState();
 
         // Clear stage clear timer if exists
         if (this.stageClearTimer) {
