@@ -178,6 +178,9 @@ export class PhysicsSystem {
         }
         
         if (entity.vy > this.maxFallSpeed) {
+            if (entity.constructor.name === 'Player') {
+                console.log('[PhysicsSystem] Max fall speed reached! Clamping vy from', entity.vy, 'to', this.maxFallSpeed);
+            }
             entity.vy = this.maxFallSpeed;
         }
     }

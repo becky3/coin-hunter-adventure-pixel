@@ -179,7 +179,7 @@ export class Player extends Entity {
         
         // Gravity strength adjustment removed - now handled by PhysicsSystem
         this.gravityStrength = 1.0;
-        this.variableJumpBoost = 0.23;  // Default variable jump boost
+        this.variableJumpBoost = 0.15;  // Default variable jump boost
     }
     
     setInputManager(inputManager: InputSystem): void {

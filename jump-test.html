@@ -98,8 +98,8 @@
             </div>
             
             <div class="control-group">
-                <label for="jumpPower">Jump Power: <span class="value" id="jumpPowerValue">6.83</span></label>
-                <input type="range" id="jumpPower" min="3" max="15" step="0.01" value="6.83">
+                <label for="jumpPower">Jump Power: <span class="value" id="jumpPowerValue">5.25</span></label>
+                <input type="range" id="jumpPower" min="3" max="15" step="0.01" value="5.25">
             </div>
             
             <div class="control-group">
@@ -108,8 +108,8 @@
             </div>
             
             <div class="control-group">
-                <label for="variableBoost">Variable Jump Boost: <span class="value" id="variableBoostValue">0.23</span></label>
-                <input type="range" id="variableBoost" min="0" max="1" step="0.01" value="0.23">
+                <label for="variableBoost">Variable Jump Boost: <span class="value" id="variableBoostValue">0.15</span></label>
+                <input type="range" id="variableBoost" min="0" max="1" step="0.01" value="0.15">
             </div>
             
             <button onclick="toggleAutoApply()" id="autoApplyBtn">Auto Apply: ON</button>
@@ -161,9 +161,9 @@
         
         const defaultValues = {
             gravity: 0.433,
-            jumpPower: 6.83,
+            jumpPower: 5.25,
             maxFallSpeed: 10,
-            variableBoost: 0.23
+            variableBoost: 0.15
         };
         
         let autoApply = true;
