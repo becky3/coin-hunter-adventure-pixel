@@ -1,21 +1,21 @@
 # 🎮 Coin Hunter Adventure - Pixel Edition
 
-A retro-style platformer game built with Canvas API and pixel art graphics.
+Canvas APIとピクセルアートグラフィックで構築されたレトロスタイルのプラットフォーマーゲームです。
 
-## 🚀 Getting Started
+## 🚀 はじめに
 
-### Prerequisites
+### 必要環境
 - Node.js 16+
-- npm or yarn
+- npm または yarn
 
-### Installation
+### インストール
 ```bash
 npm install
 ```
 
-### Development
+### 開発
 
-#### Quick Start
+#### クイックスタート
 ```bash
 # バックグラウンドで開発サーバーを起動（推奨）
 nohup npm run dev > dev-server.log 2>&1 &
@@ -31,12 +31,12 @@ npm run dev
 
 詳細は [開発ガイド](docs/DEVELOPMENT_GUIDE.md) を参照してください。
 
-### Build
+### ビルド
 ```bash
 npm run build
 ```
 
-### Testing
+### テスト
 
 #### E2Eテスト
 ```bash
@@ -63,32 +63,29 @@ RUN_FULL_TESTS=true git push
 
 詳細は [E2Eテストドキュメント](tests/e2e/README.md) を参照してください。
 
-## 📖 Documentation
+## 📖 ドキュメント
 
-See the `docs/` directory for detailed documentation:
-- [Development Guide](docs/DEVELOPMENT_GUIDE.md) - 開発環境のセットアップと使い方
-- [Game Specification](docs/GAME_SPECIFICATION.md)
-- [Technical Specification](docs/TECHNICAL_SPECIFICATION.md)
-- [Pixel Art Specification](docs/PIXEL_ART_SPECIFICATION.md)
-- [Development Guidelines](docs/DEVELOPMENT_GUIDELINES.md)
-- [Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md)
+詳細なドキュメントは `docs/` ディレクトリを参照してください：
+- [開発ガイド](docs/DEVELOPMENT_GUIDE.md) - 開発環境のセットアップと使い方
+- [ゲーム仕様書](docs/GAME_SPECIFICATION.md)
+- [技術仕様書](docs/TECHNICAL_SPECIFICATION.md)
+- [ピクセルアート仕様書](docs/PIXEL_ART_SPECIFICATION.md)
+- [開発ガイドライン](docs/DEVELOPMENT_GUIDELINES.md)
+- [実装ロードマップ](docs/IMPLEMENTATION_ROADMAP.md)
 
-## 🎨 Features
-- Pure pixel art graphics
-- Smooth 60 FPS gameplay
-- Retro game feel with modern polish
-- Stage-based palette system
-- Custom pixel font
-- Stage transition system (3 areas per stage)
-- Adjustable jump physics for better gameplay
-- Debug overlay with stage selection
-- Real-time physics parameter testing tool
+## 🎨 特徴
+- ピュアなピクセルアートグラフィック
+- スムーズな60FPSゲームプレイ
+- モダンな洗練さを持つレトロゲーム感
+- ステージベースのパレットシステム
+- カスタムピクセルフォント
+- ステージ遷移システム（ステージごとに3エリア）
+- より良いゲームプレイのための調整可能なジャンプ物理
+- ステージ選択付きデバッグオーバーレイ
+- リアルタイム物理パラメータテストツール
 
-## 🛠️ Tech Stack
+## 🛠️ 技術スタック
 - TypeScript
 - Canvas API
-- Vite for bundling
-- Puppeteer for testing
-
-## 📄 License
-MIT
+- Vite（バンドリング）
+- Puppeteer（テスト）
