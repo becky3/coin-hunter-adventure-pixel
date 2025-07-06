@@ -107,6 +107,12 @@ export class Entity {
             deltaTime = 0.01667;
         }
         
+        // Skip physics if PhysicsSystem is handling it
+        if (this.physicsSystem) {
+            // PhysicsSystem will handle gravity and max fall speed
+            return;
+        }
+        
         if (this.gravity && !this.grounded) {
             this.vy += this.gravityStrength;
             
@@ -123,7 +129,8 @@ export class Entity {
             }
         }
         
-        if (!this.physicsEnabled) {
+        // Only update position if PhysicsSystem is not handling it
+        if (!this.physicsEnabled && !this.physicsSystem) {
             const frameFactor = deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
             this.x += this.vx * frameFactor;
             this.y += this.vy * frameFactor;
