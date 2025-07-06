@@ -1,6 +1,7 @@
 import { Entity, Bounds, CollisionInfo } from '../entities/Entity';
 import { GAME_CONSTANTS } from '../config/GameConstants';
 import { Logger } from '../utils/Logger';
+import { ResourceLoader } from '../config/ResourceLoader';
 
 export type PhysicsLayer = 'tile' | 'player' | 'enemy' | 'item' | 'platform';
 
@@ -46,9 +47,17 @@ export class PhysicsSystem {
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
-        this._gravity = 0.433; // Reduced from 0.65 to exactly 2/3 for 1.5x air time
-        this._maxFallSpeed = 10; // Reduced to maintain feel
-        this._friction = 0.8;
+        // Load physics config from ResourceLoader
+        const resourceLoader = ResourceLoader.getInstance();
+        const physicsConfig = resourceLoader.getPhysicsConfig('global');
+        
+        if (!physicsConfig) {
+            throw new Error('[PhysicsSystem] Physics configuration not found. Please ensure physics.json is loaded.');
+        }
+        
+        this._gravity = physicsConfig.gravity;
+        this._maxFallSpeed = physicsConfig.maxFallSpeed;
+        this._friction = physicsConfig.friction;
         
         Logger.log('[PhysicsSystem] Initialized with:');
         Logger.log('  - Gravity:', this._gravity);

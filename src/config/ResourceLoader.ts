@@ -17,6 +17,7 @@ export class ResourceLoader {
     private audio: { [key: string]: any } | null = null;
     private objects: { [key: string]: any } | null = null;
     private musicPatterns: MusicPatternConfig | null = null;
+    private physics: { [key: string]: any } | null = null;
   
     private constructor() {}
   
@@ -41,7 +42,8 @@ export class ResourceLoader {
             this.loadCharacters(),
             this.loadAudio(),
             this.loadObjects(),
-            this.loadMusicPatterns()
+            this.loadMusicPatterns(),
+            this.loadPhysics()
         ]);
   
         // Resource configuration loaded successfully
@@ -133,6 +135,13 @@ export class ResourceLoader {
             }
         }
     }
+    
+    private async loadPhysics(): Promise<void> {
+        if (!this.resourceIndex) return;
+        
+        const physicsPath = '/src/config/resources/physics.json';
+        this.physics = await this.loadJSON(physicsPath);
+    }
   
     // Getter methods
     getSpritesConfig(): SpritesConfig | null {
@@ -209,5 +218,13 @@ export class ResourceLoader {
     
     getAllMusicPatterns(): MusicPatternConfig | null {
         return this.musicPatterns;
+    }
+    
+    getPhysicsConfig(category?: string): any {
+        if (!this.physics) return null;
+        if (category) {
+            return this.physics[category] || null;
+        }
+        return this.physics;
     }
 }

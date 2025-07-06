@@ -16,6 +16,7 @@ import { GameStateManager } from '../states/GameStateManager';
 import { MenuState } from '../states/MenuState';
 import { PlayState } from '../states/PlayState';
 import { Logger } from '../utils/Logger';
+import { ResourceLoader } from '../config/ResourceLoader';
 
 import { InputSystemAdapter } from '../systems/adapters/InputSystemAdapter';
 import { PhysicsSystemAdapter } from '../systems/adapters/PhysicsSystemAdapter';
@@ -35,6 +36,11 @@ export class GameCore {
 
     async init(): Promise<void> {
         Logger.log('GameCore: init() started');
+        
+        // Initialize ResourceLoader first
+        Logger.log('GameCore: Initializing ResourceLoader...');
+        const resourceLoader = ResourceLoader.getInstance();
+        await resourceLoader.initialize();
 
         Logger.log('GameCore: Registering core services...');
         this.registerCoreServices();

@@ -39,9 +39,7 @@ const DEFAULT_ANIMATION_CONFIG = {
     }
 } as const;
 
-// Variable jump boost strength multiplier
-// This is multiplied by variableJumpBoost to determine the additional upward force
-const VARIABLE_JUMP_GRAVITY_FACTOR = 0.4;  // Reduced from 0.65 for more balanced jumps
+// Variable jump settings will be loaded from physics.json
 
 type AnimationState = 'idle' | 'walk' | 'jump' | 'fall';
 type Facing = 'left' | 'right';
@@ -96,16 +94,19 @@ export class Player extends Entity {
     private assetLoader: AssetLoader | null;
     private eventBus: EventBus | null;
     public variableJumpBoost: number;  // For testing purposes
+    private variableJumpBoostMultiplier: number;
     private frameCount: number;
 
     constructor(x?: number, y?: number) {
         // Load config from ResourceLoader if available
         let playerConfig = null;
+        let physicsConfig = null;
         try {
             const resourceLoader = ResourceLoader.getInstance();
             playerConfig = resourceLoader.getCharacterConfig('player', 'main');
+            physicsConfig = resourceLoader.getPhysicsConfig('player');
         } catch {
-            // ResourceLoader not initialized yet, use defaults
+            throw new Error('[Player] ResourceLoader not initialized. Please ensure all resources are loaded before creating Player.');
         }
         
         const config = playerConfig ? {
@@ -139,13 +140,17 @@ export class Player extends Entity {
             this.maxFallSpeed = playerConfig.physics.maxFallSpeed;
         }
         
+        // Store configs for later use
+        this.playerConfig = config;
+        
         // Debug logging for jump configuration
         Logger.log('[Player] Jump Configuration Debug:');
-        Logger.log('  - Config source:', playerConfig ? 'ResourceLoader' : 'Default');
-        Logger.log('  - jumpPower from config:', playerConfig?.physics?.jumpPower ?? 'undefined');
-        Logger.log('  - jumpPower used:', this.jumpPower);
-        Logger.log('  - minJumpTime:', config.minJumpTime);
-        Logger.log('  - maxJumpTime:', config.maxJumpTime);
+        Logger.log('  - Config source:', 'physics.json');
+        Logger.log('  - jumpPower:', this.jumpPower);
+        Logger.log('  - variableJumpBoost:', this.variableJumpBoost);
+        Logger.log('  - variableJumpBoostMultiplier:', this.variableJumpBoostMultiplier);
+        Logger.log('  - minJumpTime:', this.playerConfig.minJumpTime);
+        Logger.log('  - maxJumpTime:', this.playerConfig.maxJumpTime);
         Logger.log('  - airResistance:', this.airResistance);
         Logger.log('  - gravityScale:', this.gravityScale);
         Logger.log('  - maxFallSpeed:', this.maxFallSpeed);
@@ -188,17 +193,42 @@ export class Player extends Entity {
         
         this.eventBus = null;
         
-        // Store configs for later use
-        this.playerConfig = config;
         // Merge animation config with defaults
         this.animationConfig = playerConfig?.animations ? {
             speed: { ...DEFAULT_ANIMATION_CONFIG.speed, ...playerConfig.animations.speed },
             frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
         } : DEFAULT_ANIMATION_CONFIG;
         
+        // Load physics settings from physics.json
+        if (!physicsConfig) {
+            throw new Error('[Player] Physics configuration not found for player.');
+        }
+        
+        this.jumpPower = physicsConfig.jumpPower;
+        this.variableJumpBoost = physicsConfig.variableJumpBoost;
+        this.variableJumpBoostMultiplier = physicsConfig.variableJumpBoostMultiplier;
+        
+        // Override minJumpTime/maxJumpTime from physics.json if available
+        if (physicsConfig.minJumpTime !== undefined) {
+            this.playerConfig.minJumpTime = physicsConfig.minJumpTime;
+        }
+        if (physicsConfig.maxJumpTime !== undefined) {
+            this.playerConfig.maxJumpTime = physicsConfig.maxJumpTime;
+        }
+        
+        // Apply physics properties
+        if (physicsConfig.airResistance !== undefined) {
+            this.airResistance = physicsConfig.airResistance;
+        }
+        if (physicsConfig.gravityScale !== undefined) {
+            this.gravityScale = physicsConfig.gravityScale;
+        }
+        if (physicsConfig.defaultMaxFallSpeed !== undefined) {
+            this.maxFallSpeed = physicsConfig.defaultMaxFallSpeed;
+        }
+        
         // Gravity strength adjustment removed - now handled by PhysicsSystem
         this.gravityStrength = 1.0;
-        this.variableJumpBoost = 0.3;  // Default variable jump boost - affects how much higher you can jump by holding button
         this.frameCount = 0;
     }
     
@@ -329,7 +359,7 @@ export class Player extends Entity {
                 if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
                     // Apply additional upward force for variable jump
                     // This counteracts gravity to maintain upward movement
-                    const boost = VARIABLE_JUMP_GRAVITY_FACTOR * this.variableJumpBoost * deltaTime * 60;
+                    const boost = this.variableJumpBoostMultiplier * this.variableJumpBoost * deltaTime * 60;
                     this.vy -= boost;
                     
                 } else {

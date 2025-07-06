@@ -168,23 +168,106 @@
     </div>
 
     <script>
-        // Default values for sliders
-        const defaultValues = {
-            gravity: 0.65,
-            jumpPower: 10,
-            maxFallSpeed: 15,
-            variableBoost: 0.5,
-            gravityScale: 1.0,
-            airResistance: 0.0
-        };
+        // All values are loaded from physics.json - no hardcoded defaults
+        let defaultValues = {};
+        let BASE_GRAVITY = 0;
+        let BASE_JUMP_POWER = 0;
+        let physicsLoaded = false;
         
-        // Base values for ratio calculations (original game values)
-        const BASE_GRAVITY = 0.65;
-        const BASE_JUMP_POWER = 10;
+        // Load all values from physics.json
+        async function loadPhysicsConfig() {
+            try {
+                const response = await fetch('/src/config/resources/physics.json');
+                const physicsData = await response.json();
+                
+                if (!physicsData.global || !physicsData.player) {
+                    throw new Error('Invalid physics.json structure');
+                }
+                
+                // Set defaults from physics.json
+                defaultValues = {
+                    gravity: physicsData.global.gravity,
+                    jumpPower: physicsData.player.jumpPower,
+                    maxFallSpeed: physicsData.global.maxFallSpeed,
+                    variableBoost: physicsData.player.variableJumpBoost,
+                    gravityScale: physicsData.player.gravityScale,
+                    airResistance: physicsData.player.airResistance
+                };
+                
+                BASE_GRAVITY = physicsData.global.gravity;
+                BASE_JUMP_POWER = physicsData.player.jumpPower;
+                
+                physicsLoaded = true;
+                console.log('Loaded physics configuration from physics.json:', defaultValues);
+                
+                // Initialize sliders with loaded values
+                resetToDefault();
+                
+                // Enable controls
+                document.querySelectorAll('input, button').forEach(el => el.disabled = false);
+                
+            } catch (error) {
+                console.error('Failed to load physics.json:', error);
+                alert('Failed to load physics configuration. Please check physics.json');
+                // Disable all controls if physics.json fails to load
+                document.querySelectorAll('input, button').forEach(el => el.disabled = true);
+            }
+        }
+        
+        // Load physics config on page load
+        loadPhysicsConfig();
         
         let autoApply = true;
         let autoJump = false;
         let autoJumpInterval = null;
+        
+        // Load actual values from game
+        function loadGameDefaults() {
+            const gameWindow = document.getElementById('gameFrame').contentWindow;
+            
+            if (!gameWindow.game) {
+                // Retry after a delay
+                setTimeout(loadGameDefaults, 1000);
+                return;
+            }
+            
+            try {
+                // Get physics system values
+                const physicsSystem = gameWindow.game.serviceLocator.get('physics');
+                if (physicsSystem) {
+                    defaultValues.gravity = physicsSystem.gravity;
+                    defaultValues.maxFallSpeed = physicsSystem.maxFallSpeed;
+                    BASE_GRAVITY = physicsSystem.gravity;
+                }
+                
+                // Wait for game to start and player to be created
+                const checkForPlayer = () => {
+                    const currentState = gameWindow.game.stateManager?.currentState;
+                    if (currentState && currentState.player) {
+                        defaultValues.jumpPower = currentState.player.jumpPower;
+                        defaultValues.variableBoost = currentState.player.variableJumpBoost;
+                        defaultValues.gravityScale = currentState.player.gravityScale || 1.0;
+                        defaultValues.airResistance = currentState.player.airResistance || 0.0;
+                        BASE_JUMP_POWER = currentState.player.jumpPower;
+                        
+                        // Update sliders with actual values
+                        resetToDefault();
+                        console.log('Loaded game defaults:', defaultValues);
+                    } else {
+                        // Player not created yet, retry
+                        setTimeout(checkForPlayer, 1000);
+                    }
+                };
+                
+                checkForPlayer();
+            } catch (error) {
+                console.error('Failed to load game defaults:', error);
+                // Retry after a delay
+                setTimeout(loadGameDefaults, 1000);
+            }
+        }
+        
+        // No longer need to load from game - using physics.json directly
         
         function updateValue(id) {
             const slider = document.getElementById(id);
@@ -241,29 +324,8 @@
                 console.log(`[JumpTest] Player ${propertyName} updated:`, value);
             }
             
-            // Update player config for respawns
-            if (gameWindow.game.serviceLocator) {
-                const resourceLoader = gameWindow.game.serviceLocator.get('resourceLoader');
-                if (resourceLoader && resourceLoader.resources && resourceLoader.resources.characters && resourceLoader.resources.characters.player) {
-                    const playerConfig = resourceLoader.resources.characters.player;
-                    if (playerConfig.physics) {
-                        switch(propertyName) {
-                            case 'jumpPower':
-                                playerConfig.physics.jumpPower = value;
-                                break;
-                            case 'maxFallSpeed':
-                                playerConfig.physics.maxFallSpeed = value;
-                                break;
-                            case 'airResistance':
-                                playerConfig.physics.airResistance = value;
-                                break;
-                            case 'gravityScale':
-                                playerConfig.physics.gravityScale = value;
-                                break;
-                        }
-                    }
-                }
-            }
+            // Note: Cannot update ResourceLoader config from here
+            // Changes only affect current game session
         }
         
         function calculateStats() {
@@ -330,20 +392,8 @@
                 console.log('  - variableJumpBoost:', currentState.player.variableJumpBoost);
             }
             
-            // Update player config for respawns
-            if (gameWindow.game.serviceLocator) {
-                const resourceLoader = gameWindow.game.serviceLocator.get('resourceLoader');
-                if (resourceLoader && resourceLoader.resources && resourceLoader.resources.characters && resourceLoader.resources.characters.player) {
-                    const playerConfig = resourceLoader.resources.characters.player;
-                    if (playerConfig.physics) {
-                        playerConfig.physics.jumpPower = jumpPower;
-                        playerConfig.physics.maxFallSpeed = maxFallSpeed;
-                        playerConfig.physics.airResistance = airResistance;
-                        playerConfig.physics.gravityScale = gravityScale;
-                    }
-                    console.log('[JumpTest] Updated player config for respawns:', playerConfig.physics);
-                }
-            }
+            // Note: ResourceLoader cannot be directly modified from here
+            // Changes only affect current entities, not future spawns
             
             console.log('Applied changes:', { gravity, jumpPower, maxFallSpeed, variableBoost, gravityScale, airResistance });
             if (showAlert) alert('Changes applied! Test the jump in the game.');
@@ -418,6 +468,11 @@
         }
         
         function resetToDefault() {
+            if (!physicsLoaded) {
+                console.warn('Physics configuration not loaded yet');
+                return;
+            }
+            
             // Use initializeSliders to set both values and display
             initializeSliders();
             
@@ -453,6 +508,11 @@
         
         // Initialize sliders with default values
         function initializeSliders() {
+            if (!physicsLoaded || !defaultValues.gravity) {
+                console.warn('Physics configuration not loaded yet');
+                return;
+            }
+            
             // Set slider values
             document.getElementById('gravity').value = defaultValues.gravity;
             document.getElementById('jumpPower').value = defaultValues.jumpPower;
@@ -470,9 +530,7 @@
             document.getElementById('airResistanceValue').textContent = defaultValues.airResistance;
         }
         
-        // Initialize on load
-        initializeSliders();
-        calculateStats();
+        // Initial calculations will be done after physics.json loads
         
         // Wait for game to load
         setTimeout(() => {

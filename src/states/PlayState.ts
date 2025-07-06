@@ -50,6 +50,7 @@ export class PlayState implements GameState {
     private stageClearTimer: number | null = null;
     private lives: number = 3; // 残機はPlayStateで管理
     private stageProgressionEnabled: boolean = false; // ステージ遷移フラグ
+    private isHandlingDeath: boolean = false; // 死亡処理中フラグ
 
     // Public getters for testing
     public get player() {
@@ -187,8 +188,13 @@ export class PlayState implements GameState {
         this.hudManager.updateTime(this.levelManager.getTimeLimit());
         this.hudManager.updateLives(this.lives);
         
-        // Setup player death listener
-        this.eventBus.on('player:died', () => this.handlePlayerDeath());
+        // Setup player death listener for combat damage only
+        this.eventBus.on('player:died', () => {
+            // Only handle if not already handling death (prevents double death from fall)
+            if (!this.isHandlingDeath) {
+                this.handlePlayerDeath();
+            }
+        });
         
         // Set stage name in HUD
         Logger.log('[PlayState] levelData:', levelData);
@@ -264,7 +270,7 @@ export class PlayState implements GameState {
             }
 
             // Death by falling (instant death, lose a life)
-            if (player.y > dimensions.height) {
+            if (player.y > dimensions.height && !this.isHandlingDeath) {
                 Logger.log('[PlayState] Player fell! Instant death.');
                 this.handlePlayerDeath();
             }
@@ -504,8 +510,12 @@ export class PlayState implements GameState {
     }
 
     private handlePlayerDeath(): void {
+        if (this.isHandlingDeath) return; // Prevent multiple calls
+        
         const player = this.entityManager.getPlayer();
         if (!player) return;
+        
+        this.isHandlingDeath = true; // Set flag to prevent re-entry
         
         this.lives--;
         this.hudManager.updateLives(this.lives);
@@ -515,6 +525,11 @@ export class PlayState implements GameState {
         } else {
             const spawn = this.levelManager.getPlayerSpawn();
             player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
+            
+            // Reset flag after respawn
+            setTimeout(() => {
+                this.isHandlingDeath = false;
+            }, 100);
         }
     }
 
