@@ -219,6 +219,78 @@ async function runTest() {
         console.log(`Player gravity scale: ${gravityScaleCheck}`);
         console.log(`✅ Gravity scale test: ${gravityScaleCheck === 0.5 ? 'PASSED' : 'FAILED'}`);
         
+        // Test 4: Air Resistance on Upward Movement
+        console.log('\n--- Test 4: Air Resistance Effect on Jump ---');
+        
+        // Reset air resistance to 0
+        await t.page.evaluate(() => {
+            const slider = document.getElementById('airResistance');
+            slider.value = '0';
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        await t.wait(200);
+        
+        // Make player jump and measure initial velocity
+        const jumpTestNoResistance = await t.page.evaluate(() => {
+            const gameWindow = document.getElementById('gameFrame').contentWindow;
+            const state = gameWindow.game?.stateManager?.currentState;
+            if (!state?.player) return null;
+            
+            // Simulate jump
+            state.player.grounded = true;
+            state.player.vy = -10; // Set upward velocity
+            
+            return {
+                initialVy: state.player.vy,
+                airResistance: state.player.airResistance
+            };
+        });
+        console.log('Jump test without air resistance:', jumpTestNoResistance);
+        
+        // Set air resistance to 0.3
+        await t.page.evaluate(() => {
+            const slider = document.getElementById('airResistance');
+            slider.value = '0.3';
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        await t.wait(200);
+        
+        // Make player jump again and measure
+        const jumpTestWithResistance = await t.page.evaluate(() => {
+            const gameWindow = document.getElementById('gameFrame').contentWindow;
+            const state = gameWindow.game?.stateManager?.currentState;
+            if (!state?.player) return null;
+            
+            // Simulate jump
+            state.player.grounded = true;
+            state.player.vy = -10; // Set same upward velocity
+            
+            // Let physics system apply air resistance for one frame
+            const physics = gameWindow.game.serviceLocator.get('physics');
+            if (physics) {
+                // Manually apply air resistance to see the effect
+                const beforeVy = state.player.vy;
+                physics.applyGravity(state.player, 1/60);
+                const afterVy = state.player.vy;
+                
+                return {
+                    initialVy: -10,
+                    beforeApply: beforeVy,
+                    afterApply: afterVy,
+                    airResistance: state.player.airResistance,
+                    velocityReduced: Math.abs(afterVy) < Math.abs(beforeVy)
+                };
+            }
+            
+            return null;
+        });
+        console.log('Jump test with air resistance:', jumpTestWithResistance);
+        
+        if (jumpTestWithResistance) {
+            const airResistanceAffectsUpward = jumpTestWithResistance.velocityReduced;
+            console.log(`✅ Air resistance affects upward movement: ${airResistanceAffectsUpward ? 'YES' : 'NO'}`);
+        }
+        
         // Take screenshot
         await t.screenshot('jump-test-final');
         

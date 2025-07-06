@@ -173,8 +173,8 @@ export class PhysicsSystem {
         const effectiveGravity = this.gravity * (entity.gravityScale || 1.0);
         entity.vy += effectiveGravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
         
-        // Apply air resistance only when falling (vy > 0)
-        if (entity.airResistance && entity.airResistance > 0 && entity.vy > 0) {
+        // Apply air resistance to all vertical movement
+        if (entity.airResistance && entity.airResistance > 0) {
             entity.vy *= (1 - entity.airResistance);
         }
         
