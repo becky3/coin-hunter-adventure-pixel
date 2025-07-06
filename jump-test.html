@@ -177,6 +177,8 @@
             calculateStats();
             
             if (autoApply) {
+                // Debug: Log when applying changes
+                console.log(`[UpdateValue] ${id}: ${slider.value}`);
                 applyChanges(false);  // Apply without alert
             }
         }
@@ -340,6 +342,18 @@
         document.getElementById('jumpPower').addEventListener('input', () => updateValue('jumpPower'));
         document.getElementById('maxFallSpeed').addEventListener('input', () => updateValue('maxFallSpeed'));
         document.getElementById('variableBoost').addEventListener('input', () => updateValue('variableBoost'));
+        
+        // Prevent iframe from stealing focus during slider drag
+        const sliders = ['gravity', 'jumpPower', 'maxFallSpeed', 'variableBoost'];
+        sliders.forEach(id => {
+            const slider = document.getElementById(id);
+            slider.addEventListener('mousedown', () => {
+                slider.dataset.dragging = 'true';
+            });
+            slider.addEventListener('mouseup', () => {
+                slider.dataset.dragging = 'false';
+            });
+        });
         
         calculateStats();
         
