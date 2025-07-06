@@ -30,17 +30,28 @@ ctx.imageSmoothingEnabled = false;
 
 ## 物理演算
 
-### 基本パラメータ
+### 基本パラメータ（調整済み）
 ```typescript
-GRAVITY: 0.65          // 重力加速度
-MAX_FALL_SPEED: 15     // 最大落下速度
-FRICTION: 0.85         // 地面摩擦
-AIR_RESISTANCE: 0.98   // 空気抵抗
+GRAVITY: 0.433         // 重力加速度（元の66%）
+MAX_FALL_SPEED: 10     // 最大落下速度
+FRICTION: 0.8          // 地面摩擦
+```
+
+### プレイヤー物理パラメータ
+```typescript
+jumpPower: 5.25        // ジャンプ初速度
+variableJumpBoost: 0.15  // 可変ジャンプのブースト値
+gravityScale: 1.0      // 重力スケール（個別調整用）
 ```
 
 ### 衝突判定
 - **矩形判定**: AABB (Axis-Aligned Bounding Box)
 - **プラットフォーム**: 一方通行判定（上からのみ乗れる）
+
+### 物理システムの構成
+- **PhysicsSystem**: 全体の物理演算を管理
+- **Entity**: 個別の物理プロパティを保持
+- **競合回避**: PhysicsSystemが有効な場合、Entity.updatePhysics()はスキップ
 
 ## エンティティ構成
 

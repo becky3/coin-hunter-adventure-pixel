@@ -79,6 +79,10 @@ See the `docs/` directory for detailed documentation:
 - Retro game feel with modern polish
 - Stage-based palette system
 - Custom pixel font
+- Stage transition system (3 areas per stage)
+- Adjustable jump physics for better gameplay
+- Debug overlay with stage selection
+- Real-time physics parameter testing tool
 
 ## 🛠️ Tech Stack
 - TypeScript

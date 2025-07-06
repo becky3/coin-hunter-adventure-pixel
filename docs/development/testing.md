@@ -99,6 +99,22 @@ game.stateManager.setState('play');
 - **物理デバッグ**: `/tests/physics-debug-test.html`
 - **敵動作監視**: `/tests/enemy-behavior-monitor.html`
 - **deltaTime追跡**: `/tests/deltatime-test.html`
+- **ジャンプ物理テスト**: `/jump-test.html`
+
+### jump-test.html
+ジャンプ物理パラメータをリアルタイムで調整できるツールです。
+
+**機能**
+- 重力、ジャンプ力、最大落下速度、可変ジャンプブーストの調整
+- リアルタイム反映（Auto Apply）
+- 自動ジャンプテスト（Auto Jump）
+- 理論値の計算表示（最大高さ、滞空時間、比率）
+
+**使用方法**
+1. `http://localhost:3000/jump-test.html` にアクセス
+2. スライダーでパラメータを調整
+3. Auto Jumpで連続ジャンプテスト
+4. コンソールでデバッグ情報を確認
 
 ## チェックリスト
 
