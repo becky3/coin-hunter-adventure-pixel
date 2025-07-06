@@ -143,7 +143,14 @@ export class GameCore {
         stateManager.registerState(new PlayState(gameProxy));
     }
 
-    private createGameProxy(): any {
+    private createGameProxy(): {
+        renderer: PixelRenderer;
+        inputSystem: InputSystemImpl;
+        physicsSystem: PhysicsSystem;
+        assetLoader: AssetLoader;
+        musicSystem: MusicSystem;
+        stateManager: GameStateManager;
+        } {
         return {
             renderer: this._serviceLocator.get(ServiceNames.RENDERER),
             inputSystem: this._serviceLocator.get(ServiceNames.INPUT),

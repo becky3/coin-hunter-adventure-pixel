@@ -35,7 +35,10 @@ class PixelArtSprite {
         this.canvas = document.createElement('canvas');
         this.canvas.width = this.width;
         this.canvas.height = this.height;
-        const ctx = this.canvas.getContext('2d')!;
+        const ctx = this.canvas.getContext('2d');
+        if (!ctx) {
+            throw new Error('Failed to get 2D context from canvas');
+        }
         ctx.imageSmoothingEnabled = false;
         
         this._drawPixels(ctx, false);
@@ -43,7 +46,10 @@ class PixelArtSprite {
         this.flippedCanvas = document.createElement('canvas');
         this.flippedCanvas.width = this.width;
         this.flippedCanvas.height = this.height;
-        const flippedCtx = this.flippedCanvas.getContext('2d')!;
+        const flippedCtx = this.flippedCanvas.getContext('2d');
+        if (!flippedCtx) {
+            throw new Error('Failed to get 2D context from flipped canvas');
+        }
         flippedCtx.imageSmoothingEnabled = false;
         
         this._drawPixels(flippedCtx, true);
@@ -107,7 +113,11 @@ class PixelArtRenderer {
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d')!;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            throw new Error('Failed to get 2D context from canvas');
+        }
+        this.ctx = ctx;
         this.ctx.imageSmoothingEnabled = false;
         this.sprites = new Map();
         this.animations = new Map();

@@ -2,14 +2,14 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 
 export interface GameState {
     name?: string;
-    enter?(params?: any): void;
+    enter?(params?: StateChangeParams): void;
     exit?(): void;
     update?(deltaTime: number): void;
     render?(renderer: PixelRenderer): void;
 }
 
 export interface StateChangeParams {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface GameSnapshot {
@@ -40,7 +40,7 @@ export interface GameSnapshot {
 export interface StateEvent {
     timestamp: number;
     type: string;
-    data: any;
+    data: unknown;
 }
 
 type EventListener = (event: StateEvent) => void;
@@ -83,7 +83,11 @@ export class GameStateManager {
             }
             this.previousState = this._currentState;
         }
-        this._currentState = this.states.get(name)!;
+        const state = this.states.get(name);
+        if (!state) {
+            throw new Error(`State '${name}' not found`);
+        }
+        this._currentState = state;
         this._currentStateName = name;
         if (this._currentState.enter) {
             this._currentState.enter(params);
@@ -107,7 +111,28 @@ export class GameStateManager {
         }
     }
     
-    captureGameSnapshot(game: any): GameSnapshot | null {
+    captureGameSnapshot(game: {
+        frameCount?: number;
+        player?: {
+            x: number;
+            y: number;
+            vx: number;
+            vy: number;
+            grounded: boolean;
+            health: number;
+            score: number;
+        };
+        entities?: Array<{
+            constructor: { name: string };
+            x: number;
+            y: number;
+            active: boolean;
+        }>;
+        camera?: {
+            x: number;
+            y: number;
+        };
+    }): GameSnapshot | null {
         if (!game) return null;
         
         const snapshot: GameSnapshot = {
@@ -123,7 +148,7 @@ export class GameStateManager {
                 health: game.player.health,
                 score: game.player.score
             } : null,
-            entities: game.entities ? game.entities.map((e: any) => ({
+            entities: game.entities ? game.entities.map((e) => ({
                 type: e.constructor.name,
                 x: e.x,
                 y: e.y,
@@ -155,14 +180,15 @@ export class GameStateManager {
         return this.stateHistory;
     }
     
-    recordEvent(eventType: string, data: any): StateEvent {
+    recordEvent(eventType: string, data: unknown): StateEvent {
         const event: StateEvent = {
             timestamp: Date.now(),
             type: eventType,
             data: data
         };
-        if (this.listeners.has(eventType)) {
-            this.listeners.get(eventType)!.forEach(fn => fn(event));
+        const eventListeners = this.listeners.get(eventType);
+        if (eventListeners) {
+            eventListeners.forEach(fn => fn(event));
         }
         
         return event;
@@ -172,12 +198,15 @@ export class GameStateManager {
         if (!this.listeners.has(eventType)) {
             this.listeners.set(eventType, []);
         }
-        this.listeners.get(eventType)!.push(callback);
+        const eventListeners = this.listeners.get(eventType);
+        if (eventListeners) {
+            eventListeners.push(callback);
+        }
     }
     
     removeEventListener(eventType: string, callback: EventListener): void {
-        if (this.listeners.has(eventType)) {
-            const listeners = this.listeners.get(eventType)!;
+        const listeners = this.listeners.get(eventType);
+        if (listeners) {
             const index = listeners.indexOf(callback);
             if (index !== -1) {
                 listeners.splice(index, 1);

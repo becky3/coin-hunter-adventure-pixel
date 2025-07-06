@@ -1,15 +1,18 @@
 import { EntityManager } from '../managers/EntityManager';
 import { CameraController } from './CameraController';
-import { LevelManager } from '../managers/LevelManager';
+import { LevelManager, LevelData } from '../managers/LevelManager';
 import { HUDManager } from '../ui/HUDManager';
 import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { Logger } from '../utils/Logger';
+import { PhysicsSystem } from '../physics/PhysicsSystem';
+import { PixelRenderer } from '../rendering/PixelRenderer';
+import { InputSystem } from '../core/InputSystem';
 
 export interface GameServices {
-    physicsSystem: any;
-    renderer: any;
-    inputSystem: any;
+    physicsSystem: PhysicsSystem;
+    renderer: PixelRenderer;
+    inputSystem: InputSystem;
     eventBus: EventBus;
 }
 
@@ -46,17 +49,17 @@ export class GameController {
     }
     
     private setupEventListeners(): void {
-        this.eventBus.on('player:score-changed', (data: any) => {
+        this.eventBus.on<{score: number}>('player:score-changed', (data) => {
             this.hudManager.updateScore(data.score);
         });
         
         
-        this.eventBus.on('player:coins-changed', (data: any) => {
+        this.eventBus.on<{coins: number}>('player:coins-changed', (data) => {
             this.hudManager.updateCoins(data.coins);
         });
     }
     
-    async initializeLevel(levelName: string): Promise<any> {
+    async initializeLevel(levelName: string): Promise<LevelData | null> {
         // Clear physics system
         this.services.physicsSystem.clearEntities();
         

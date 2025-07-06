@@ -37,7 +37,7 @@ export class Slime extends Enemy {
         
         // Apply AI configuration if available
         if (slimeConfig?.ai) {
-            this.aiType = slimeConfig.ai.type as any || 'patrol';
+            this.aiType = (slimeConfig.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
             this.detectRange = slimeConfig.ai.detectRange || 100;
             this.attackRange = slimeConfig.ai.attackRange || 20;
         }

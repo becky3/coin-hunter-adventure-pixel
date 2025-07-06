@@ -268,13 +268,14 @@ export class PhysicsSystem {
         for (let i = 0; i < entitiesArray.length; i++) {
             const entityA = entitiesArray[i];
             if (!entityA.active || !entityA.collidable) continue;
-            const collisionLayers = this.collisionMatrix[entityA.physicsLayer!] || [];
+            const collisionLayers = entityA.physicsLayer ? this.collisionMatrix[entityA.physicsLayer] || [] : [];
             
             for (let j = i + 1; j < entitiesArray.length; j++) {
                 const entityB = entitiesArray[j];
                 if (!entityB.active || !entityB.collidable) continue;
-                if (collisionLayers.includes(entityB.physicsLayer!) ||
-                    (this.collisionMatrix[entityB.physicsLayer!] || []).includes(entityA.physicsLayer!)) {
+                if (entityB.physicsLayer && entityA.physicsLayer && 
+                    (collisionLayers.includes(entityB.physicsLayer) ||
+                     (this.collisionMatrix[entityB.physicsLayer] || []).includes(entityA.physicsLayer))) {
                     const pairKey = entityA.id < entityB.id ? 
                         `${entityA.id}-${entityB.id}` : 
                         `${entityB.id}-${entityA.id}`;

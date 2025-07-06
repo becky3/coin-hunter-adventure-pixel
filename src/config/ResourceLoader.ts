@@ -13,11 +13,11 @@ export class ResourceLoader {
     private static instance: ResourceLoader;
     private resourceIndex: ResourceIndexConfig | null = null;
     private sprites: SpritesConfig | null = null;
-    private characters: { [key: string]: any } | null = null;
-    private audio: { [key: string]: any } | null = null;
-    private objects: { [key: string]: any } | null = null;
+    private characters: { [key: string]: { [key: string]: CharacterConfig } } | null = null;
+    private audio: { [key: string]: { [key: string]: AudioConfig } } | null = null;
+    private objects: { [key: string]: { [key: string]: ObjectConfig } } | null = null;
     private musicPatterns: MusicPatternConfig | null = null;
-    private physics: { [key: string]: any } | null = null;
+    private physics: { [key: string]: unknown } | null = null;
   
     private constructor() {}
   
@@ -49,7 +49,7 @@ export class ResourceLoader {
         // Resource configuration loaded successfully
     }
   
-    private async loadJSON(path: string): Promise<any> {
+    private async loadJSON<T = unknown>(path: string): Promise<T | null> {
         // Check bundled data first
         const allBundled = { ...bundledResourceData, ...bundledMusicData };
         if (allBundled[path]) {
@@ -67,7 +67,7 @@ export class ResourceLoader {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return await response.json();
+            return await response.json() as T;
         } catch (error) {
             // Store error for debugging
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -181,7 +181,8 @@ export class ResourceLoader {
     getAllSpriteAssets(): Array<{ type: string; category: string; name?: string; baseName?: string; frameCount?: number; frameDuration?: number }> {
         if (!this.sprites) return [];
     
-        const assets: Array<any> = [];
+        type AssetType = { type: string; category: string; name?: string; baseName?: string; frameCount?: number; frameDuration?: number };
+        const assets: Array<AssetType> = [];
     
         for (const [category, config] of Object.entries(this.sprites.categories)) {
             // Add sprites
@@ -220,7 +221,7 @@ export class ResourceLoader {
         return this.musicPatterns;
     }
     
-    getPhysicsConfig(category?: string): any {
+    getPhysicsConfig(category?: string): unknown {
         if (!this.physics) return null;
         if (category) {
             return this.physics[category] || null;

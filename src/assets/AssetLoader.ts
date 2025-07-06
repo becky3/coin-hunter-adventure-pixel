@@ -51,12 +51,14 @@ export class AssetLoader {
     async loadSprite(category: string, name: string): Promise<LoadedAsset> {
         const key = `${category}/${name}`;
         
-        if (this.loadedAssets.has(key)) {
-            return this.loadedAssets.get(key)!;
+        const loadedAsset = this.loadedAssets.get(key);
+        if (loadedAsset) {
+            return loadedAsset;
         }
         
-        if (this.loadingPromises.has(key)) {
-            return this.loadingPromises.get(key)!;
+        const loadingPromise = this.loadingPromises.get(key);
+        if (loadingPromise) {
+            return loadingPromise;
         }
         
         const loadPromise = this._loadSpriteInternal(category, name);
@@ -77,12 +79,14 @@ export class AssetLoader {
     async loadAnimation(category: string, baseName: string, frameCount: number, frameDuration: number = 100): Promise<LoadedAsset> {
         const key = `${category}/${baseName}_anim`;
         
-        if (this.loadedAssets.has(key)) {
-            return this.loadedAssets.get(key)!;
+        const loadedAsset = this.loadedAssets.get(key);
+        if (loadedAsset) {
+            return loadedAsset;
         }
         
-        if (this.loadingPromises.has(key)) {
-            return this.loadingPromises.get(key)!;
+        const loadingPromise = this.loadingPromises.get(key);
+        if (loadingPromise) {
+            return loadingPromise;
         }
         
         const loadPromise = this._loadAnimationInternal(category, baseName, frameCount, frameDuration);

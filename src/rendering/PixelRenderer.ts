@@ -1,14 +1,9 @@
 import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants';
 import { PixelArtRenderer } from '../utils/pixelArt';
 import { Logger } from '../utils/Logger';
+import { AssetLoader } from '../assets/AssetLoader';
+import { SpriteData } from '../types/assetTypes';
 
-export interface SpriteData {
-    width: number;
-    height: number;
-    canvas?: HTMLCanvasElement;
-    imageData?: ImageData;
-    flippedCanvas?: HTMLCanvasElement;
-}
 
 export class PixelRenderer {
     private canvas: HTMLCanvasElement;
@@ -23,15 +18,31 @@ export class PixelRenderer {
     private spriteCache: Map<string, HTMLCanvasElement>;
     public debug: boolean;
     public pixelArtRenderer?: PixelArtRenderer;
-    public assetLoader?: any;
+    public assetLoader?: AssetLoader;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d')!;
+        const context = canvas.getContext('2d');
+        if (!context) {
+            throw new Error('Failed to get 2D context from canvas');
+        }
+        this.ctx = context;
         this.ctx.imageSmoothingEnabled = false;
-        (this.ctx as any).mozImageSmoothingEnabled = false;
-        (this.ctx as any).webkitImageSmoothingEnabled = false;
-        (this.ctx as any).msImageSmoothingEnabled = false;
+        (this.ctx as CanvasRenderingContext2D & { 
+            mozImageSmoothingEnabled?: boolean;
+            webkitImageSmoothingEnabled?: boolean;
+            msImageSmoothingEnabled?: boolean;
+        }).mozImageSmoothingEnabled = false;
+        (this.ctx as CanvasRenderingContext2D & { 
+            mozImageSmoothingEnabled?: boolean;
+            webkitImageSmoothingEnabled?: boolean;
+            msImageSmoothingEnabled?: boolean;
+        }).webkitImageSmoothingEnabled = false;
+        (this.ctx as CanvasRenderingContext2D & { 
+            mozImageSmoothingEnabled?: boolean;
+            webkitImageSmoothingEnabled?: boolean;
+            msImageSmoothingEnabled?: boolean;
+        }).msImageSmoothingEnabled = false;
         this.width = GAME_RESOLUTION.WIDTH;
         this.height = GAME_RESOLUTION.HEIGHT;
         this.canvasWidth = canvas.width;
@@ -70,10 +81,12 @@ export class PixelRenderer {
         let finalSprite: SpriteData | HTMLCanvasElement | ImageData | null = null;
 
         if (typeof sprite === 'string') {
-            if (this.pixelArtRenderer && this.pixelArtRenderer.sprites.has(sprite)) {
-                const pixelSprite = this.pixelArtRenderer.sprites.get(sprite)!;
-                const canvas = flipX ? pixelSprite.flippedCanvas : pixelSprite.canvas;
-                finalSprite = canvas;
+            if (this.pixelArtRenderer) {
+                const pixelSprite = this.pixelArtRenderer.sprites.get(sprite);
+                if (pixelSprite) {
+                    const canvas = flipX ? pixelSprite.flippedCanvas : pixelSprite.canvas;
+                    finalSprite = canvas;
+                }
             }
             else if (this.assetLoader) {
                 const loadedSprite = this.assetLoader.loadedAssets.get(sprite);
@@ -116,7 +129,7 @@ export class PixelRenderer {
                 drawX, drawY, spriteWidth * this.scale, spriteHeight * this.scale
             );
         } else if (finalSprite instanceof HTMLCanvasElement || (finalSprite && 'canvas' in finalSprite)) {
-            const canvas = finalSprite instanceof HTMLCanvasElement ? finalSprite : (finalSprite as any).canvas;
+            const canvas = finalSprite instanceof HTMLCanvasElement ? finalSprite : (finalSprite as SpriteData).canvas;
             this.ctx.drawImage(
                 canvas,
                 0, 0, spriteWidth, spriteHeight,
@@ -261,8 +274,14 @@ export class PixelRenderer {
             this.spriteCache.set(key, tempCanvas);
         }
         
-        const tempCanvas = this.spriteCache.get(key)!;
-        const tempCtx = tempCanvas.getContext('2d')!;
+        const tempCanvas = this.spriteCache.get(key);
+        if (!tempCanvas) {
+            throw new Error(`Canvas not found in sprite cache for key: ${key}`);
+        }
+        const tempCtx = tempCanvas.getContext('2d');
+        if (!tempCtx) {
+            throw new Error('Failed to get 2D context from temp canvas');
+        }
         tempCtx.putImageData(imageData, 0, 0);
         
         return tempCanvas;
@@ -281,9 +300,21 @@ export class PixelRenderer {
         this.height = GAME_RESOLUTION.HEIGHT;
         this.scale = Math.min(width / GAME_RESOLUTION.WIDTH, height / GAME_RESOLUTION.HEIGHT);
         this.ctx.imageSmoothingEnabled = false;
-        (this.ctx as any).mozImageSmoothingEnabled = false;
-        (this.ctx as any).webkitImageSmoothingEnabled = false;
-        (this.ctx as any).msImageSmoothingEnabled = false;
+        (this.ctx as CanvasRenderingContext2D & { 
+            mozImageSmoothingEnabled?: boolean;
+            webkitImageSmoothingEnabled?: boolean;
+            msImageSmoothingEnabled?: boolean;
+        }).mozImageSmoothingEnabled = false;
+        (this.ctx as CanvasRenderingContext2D & { 
+            mozImageSmoothingEnabled?: boolean;
+            webkitImageSmoothingEnabled?: boolean;
+            msImageSmoothingEnabled?: boolean;
+        }).webkitImageSmoothingEnabled = false;
+        (this.ctx as CanvasRenderingContext2D & { 
+            mozImageSmoothingEnabled?: boolean;
+            webkitImageSmoothingEnabled?: boolean;
+            msImageSmoothingEnabled?: boolean;
+        }).msImageSmoothingEnabled = false;
     }
     
     fillRect(x: number, y: number, width: number, height: number, color: string): void {

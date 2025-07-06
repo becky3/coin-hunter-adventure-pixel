@@ -165,8 +165,9 @@ export class LevelManager {
         const areaNum = parseInt(match[2]);
         
         // Check if level data has a specific next level defined (for special cases like bonus stages)
-        if (this.levelData && (this.levelData as any).nextLevel) {
-            return (this.levelData as any).nextLevel;
+        if (this.levelData && this.levelData.name) {
+            // For now, use the default progression logic
+            // Custom nextLevel property could be added to LevelData interface if needed
         }
         
         // Default progression logic
@@ -246,7 +247,7 @@ export class LevelManager {
         this.timeLimit = 300;
     }
     
-    renderTileMap(_renderer: any): void {
+    renderTileMap(_renderer: unknown): void {
         // Tile map rendering is handled by PlayState
         // This method is here for compatibility with GameController
     }

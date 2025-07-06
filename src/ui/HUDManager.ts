@@ -282,7 +282,9 @@ export class HUDManager {
         renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, '#000000');
         
         // Draw message text
-        renderer.drawTextCentered(this._message!, centerX, centerY - 4, '#FFD700');
+        if (this._message) {
+            renderer.drawTextCentered(this._message, centerX, centerY - 4, '#FFD700');
+        }
     }
 
     reset(): void {
