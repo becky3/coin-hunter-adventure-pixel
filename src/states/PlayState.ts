@@ -9,6 +9,7 @@ import { EventBus } from '../services/EventBus';
 import { GameController } from '../controllers/GameController';
 import { EventCoordinator } from '../controllers/EventCoordinator';
 import { TILE_SIZE } from '../constants/gameConstants';
+import { Logger } from '../utils/Logger';
 
 interface Game {
     renderer?: PixelRenderer;
@@ -116,14 +117,14 @@ export class PlayState implements GameState {
 
     private async preloadSprites(): Promise<void> {
         if (!this.game.assetLoader) {
-            console.warn('[PlayState] AssetLoader not available, skipping sprite preload');
+            Logger.warn('[PlayState] AssetLoader not available, skipping sprite preload');
             return;
         }
         
         const startTime = performance.now();
         
         try {
-            console.log('[PlayState] Checking/loading sprites...');
+            Logger.log('[PlayState] Checking/loading sprites...');
             
             // Load sprites in parallel for better performance
             const loadPromises = [
@@ -145,7 +146,6 @@ export class PlayState implements GameState {
                 this.game.assetLoader.loadAnimation('items', 'coin_spin', 4, 100),
 
                 // Enemy sprites
-                this.game.assetLoader.loadSprite('enemies', 'slime'),
                 this.game.assetLoader.loadAnimation('enemies', 'slime_idle', 2, 500),
                 this.game.assetLoader.loadAnimation('enemies', 'bird_fly', 2, 200)
             ];
@@ -153,16 +153,16 @@ export class PlayState implements GameState {
             await Promise.all(loadPromises);
             
             const endTime = performance.now();
-            console.log(`[PlayState] Sprites loaded successfully in ${(endTime - startTime).toFixed(2)}ms`);
+            Logger.log(`[PlayState] Sprites loaded successfully in ${(endTime - startTime).toFixed(2)}ms`);
         } catch (error) {
-            console.error('Failed to load sprites:', error);
+            Logger.error('Failed to load sprites:', error);
         }
     }
 
     async enter(params: any = {}): Promise<void> {
         const enterStartTime = performance.now();
-        console.log('[PlayState] enter() called with params:', params);
-        console.log('[PlayState] Starting initialization...');
+        Logger.log('[PlayState] enter() called with params:', params);
+        Logger.log('[PlayState] Starting initialization...');
 
         // Reset game state for new game
         this.gameState = 'playing';
@@ -170,7 +170,7 @@ export class PlayState implements GameState {
         
         // Store progression mode from params (default: disabled for testing)
         this.stageProgressionEnabled = params.enableProgression || false;
-        console.log(`[PlayState] Stage progression: ${this.stageProgressionEnabled ? 'ENABLED' : 'DISABLED'}`);
+        Logger.log(`[PlayState] Stage progression: ${this.stageProgressionEnabled ? 'ENABLED' : 'DISABLED'}`);
 
         // Preload sprites
         await this.preloadSprites();
@@ -191,16 +191,16 @@ export class PlayState implements GameState {
         this.eventBus.on('player:died', () => this.handlePlayerDeath());
         
         // Set stage name in HUD
-        console.log('[PlayState] levelData:', levelData);
-        console.log('[PlayState] levelData.name:', levelData?.name);
+        Logger.log('[PlayState] levelData:', levelData);
+        Logger.log('[PlayState] levelData.name:', levelData?.name);
         if (levelData && levelData.name) {
             this.hudManager.updateStageName(levelData.name);
-            console.log('[PlayState] Stage name set to:', levelData.name);
+            Logger.log('[PlayState] Stage name set to:', levelData.name);
         } else {
             // Fallback to using the level ID
             const stageName = levelName.toUpperCase().replace('-', ' ');
             this.hudManager.updateStageName(stageName);
-            console.log('[PlayState] Stage name set to fallback:', stageName);
+            Logger.log('[PlayState] Stage name set to fallback:', stageName);
         }
 
         // Setup input listeners
@@ -210,19 +210,19 @@ export class PlayState implements GameState {
         this.lastTimeUpdate = Date.now();
 
         // Play BGM
-        console.log('[PlayState] MusicSystem status:', {
+        Logger.log('[PlayState] MusicSystem status:', {
             exists: !!this.game.musicSystem,
             isInitialized: this.game.musicSystem?.isInitialized
         });
         if (this.game.musicSystem && this.game.musicSystem.isInitialized) {
-            console.log('[PlayState] Playing game BGM...');
+            Logger.log('[PlayState] Playing game BGM...');
             this.game.musicSystem.playBGMFromPattern('game');
         }
         
         // プレイヤーが作成されたことを確認
         const player = this.entityManager.getPlayer();
         if (player) {
-            console.log('[PlayState] Player created successfully');
+            Logger.log('[PlayState] Player created successfully');
             // グローバルイベントとして通知（テスト用）
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('playstate:ready', { 
@@ -230,11 +230,11 @@ export class PlayState implements GameState {
                 }));
             }
         } else {
-            console.error('[PlayState] Player creation failed!');
+            Logger.error('[PlayState] Player creation failed!');
         }
         
         const enterEndTime = performance.now();
-        console.log(`[PlayState] enter() completed in ${(enterEndTime - enterStartTime).toFixed(2)}ms`);
+        Logger.log(`[PlayState] enter() completed in ${(enterEndTime - enterStartTime).toFixed(2)}ms`);
     }
 
     update(deltaTime: number): void {
@@ -265,7 +265,7 @@ export class PlayState implements GameState {
 
             // Death by falling (instant death, lose a life)
             if (player.y > dimensions.height) {
-                console.log('[PlayState] Player fell! Instant death.');
+                Logger.log('[PlayState] Player fell! Instant death.');
                 this.handlePlayerDeath();
             }
         }
@@ -426,7 +426,7 @@ export class PlayState implements GameState {
     private gameOver(): void {
         if (this.gameState === 'gameover') return;
         
-        console.log('Game Over!');
+        Logger.log('Game Over!');
         this.gameState = 'gameover';
         
         // Stop the BGM
@@ -521,7 +521,7 @@ export class PlayState implements GameState {
     private debugWarp(x: number, y: number, tileCoords: boolean = false): void {
         const player = this.entityManager.getPlayer();
         if (!player) {
-            console.warn('Player not found');
+            Logger.warn('Player not found');
             return;
         }
 
@@ -536,6 +536,6 @@ export class PlayState implements GameState {
 
         this.cameraController.update(0);
         
-        console.log(`Player warped to (${pixelX}, ${pixelY})`);
+        Logger.log(`Player warped to (${pixelX}, ${pixelY})`);
     }
 }

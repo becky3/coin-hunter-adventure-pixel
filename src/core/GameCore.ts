@@ -15,6 +15,7 @@ import { MusicSystem } from '../audio/MusicSystem';
 import { GameStateManager } from '../states/GameStateManager';
 import { MenuState } from '../states/MenuState';
 import { PlayState } from '../states/PlayState';
+import { Logger } from '../utils/Logger';
 
 import { InputSystemAdapter } from '../systems/adapters/InputSystemAdapter';
 import { PhysicsSystemAdapter } from '../systems/adapters/PhysicsSystemAdapter';
@@ -33,28 +34,28 @@ export class GameCore {
     }
 
     async init(): Promise<void> {
-        console.log('GameCore: init() started');
+        Logger.log('GameCore: init() started');
 
-        console.log('GameCore: Registering core services...');
+        Logger.log('GameCore: Registering core services...');
         this.registerCoreServices();
 
-        console.log('GameCore: Registering systems...');
+        Logger.log('GameCore: Registering systems...');
         await this.registerSystems();
 
-        console.log('GameCore: Registering states...');
+        Logger.log('GameCore: Registering states...');
         this.registerStates();
 
-        console.log('GameCore: Initializing debug overlay...');
+        Logger.log('GameCore: Initializing debug overlay...');
         this.debugOverlay = new DebugOverlay(this._serviceLocator);
         await this.debugOverlay.init();
 
-        console.log('GameCore: Hiding loading screen...');
+        Logger.log('GameCore: Hiding loading screen...');
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {
             loadingScreen.style.display = 'none';
         }
         
-        console.log('GameCore: init() completed');
+        Logger.log('GameCore: init() completed');
     }
 
     private registerCoreServices(): void {
@@ -113,7 +114,7 @@ export class GameCore {
         // MusicSystemの初期化
         const musicSystem = this._serviceLocator.get<MusicSystem>(ServiceNames.AUDIO);
         try {
-            console.log('GameCore: Initializing MusicSystem...');
+            Logger.log('GameCore: Initializing MusicSystem...');
             // タイムアウトを設定
             const initPromise = musicSystem.init();
             const timeoutPromise = new Promise<boolean>((_, reject) => 
@@ -121,9 +122,9 @@ export class GameCore {
             );
             
             await Promise.race([initPromise, timeoutPromise]);
-            console.log('GameCore: MusicSystem initialized');
+            Logger.log('GameCore: MusicSystem initialized');
         } catch (error) {
-            console.warn('GameCore: MusicSystem initialization failed, continuing without audio:', error);
+            Logger.warn('GameCore: MusicSystem initialization failed, continuing without audio:', error);
         }
     }
 
@@ -148,7 +149,7 @@ export class GameCore {
     }
 
     start(): void {
-        console.log('GameCore: Starting game loop...');
+        Logger.log('GameCore: Starting game loop...');
         
         const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
         const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
@@ -166,11 +167,11 @@ export class GameCore {
             systemManager.renderSystems(renderer);
         });
         
-        console.log('GameCore: Game loop started, running:', this.gameLoop.isRunning());
+        Logger.log('GameCore: Game loop started, running:', this.gameLoop.isRunning());
         
         // Set initial state to menu
         stateManager.setState('menu');
-        console.log('GameCore: Initial state set to menu');
+        Logger.log('GameCore: Initial state set to menu');
     }
 
     stop(): void {

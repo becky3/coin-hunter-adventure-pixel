@@ -1,4 +1,5 @@
 
+import { Logger } from '../utils/Logger';
 
 export class GameLoop {
     private _running: boolean = false;
@@ -9,7 +10,7 @@ export class GameLoop {
 
     start(updateCallback: (deltaTime: number) => void): void {
         if (this._running) {
-            console.warn('Game loop is already running');
+            Logger.warn('Game loop is already running');
             return;
         }
         

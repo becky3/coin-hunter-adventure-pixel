@@ -27,7 +27,6 @@ import itemsCoinSpin2 from './items/coin_spin2.json';
 import itemsCoinSpin3 from './items/coin_spin3.json';
 import itemsCoinSpin4 from './items/coin_spin4.json';
 
-import enemiesSlime from './enemies/slime.json';
 import enemiesSlimeIdle1 from './enemies/slime_idle1.json';
 import enemiesSlimeIdle2 from './enemies/slime_idle2.json';
 import enemiesBirdFly1 from './enemies/bird_fly1.json';
@@ -60,7 +59,6 @@ export const spriteDataMap: Record<string, any> = {
     'items/coin_spin2': itemsCoinSpin2,
     'items/coin_spin3': itemsCoinSpin3,
     'items/coin_spin4': itemsCoinSpin4,
-    'enemies/slime': enemiesSlime,
     'enemies/slime_idle1': enemiesSlimeIdle1,
     'enemies/slime_idle2': enemiesSlimeIdle2,
     'enemies/bird_fly1': enemiesBirdFly1,

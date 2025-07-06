@@ -1,4 +1,5 @@
 import { spriteDataMap } from '../assets/sprites/spriteData';
+import { Logger } from './Logger';
 
 interface SpriteData {
     width: number;
@@ -36,21 +37,25 @@ class SpriteLoader {
 
         // Try to use bundled data first
         if (this.useBundledData && spriteDataMap[key]) {
-            console.log(`[SpriteLoader] Using bundled data for: ${key}`);
+            Logger.log(`[SpriteLoader] Using bundled data for: ${key}`);
             const data = spriteDataMap[key] as SpriteData;
+            if (!data || !data.data) {
+                Logger.error(`[SpriteLoader] Bundled data for ${key} is invalid:`, data);
+                throw new Error(`Invalid sprite data for ${key}`);
+            }
             this.cache.set(key, data);
             return data;
         }
 
         // Fall back to fetch if not in bundle
         const url = `${this.basePath}${category}/${name}.json`;
-        console.log(`[SpriteLoader] Fetching: ${url}`);
+        Logger.log(`[SpriteLoader] Fetching: ${url}`);
         const startTime = performance.now();
 
         try {
             const response = await fetch(url);
             const fetchTime = performance.now() - startTime;
-            console.log(`[SpriteLoader] Fetch completed in ${fetchTime.toFixed(2)}ms - Status: ${response.status}`);
+            Logger.log(`[SpriteLoader] Fetch completed in ${fetchTime.toFixed(2)}ms - Status: ${response.status}`);
             
             if (!response.ok) {
                 throw new Error(`Failed to load sprite: ${key} (${response.status})`);
@@ -60,7 +65,7 @@ class SpriteLoader {
             this.cache.set(key, data);
             return data;
         } catch (error) {
-            console.error(`Error loading sprite ${key}:`, error);
+            Logger.error(`Error loading sprite ${key}:`, error);
             throw error;
         }
     }

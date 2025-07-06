@@ -2,6 +2,7 @@ import { LevelLoader } from '../levels/LevelLoader';
 import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
+import { Logger } from '../utils/Logger';
 
 export interface LevelData {
     name?: string;
@@ -42,7 +43,7 @@ export class LevelManager {
         try {
             await this.levelLoader.loadStageList();
         } catch (error) {
-            console.error('Failed to load stage list:', error);
+            Logger.error('Failed to load stage list:', error);
         }
     }
 
@@ -77,7 +78,7 @@ export class LevelManager {
             });
             
         } catch (error) {
-            console.error('Failed to load level:', error);
+            Logger.error('Failed to load level:', error);
             
             // Emit level load error event
             this.eventBus.emit('level:load-error', {

@@ -1,5 +1,6 @@
 import { Entity, Bounds, CollisionInfo } from '../entities/Entity';
 import { GAME_CONSTANTS } from '../config/GameConstants';
+import { Logger } from '../utils/Logger';
 
 export type PhysicsLayer = 'tile' | 'player' | 'enemy' | 'item' | 'platform';
 
@@ -49,10 +50,10 @@ export class PhysicsSystem {
         this._maxFallSpeed = 10; // Reduced to maintain feel
         this._friction = 0.8;
         
-        console.log('[PhysicsSystem] Initialized with:');
-        console.log('  - Gravity:', this._gravity);
-        console.log('  - Max fall speed:', this._maxFallSpeed);
-        console.log('  - Friction:', this._friction);
+        Logger.log('[PhysicsSystem] Initialized with:');
+        Logger.log('  - Gravity:', this._gravity);
+        Logger.log('  - Max fall speed:', this._maxFallSpeed);
+        Logger.log('  - Friction:', this._friction);
         this.layers = {
             TILE: 'tile',
             PLAYER: 'player',
@@ -134,15 +135,6 @@ export class PhysicsSystem {
     update(deltaTime: number): void {
         this.frameCount++;
         
-        // Debug: Log deltaTime for first few frames
-        if (this.frameCount <= 3) {
-            console.log(`[PhysicsSystem] Frame ${this.frameCount}, deltaTime=${deltaTime.toFixed(4)}, entities=${this.entities.size}`);
-            for (const entity of this.entities) {
-                if (entity.constructor.name === 'Slime') {
-                    console.log(`[PhysicsSystem]   Slime at y=${entity.y.toFixed(2)}, vy=${entity.vy.toFixed(2)}, grounded=${entity.grounded}`);
-                }
-            }
-        }
         
         // Clamp deltaTime to prevent huge jumps
         const clampedDeltaTime = Math.min(deltaTime, 0.033); // Max 33ms (30fps)
@@ -168,7 +160,6 @@ export class PhysicsSystem {
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
         
-        const previousVy = entity.vy;
         // Apply effective gravity = base gravity * entity's gravity scale
         const effectiveGravity = this.gravity * (entity.gravityScale || 1.0);
         entity.vy += effectiveGravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
@@ -178,27 +169,12 @@ export class PhysicsSystem {
             entity.vy *= (1 - entity.airResistance);
         }
         
-        // Debug logging for Player entity - only log every 10th frame
-        if (entity.constructor.name === 'Player' && (entity as any)._isJumping && this.frameCount % 10 === 0) {
-            console.log('[PhysicsSystem] Gravity applied to Player:');
-            console.log('  - Previous vy:', previousVy.toFixed(2));
-            console.log('  - Base gravity:', this.gravity);
-            console.log('  - Gravity scale:', entity.gravityScale || 1.0);
-            console.log('  - Effective gravity:', effectiveGravity);
-            console.log('  - Air resistance:', entity.airResistance || 0);
-            console.log('  - New vy:', entity.vy.toFixed(2));
-            console.log('  - Entity max fall speed:', entity.maxFallSpeed || this.maxFallSpeed);
-            console.log('  - Frame:', this.frameCount);
-        }
         
         // Use entity's maxFallSpeed if defined, otherwise use system's default
         const maxFall = entity.maxFallSpeed !== undefined ? entity.maxFallSpeed : this.maxFallSpeed;
         
         // Only clamp downward velocity (positive vy)
         if (entity.vy > 0 && entity.vy > maxFall) {
-            if (entity.constructor.name === 'Player') {
-                console.log('[PhysicsSystem] Max fall speed reached! Clamping vy from', entity.vy, 'to', maxFall);
-            }
             entity.vy = maxFall;
         }
     }
@@ -233,27 +209,6 @@ export class PhysicsSystem {
         const clampedStartRow = Math.max(0, startRow);
         const clampedEndRow = Math.min(this.tileMap.length - 1, endRow);
         
-        // Debug logging for enemy entities falling through ground
-        if (entity.constructor.name === 'Slime' && axis === 'vertical' && entity.vy > 0) {
-            // First few frames only
-            if (entity.y < 220) {
-                console.log(`[Physics] Slime collision check: y=${entity.y.toFixed(2)}, vy=${entity.vy.toFixed(2)}`);
-                console.log(`[Physics]   bounds: top=${bounds.top.toFixed(2)}, bottom=${bounds.bottom.toFixed(2)}`);
-                console.log(`[Physics]   rows: ${startRow}-${endRow} (clamped: ${clampedStartRow}-${clampedEndRow})`);
-                
-                // Check what tiles are at row 12 and 13
-                if (this.tileMap[12]) {
-                    console.log(`[Physics]   row 12: ${this.tileMap[12].slice(7, 10).join('')}`);
-                }
-                if (this.tileMap[13]) {
-                    console.log(`[Physics]   row 13: ${this.tileMap[13].slice(7, 10).join('')}`);
-                }
-            }
-            
-            if (clampedStartRow > clampedEndRow) {
-                return; // Skip collision check if out of bounds
-            }
-        }
         
         for (let row = clampedStartRow; row <= clampedEndRow; row++) {
             for (let col = clampedStartCol; col <= clampedEndCol; col++) {
@@ -267,11 +222,6 @@ export class PhysicsSystem {
                         height: this.tileSize
                     };
                     
-                    // Debug for Slime collision
-                    if (entity.constructor.name === 'Slime' && axis === 'vertical' && row === 13) {
-                        console.log(`[Physics] Slime collision with ground tile at col=${col}, tileBounds=${JSON.stringify(tileBounds)}`);
-                        console.log(`[Physics]   Entity bounds=${JSON.stringify(entity.getBounds())}`);
-                    }
                     
                     if (this.checkAABB(bounds, tileBounds)) {
                         this.resolveTileCollision(entity, tileBounds, axis);

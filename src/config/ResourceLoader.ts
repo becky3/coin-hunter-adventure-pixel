@@ -7,6 +7,7 @@ import {
 } from './ResourceConfig';
 import { MusicPatternConfig, MusicConfig } from './MusicPatternConfig';
 import { bundledResourceData, bundledMusicData } from '../data/bundledData';
+import { Logger } from '../utils/Logger';
 
 export class ResourceLoader {
     private static instance: ResourceLoader;
@@ -50,7 +51,7 @@ export class ResourceLoader {
         // Check bundled data first
         const allBundled = { ...bundledResourceData, ...bundledMusicData };
         if (allBundled[path]) {
-            console.log(`[ResourceLoader] Using bundled data for: ${path}`);
+            Logger.log(`[ResourceLoader] Using bundled data for: ${path}`);
             return allBundled[path];
         }
         
@@ -59,7 +60,7 @@ export class ResourceLoader {
             const startTime = performance.now();
             const response = await fetch(path);
             const fetchTime = performance.now() - startTime;
-            console.log(`[ResourceLoader] Fetched ${path} in ${fetchTime.toFixed(2)}ms`);
+            Logger.log(`[ResourceLoader] Fetched ${path} in ${fetchTime.toFixed(2)}ms`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -68,8 +69,7 @@ export class ResourceLoader {
         } catch (error) {
             // Store error for debugging
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            // eslint-disable-next-line no-console
-            console.error(`Failed to load resource: ${path}`, errorMessage);
+            Logger.error(`Failed to load resource: ${path}`, errorMessage);
             // In production, this could be sent to a logging service
             return null;
         }

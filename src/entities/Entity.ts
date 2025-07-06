@@ -1,5 +1,4 @@
 import type { PixelRenderer } from '../rendering/PixelRenderer';
-import { GAME_CONSTANTS } from '../config/GameConstants';
 
 export interface Bounds {
     left: number;

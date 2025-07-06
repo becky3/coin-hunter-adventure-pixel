@@ -12,6 +12,7 @@ import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { MusicSystem } from '../audio/MusicSystem';
 import { AssetLoader } from '../assets/AssetLoader';
 import { InputSystem } from '../core/InputSystem';
+import { Logger } from '../utils/Logger';
 
 export interface EntityConfig {
     type: string;
@@ -76,7 +77,7 @@ export class EntityManager {
     }
 
     createPlayer(spawnX: number, spawnY: number): Player {
-        console.log(`[EntityManager] Creating player at (${spawnX}, ${spawnY})`);
+        Logger.log(`[EntityManager] Creating player at (${spawnX}, ${spawnY})`);
         
         this.player = new Player(spawnX, spawnY);
         this.player.setInputManager(this.inputSystem);
@@ -88,7 +89,7 @@ export class EntityManager {
         
         this.eventBus.emit('player:created', { player: this.player });
         
-        console.log(`[EntityManager] Player created: ${this.player ? 'success' : 'failed'}`);
+        Logger.log(`[EntityManager] Player created: ${this.player ? 'success' : 'failed'}`);
         
         return this.player;
     }
@@ -105,7 +106,7 @@ export class EntityManager {
         // Check if entity spawn position is valid
         const tileMap = this.physicsSystem.tileMap;
         if (tileMap && tileMap[config.y] && tileMap[config.y][config.x] === 1) {
-            console.warn(`[EntityManager] 警告: エンティティ(${config.type})のスポーン位置(${config.x}, ${config.y})が地面の中です！`);
+            Logger.warn(`[EntityManager] 警告: エンティティ(${config.type})のスポーン位置(${config.x}, ${config.y})が地面の中です！`);
         }
         
         switch (config.type) {
@@ -145,8 +146,8 @@ export class EntityManager {
             this.enemies.push(slime);
             
             // Debug: Check physics system state before adding entity
-            console.log(`[EntityManager] Creating slime at (${config.x * TILE_SIZE}, ${config.y * TILE_SIZE})`);
-            console.log(`[EntityManager] Physics system has tilemap: ${this.physicsSystem.tileMap !== null}`);
+            Logger.log(`[EntityManager] Creating slime at (${config.x * TILE_SIZE}, ${config.y * TILE_SIZE})`);
+            Logger.log(`[EntityManager] Physics system has tilemap: ${this.physicsSystem.tileMap !== null}`);
             
             this.physicsSystem.addEntity(slime, this.physicsSystem.layers.ENEMY);
             entity = slime;
@@ -203,7 +204,7 @@ export class EntityManager {
                 }
             });
         } catch (error) {
-            console.error('Error during entity update:', error);
+            Logger.error('Error during entity update:', error);
             this.eventBus.emit('entity:update-error', { error });
         }
     }

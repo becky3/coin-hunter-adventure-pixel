@@ -93,23 +93,23 @@
     <div class="container">
         <div class="controls">
             <div class="control-group">
-                <label for="gravity">Gravity: <span class="value" id="gravityValue">0.433</span></label>
-                <input type="range" id="gravity" min="0.1" max="1.0" step="0.001" value="0.433">
+                <label for="gravity">Gravity: <span class="value" id="gravityValue">0.65</span></label>
+                <input type="range" id="gravity" min="0.1" max="1.0" step="0.001" value="0.65">
             </div>
             
             <div class="control-group">
-                <label for="jumpPower">Jump Power: <span class="value" id="jumpPowerValue">5.25</span></label>
-                <input type="range" id="jumpPower" min="3" max="15" step="0.01" value="5.25">
+                <label for="jumpPower">Jump Power: <span class="value" id="jumpPowerValue">10</span></label>
+                <input type="range" id="jumpPower" min="0" max="50" step="0.1" value="10">
             </div>
             
             <div class="control-group">
-                <label for="maxFallSpeed">Max Fall Speed: <span class="value" id="maxFallSpeedValue">10</span></label>
-                <input type="range" id="maxFallSpeed" min="5" max="20" step="0.1" value="10">
+                <label for="maxFallSpeed">Max Fall Speed: <span class="value" id="maxFallSpeedValue">15</span></label>
+                <input type="range" id="maxFallSpeed" min="0" max="100" step="0.5" value="15">
             </div>
             
             <div class="control-group">
-                <label for="variableBoost">Variable Jump Boost: <span class="value" id="variableBoostValue">0.15</span></label>
-                <input type="range" id="variableBoost" min="0" max="1" step="0.01" value="0.15">
+                <label for="variableBoost">Variable Jump Boost: <span class="value" id="variableBoostValue">0.5</span></label>
+                <input type="range" id="variableBoost" min="0" max="5" step="0.05" value="0.5">
             </div>
             
             <div class="control-group">
@@ -119,13 +119,12 @@
             
             <div class="control-group">
                 <label for="airResistance">Air Resistance: <span class="value" id="airResistanceValue">0.0</span></label>
-                <input type="range" id="airResistance" min="0" max="0.5" step="0.01" value="0.0">
+                <input type="range" id="airResistance" min="0" max="1" step="0.01" value="0.0">
             </div>
             
             <button onclick="toggleAutoApply()" id="autoApplyBtn">Auto Apply: ON</button>
             <button onclick="toggleAutoJump()" id="autoJumpBtn">Auto Jump: OFF</button>
             <button onclick="resetToDefault()">Reset to Default</button>
-            <button onclick="resetToOriginal()">Reset to Original</button>
             
             <div class="info">
                 <h3>Current Settings</h3>
@@ -153,6 +152,13 @@
                 <h3>Reference Values</h3>
                 <p>Original: Gravity=0.65, JumpPower=10</p>
                 <p>Current Goal: 70% height, 1.5x air time</p>
+                <p style="color: #FFD700; margin-top: 10px;">
+                    <strong>使い方:</strong><br>
+                    - Jump Power: 初期ジャンプ力<br>
+                    - Variable Jump Boost: 長押し時の追加上昇力<br>
+                    - Max Fall Speed: 落下速度の上限<br>
+                    - Air Resistance: 空気抵抗（上昇・下降両方に適用）
+                </p>
             </div>
         </div>
         
@@ -162,7 +168,8 @@
     </div>
 
     <script>
-        const originalValues = {
+        // Default values for sliders
+        const defaultValues = {
             gravity: 0.65,
             jumpPower: 10,
             maxFallSpeed: 15,
@@ -171,14 +178,9 @@
             airResistance: 0.0
         };
         
-        const defaultValues = {
-            gravity: 0.433,
-            jumpPower: 5.25,
-            maxFallSpeed: 10,
-            variableBoost: 0.15,
-            gravityScale: 1.0,
-            airResistance: 0.0
-        };
+        // Base values for ratio calculations (original game values)
+        const BASE_GRAVITY = 0.65;
+        const BASE_JUMP_POWER = 10;
         
         let autoApply = true;
         let autoJump = false;
@@ -272,9 +274,9 @@
             const maxHeight = (jumpPower * jumpPower) / (2 * gravity);
             const airTime = (2 * jumpPower) / gravity;
             
-            // Calculate ratios compared to original
-            const origMaxHeight = (originalValues.jumpPower * originalValues.jumpPower) / (2 * originalValues.gravity);
-            const origAirTime = (2 * originalValues.jumpPower) / originalValues.gravity;
+            // Calculate ratios compared to base values
+            const origMaxHeight = (BASE_JUMP_POWER * BASE_JUMP_POWER) / (2 * BASE_GRAVITY);
+            const origAirTime = (2 * BASE_JUMP_POWER) / BASE_GRAVITY;
             
             const heightRatio = (maxHeight / origMaxHeight * 100).toFixed(1);
             const timeRatio = (airTime / origAirTime * 100).toFixed(1);
@@ -416,36 +418,18 @@
         }
         
         function resetToDefault() {
-            document.getElementById('gravity').value = defaultValues.gravity;
-            document.getElementById('jumpPower').value = defaultValues.jumpPower;
-            document.getElementById('maxFallSpeed').value = defaultValues.maxFallSpeed;
-            document.getElementById('variableBoost').value = defaultValues.variableBoost;
-            document.getElementById('gravityScale').value = defaultValues.gravityScale;
-            document.getElementById('airResistance').value = defaultValues.airResistance;
+            // Use initializeSliders to set both values and display
+            initializeSliders();
             
-            updateValue('gravity');
-            updateValue('jumpPower');
-            updateValue('maxFallSpeed');
-            updateValue('variableBoost');
-            updateValue('gravityScale');
-            updateValue('airResistance');
+            // Recalculate stats
+            calculateStats();
+            
+            // Apply changes if auto-apply is on
+            if (autoApply) {
+                applyChanges(false);
+            }
         }
         
-        function resetToOriginal() {
-            document.getElementById('gravity').value = originalValues.gravity;
-            document.getElementById('jumpPower').value = originalValues.jumpPower;
-            document.getElementById('maxFallSpeed').value = originalValues.maxFallSpeed;
-            document.getElementById('variableBoost').value = originalValues.variableBoost;
-            document.getElementById('gravityScale').value = originalValues.gravityScale;
-            document.getElementById('airResistance').value = originalValues.airResistance;
-            
-            updateValue('gravity');
-            updateValue('jumpPower');
-            updateValue('maxFallSpeed');
-            updateValue('variableBoost');
-            updateValue('gravityScale');
-            updateValue('airResistance');
-        }
         
         // Initialize
         document.getElementById('gravity').addEventListener('input', () => updateValue('gravity'));
@@ -467,6 +451,27 @@
             });
         });
         
+        // Initialize sliders with default values
+        function initializeSliders() {
+            // Set slider values
+            document.getElementById('gravity').value = defaultValues.gravity;
+            document.getElementById('jumpPower').value = defaultValues.jumpPower;
+            document.getElementById('maxFallSpeed').value = defaultValues.maxFallSpeed;
+            document.getElementById('variableBoost').value = defaultValues.variableBoost;
+            document.getElementById('gravityScale').value = defaultValues.gravityScale;
+            document.getElementById('airResistance').value = defaultValues.airResistance;
+            
+            // Update displayed values
+            document.getElementById('gravityValue').textContent = defaultValues.gravity;
+            document.getElementById('jumpPowerValue').textContent = defaultValues.jumpPower;
+            document.getElementById('maxFallSpeedValue').textContent = defaultValues.maxFallSpeed;
+            document.getElementById('variableBoostValue').textContent = defaultValues.variableBoost;
+            document.getElementById('gravityScaleValue').textContent = defaultValues.gravityScale;
+            document.getElementById('airResistanceValue').textContent = defaultValues.airResistance;
+        }
+        
+        // Initialize on load
+        initializeSliders();
         calculateStats();
         
         // Wait for game to load
