@@ -1,31 +1,31 @@
 
-
 import { GameCore } from './core/GameCore';
+import { Logger } from './utils/Logger';
 
 window.addEventListener('error', (event) => {
-    console.error('Global error:', event.error);
+    Logger.error('Global error:', event.error);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-    console.error('Unhandled promise rejection:', event.reason);
+    Logger.error('Unhandled promise rejection:', event.reason);
 });
 
 async function startGame() {
     try {
-        console.log('Starting game initialization...');
+        Logger.log('Starting game initialization...');
         const gameCore = new GameCore();
 
         (window as any).game = gameCore;
         
-        console.log('Initializing GameCore...');
+        Logger.log('Initializing GameCore...');
         await gameCore.init();
         
-        console.log('Starting game loop...');
+        Logger.log('Starting game loop...');
         gameCore.start();
         
-        console.log('Game started successfully');
+        Logger.log('Game started successfully');
     } catch (error) {
-        console.error('Failed to start game:', error);
+        Logger.error('Failed to start game:', error);
         // Loading画面を非表示にする
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {

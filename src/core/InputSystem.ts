@@ -1,4 +1,6 @@
 
+import { Logger } from '../utils/Logger';
+
 export type InputEventType = 'keyPress' | 'keyRelease' | 'keyHold';
 export type ActionName = 'left' | 'right' | 'up' | 'down' | 'jump' | 'action' | 'escape' | 'mute' | 'debug';
 
@@ -151,7 +153,7 @@ export class InputSystem {
         
         // デバッグログ（Spaceキーの場合のみ）
         if (key === 'Space') {
-            console.log('InputSystem: Space key pressed, actions:', actions);
+            Logger.log('InputSystem: Space key pressed, actions:', actions);
         }
         
         for (const action of actions) {
@@ -218,7 +220,7 @@ export class InputSystem {
     
     on(eventType: InputEventType, callback: InputEventListener): UnsubscribeFunction {
         if (!this.listeners[eventType]) {
-            console.warn(`Unknown event type: ${eventType}`);
+            Logger.warn(`Unknown event type: ${eventType}`);
             return () => {};
         }
         

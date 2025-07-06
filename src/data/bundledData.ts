@@ -7,6 +7,7 @@ import resourceSprites from '../config/resources/sprites.json';
 import resourceCharacters from '../config/resources/characters.json';
 import resourceAudio from '../config/resources/audio.json';
 import resourceObjects from '../config/resources/objects.json';
+import resourcePhysics from '../config/resources/physics.json';
 
 // BGM files
 import bgmTitle from '../config/resources/bgm/title.json';
@@ -41,6 +42,7 @@ export const bundledResourceData: Record<string, any> = {
     '/src/config/resources/characters.json': resourceCharacters,
     '/src/config/resources/audio.json': resourceAudio,
     '/src/config/resources/objects.json': resourceObjects,
+    '/src/config/resources/physics.json': resourcePhysics,
 };
 
 export const bundledMusicData: Record<string, any> = {

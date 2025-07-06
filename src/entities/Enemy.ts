@@ -2,6 +2,7 @@
 import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { Logger } from '../utils/Logger';
 
 export type AIType = 'patrol' | 'chase' | 'idle';
 export type EnemyState = 'idle' | 'hurt' | 'dead';
@@ -47,7 +48,7 @@ export class Enemy extends Entity {
         
         // Debug: Log initial position
         if (this.constructor.name === 'Slime') {
-            console.log(`[Enemy] Created at x=${x}, y=${y}`);
+            Logger.log('Enemy', `Created at x=${x}, y=${y}`);
         }
     }
     

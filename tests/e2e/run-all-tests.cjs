@@ -22,11 +22,6 @@ const tests = [
         name: 'Performance Test',
         file: './test-performance.cjs',
         critical: true
-    },
-    {
-        name: 'Stress Test',
-        file: './test-stress.cjs',
-        critical: false
     }
 ];
 

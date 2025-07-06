@@ -4,6 +4,7 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputEvent } from '../core/InputSystem';
 import { URLParams } from '../utils/urlParams';
 import { GameEnvironment } from '../utils/gameEnvironment';
+import { Logger } from '../utils/Logger';
 
 interface MenuOption {
     text: string;
@@ -159,7 +160,7 @@ export class MenuState implements GameState {
         
         // デバッグ: 初回のみログ出力
         if (!this._firstUpdateLogged) {
-            console.log('MenuState: update called, optionsAlpha:', this.optionsAlpha);
+            Logger.log('MenuState', `update called, optionsAlpha: ${this.optionsAlpha}`);
             this._firstUpdateLogged = true;
         }
     }
@@ -294,10 +295,10 @@ export class MenuState implements GameState {
                 
                 // Determine if stage progression should be enabled based on environment
                 const enableProgression = GameEnvironment.shouldEnableStageProgression();
-                console.log(`Environment: ${GameEnvironment.getEnvironmentName()}, Stage progression: ${enableProgression ? 'ENABLED' : 'DISABLED'}`);
+                Logger.log('MenuState', `Environment: ${GameEnvironment.getEnvironmentName()}, Stage progression: ${enableProgression ? 'ENABLED' : 'DISABLED'}`);
                 
                 if (selectedStage) {
-                    console.log(`Starting stage: ${selectedStage} (source: ${debugSelectedStage ? 'debug overlay' : 'URL parameter'})`);
+                    Logger.log('MenuState', `Starting stage: ${selectedStage} (source: ${debugSelectedStage ? 'debug overlay' : 'URL parameter'}`);
                     this.game.stateManager.setState('play', { 
                         level: selectedStage,
                         enableProgression: enableProgression 
@@ -308,7 +309,7 @@ export class MenuState implements GameState {
                     });
                 }
             } catch (error) {
-                console.error('Error transitioning to play state:', error);
+                Logger.error('MenuState', 'Error transitioning to play state:', error);
             }
             break;
                 

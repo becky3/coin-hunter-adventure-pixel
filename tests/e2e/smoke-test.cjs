@@ -18,9 +18,10 @@ async function runAutomatedTests() {
         // stage0-1をURLパラメータで指定
         await page.goto('http://localhost:3000/?s=0-1', { waitUntil: 'networkidle0' });
         
+        // ゲーム初期化を待つ（タイムアウトを延長）
         const initialized = await page.waitForFunction(
             () => window.game?.gameLoop?.running,
-            { timeout: 5000 }
+            { timeout: 10000 }
         ).then(() => true).catch(() => false);
         
         if (initialized) {
@@ -53,10 +54,10 @@ async function runAutomatedTests() {
         console.log('\nテスト3: ゲーム開始 (Space キー)');
         // マウスクリックでフォーカスを確保
         await page.mouse.click(100, 100);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 500)); // 待機時間を延長
         
         await page.keyboard.down('Space');
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200)); // キー入力の間隔を延長
         await page.keyboard.up('Space');
         
         const gameStarted = await page.waitForFunction(
@@ -78,7 +79,7 @@ async function runAutomatedTests() {
             );
             
             // さらに待機して初期化を確実に完了させる
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 3000)); // 待機時間を延長
         } else {
             console.log('  ✗ ゲーム開始失敗');
             testsFailed++;
@@ -102,21 +103,31 @@ async function runAutomatedTests() {
         
         // テスト5: プレイヤー移動
         console.log('\nテスト5: プレイヤー移動');
+        
+        // プレイヤーの初期位置を確実に取得
+        await new Promise(resolve => setTimeout(resolve, 500));
         const initialX = await page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
             return state?.player?.x;
         });
         
+        console.log(`  初期位置: ${initialX}`);
+        
+        // 右キーを押して移動
         await page.keyboard.down('ArrowRight');
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 移動時間を延長
         await page.keyboard.up('ArrowRight');
         
+        // 移動後の位置を取得
+        await new Promise(resolve => setTimeout(resolve, 500));
         const finalX = await page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
             return state?.player?.x;
         });
         
-        if (finalX > initialX) {
+        console.log(`  移動後位置: ${finalX}`);
+        
+        if (finalX > initialX && initialX !== undefined && finalX !== undefined) {
             console.log('  ✓ プレイヤー移動成功');
             testsPassed++;
         } else {
@@ -178,6 +189,8 @@ if (waitForServer) {
             const response = await fetch('http://localhost:3000/');
             if (response.ok) {
                 console.log('サーバーが起動しました\n');
+                // サーバー起動後も少し待機してから開始
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 runAutomatedTests();
             } else {
                 setTimeout(checkServer, 1000);

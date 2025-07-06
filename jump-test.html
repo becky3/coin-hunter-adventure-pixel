@@ -93,29 +93,38 @@
     <div class="container">
         <div class="controls">
             <div class="control-group">
-                <label for="gravity">Gravity: <span class="value" id="gravityValue">0.433</span></label>
-                <input type="range" id="gravity" min="0.1" max="1.0" step="0.001" value="0.433">
+                <label for="gravity">Gravity: <span class="value" id="gravityValue">0.65</span></label>
+                <input type="range" id="gravity" min="0.1" max="1.0" step="0.001" value="0.65">
             </div>
             
             <div class="control-group">
-                <label for="jumpPower">Jump Power: <span class="value" id="jumpPowerValue">5.25</span></label>
-                <input type="range" id="jumpPower" min="3" max="15" step="0.01" value="5.25">
+                <label for="jumpPower">Jump Power: <span class="value" id="jumpPowerValue">10</span></label>
+                <input type="range" id="jumpPower" min="0" max="50" step="0.1" value="10">
             </div>
             
             <div class="control-group">
-                <label for="maxFallSpeed">Max Fall Speed: <span class="value" id="maxFallSpeedValue">10</span></label>
-                <input type="range" id="maxFallSpeed" min="5" max="20" step="0.1" value="10">
+                <label for="maxFallSpeed">Max Fall Speed: <span class="value" id="maxFallSpeedValue">15</span></label>
+                <input type="range" id="maxFallSpeed" min="0" max="100" step="0.5" value="15">
             </div>
             
             <div class="control-group">
-                <label for="variableBoost">Variable Jump Boost: <span class="value" id="variableBoostValue">0.15</span></label>
-                <input type="range" id="variableBoost" min="0" max="1" step="0.01" value="0.15">
+                <label for="variableBoost">Variable Jump Boost: <span class="value" id="variableBoostValue">0.5</span></label>
+                <input type="range" id="variableBoost" min="0" max="5" step="0.05" value="0.5">
+            </div>
+            
+            <div class="control-group">
+                <label for="gravityScale">Gravity Scale: <span class="value" id="gravityScaleValue">1.0</span></label>
+                <input type="range" id="gravityScale" min="0.1" max="2.0" step="0.01" value="1.0">
+            </div>
+            
+            <div class="control-group">
+                <label for="airResistance">Air Resistance: <span class="value" id="airResistanceValue">0.0</span></label>
+                <input type="range" id="airResistance" min="0" max="1" step="0.01" value="0.0">
             </div>
             
             <button onclick="toggleAutoApply()" id="autoApplyBtn">Auto Apply: ON</button>
             <button onclick="toggleAutoJump()" id="autoJumpBtn">Auto Jump: OFF</button>
             <button onclick="resetToDefault()">Reset to Default</button>
-            <button onclick="resetToOriginal()">Reset to Original</button>
             
             <div class="info">
                 <h3>Current Settings</h3>
@@ -143,6 +152,13 @@
                 <h3>Reference Values</h3>
                 <p>Original: Gravity=0.65, JumpPower=10</p>
                 <p>Current Goal: 70% height, 1.5x air time</p>
+                <p style="color: #FFD700; margin-top: 10px;">
+                    <strong>使い方:</strong><br>
+                    - Jump Power: 初期ジャンプ力<br>
+                    - Variable Jump Boost: 長押し時の追加上昇力<br>
+                    - Max Fall Speed: 落下速度の上限<br>
+                    - Air Resistance: 空気抵抗（上昇・下降両方に適用）
+                </p>
             </div>
         </div>
         
@@ -152,23 +168,106 @@
     </div>
 
     <script>
-        const originalValues = {
-            gravity: 0.65,
-            jumpPower: 10,
-            maxFallSpeed: 15,
-            variableBoost: 0.5
-        };
+        // All values are loaded from physics.json - no hardcoded defaults
+        let defaultValues = {};
+        let BASE_GRAVITY = 0;
+        let BASE_JUMP_POWER = 0;
+        let physicsLoaded = false;
         
-        const defaultValues = {
-            gravity: 0.433,
-            jumpPower: 5.25,
-            maxFallSpeed: 10,
-            variableBoost: 0.15
-        };
+        // Load all values from physics.json
+        async function loadPhysicsConfig() {
+            try {
+                const response = await fetch('/src/config/resources/physics.json');
+                const physicsData = await response.json();
+                
+                if (!physicsData.global || !physicsData.player) {
+                    throw new Error('Invalid physics.json structure');
+                }
+                
+                // Set defaults from physics.json
+                defaultValues = {
+                    gravity: physicsData.global.gravity,
+                    jumpPower: physicsData.player.jumpPower,
+                    maxFallSpeed: physicsData.global.maxFallSpeed,
+                    variableBoost: physicsData.player.variableJumpBoost,
+                    gravityScale: physicsData.player.gravityScale,
+                    airResistance: physicsData.player.airResistance
+                };
+                
+                BASE_GRAVITY = physicsData.global.gravity;
+                BASE_JUMP_POWER = physicsData.player.jumpPower;
+                
+                physicsLoaded = true;
+                console.log('Loaded physics configuration from physics.json:', defaultValues);
+                
+                // Initialize sliders with loaded values
+                resetToDefault();
+                
+                // Enable controls
+                document.querySelectorAll('input, button').forEach(el => el.disabled = false);
+                
+            } catch (error) {
+                console.error('Failed to load physics.json:', error);
+                alert('Failed to load physics configuration. Please check physics.json');
+                // Disable all controls if physics.json fails to load
+                document.querySelectorAll('input, button').forEach(el => el.disabled = true);
+            }
+        }
+        
+        // Load physics config on page load
+        loadPhysicsConfig();
         
         let autoApply = true;
         let autoJump = false;
         let autoJumpInterval = null;
+        
+        // Load actual values from game
+        function loadGameDefaults() {
+            const gameWindow = document.getElementById('gameFrame').contentWindow;
+            
+            if (!gameWindow.game) {
+                // Retry after a delay
+                setTimeout(loadGameDefaults, 1000);
+                return;
+            }
+            
+            try {
+                // Get physics system values
+                const physicsSystem = gameWindow.game.serviceLocator.get('physics');
+                if (physicsSystem) {
+                    defaultValues.gravity = physicsSystem.gravity;
+                    defaultValues.maxFallSpeed = physicsSystem.maxFallSpeed;
+                    BASE_GRAVITY = physicsSystem.gravity;
+                }
+                
+                // Wait for game to start and player to be created
+                const checkForPlayer = () => {
+                    const currentState = gameWindow.game.stateManager?.currentState;
+                    if (currentState && currentState.player) {
+                        defaultValues.jumpPower = currentState.player.jumpPower;
+                        defaultValues.variableBoost = currentState.player.variableJumpBoost;
+                        defaultValues.gravityScale = currentState.player.gravityScale || 1.0;
+                        defaultValues.airResistance = currentState.player.airResistance || 0.0;
+                        BASE_JUMP_POWER = currentState.player.jumpPower;
+                        
+                        // Update sliders with actual values
+                        resetToDefault();
+                        console.log('Loaded game defaults:', defaultValues);
+                    } else {
+                        // Player not created yet, retry
+                        setTimeout(checkForPlayer, 1000);
+                    }
+                };
+                
+                checkForPlayer();
+            } catch (error) {
+                console.error('Failed to load game defaults:', error);
+                // Retry after a delay
+                setTimeout(loadGameDefaults, 1000);
+            }
+        }
+        
+        // No longer need to load from game - using physics.json directly
         
         function updateValue(id) {
             const slider = document.getElementById(id);
@@ -179,8 +278,54 @@
             if (autoApply) {
                 // Debug: Log when applying changes
                 console.log(`[UpdateValue] ${id}: ${slider.value}`);
-                applyChanges(false);  // Apply without alert
+                applySingleChange(id, parseFloat(slider.value));  // Apply only the changed value
             }
+        }
+        
+        function applySingleChange(propertyName, value) {
+            const gameWindow = document.getElementById('gameFrame').contentWindow;
+            
+            if (!gameWindow.game) {
+                return;
+            }
+            
+            // Apply to physics system if relevant
+            const physicsSystem = gameWindow.game.serviceLocator.get('physics');
+            if (physicsSystem) {
+                if (propertyName === 'gravity') {
+                    physicsSystem.setGravity(value);
+                    console.log('[JumpTest] Physics gravity updated:', value);
+                } else if (propertyName === 'maxFallSpeed') {
+                    physicsSystem.setMaxFallSpeed(value);
+                    console.log('[JumpTest] Physics maxFallSpeed updated:', value);
+                }
+            }
+            
+            // Apply to player if in play state
+            const currentState = gameWindow.game.stateManager.currentState;
+            if (currentState && currentState.name === 'play' && currentState.player) {
+                switch(propertyName) {
+                    case 'jumpPower':
+                        currentState.player.jumpPower = value;
+                        break;
+                    case 'maxFallSpeed':
+                        currentState.player.maxFallSpeed = value;
+                        break;
+                    case 'gravityScale':
+                        currentState.player.gravityScale = value;
+                        break;
+                    case 'airResistance':
+                        currentState.player.airResistance = value;
+                        break;
+                    case 'variableBoost':
+                        currentState.player.variableJumpBoost = value;
+                        break;
+                }
+                console.log(`[JumpTest] Player ${propertyName} updated:`, value);
+            }
+            
+            // Note: Cannot update ResourceLoader config from here
+            // Changes only affect current game session
         }
         
         function calculateStats() {
@@ -191,9 +336,9 @@
             const maxHeight = (jumpPower * jumpPower) / (2 * gravity);
             const airTime = (2 * jumpPower) / gravity;
             
-            // Calculate ratios compared to original
-            const origMaxHeight = (originalValues.jumpPower * originalValues.jumpPower) / (2 * originalValues.gravity);
-            const origAirTime = (2 * originalValues.jumpPower) / originalValues.gravity;
+            // Calculate ratios compared to base values
+            const origMaxHeight = (BASE_JUMP_POWER * BASE_JUMP_POWER) / (2 * BASE_GRAVITY);
+            const origAirTime = (2 * BASE_JUMP_POWER) / BASE_GRAVITY;
             
             const heightRatio = (maxHeight / origMaxHeight * 100).toFixed(1);
             const timeRatio = (airTime / origAirTime * 100).toFixed(1);
@@ -216,6 +361,8 @@
             const jumpPower = parseFloat(document.getElementById('jumpPower').value);
             const maxFallSpeed = parseFloat(document.getElementById('maxFallSpeed').value);
             const variableBoost = parseFloat(document.getElementById('variableBoost').value);
+            const gravityScale = parseFloat(document.getElementById('gravityScale').value);
+            const airResistance = parseFloat(document.getElementById('airResistance').value);
             
             // Apply to physics system
             const physicsSystem = gameWindow.game.serviceLocator.get('physics');
@@ -229,20 +376,26 @@
             const currentState = gameWindow.game.stateManager.currentState;
             if (currentState && currentState.name === 'play' && currentState.player) {
                 currentState.player.jumpPower = jumpPower;
+                currentState.player.maxFallSpeed = maxFallSpeed;
+                currentState.player.gravityScale = gravityScale;
+                currentState.player.airResistance = airResistance;
                 
                 // Update variable jump boost (this is a bit hacky but works for testing)
                 currentState.player.variableJumpBoost = variableBoost;
+                
+                // Debug log to verify values
+                console.log('[JumpTest] Player values updated:');
+                console.log('  - jumpPower:', currentState.player.jumpPower);
+                console.log('  - maxFallSpeed:', currentState.player.maxFallSpeed);
+                console.log('  - gravityScale:', currentState.player.gravityScale);
+                console.log('  - airResistance:', currentState.player.airResistance);
+                console.log('  - variableJumpBoost:', currentState.player.variableJumpBoost);
             }
             
-            // Update player config for respawns
-            if (gameWindow.game.serviceLocator) {
-                const resourceLoader = gameWindow.game.serviceLocator.get('resourceLoader');
-                if (resourceLoader && resourceLoader.resources.characters) {
-                    resourceLoader.resources.characters.player.physics.jumpPower = jumpPower;
-                }
-            }
+            // Note: ResourceLoader cannot be directly modified from here
+            // Changes only affect current entities, not future spawns
             
-            console.log('Applied changes:', { gravity, jumpPower, maxFallSpeed, variableBoost });
+            console.log('Applied changes:', { gravity, jumpPower, maxFallSpeed, variableBoost, gravityScale, airResistance });
             if (showAlert) alert('Changes applied! Test the jump in the game.');
         }
         
@@ -315,37 +468,34 @@
         }
         
         function resetToDefault() {
-            document.getElementById('gravity').value = defaultValues.gravity;
-            document.getElementById('jumpPower').value = defaultValues.jumpPower;
-            document.getElementById('maxFallSpeed').value = defaultValues.maxFallSpeed;
-            document.getElementById('variableBoost').value = defaultValues.variableBoost;
+            if (!physicsLoaded) {
+                console.warn('Physics configuration not loaded yet');
+                return;
+            }
             
-            updateValue('gravity');
-            updateValue('jumpPower');
-            updateValue('maxFallSpeed');
-            updateValue('variableBoost');
+            // Use initializeSliders to set both values and display
+            initializeSliders();
+            
+            // Recalculate stats
+            calculateStats();
+            
+            // Apply changes if auto-apply is on
+            if (autoApply) {
+                applyChanges(false);
+            }
         }
         
-        function resetToOriginal() {
-            document.getElementById('gravity').value = originalValues.gravity;
-            document.getElementById('jumpPower').value = originalValues.jumpPower;
-            document.getElementById('maxFallSpeed').value = originalValues.maxFallSpeed;
-            document.getElementById('variableBoost').value = originalValues.variableBoost;
-            
-            updateValue('gravity');
-            updateValue('jumpPower');
-            updateValue('maxFallSpeed');
-            updateValue('variableBoost');
-        }
         
         // Initialize
         document.getElementById('gravity').addEventListener('input', () => updateValue('gravity'));
         document.getElementById('jumpPower').addEventListener('input', () => updateValue('jumpPower'));
         document.getElementById('maxFallSpeed').addEventListener('input', () => updateValue('maxFallSpeed'));
         document.getElementById('variableBoost').addEventListener('input', () => updateValue('variableBoost'));
+        document.getElementById('gravityScale').addEventListener('input', () => updateValue('gravityScale'));
+        document.getElementById('airResistance').addEventListener('input', () => updateValue('airResistance'));
         
         // Prevent iframe from stealing focus during slider drag
-        const sliders = ['gravity', 'jumpPower', 'maxFallSpeed', 'variableBoost'];
+        const sliders = ['gravity', 'jumpPower', 'maxFallSpeed', 'variableBoost', 'gravityScale', 'airResistance'];
         sliders.forEach(id => {
             const slider = document.getElementById(id);
             slider.addEventListener('mousedown', () => {
@@ -356,7 +506,31 @@
             });
         });
         
-        calculateStats();
+        // Initialize sliders with default values
+        function initializeSliders() {
+            if (!physicsLoaded || !defaultValues.gravity) {
+                console.warn('Physics configuration not loaded yet');
+                return;
+            }
+            
+            // Set slider values
+            document.getElementById('gravity').value = defaultValues.gravity;
+            document.getElementById('jumpPower').value = defaultValues.jumpPower;
+            document.getElementById('maxFallSpeed').value = defaultValues.maxFallSpeed;
+            document.getElementById('variableBoost').value = defaultValues.variableBoost;
+            document.getElementById('gravityScale').value = defaultValues.gravityScale;
+            document.getElementById('airResistance').value = defaultValues.airResistance;
+            
+            // Update displayed values
+            document.getElementById('gravityValue').textContent = defaultValues.gravity;
+            document.getElementById('jumpPowerValue').textContent = defaultValues.jumpPower;
+            document.getElementById('maxFallSpeedValue').textContent = defaultValues.maxFallSpeed;
+            document.getElementById('variableBoostValue').textContent = defaultValues.variableBoost;
+            document.getElementById('gravityScaleValue').textContent = defaultValues.gravityScale;
+            document.getElementById('airResistanceValue').textContent = defaultValues.airResistance;
+        }
+        
+        // Initial calculations will be done after physics.json loads
         
         // Wait for game to load
         setTimeout(() => {
@@ -367,6 +541,22 @@
                 if (autoApply) {
                     applyChanges(false);
                 }
+                
+                // Debug helper - expose player to console
+                window.debugPlayer = () => {
+                    const state = gameWindow.game.stateManager.currentState;
+                    if (state && state.player) {
+                        console.log('Player physics properties:');
+                        console.log('  - jumpPower:', state.player.jumpPower);
+                        console.log('  - airResistance:', state.player.airResistance);
+                        console.log('  - gravityScale:', state.player.gravityScale);
+                        console.log('  - maxFallSpeed:', state.player.maxFallSpeed);
+                        console.log('  - vy:', state.player.vy);
+                        console.log('  - grounded:', state.player.grounded);
+                        return state.player;
+                    }
+                };
+                console.log('Debug: Type debugPlayer() in console to check player values');
             }
         }, 3000);
     </script>

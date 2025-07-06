@@ -1,4 +1,5 @@
 import { bundledStageData } from '../data/bundledData';
+import { Logger } from '../utils/Logger';
 
 interface StageInfo {
     id: string;
@@ -53,7 +54,7 @@ export class LevelLoader {
             
             // Check bundled data first
             if (bundledStageData[url]) {
-                console.log(`[LevelLoader] Using bundled data for: ${url}`);
+                Logger.log(`[LevelLoader] Using bundled data for: ${url}`);
                 const data = bundledStageData[url] as StageList;
                 this.stages = data.stages;
                 this.stageList = data;
@@ -64,7 +65,7 @@ export class LevelLoader {
             const startTime = performance.now();
             const response = await fetch(url);
             const fetchTime = performance.now() - startTime;
-            console.log(`[LevelLoader] Fetched ${url} in ${fetchTime.toFixed(2)}ms`);
+            Logger.log(`[LevelLoader] Fetched ${url} in ${fetchTime.toFixed(2)}ms`);
             
             if (!response.ok) {
                 throw new Error(`ステージリスト読み込みエラー: ${response.status}`);
@@ -76,7 +77,7 @@ export class LevelLoader {
             
             return data;
         } catch (error) {
-            console.error('ステージリスト読み込み失敗:', error);
+            Logger.error('ステージリスト読み込み失敗:', error);
             throw error;
         }
     }
@@ -92,7 +93,7 @@ export class LevelLoader {
             
             // Check bundled data first
             if (bundledStageData[url]) {
-                console.log(`[LevelLoader] Using bundled data for: ${url}`);
+                Logger.log(`[LevelLoader] Using bundled data for: ${url}`);
                 const stageData = bundledStageData[url] as StageData;
                 this.validateStageData(stageData);
                 this.currentStageData = stageData;
@@ -104,7 +105,7 @@ export class LevelLoader {
             const startTime = performance.now();
             const response = await fetch(url);
             const fetchTime = performance.now() - startTime;
-            console.log(`[LevelLoader] Fetched ${url} in ${fetchTime.toFixed(2)}ms`);
+            Logger.log(`[LevelLoader] Fetched ${url} in ${fetchTime.toFixed(2)}ms`);
             
             if (!response.ok) {
                 throw new Error(`ステージデータ読み込みエラー: ${response.status}`);
@@ -119,7 +120,7 @@ export class LevelLoader {
             
             return stageData;
         } catch (error) {
-            console.error(`ステージ読み込みエラー (${stageId}):`, error);
+            Logger.error(`ステージ読み込みエラー (${stageId}):`, error);
             throw error;
         }
     }

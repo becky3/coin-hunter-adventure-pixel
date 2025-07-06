@@ -5,6 +5,7 @@ import { AssetLoader } from '../assets/AssetLoader';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../services/EventBus';
 import { ResourceLoader } from '../config/ResourceLoader';
+import { Logger } from '../utils/Logger';
 
 
 // Default config as fallback if ResourceLoader is not available
@@ -15,8 +16,8 @@ const DEFAULT_PLAYER_CONFIG = {
     smallHeight: 16,
     speed: 1.17,
     jumpPower: 10,
-    minJumpTime: 8,
-    maxJumpTime: 20,
+    minJumpTime: 0,      // 最小時間なし - いつでもジャンプを中断可能
+    maxJumpTime: 400,    // 400ms = 0.4秒（約24フレーム）
     maxHealth: 3,
     invulnerabilityTime: 2000,
     spawnX: 100,
@@ -37,6 +38,8 @@ const DEFAULT_ANIMATION_CONFIG = {
         fall: 1
     }
 } as const;
+
+// Variable jump settings will be loaded from physics.json
 
 type AnimationState = 'idle' | 'walk' | 'jump' | 'fall';
 type Facing = 'left' | 'right';
@@ -91,15 +94,22 @@ export class Player extends Entity {
     private assetLoader: AssetLoader | null;
     private eventBus: EventBus | null;
     public variableJumpBoost: number;  // For testing purposes
+    private variableJumpBoostMultiplier: number;
+    private frameCount: number;
 
     constructor(x?: number, y?: number) {
         // Load config from ResourceLoader if available
         let playerConfig = null;
+        let physicsConfig = null;
         try {
             const resourceLoader = ResourceLoader.getInstance();
             playerConfig = resourceLoader.getCharacterConfig('player', 'main');
+            physicsConfig = resourceLoader.getPhysicsConfig('player');
         } catch {
-            // ResourceLoader not initialized yet, use defaults
+            // Fall back to default config for standalone tests
+            Logger.warn('[Player] ResourceLoader not available, using default configuration');
+            playerConfig = null;
+            physicsConfig = null;
         }
         
         const config = playerConfig ? {
@@ -122,14 +132,31 @@ export class Player extends Entity {
         this.speed = config.speed;
         this.jumpPower = config.jumpPower;
         
+        // Apply new physics properties from config
+        if (playerConfig?.physics?.airResistance !== undefined) {
+            this.airResistance = playerConfig.physics.airResistance;
+        }
+        if (playerConfig?.physics?.gravityScale !== undefined) {
+            this.gravityScale = playerConfig.physics.gravityScale;
+        }
+        if (playerConfig?.physics?.maxFallSpeed !== undefined) {
+            this.maxFallSpeed = playerConfig.physics.maxFallSpeed;
+        }
+        
+        // Store configs for later use
+        this.playerConfig = config;
+        
         // Debug logging for jump configuration
-        console.log('[Player] Jump Configuration Debug:');
-        console.log('  - Config source:', playerConfig ? 'ResourceLoader' : 'Default');
-        console.log('  - jumpPower from config:', playerConfig?.physics?.jumpPower ?? 'undefined');
-        console.log('  - jumpPower used:', this.jumpPower);
-        console.log('  - minJumpTime:', config.minJumpTime);
-        console.log('  - maxJumpTime:', config.maxJumpTime);
-        console.log('  - gravityStrength:', this.gravityStrength);
+        Logger.log('[Player] Jump Configuration Debug:');
+        Logger.log('  - Config source:', 'physics.json');
+        Logger.log('  - jumpPower:', this.jumpPower);
+        Logger.log('  - variableJumpBoost:', this.variableJumpBoost);
+        Logger.log('  - variableJumpBoostMultiplier:', this.variableJumpBoostMultiplier);
+        Logger.log('  - minJumpTime:', this.playerConfig.minJumpTime);
+        Logger.log('  - maxJumpTime:', this.playerConfig.maxJumpTime);
+        Logger.log('  - airResistance:', this.airResistance);
+        Logger.log('  - gravityScale:', this.gravityScale);
+        Logger.log('  - maxFallSpeed:', this.maxFallSpeed);
         
         this.spriteKey = null;
         
@@ -169,17 +196,48 @@ export class Player extends Entity {
         
         this.eventBus = null;
         
-        // Store configs for later use
-        this.playerConfig = config;
         // Merge animation config with defaults
         this.animationConfig = playerConfig?.animations ? {
             speed: { ...DEFAULT_ANIMATION_CONFIG.speed, ...playerConfig.animations.speed },
             frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
         } : DEFAULT_ANIMATION_CONFIG;
         
+        // Load physics settings from physics.json
+        if (physicsConfig) {
+            this.jumpPower = physicsConfig.jumpPower;
+            this.variableJumpBoost = physicsConfig.variableJumpBoost;
+            this.variableJumpBoostMultiplier = physicsConfig.variableJumpBoostMultiplier;
+        } else {
+            // Use default values if physics config not available
+            this.jumpPower = config.jumpPower;
+            this.variableJumpBoost = 0.5;  // Default variable jump boost
+            this.variableJumpBoostMultiplier = 0.4;  // Default multiplier
+        }
+        
+        // Override minJumpTime/maxJumpTime from physics.json if available
+        if (physicsConfig) {
+            if (physicsConfig.minJumpTime !== undefined) {
+                this.playerConfig.minJumpTime = physicsConfig.minJumpTime;
+            }
+            if (physicsConfig.maxJumpTime !== undefined) {
+                this.playerConfig.maxJumpTime = physicsConfig.maxJumpTime;
+            }
+            
+            // Apply physics properties
+            if (physicsConfig.airResistance !== undefined) {
+                this.airResistance = physicsConfig.airResistance;
+            }
+            if (physicsConfig.gravityScale !== undefined) {
+                this.gravityScale = physicsConfig.gravityScale;
+            }
+            if (physicsConfig.defaultMaxFallSpeed !== undefined) {
+                this.maxFallSpeed = physicsConfig.defaultMaxFallSpeed;
+            }
+        }
+        
         // Gravity strength adjustment removed - now handled by PhysicsSystem
         this.gravityStrength = 1.0;
-        this.variableJumpBoost = 0.15;  // Default variable jump boost
+        this.frameCount = 0;
     }
     
     setInputManager(inputManager: InputSystem): void {
@@ -215,6 +273,8 @@ export class Player extends Entity {
         
         if (!this.inputManager) return;
         
+        this.frameCount++;
+        
         // Debug: Allow dynamic jumpPower adjustment with number keys
         if ((window as any).debugMode) {
             for (let i = 1; i <= 9; i++) {
@@ -222,7 +282,7 @@ export class Player extends Entity {
                     const newJumpPower = i * 2; // 2, 4, 6, 8, 10, 12, 14, 16, 18
                     if (this.jumpPower !== newJumpPower) {
                         this.jumpPower = newJumpPower;
-                        console.log(`[Player] Jump power changed to: ${this.jumpPower}`);
+                        Logger.log(`[Player] Jump power changed to: ${this.jumpPower}`);
                     }
                 }
             }
@@ -277,11 +337,12 @@ export class Player extends Entity {
             this.jumpStartY = this.y;
             
             // Debug logging for jump initiation
-            console.log('[Player] Jump initiated:');
-            console.log('  - Initial Y position:', this.y);
-            console.log('  - Jump power applied:', this.jumpPower);
-            console.log('  - Initial velocity (vy):', this.vy);
-            console.log('  - Gravity strength:', this.gravityStrength);
+            Logger.log('[Player] Jump initiated:');
+            Logger.log('  - Initial Y position:', this.y);
+            Logger.log('  - Jump power applied:', this.jumpPower);
+            Logger.log('  - Initial velocity (vy):', this.vy);
+            Logger.log('  - Air resistance:', this.airResistance);
+            Logger.log('  - Gravity scale:', this.gravityScale);
             
             if (this.musicSystem) {
                 this.musicSystem.playSEFromPattern('jump');
@@ -291,19 +352,29 @@ export class Player extends Entity {
         if (this._isJumping) {
             this.jumpTime += deltaTime * 1000;
             
-            if (input.jump && this.canVariableJump) {
-                if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime) && this.vy < 0) {
-                    // Apply additional upward force for variable jump (adjusted for 70% height)
-                    this.vy -= this.gravityStrength * this.variableJumpBoost;
-                } else if (this.jumpTime >= (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
-                    this.canVariableJump = false;
-                }
-            } else {
-                if (this.jumpTime >= (this.playerConfig.minJumpTime || DEFAULT_PLAYER_CONFIG.minJumpTime) && this.vy < 0) {
+            
+            // Check if button was released
+            if (!input.jump && this.canVariableJump) {
+                // Immediately reduce upward velocity if still going up
+                if (this.vy < 0) {
                     this.vy *= 0.5;
+                    Logger.log('[Player] Jump button released at time:', this.jumpTime, 'ms, velocity reduced from', this.vy * 2, 'to', this.vy);
                 }
-                this.jumpButtonPressed = false;
                 this.canVariableJump = false;
+            }
+            // If button is still held and we can still boost
+            else if (input.jump && this.canVariableJump) {
+                if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
+                    // Apply additional upward force for variable jump
+                    // This counteracts gravity to maintain upward movement
+                    const boost = this.variableJumpBoostMultiplier * this.variableJumpBoost * deltaTime * 60;
+                    this.vy -= boost;
+                    
+                } else {
+                    // Max jump time reached
+                    this.canVariableJump = false;
+                    Logger.log('[Player] Variable jump ended: max time reached at', this.jumpTime, 'ms');
+                }
             }
         }
         
@@ -311,7 +382,6 @@ export class Player extends Entity {
             const currentHeight = this.jumpStartY - this.y;
             if (currentHeight > this.jumpMaxHeight) {
                 this.jumpMaxHeight = currentHeight;
-                console.log('[Player] New max jump height:', this.jumpMaxHeight, 'pixels');
             }
         }
         
@@ -319,10 +389,11 @@ export class Player extends Entity {
             this.jumpButtonPressed = false;
         }
         
-        if (this.grounded && this._isJumping) {
-            console.log('[Player] Jump completed:');
-            console.log('  - Final max height reached:', this.jumpMaxHeight, 'pixels');
-            console.log('  - Jump duration:', this.jumpTime, 'ms');
+        // Only check for landing after a minimum jump time to avoid immediate grounding
+        if (this.grounded && this._isJumping && this.jumpTime > 50) {
+            Logger.log('[Player] Jump completed:');
+            Logger.log('  - Final max height reached:', this.jumpMaxHeight, 'pixels');
+            Logger.log('  - Jump duration:', this.jumpTime, 'ms');
             this._isJumping = false;
             this.canVariableJump = false;
         }
@@ -545,13 +616,13 @@ export class Player extends Entity {
                 );
                 return;
             } else if ((window as any).game?.debug) {
-                console.warn('Sprite not found:', this.spriteKey);
+                Logger.warn('Sprite not found:', this.spriteKey);
             }
         }
         
         // フォールバック: スプライトが見つからない場合は基本的な矩形を描画
         if (!renderer.pixelArtRenderer || !renderer.pixelArtRenderer.sprites.has(this.spriteKey || 'player/idle')) {
-            console.warn('Player sprite not found, falling back to rectangle. spriteKey:', this.spriteKey);
+            Logger.warn('Player sprite not found, falling back to rectangle. spriteKey:', this.spriteKey);
             super.render(renderer);
         }
         

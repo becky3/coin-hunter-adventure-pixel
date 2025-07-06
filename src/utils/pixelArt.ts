@@ -10,6 +10,13 @@ class PixelArtSprite {
     public flippedCanvas: HTMLCanvasElement | null;
 
     constructor(pixelData: PixelData, colors: ColorMap) {
+        if (!pixelData || !Array.isArray(pixelData) || pixelData.length === 0) {
+            throw new Error('PixelArtSprite: pixelData must be a non-empty array');
+        }
+        if (!pixelData[0] || !Array.isArray(pixelData[0])) {
+            throw new Error('PixelArtSprite: pixelData must be a 2D array');
+        }
+        
         this.pixelData = pixelData;
         this.colors = colors;
         this.width = pixelData[0].length;

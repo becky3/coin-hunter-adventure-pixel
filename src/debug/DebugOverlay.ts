@@ -4,6 +4,7 @@ import { ServiceLocator } from '../services/ServiceLocator';
 import { GAME_CONSTANTS } from '../config/GameConstants';
 import { PlayState } from '../states/PlayState';
 import { URLParams } from '../utils/urlParams';
+import { Logger } from '../utils/Logger';
 
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
@@ -43,7 +44,7 @@ export class DebugOverlay {
         
         (window as any).debugOverlay = this;
         
-        console.log(`[DebugOverlay] Initialized with stage: ${this.stageList[this.selectedStageIndex]} (index: ${this.selectedStageIndex})`);
+        Logger.log('DebugOverlay', `Initialized with stage: ${this.stageList[this.selectedStageIndex]} (index: ${this.selectedStageIndex})`);
     }
 
     private createDebugUI(): void {
@@ -139,7 +140,7 @@ export class DebugOverlay {
             
             // Debug: Log all arrow key presses in menu
             if (currentState && currentState.name === 'menu' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
-                console.log(`[DebugOverlay] Arrow key pressed: ${e.key}, defaultPrevented: ${e.defaultPrevented}`);
+                Logger.log('DebugOverlay', `Arrow key pressed: ${e.key}, defaultPrevented: ${e.defaultPrevented}`);
             }
             
             if (currentState && currentState.name === 'menu') {
@@ -151,7 +152,7 @@ export class DebugOverlay {
                         this.selectedStageIndex = this.stageList.length - 1;
                     }
                     this.updateStageDisplay();
-                    console.log(`[DebugOverlay] Stage left: ${this.stageList[this.selectedStageIndex]}`);
+                    Logger.log('DebugOverlay', `Stage left: ${this.stageList[this.selectedStageIndex]}`);
                 }
                 
                 if (e.key === 'ArrowRight') {
@@ -162,7 +163,7 @@ export class DebugOverlay {
                         this.selectedStageIndex = 0;
                     }
                     this.updateStageDisplay();
-                    console.log(`[DebugOverlay] Stage right: ${this.stageList[this.selectedStageIndex]}`);
+                    Logger.log('DebugOverlay', `Stage right: ${this.stageList[this.selectedStageIndex]}`);
                 }
             }
         }, true);  // Use capture phase to handle events before InputSystem

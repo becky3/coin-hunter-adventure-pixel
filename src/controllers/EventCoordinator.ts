@@ -1,6 +1,7 @@
 import { EventBus } from '../services/EventBus';
 import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
+import { Logger } from '../utils/Logger';
 
 export interface EventCoordinatorConfig {
     eventBus: EventBus;
@@ -32,7 +33,7 @@ export class EventCoordinator {
     private setupEventListeners(): void {
         // Coin collection event
         this.addListener('coin:collected', (data: any) => {
-            console.log(`Coin collected! Score: ${data.score}`);
+            Logger.log(`Coin collected! Score: ${data.score}`);
             const player = this.entityManager.getPlayer();
             if (player) {
                 player.addScore(data.score);
@@ -50,7 +51,7 @@ export class EventCoordinator {
         
         // Enemy defeated event
         this.addListener('enemy:defeated', (data: any) => {
-            console.log(`Enemy defeated! Score: ${data.score}`);
+            Logger.log(`Enemy defeated! Score: ${data.score}`);
             const player = this.entityManager.getPlayer();
             if (player) {
                 player.addScore(data.score);
@@ -59,12 +60,12 @@ export class EventCoordinator {
         
         // Spring bounce event
         this.addListener('spring:bounce', (data: any) => {
-            console.log('Spring bounced!', data);
+            Logger.log('Spring bounced!', data);
         });
         
         // Level specific events
         this.addListener('level:trigger', (data: any) => {
-            console.log('Level trigger activated:', data);
+            Logger.log('Level trigger activated:', data);
             this.handleLevelTrigger(data);
         });
     }
@@ -86,7 +87,7 @@ export class EventCoordinator {
             this.handleBossEncounter(data);
             break;
         default:
-            console.warn('Unknown level trigger type:', data.type);
+            Logger.warn('Unknown level trigger type:', data.type);
         }
     }
     
@@ -94,14 +95,14 @@ export class EventCoordinator {
         const player = this.entityManager.getPlayer();
         if (player) {
             // Save checkpoint position
-            console.log('Checkpoint reached at:', data.position);
+            Logger.log('Checkpoint reached at:', data.position);
             // TODO: Implement checkpoint functionality in LevelManager
             // this.levelManager.setCheckpoint(data.position);
         }
     }
     
     private handleSecretArea(data: any): void {
-        console.log('Secret area discovered!', data);
+        Logger.log('Secret area discovered!', data);
         // Award bonus points
         const player = this.entityManager.getPlayer();
         if (player) {
@@ -110,7 +111,7 @@ export class EventCoordinator {
     }
     
     private handleBossEncounter(data: any): void {
-        console.log('Boss encounter started!', data);
+        Logger.log('Boss encounter started!', data);
         // Initialize boss battle
         this.eventBus.emit('boss:start', data);
     }

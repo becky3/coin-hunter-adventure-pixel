@@ -31,6 +31,9 @@ export interface CharacterPhysicsConfig {
   moveSpeed?: number;
   jumpHeight?: number;
   jumpInterval?: number;
+  airResistance?: number;
+  gravityScale?: number;
+  maxFallSpeed?: number;
 }
 
 export interface CharacterStatsConfig {

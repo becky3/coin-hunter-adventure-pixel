@@ -1,5 +1,6 @@
 import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants';
 import { PixelArtRenderer } from '../utils/pixelArt';
+import { Logger } from '../utils/Logger';
 
 export interface SpriteData {
     width: number;
@@ -154,7 +155,7 @@ export class PixelRenderer {
         if (!suppressWarning && (snappedX < 0 || snappedY < 0 || 
             snappedX + textWidth > GAME_RESOLUTION.WIDTH || 
             snappedY + textHeight > GAME_RESOLUTION.HEIGHT)) {
-            console.warn(`[PixelRenderer] Text "${text}" is being drawn outside screen bounds at (${x}, ${y}). Game resolution: ${GAME_RESOLUTION.WIDTH}x${GAME_RESOLUTION.HEIGHT}`);
+            Logger.warn(`[PixelRenderer] Text "${text}" is being drawn outside screen bounds at (${x}, ${y}). Game resolution: ${GAME_RESOLUTION.WIDTH}x${GAME_RESOLUTION.HEIGHT}`);
         }
         
         const drawX = Math.floor((snappedX - this.cameraX) * this.scale);

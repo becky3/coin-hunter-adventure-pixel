@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Resistance Physics Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            color: white;
+            font-family: monospace;
+        }
+        #gameCanvas {
+            background-color: #000;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            display: block;
+            margin: 20px auto;
+        }
+        .container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .game-area {
+            flex: 1;
+        }
+        .debug-panel {
+            width: 400px;
+            margin-left: 20px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #0f0;
+            padding: 15px;
+            height: fit-content;
+        }
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        .debug-item {
+            margin: 5px 0;
+            color: #0f0;
+        }
+        .debug-label {
+            color: #888;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .warning {
+            color: #ffd93d;
+        }
+        .info {
+            color: #4ecdc4;
+        }
+        button {
+            background: #4ecdc4;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #45b7b8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Air Resistance Physics Test</h1>
+    <div class="container">
+        <div class="game-area">
+            <canvas id="gameCanvas" width="256" height="240"></canvas>
+            <div class="info" style="text-align: center;">
+                <p>Controls: Arrow Keys to move, Space to jump</p>
+            </div>
+        </div>
+        <div class="debug-panel">
+            <h3>Debug Info</h3>
+            <div class="status" id="status">Initializing...</div>
+            
+            <h4>Player Physics</h4>
+            <div class="debug-item">
+                <span class="debug-label">Position Y:</span> <span id="playerY">-</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Velocity Y:</span> <span id="playerVy">-</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Grounded:</span> <span id="playerGrounded">-</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Jump Power:</span> <span id="jumpPower">-</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Air Resistance:</span> <span id="airResistance">-</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Gravity Scale:</span> <span id="gravityScale">-</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Max Fall Speed:</span> <span id="maxFallSpeed">-</span>
+            </div>
+            
+            <h4>Physics System</h4>
+            <div class="debug-item">
+                <span class="debug-label">Base Gravity:</span> <span id="baseGravity">-</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">System Max Fall:</span> <span id="systemMaxFall">-</span>
+            </div>
+            
+            <h4>Tests</h4>
+            <button onclick="testNoResistance()">Test No Resistance</button>
+            <button onclick="testWithResistance()">Test With Resistance (0.2)</button>
+            <button onclick="testHighResistance()">Test High Resistance (0.5)</button>
+            <button onclick="resetPlayer()">Reset Player</button>
+            
+            <div id="testResults" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { PixelRenderer } from '../../src/rendering/PixelRenderer.js';
+        import { InputSystem } from '../../src/core/InputSystem.js';
+        import { PhysicsSystem } from '../../src/physics/PhysicsSystem.js';
+        import { Player } from '../../src/entities/Player.js';
+        import { LevelSystem } from '../../src/level/LevelSystem.js';
+        
+        let renderer, physics, input, player, levelSystem;
+        let statusEl = document.getElementById('status');
+        let testResultsEl = document.getElementById('testResults');
+        
+        function updateStatus(msg, type = 'info') {
+            statusEl.className = 'status ' + type;
+            statusEl.textContent = msg;
+        }
+        
+        function updateDebugInfo() {
+            if (!player) return;
+            
+            document.getElementById('playerY').textContent = player.y.toFixed(2);
+            document.getElementById('playerVy').textContent = player.vy.toFixed(2);
+            document.getElementById('playerGrounded').textContent = player.grounded ? 'Yes' : 'No';
+            document.getElementById('jumpPower').textContent = player.jumpPower;
+            document.getElementById('airResistance').textContent = player.airResistance;
+            document.getElementById('gravityScale').textContent = player.gravityScale;
+            document.getElementById('maxFallSpeed').textContent = player.maxFallSpeed;
+            
+            if (physics) {
+                document.getElementById('baseGravity').textContent = physics.gravity;
+                document.getElementById('systemMaxFall').textContent = physics.maxFallSpeed;
+            }
+        }
+        
+        window.testNoResistance = function() {
+            if (!player) return;
+            player.airResistance = 0;
+            updateStatus('Air resistance set to 0', 'info');
+            logTest('No Resistance Test Started');
+        };
+        
+        window.testWithResistance = function() {
+            if (!player) return;
+            player.airResistance = 0.2;
+            updateStatus('Air resistance set to 0.2', 'info');
+            logTest('Resistance 0.2 Test Started');
+        };
+        
+        window.testHighResistance = function() {
+            if (!player) return;
+            player.airResistance = 0.5;
+            updateStatus('Air resistance set to 0.5', 'warning');
+            logTest('High Resistance 0.5 Test Started');
+        };
+        
+        window.resetPlayer = function() {
+            if (!player) return;
+            player.x = 128;
+            player.y = 150;
+            player.vx = 0;
+            player.vy = 0;
+            player.airResistance = 0;
+            player.gravityScale = 1.0;
+            player.grounded = false;
+            updateStatus('Player reset', 'info');
+        };
+        
+        function logTest(msg) {
+            const div = document.createElement('div');
+            div.className = 'debug-item';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            testResultsEl.appendChild(div);
+            if (testResultsEl.children.length > 10) {
+                testResultsEl.removeChild(testResultsEl.firstChild);
+            }
+        }
+        
+        async function init() {
+            try {
+                updateStatus('Initializing systems...', 'info');
+                
+                const canvas = document.getElementById('gameCanvas');
+                renderer = new PixelRenderer(canvas);
+                
+                input = new InputSystem();
+                physics = new PhysicsSystem();
+                levelSystem = new LevelSystem();
+                
+                // Create a simple test level
+                const testLevel = {
+                    width: 256,
+                    height: 240,
+                    tileSize: 16,
+                    tiles: Array(15).fill(null).map(() => Array(16).fill(0))
+                };
+                
+                // Add ground
+                for (let x = 0; x < 16; x++) {
+                    testLevel.tiles[13][x] = 1; // Ground row
+                    testLevel.tiles[14][x] = 1; // Ground row
+                }
+                
+                // Add some platforms
+                for (let x = 3; x < 7; x++) {
+                    testLevel.tiles[10][x] = 1;
+                }
+                for (let x = 9; x < 13; x++) {
+                    testLevel.tiles[7][x] = 1;
+                }
+                
+                levelSystem.loadLevel(testLevel);
+                physics.setTileMap(testLevel.tiles, testLevel.tileSize);
+                
+                // Create player
+                player = new Player(128, 150);
+                physics.addEntity(player, physics.layers.PLAYER);
+                
+                // Log initial values
+                console.log('Initial player properties:', {
+                    jumpPower: player.jumpPower,
+                    airResistance: player.airResistance,
+                    gravityScale: player.gravityScale,
+                    maxFallSpeed: player.maxFallSpeed
+                });
+                
+                updateStatus('Initialized successfully', 'info');
+                logTest('System initialized');
+                
+                // Start game loop
+                requestAnimationFrame(gameLoop);
+                
+            } catch (error) {
+                updateStatus('Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            const deltaTime = Math.min((timestamp - lastTime) / 1000, 1/30);
+            lastTime = timestamp;
+            
+            // Update systems
+            input.update();
+            player.update(deltaTime);
+            physics.update(deltaTime);
+            
+            // Render
+            renderer.clear();
+            levelSystem.render(renderer);
+            player.render(renderer);
+            
+            // Update debug info
+            updateDebugInfo();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

@@ -2,6 +2,7 @@ import { SpriteLoader } from '../utils/spriteLoader';
 import { getColorPalette } from '../utils/pixelArtPalette';
 import { PixelArtRenderer } from '../utils/pixelArt';
 import { ResourceLoader } from '../config/ResourceLoader';
+import { Logger } from '../utils/Logger';
 
 export interface LoadedAsset {
     key: string;
@@ -138,6 +139,10 @@ export class AssetLoader {
         const startTime = performance.now();
         const spriteData = await this.spriteLoader.loadSprite(category, name);
         
+        if (!spriteData || !spriteData.data) {
+            throw new Error(`Failed to load sprite data for ${category}/${name}`);
+        }
+        
         if (this.renderer) {
             const paletteName = this._getPaletteForCategory(category);
             const colors = getColorPalette(paletteName);
@@ -149,7 +154,7 @@ export class AssetLoader {
             );
             // Sprite loaded and added to renderer
             const endTime = performance.now();
-            console.log(`[AssetLoader] Loaded sprite ${spriteKey} in ${(endTime - startTime).toFixed(2)}ms`);
+            Logger.log(`[AssetLoader] Loaded sprite ${spriteKey} in ${(endTime - startTime).toFixed(2)}ms`);
         } else {
             // Renderer not set when loading sprite
         }
@@ -182,7 +187,7 @@ export class AssetLoader {
             );
             // Animation loaded and added to renderer
             const endTime = performance.now();
-            console.log(`[AssetLoader] Loaded animation ${animKey} (${frameCount} frames) in ${(endTime - startTime).toFixed(2)}ms`);
+            Logger.log(`[AssetLoader] Loaded animation ${animKey} (${frameCount} frames) in ${(endTime - startTime).toFixed(2)}ms`);
         } else {
             // Renderer not set when loading animation
         }

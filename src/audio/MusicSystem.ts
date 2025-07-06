@@ -1,5 +1,6 @@
 import { ResourceLoader } from '../config/ResourceLoader';
 import { MusicConfig, TrackConfig, FrequencyRamp } from '../config/MusicPatternConfig';
+import { Logger } from '../utils/Logger';
 
 interface ActiveNode {
     oscillator: OscillatorNode | AudioBufferSourceNode;
@@ -78,33 +79,33 @@ export class MusicSystem {
     }
 
     async init(): Promise<boolean> {
-        console.log('MusicSystem: init() called');
+        Logger.log('MusicSystem: init() called');
         if (this._isInitialized) {
-            console.log('MusicSystem: Already initialized');
+            Logger.log('MusicSystem: Already initialized');
             return true;
         }
         
         try {
             const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
             if (!AudioContextClass) {
-                console.warn('Web Audio API is not supported in this browser');
+                Logger.warn('Web Audio API is not supported in this browser');
                 return false;
             }
 
             try {
                 this.audioContext = new AudioContextClass() as AudioContext;
-                console.log('MusicSystem: AudioContext created');
+                Logger.log('MusicSystem: AudioContext created');
             } catch {
-                console.info('AudioContext creation deferred - will retry on user interaction');
+                Logger.log('AudioContext creation deferred - will retry on user interaction');
                 return false;
             }
 
             if (this.audioContext.state === 'suspended') {
-                console.log('MusicSystem: AudioContext is suspended, attempting to resume...');
+                Logger.log('MusicSystem: AudioContext is suspended, attempting to resume...');
                 try {
                     await this.audioContext.resume();
                 } catch {
-                    console.info('AudioContext resume deferred - will retry on user interaction');
+                    Logger.log('AudioContext resume deferred - will retry on user interaction');
                     return false;
                 }
             }
@@ -114,14 +115,14 @@ export class MusicSystem {
             this.masterGain.gain.value = this.bgmVolume;
             
             this._isInitialized = true;
-            console.log('Music system initialized successfully');
+            Logger.log('Music system initialized successfully');
             return true;
         } catch (error: any) {
 
             if (error.name === 'NotAllowedError') {
-                console.info('音楽システムはユーザー操作後に開始されます');
+                Logger.log('音楽システムはユーザー操作後に開始されます');
             } else {
-                console.warn('音楽システムの初期化エラー:', error);
+                Logger.warn('音楽システムの初期化エラー:', error);
             }
             this._isInitialized = false;
             return false;
@@ -759,12 +760,12 @@ export class MusicSystem {
             this.stopAllActiveNodes();
             if (this.audioContext && this.audioContext.state !== 'closed') {
                 this.audioContext.close().catch(error => {
-                    console.error('AudioContext closing error:', error);
+                    Logger.error('AudioContext closing error:', error);
                 });
             }
             this._isInitialized = false;
         } catch (error) {
-            console.error('音楽システムのクリーンアップエラー:', error);
+            Logger.error('音楽システムのクリーンアップエラー:', error);
         }
     }
     
@@ -805,7 +806,7 @@ export class MusicSystem {
     // 統一的なインターフェース
     playBGM(name: BGMName): void {
         if (!this.isInitialized) {
-            console.warn(`[MusicSystem] Cannot play BGM '${name}' - system not initialized`);
+            Logger.warn(`[MusicSystem] Cannot play BGM '${name}' - system not initialized`);
             return;
         }
         
@@ -823,13 +824,13 @@ export class MusicSystem {
             this.playGameOverJingle();
             break;
         default:
-            console.warn(`[MusicSystem] Unknown BGM: ${name}`);
+            Logger.warn(`[MusicSystem] Unknown BGM: ${name}`);
         }
     }
     
     playSE(name: SEName): void {
         if (!this.isInitialized) {
-            console.warn(`[MusicSystem] Cannot play SE '${name}' - system not initialized`);
+            Logger.warn(`[MusicSystem] Cannot play SE '${name}' - system not initialized`);
             return;
         }
         
@@ -853,7 +854,7 @@ export class MusicSystem {
             this.playGameStartSound();
             break;
         default:
-            console.warn(`[MusicSystem] Unknown SE: ${name}`);
+            Logger.warn(`[MusicSystem] Unknown SE: ${name}`);
         }
     }
     

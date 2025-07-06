@@ -1,6 +1,7 @@
 import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants';
 import { GameState } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { Logger } from '../utils/Logger';
 
 interface TestPlayer {
     x: number;
@@ -29,7 +30,7 @@ export class TestPlayState implements GameState {
     }
     
     enter(): void {
-        console.log('TestPlayState: enter');
+        Logger.log('TestPlayState: enter');
 
         this.player = {
             x: 64,
@@ -70,7 +71,7 @@ export class TestPlayState implements GameState {
 
         if (this.game.inputSystem.isActionJustPressed('jump') && this.player.grounded) {
             this.player.vy = -10;
-            console.log('Jump!');
+            Logger.log('Jump!');
         }
 
         this.player.vy += 0.5;
@@ -129,6 +130,6 @@ export class TestPlayState implements GameState {
     }
     
     exit(): void {
-        console.log('TestPlayState: exit');
+        Logger.log('TestPlayState: exit');
     }
 }
