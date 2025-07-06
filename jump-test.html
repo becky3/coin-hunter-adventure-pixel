@@ -272,12 +272,12 @@
                 return;
             }
             
-            // Simulate jump key press every 2 seconds
+            // Continuously check and jump when grounded
             autoJumpInterval = setInterval(() => {
                 const currentState = gameWindow.game.stateManager.currentState;
                 if (currentState && currentState.name === 'play' && currentState.player) {
                     // Check if player is grounded
-                    if (currentState.player.grounded) {
+                    if (currentState.player.grounded && !currentState.player.isJumping) {
                         // Simulate jump key press
                         const inputSystem = gameWindow.game.serviceLocator.get('input');
                         if (inputSystem) {
@@ -289,7 +289,7 @@
                             });
                             gameWindow.dispatchEvent(event);
                             
-                            // Release after 100ms for a medium jump
+                            // Release after 150ms for a consistent medium-high jump
                             setTimeout(() => {
                                 const releaseEvent = new KeyboardEvent('keyup', {
                                     code: 'Space',
@@ -297,11 +297,11 @@
                                     bubbles: true
                                 });
                                 gameWindow.dispatchEvent(releaseEvent);
-                            }, 100);
+                            }, 150);
                         }
                     }
                 }
-            }, 2000);
+            }, 50);  // Check every 50ms for smooth continuous jumping
         }
         
         function stopAutoJump() {
