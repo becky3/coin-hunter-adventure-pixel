@@ -168,16 +168,18 @@ export class PhysicsSystem {
         const previousVy = entity.vy;
         entity.vy += this.gravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
         
-        // Debug logging for Player entity
-        if (entity.constructor.name === 'Player' && (entity as any)._isJumping) {
+        // Debug logging for Player entity - only log every 10th frame
+        if (entity.constructor.name === 'Player' && (entity as any)._isJumping && this.frameCount % 10 === 0) {
             console.log('[PhysicsSystem] Gravity applied to Player:');
-            console.log('  - Previous vy:', previousVy);
-            console.log('  - Gravity applied:', this.gravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER);
-            console.log('  - New vy:', entity.vy);
-            console.log('  - Current Y:', entity.y);
+            console.log('  - Previous vy:', previousVy.toFixed(2));
+            console.log('  - Gravity:', this.gravity);
+            console.log('  - New vy:', entity.vy.toFixed(2));
+            console.log('  - Max fall speed:', this.maxFallSpeed);
+            console.log('  - Frame:', this.frameCount);
         }
         
-        if (entity.vy > this.maxFallSpeed) {
+        // Only clamp downward velocity (positive vy)
+        if (entity.vy > 0 && entity.vy > this.maxFallSpeed) {
             if (entity.constructor.name === 'Player') {
                 console.log('[PhysicsSystem] Max fall speed reached! Clamping vy from', entity.vy, 'to', this.maxFallSpeed);
             }
