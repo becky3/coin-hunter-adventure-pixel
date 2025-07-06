@@ -122,6 +122,17 @@ export class Player extends Entity {
         this.speed = config.speed;
         this.jumpPower = config.jumpPower;
         
+        // Apply new physics properties from config
+        if (playerConfig?.physics?.airResistance !== undefined) {
+            this.airResistance = playerConfig.physics.airResistance;
+        }
+        if (playerConfig?.physics?.gravityScale !== undefined) {
+            this.gravityScale = playerConfig.physics.gravityScale;
+        }
+        if (playerConfig?.physics?.maxFallSpeed !== undefined) {
+            this.maxFallSpeed = playerConfig.physics.maxFallSpeed;
+        }
+        
         // Debug logging for jump configuration
         console.log('[Player] Jump Configuration Debug:');
         console.log('  - Config source:', playerConfig ? 'ResourceLoader' : 'Default');
@@ -129,7 +140,9 @@ export class Player extends Entity {
         console.log('  - jumpPower used:', this.jumpPower);
         console.log('  - minJumpTime:', config.minJumpTime);
         console.log('  - maxJumpTime:', config.maxJumpTime);
-        console.log('  - gravityStrength:', this.gravityStrength);
+        console.log('  - airResistance:', this.airResistance);
+        console.log('  - gravityScale:', this.gravityScale);
+        console.log('  - maxFallSpeed:', this.maxFallSpeed);
         
         this.spriteKey = null;
         
@@ -281,7 +294,8 @@ export class Player extends Entity {
             console.log('  - Initial Y position:', this.y);
             console.log('  - Jump power applied:', this.jumpPower);
             console.log('  - Initial velocity (vy):', this.vy);
-            console.log('  - Gravity strength:', this.gravityStrength);
+            console.log('  - Air resistance:', this.airResistance);
+            console.log('  - Gravity scale:', this.gravityScale);
             
             if (this.musicSystem) {
                 this.musicSystem.playSEFromPattern('jump');
@@ -293,8 +307,9 @@ export class Player extends Entity {
             
             if (input.jump && this.canVariableJump) {
                 if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime) && this.vy < 0) {
-                    // Apply additional upward force for variable jump (adjusted for 70% height)
-                    this.vy -= this.gravityStrength * this.variableJumpBoost;
+                    // Apply additional upward force for variable jump
+                    // Using base gravity value (0.433) as reference
+                    this.vy -= 0.433 * this.variableJumpBoost;
                 } else if (this.jumpTime >= (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
                     this.canVariableJump = false;
                 }

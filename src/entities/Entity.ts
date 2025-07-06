@@ -38,7 +38,7 @@ export class Entity {
     public ay: number;
     
     public gravity: boolean;
-    public gravityStrength: number;
+    public airResistance: number;
     public gravityScale: number;
     public maxFallSpeed: number;
     public friction: number;
@@ -74,9 +74,9 @@ export class Entity {
         this.ay = 0;
         
         this.gravity = true;
-        this.gravityStrength = 0.65;
+        this.airResistance = 0.0;
         this.gravityScale = 1.0;
-        this.maxFallSpeed = 15;
+        this.maxFallSpeed = 10;
         this.friction = 0.8;
         this.physicsEnabled = true;
         
@@ -102,40 +102,6 @@ export class Entity {
         this.onUpdate(deltaTime);
     }
 
-    updatePhysics(deltaTime: number): void {
-        if (!deltaTime || deltaTime <= 0 || deltaTime > 0.1) {
-            deltaTime = 0.01667;
-        }
-        
-        // Skip physics if PhysicsSystem is handling it
-        if (this.physicsSystem) {
-            // PhysicsSystem will handle gravity and max fall speed
-            return;
-        }
-        
-        if (this.gravity && !this.grounded) {
-            this.vy += this.gravityStrength;
-            
-            if (this.vy > this.maxFallSpeed) {
-                this.vy = this.maxFallSpeed;
-            }
-        }
-        
-        if (this.grounded) {
-            this.vx *= this.friction;
-            
-            if (Math.abs(this.vx) < 0.1) {
-                this.vx = 0;
-            }
-        }
-        
-        // Only update position if PhysicsSystem is not handling it
-        if (!this.physicsEnabled && !this.physicsSystem) {
-            const frameFactor = deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
-            this.x += this.vx * frameFactor;
-            this.y += this.vy * frameFactor;
-        }
-    }
 
     updateAnimation(deltaTime: number): void {
         if (this.currentAnimation) {

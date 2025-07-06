@@ -24,6 +24,9 @@ type CollisionMatrix = {
 interface PhysicsEntity extends Entity {
     physicsLayer?: PhysicsLayer;
     physicsSystem?: PhysicsSystem;
+    airResistance?: number;
+    gravityScale?: number;
+    maxFallSpeed?: number;
 }
 
 interface IRenderer {
@@ -166,24 +169,37 @@ export class PhysicsSystem {
         if (!entity.gravity || entity.grounded) return;
         
         const previousVy = entity.vy;
-        entity.vy += this.gravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
+        // Apply effective gravity = base gravity * entity's gravity scale
+        const effectiveGravity = this.gravity * (entity.gravityScale || 1.0);
+        entity.vy += effectiveGravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
+        
+        // Apply air resistance only when falling (vy > 0)
+        if (entity.airResistance && entity.airResistance > 0 && entity.vy > 0) {
+            entity.vy *= (1 - entity.airResistance);
+        }
         
         // Debug logging for Player entity - only log every 10th frame
         if (entity.constructor.name === 'Player' && (entity as any)._isJumping && this.frameCount % 10 === 0) {
             console.log('[PhysicsSystem] Gravity applied to Player:');
             console.log('  - Previous vy:', previousVy.toFixed(2));
-            console.log('  - Gravity:', this.gravity);
+            console.log('  - Base gravity:', this.gravity);
+            console.log('  - Gravity scale:', entity.gravityScale || 1.0);
+            console.log('  - Effective gravity:', effectiveGravity);
+            console.log('  - Air resistance:', entity.airResistance || 0);
             console.log('  - New vy:', entity.vy.toFixed(2));
-            console.log('  - Max fall speed:', this.maxFallSpeed);
+            console.log('  - Entity max fall speed:', entity.maxFallSpeed || this.maxFallSpeed);
             console.log('  - Frame:', this.frameCount);
         }
         
+        // Use entity's maxFallSpeed if defined, otherwise use system's default
+        const maxFall = entity.maxFallSpeed !== undefined ? entity.maxFallSpeed : this.maxFallSpeed;
+        
         // Only clamp downward velocity (positive vy)
-        if (entity.vy > 0 && entity.vy > this.maxFallSpeed) {
+        if (entity.vy > 0 && entity.vy > maxFall) {
             if (entity.constructor.name === 'Player') {
-                console.log('[PhysicsSystem] Max fall speed reached! Clamping vy from', entity.vy, 'to', this.maxFallSpeed);
+                console.log('[PhysicsSystem] Max fall speed reached! Clamping vy from', entity.vy, 'to', maxFall);
             }
-            entity.vy = this.maxFallSpeed;
+            entity.vy = maxFall;
         }
     }
     
