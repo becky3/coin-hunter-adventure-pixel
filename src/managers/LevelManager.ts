@@ -151,6 +151,45 @@ export class LevelManager {
     isSolid(worldX: number, worldY: number): boolean {
         return this.getTileAt(worldX, worldY) === 1;
     }
+    
+    // Get next level based on current level
+    getNextLevel(): string | null {
+        if (!this.currentLevel) return null;
+        
+        // Parse stage and area numbers from level name (e.g., "stage1-2" -> stage=1, area=2)
+        const match = this.currentLevel.match(/^stage(\d+)-(\d+)$/);
+        if (!match) return null;
+        
+        const stageNum = parseInt(match[1]);
+        const areaNum = parseInt(match[2]);
+        
+        // Check if level data has a specific next level defined (for special cases like bonus stages)
+        if (this.levelData && (this.levelData as any).nextLevel) {
+            return (this.levelData as any).nextLevel;
+        }
+        
+        // Default progression logic
+        const maxAreasPerStage = 3;
+        const maxStages = 1; // Currently only stage 1 exists
+        
+        // Calculate next area
+        if (areaNum < maxAreasPerStage) {
+            // Go to next area in same stage
+            return `stage${stageNum}-${areaNum + 1}`;
+        } else if (stageNum < maxStages) {
+            // Go to first area of next stage
+            return `stage${stageNum + 1}-1`;
+        } else {
+            // No more levels - end of game
+            return null;
+        }
+    }
+    
+    // Check if current level is the final level
+    isFinalLevel(): boolean {
+        const nextLevel = this.getNextLevel();
+        return nextLevel === null;
+    }
 
     private createTestLevel(): void {
         this.tileMap = [

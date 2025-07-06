@@ -42,9 +42,14 @@ export class PhysicsSystem {
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
-        this._gravity = 0.65;
-        this._maxFallSpeed = 15;
+        this._gravity = 0.433; // Reduced from 0.65 to exactly 2/3 for 1.5x air time
+        this._maxFallSpeed = 10; // Reduced to maintain feel
         this._friction = 0.8;
+        
+        console.log('[PhysicsSystem] Initialized with:');
+        console.log('  - Gravity:', this._gravity);
+        console.log('  - Max fall speed:', this._maxFallSpeed);
+        console.log('  - Friction:', this._friction);
         this.layers = {
             TILE: 'tile',
             PLAYER: 'player',
@@ -160,8 +165,24 @@ export class PhysicsSystem {
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
         
+        const previousVy = entity.vy;
         entity.vy += this.gravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
-        if (entity.vy > this.maxFallSpeed) {
+        
+        // Debug logging for Player entity - only log every 10th frame
+        if (entity.constructor.name === 'Player' && (entity as any)._isJumping && this.frameCount % 10 === 0) {
+            console.log('[PhysicsSystem] Gravity applied to Player:');
+            console.log('  - Previous vy:', previousVy.toFixed(2));
+            console.log('  - Gravity:', this.gravity);
+            console.log('  - New vy:', entity.vy.toFixed(2));
+            console.log('  - Max fall speed:', this.maxFallSpeed);
+            console.log('  - Frame:', this.frameCount);
+        }
+        
+        // Only clamp downward velocity (positive vy)
+        if (entity.vy > 0 && entity.vy > this.maxFallSpeed) {
+            if (entity.constructor.name === 'Player') {
+                console.log('[PhysicsSystem] Max fall speed reached! Clamping vy from', entity.vy, 'to', this.maxFallSpeed);
+            }
             entity.vy = this.maxFallSpeed;
         }
     }

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jump Physics Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .controls {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 300px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4ECDC4;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        .value {
+            color: #FFD700;
+            font-weight: bold;
+        }
+        button {
+            background: #4ECDC4;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45B7B8;
+        }
+        .info {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .info h3 {
+            color: #FFD700;
+            margin-top: 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .stat-item {
+            background: #444;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .stat-label {
+            color: #888;
+            font-size: 12px;
+        }
+        .stat-value {
+            color: #4ECDC4;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        iframe {
+            border: 2px solid #444;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jump Physics Testing Tool</h1>
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <label for="gravity">Gravity: <span class="value" id="gravityValue">0.433</span></label>
+                <input type="range" id="gravity" min="0.1" max="1.0" step="0.001" value="0.433">
+            </div>
+            
+            <div class="control-group">
+                <label for="jumpPower">Jump Power: <span class="value" id="jumpPowerValue">5.25</span></label>
+                <input type="range" id="jumpPower" min="3" max="15" step="0.01" value="5.25">
+            </div>
+            
+            <div class="control-group">
+                <label for="maxFallSpeed">Max Fall Speed: <span class="value" id="maxFallSpeedValue">10</span></label>
+                <input type="range" id="maxFallSpeed" min="5" max="20" step="0.1" value="10">
+            </div>
+            
+            <div class="control-group">
+                <label for="variableBoost">Variable Jump Boost: <span class="value" id="variableBoostValue">0.15</span></label>
+                <input type="range" id="variableBoost" min="0" max="1" step="0.01" value="0.15">
+            </div>
+            
+            <button onclick="toggleAutoApply()" id="autoApplyBtn">Auto Apply: ON</button>
+            <button onclick="toggleAutoJump()" id="autoJumpBtn">Auto Jump: OFF</button>
+            <button onclick="resetToDefault()">Reset to Default</button>
+            <button onclick="resetToOriginal()">Reset to Original</button>
+            
+            <div class="info">
+                <h3>Current Settings</h3>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Theoretical Max Height</div>
+                        <div class="stat-value" id="maxHeight">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Air Time</div>
+                        <div class="stat-value" id="airTime">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Height Ratio</div>
+                        <div class="stat-value" id="heightRatio">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Time Ratio</div>
+                        <div class="stat-value" id="timeRatio">--</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info">
+                <h3>Reference Values</h3>
+                <p>Original: Gravity=0.65, JumpPower=10</p>
+                <p>Current Goal: 70% height, 1.5x air time</p>
+            </div>
+        </div>
+        
+        <div>
+            <iframe id="gameFrame" src="http://localhost:3000/?stage=stage1-2" width="768" height="720"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const originalValues = {
+            gravity: 0.65,
+            jumpPower: 10,
+            maxFallSpeed: 15,
+            variableBoost: 0.5
+        };
+        
+        const defaultValues = {
+            gravity: 0.433,
+            jumpPower: 5.25,
+            maxFallSpeed: 10,
+            variableBoost: 0.15
+        };
+        
+        let autoApply = true;
+        let autoJump = false;
+        let autoJumpInterval = null;
+        
+        function updateValue(id) {
+            const slider = document.getElementById(id);
+            const valueSpan = document.getElementById(id + 'Value');
+            valueSpan.textContent = slider.value;
+            calculateStats();
+            
+            if (autoApply) {
+                // Debug: Log when applying changes
+                console.log(`[UpdateValue] ${id}: ${slider.value}`);
+                applyChanges(false);  // Apply without alert
+            }
+        }
+        
+        function calculateStats() {
+            const gravity = parseFloat(document.getElementById('gravity').value);
+            const jumpPower = parseFloat(document.getElementById('jumpPower').value);
+            
+            // Calculate theoretical max height and air time
+            const maxHeight = (jumpPower * jumpPower) / (2 * gravity);
+            const airTime = (2 * jumpPower) / gravity;
+            
+            // Calculate ratios compared to original
+            const origMaxHeight = (originalValues.jumpPower * originalValues.jumpPower) / (2 * originalValues.gravity);
+            const origAirTime = (2 * originalValues.jumpPower) / originalValues.gravity;
+            
+            const heightRatio = (maxHeight / origMaxHeight * 100).toFixed(1);
+            const timeRatio = (airTime / origAirTime * 100).toFixed(1);
+            
+            document.getElementById('maxHeight').textContent = maxHeight.toFixed(1) + ' px';
+            document.getElementById('airTime').textContent = airTime.toFixed(2) + ' frames';
+            document.getElementById('heightRatio').textContent = heightRatio + '%';
+            document.getElementById('timeRatio').textContent = timeRatio + '%';
+        }
+        
+        function applyChanges(showAlert = true) {
+            const gameWindow = document.getElementById('gameFrame').contentWindow;
+            
+            if (!gameWindow.game) {
+                if (showAlert) alert('Game not loaded yet. Please wait for the game to load.');
+                return;
+            }
+            
+            const gravity = parseFloat(document.getElementById('gravity').value);
+            const jumpPower = parseFloat(document.getElementById('jumpPower').value);
+            const maxFallSpeed = parseFloat(document.getElementById('maxFallSpeed').value);
+            const variableBoost = parseFloat(document.getElementById('variableBoost').value);
+            
+            // Apply to physics system
+            const physicsSystem = gameWindow.game.serviceLocator.get('physics');
+            if (physicsSystem) {
+                physicsSystem.setGravity(gravity);
+                physicsSystem.setMaxFallSpeed(maxFallSpeed);
+                console.log('[JumpTest] Physics updated - Gravity:', physicsSystem.gravity, 'MaxFallSpeed:', physicsSystem.maxFallSpeed);
+            }
+            
+            // Apply to player if in play state
+            const currentState = gameWindow.game.stateManager.currentState;
+            if (currentState && currentState.name === 'play' && currentState.player) {
+                currentState.player.jumpPower = jumpPower;
+                
+                // Update variable jump boost (this is a bit hacky but works for testing)
+                currentState.player.variableJumpBoost = variableBoost;
+            }
+            
+            // Update player config for respawns
+            if (gameWindow.game.serviceLocator) {
+                const resourceLoader = gameWindow.game.serviceLocator.get('resourceLoader');
+                if (resourceLoader && resourceLoader.resources.characters) {
+                    resourceLoader.resources.characters.player.physics.jumpPower = jumpPower;
+                }
+            }
+            
+            console.log('Applied changes:', { gravity, jumpPower, maxFallSpeed, variableBoost });
+            if (showAlert) alert('Changes applied! Test the jump in the game.');
+        }
+        
+        function toggleAutoApply() {
+            autoApply = !autoApply;
+            document.getElementById('autoApplyBtn').textContent = `Auto Apply: ${autoApply ? 'ON' : 'OFF'}`;
+            if (autoApply) {
+                applyChanges(false);
+            }
+        }
+        
+        function toggleAutoJump() {
+            autoJump = !autoJump;
+            document.getElementById('autoJumpBtn').textContent = `Auto Jump: ${autoJump ? 'ON' : 'OFF'}`;
+            
+            if (autoJump) {
+                startAutoJump();
+            } else {
+                stopAutoJump();
+            }
+        }
+        
+        function startAutoJump() {
+            const gameWindow = document.getElementById('gameFrame').contentWindow;
+            
+            if (!gameWindow.game) {
+                alert('Game not loaded yet. Please wait for the game to load.');
+                autoJump = false;
+                document.getElementById('autoJumpBtn').textContent = 'Auto Jump: OFF';
+                return;
+            }
+            
+            // Continuously check and jump when grounded
+            autoJumpInterval = setInterval(() => {
+                const currentState = gameWindow.game.stateManager.currentState;
+                if (currentState && currentState.name === 'play' && currentState.player) {
+                    // Check if player is grounded
+                    if (currentState.player.grounded && !currentState.player.isJumping) {
+                        // Simulate jump key press
+                        const inputSystem = gameWindow.game.serviceLocator.get('input');
+                        if (inputSystem) {
+                            // Trigger jump by dispatching keyboard event to the game window
+                            const event = new KeyboardEvent('keydown', {
+                                code: 'Space',
+                                key: ' ',
+                                bubbles: true
+                            });
+                            gameWindow.dispatchEvent(event);
+                            
+                            // Release after 150ms for a consistent medium-high jump
+                            setTimeout(() => {
+                                const releaseEvent = new KeyboardEvent('keyup', {
+                                    code: 'Space',
+                                    key: ' ',
+                                    bubbles: true
+                                });
+                                gameWindow.dispatchEvent(releaseEvent);
+                            }, 150);
+                        }
+                    }
+                }
+            }, 50);  // Check every 50ms for smooth continuous jumping
+        }
+        
+        function stopAutoJump() {
+            if (autoJumpInterval) {
+                clearInterval(autoJumpInterval);
+                autoJumpInterval = null;
+            }
+        }
+        
+        function resetToDefault() {
+            document.getElementById('gravity').value = defaultValues.gravity;
+            document.getElementById('jumpPower').value = defaultValues.jumpPower;
+            document.getElementById('maxFallSpeed').value = defaultValues.maxFallSpeed;
+            document.getElementById('variableBoost').value = defaultValues.variableBoost;
+            
+            updateValue('gravity');
+            updateValue('jumpPower');
+            updateValue('maxFallSpeed');
+            updateValue('variableBoost');
+        }
+        
+        function resetToOriginal() {
+            document.getElementById('gravity').value = originalValues.gravity;
+            document.getElementById('jumpPower').value = originalValues.jumpPower;
+            document.getElementById('maxFallSpeed').value = originalValues.maxFallSpeed;
+            document.getElementById('variableBoost').value = originalValues.variableBoost;
+            
+            updateValue('gravity');
+            updateValue('jumpPower');
+            updateValue('maxFallSpeed');
+            updateValue('variableBoost');
+        }
+        
+        // Initialize
+        document.getElementById('gravity').addEventListener('input', () => updateValue('gravity'));
+        document.getElementById('jumpPower').addEventListener('input', () => updateValue('jumpPower'));
+        document.getElementById('maxFallSpeed').addEventListener('input', () => updateValue('maxFallSpeed'));
+        document.getElementById('variableBoost').addEventListener('input', () => updateValue('variableBoost'));
+        
+        // Prevent iframe from stealing focus during slider drag
+        const sliders = ['gravity', 'jumpPower', 'maxFallSpeed', 'variableBoost'];
+        sliders.forEach(id => {
+            const slider = document.getElementById(id);
+            slider.addEventListener('mousedown', () => {
+                slider.dataset.dragging = 'true';
+            });
+            slider.addEventListener('mouseup', () => {
+                slider.dataset.dragging = 'false';
+            });
+        });
+        
+        calculateStats();
+        
+        // Wait for game to load
+        setTimeout(() => {
+            const gameWindow = document.getElementById('gameFrame').contentWindow;
+            if (gameWindow.game) {
+                console.log('Game loaded, ready for testing!');
+                // Apply initial values
+                if (autoApply) {
+                    applyChanges(false);
+                }
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

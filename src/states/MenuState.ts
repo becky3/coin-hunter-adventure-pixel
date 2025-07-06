@@ -3,6 +3,7 @@ import { GameState } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputEvent } from '../core/InputSystem';
 import { URLParams } from '../utils/urlParams';
+import { GameEnvironment } from '../utils/gameEnvironment';
 
 interface MenuOption {
     text: string;
@@ -29,6 +30,7 @@ export class MenuState implements GameState {
     private titleAnimTimer: number;
     private inputListeners: Array<() => void>;
     private _firstUpdateLogged: boolean = false;
+    
 
     constructor(game: Game) {
         this.game = game;
@@ -283,11 +285,27 @@ export class MenuState implements GameState {
                 const urlParams = new URLParams();
                 const stageId = urlParams.getStageId();
                 
-                if (stageId) {
-                    console.log(`Starting stage from URL parameter: ${stageId}`);
-                    this.game.stateManager.setState('play', { level: stageId });
+                // Check if debug overlay has a selected stage
+                const debugOverlay = (window as any).debugOverlay;
+                const debugSelectedStage = debugOverlay?.getSelectedStage?.();
+                
+                // Determine which stage to use (debug selection takes priority)
+                const selectedStage = debugSelectedStage || stageId;
+                
+                // Determine if stage progression should be enabled based on environment
+                const enableProgression = GameEnvironment.shouldEnableStageProgression();
+                console.log(`Environment: ${GameEnvironment.getEnvironmentName()}, Stage progression: ${enableProgression ? 'ENABLED' : 'DISABLED'}`);
+                
+                if (selectedStage) {
+                    console.log(`Starting stage: ${selectedStage} (source: ${debugSelectedStage ? 'debug overlay' : 'URL parameter'})`);
+                    this.game.stateManager.setState('play', { 
+                        level: selectedStage,
+                        enableProgression: enableProgression 
+                    });
                 } else {
-                    this.game.stateManager.setState('play');
+                    this.game.stateManager.setState('play', { 
+                        enableProgression: enableProgression 
+                    });
                 }
             } catch (error) {
                 console.error('Error transitioning to play state:', error);

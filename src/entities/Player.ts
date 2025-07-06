@@ -63,7 +63,7 @@ export class Player extends Entity {
     private playerConfig: any;
     private animationConfig: any;
     private speed: number;
-    private jumpPower: number;
+    public jumpPower: number;  // Made public for testing
     private spriteKey: string | null;
     private _health: number;
     private _maxHealth: number;
@@ -90,6 +90,7 @@ export class Player extends Entity {
     private musicSystem: MusicSystem | null;
     private assetLoader: AssetLoader | null;
     private eventBus: EventBus | null;
+    public variableJumpBoost: number;  // For testing purposes
 
     constructor(x?: number, y?: number) {
         // Load config from ResourceLoader if available
@@ -120,6 +121,15 @@ export class Player extends Entity {
         
         this.speed = config.speed;
         this.jumpPower = config.jumpPower;
+        
+        // Debug logging for jump configuration
+        console.log('[Player] Jump Configuration Debug:');
+        console.log('  - Config source:', playerConfig ? 'ResourceLoader' : 'Default');
+        console.log('  - jumpPower from config:', playerConfig?.physics?.jumpPower ?? 'undefined');
+        console.log('  - jumpPower used:', this.jumpPower);
+        console.log('  - minJumpTime:', config.minJumpTime);
+        console.log('  - maxJumpTime:', config.maxJumpTime);
+        console.log('  - gravityStrength:', this.gravityStrength);
         
         this.spriteKey = null;
         
@@ -167,9 +177,9 @@ export class Player extends Entity {
             frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
         } : DEFAULT_ANIMATION_CONFIG;
         
-        // Reduce gravity to extend air time (about half of default)
-        // This makes jumps feel more floaty without changing the jump height
-        this.gravityStrength = 0.35;
+        // Gravity strength adjustment removed - now handled by PhysicsSystem
+        this.gravityStrength = 1.0;
+        this.variableJumpBoost = 0.15;  // Default variable jump boost
     }
     
     setInputManager(inputManager: InputSystem): void {
@@ -205,7 +215,18 @@ export class Player extends Entity {
         
         if (!this.inputManager) return;
         
-        
+        // Debug: Allow dynamic jumpPower adjustment with number keys
+        if ((window as any).debugMode) {
+            for (let i = 1; i <= 9; i++) {
+                if (this.inputManager.isActionPressed(`${i}` as any)) {
+                    const newJumpPower = i * 2; // 2, 4, 6, 8, 10, 12, 14, 16, 18
+                    if (this.jumpPower !== newJumpPower) {
+                        this.jumpPower = newJumpPower;
+                        console.log(`[Player] Jump power changed to: ${this.jumpPower}`);
+                    }
+                }
+            }
+        }
         
         const input = {
             left: this.inputManager.isActionPressed('left'),
@@ -255,6 +276,13 @@ export class Player extends Entity {
             this.jumpMaxHeight = 0;
             this.jumpStartY = this.y;
             
+            // Debug logging for jump initiation
+            console.log('[Player] Jump initiated:');
+            console.log('  - Initial Y position:', this.y);
+            console.log('  - Jump power applied:', this.jumpPower);
+            console.log('  - Initial velocity (vy):', this.vy);
+            console.log('  - Gravity strength:', this.gravityStrength);
+            
             if (this.musicSystem) {
                 this.musicSystem.playSEFromPattern('jump');
             }
@@ -265,7 +293,8 @@ export class Player extends Entity {
             
             if (input.jump && this.canVariableJump) {
                 if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime) && this.vy < 0) {
-                    this.vy -= this.gravityStrength * 0.5;
+                    // Apply additional upward force for variable jump (adjusted for 70% height)
+                    this.vy -= this.gravityStrength * this.variableJumpBoost;
                 } else if (this.jumpTime >= (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
                     this.canVariableJump = false;
                 }
@@ -282,6 +311,7 @@ export class Player extends Entity {
             const currentHeight = this.jumpStartY - this.y;
             if (currentHeight > this.jumpMaxHeight) {
                 this.jumpMaxHeight = currentHeight;
+                console.log('[Player] New max jump height:', this.jumpMaxHeight, 'pixels');
             }
         }
         
@@ -290,6 +320,9 @@ export class Player extends Entity {
         }
         
         if (this.grounded && this._isJumping) {
+            console.log('[Player] Jump completed:');
+            console.log('  - Final max height reached:', this.jumpMaxHeight, 'pixels');
+            console.log('  - Jump duration:', this.jumpTime, 'ms');
             this._isJumping = false;
             this.canVariableJump = false;
         }
@@ -432,6 +465,35 @@ export class Player extends Entity {
     render(renderer: PixelRenderer): void {
         this.flipX = this._facing === 'left';
         
+        // Draw jump height debug marker when jumping
+        if (this._isJumping && renderer.debug) {
+            const screenPos = renderer.worldToScreen(this.x, this.jumpStartY);
+            const currentScreenPos = renderer.worldToScreen(this.x, this.y);
+            
+            // Draw vertical line showing jump trajectory
+            renderer.ctx.strokeStyle = '#00FF00';
+            renderer.ctx.lineWidth = 2;
+            renderer.ctx.beginPath();
+            renderer.ctx.moveTo(screenPos.x + this.width / 2, screenPos.y);
+            renderer.ctx.lineTo(currentScreenPos.x + this.width / 2, currentScreenPos.y);
+            renderer.ctx.stroke();
+            
+            // Draw max height marker
+            const maxHeightY = this.jumpStartY - this.jumpMaxHeight;
+            const maxHeightScreenPos = renderer.worldToScreen(this.x, maxHeightY);
+            renderer.ctx.fillStyle = '#FFFF00';
+            renderer.ctx.fillRect(maxHeightScreenPos.x - 2, maxHeightScreenPos.y - 2, this.width + 4, 4);
+            
+            // Draw height text
+            renderer.ctx.fillStyle = '#FFFFFF';
+            renderer.ctx.font = '12px monospace';
+            renderer.ctx.fillText(
+                `H: ${Math.round(this.jumpMaxHeight)}px`,
+                maxHeightScreenPos.x + this.width + 5,
+                maxHeightScreenPos.y + 4
+            );
+        }
+        
         // 無敵時は点滅させる（100ms間隔で表示/非表示を切り替え）
         if (this._invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 1) {
             return;
@@ -501,6 +563,13 @@ export class Player extends Entity {
                 `HP:${this._health}/${this._maxHealth} ${this._animState}`,
                 screenPos.x,
                 screenPos.y
+            );
+            
+            // Show current jump power
+            renderer.ctx.fillText(
+                `JP:${this.jumpPower.toFixed(1)} VY:${this.vy.toFixed(1)}`,
+                screenPos.x,
+                screenPos.y + 12
             );
         }
     }
