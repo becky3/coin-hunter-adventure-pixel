@@ -38,6 +38,10 @@ const DEFAULT_ANIMATION_CONFIG = {
     }
 } as const;
 
+// Variable jump boost strength multiplier
+// This is multiplied by variableJumpBoost to determine the additional upward force
+const VARIABLE_JUMP_GRAVITY_FACTOR = 0.65;
+
 type AnimationState = 'idle' | 'walk' | 'jump' | 'fall';
 type Facing = 'left' | 'right';
 
@@ -308,8 +312,7 @@ export class Player extends Entity {
             if (input.jump && this.canVariableJump) {
                 if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime) && this.vy < 0) {
                     // Apply additional upward force for variable jump
-                    // Using original gravity strength value
-                    this.vy -= 0.65 * this.variableJumpBoost;
+                    this.vy -= VARIABLE_JUMP_GRAVITY_FACTOR * this.variableJumpBoost;
                 } else if (this.jumpTime >= (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
                     this.canVariableJump = false;
                 }
