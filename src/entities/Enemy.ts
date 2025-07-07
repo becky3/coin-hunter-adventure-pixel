@@ -108,17 +108,15 @@ export class Enemy extends Entity {
         if (this.state === 'dead' || !this.active || player.invulnerable) return;
         
         const playerBottom = player.y + player.height;
-        const playerPrevBottom = player.y + player.height - player.vy;
         const enemyTop = this.y;
+        const enemyCenter = this.y + this.height / 2;
         
-        // プレイヤーが小さい場合は踏みつけ判定を厳しくする
-        const stompThreshold = player.isSmall ? -2 : 4;
+        // 踏みつけ判定：プレイヤーの中心が敵の上半分より上にあり、下向きに移動している
+        const playerCenter = player.y + player.height / 2;
+        const isAboveEnemy = playerCenter < enemyCenter;
+        const isFalling = player.vy > 0;
         
-        const wasAbove = playerPrevBottom <= enemyTop + stompThreshold;
-        const isNowColliding = playerBottom >= enemyTop;
-        const isFalling = player.vy > 0;  // 下向きの速度がある時のみ（静止状態を除外）
-        
-        if (wasAbove && isNowColliding && isFalling) {
+        if (isAboveEnemy && isFalling) {
             this.takeDamage(1, player);
             player.vy = -5;
             // 敵を踏み潰した時のスコア加算とイベント発行
