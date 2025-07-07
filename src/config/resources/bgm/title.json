@@ -12,6 +12,7 @@
       "pattern": {
         "notes": ["C3", "C3", "G3", "G3", "A3", "A3", "F3", "F3"],
         "durations": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+        "duration": 4,
         "loop": true
       }
     },
@@ -29,6 +30,7 @@
           ["F4", "A4", "C5"]
         ],
         "durations": [1, 1, 1, 1],
+        "duration": 4,
         "loop": true
       }
     },
@@ -40,7 +42,8 @@
       },
       "pattern": {
         "notes": ["E5", "D5", "C5", "G4", "A4", "B4", "C5"],
-        "durations": [0.5, 0.5, 1, 1, 0.5, 0.5, 1],
+        "durations": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1],
+        "duration": 4,
         "loop": true
       }
     }

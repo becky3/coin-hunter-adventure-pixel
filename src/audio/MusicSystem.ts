@@ -50,9 +50,6 @@ export class MusicSystem {
     private currentMusicConfig: MusicConfig | null;
     private patternLoopTimeout: NodeJS.Timeout | null;
     
-    // Debug tracking
-    private loopCount: number;
-    private loopStartTime: number;
     
     constructor() {
 
@@ -74,9 +71,6 @@ export class MusicSystem {
         
         this.currentMusicConfig = null;
         this.patternLoopTimeout = null;
-        
-        this.loopCount = 0;
-        this.loopStartTime = 0;
     }
     
     get isInitialized(): boolean {
@@ -243,13 +237,6 @@ export class MusicSystem {
         });
     }
 
-    // Legacy method - removed in favor of pattern-based playback
-
-    // Legacy method - removed in favor of pattern-based playback
-
-    // Legacy method - removed in favor of pattern-based playback
-
-    // Legacy method - removed in favor of pattern-based playback
 
     private playSoundEffect(frequency: number, duration: number, type: OscillatorType = 'square', volume: number | null = null, envelope: EnvelopeSettings | null = null): void {
         if (!this.isInitialized || this.isMuted || !this.audioContext || !this.masterGain) return;
@@ -497,10 +484,7 @@ export class MusicSystem {
     }
 
     stopBGM(): void {
-        Logger.log(`[MusicSystem] stopBGM called, currentBGM: ${this.currentBGM}, has timeout: ${!!this.patternLoopTimeout}`);
-        
         if (!this.currentBGM && !this.patternLoopTimeout) {
-            Logger.log('[MusicSystem] Nothing to stop');
             return;
         }
         
@@ -510,8 +494,6 @@ export class MusicSystem {
         this.currentBGM = null;
         this.isPaused = false;
         this.pausedBGM = null;
-        
-        Logger.log('[MusicSystem] BGM stopped');
     }
 
     setVolume(volume: number): void {
@@ -645,18 +627,12 @@ export class MusicSystem {
             maxDuration = Math.max(maxDuration, duration);
         });
         
-        const loopDurationMs = maxDuration * beatLength * 1000;
-        Logger.log(`[MusicSystem] Starting pattern playback, loop duration: ${maxDuration} beats (${loopDurationMs}ms), looping: ${config.loop}`);
-        
         // Schedule all patterns at once
         this.scheduleAllPatterns(config, beatLength, maxDuration);
         
         // If looping, schedule next iteration
         if (config.loop) {
-            Logger.log(`[MusicSystem] Scheduling loop continuation in ${loopDurationMs}ms`);
             this.scheduleNextLoop(config, beatLength, maxDuration);
-        } else {
-            Logger.log('[MusicSystem] Not looping - config.loop is false');
         }
     }
     
@@ -678,16 +654,8 @@ export class MusicSystem {
         this.patternLoopTimeout = setTimeout(() => {
             // Check if we should continue looping
             if (!this.currentBGM || !this.currentMusicConfig) {
-                Logger.log('[MusicSystem] Loop cancelled - BGM stopped');
                 return;
             }
-            
-            this.loopCount++;
-            const actualTime = Date.now() - this.loopStartTime;
-            const expectedTime = this.loopCount * loopDurationMs;
-            const drift = actualTime - expectedTime;
-            
-            Logger.log(`[MusicSystem] Loop #${this.loopCount} - Expected: ${expectedTime}ms, Actual: ${actualTime}ms, Drift: ${drift}ms`);
             
             // Schedule all patterns for next loop
             this.scheduleAllPatterns(config, beatLength, loopDuration);
@@ -827,8 +795,6 @@ export class MusicSystem {
     }
     
     private stopPatternPlayback(): void {
-        Logger.log('[MusicSystem] Stopping pattern playback');
-        
         if (this.patternLoopTimeout) {
             clearTimeout(this.patternLoopTimeout);
             this.patternLoopTimeout = null;
@@ -839,11 +805,8 @@ export class MusicSystem {
     
     // New unified methods using patterns
     playBGMFromPattern(name: BGMName): void {
-        Logger.log(`[MusicSystem] playBGMFromPattern called for: ${name}`);
-        
         // If already playing the same BGM, don't restart
         if (this.currentBGM === name) {
-            Logger.log(`[MusicSystem] BGM ${name} is already playing, skipping`);
             return;
         }
         
@@ -852,14 +815,10 @@ export class MusicSystem {
             const musicConfig = resourceLoader.getMusicPattern('bgm', name);
             
             if (musicConfig) {
-                Logger.log(`[MusicSystem] Found pattern config for ${name}, tempo: ${musicConfig.tempo}, loop: ${musicConfig.loop}`);
                 this.stopBGM();
                 this.stopPatternPlayback();
                 this.currentBGM = name as BGMType;
                 
-                // Reset loop tracking
-                this.loopCount = 0;
-                this.loopStartTime = Date.now();
                 
                 this.playMusicPattern(musicConfig);
             } else {
