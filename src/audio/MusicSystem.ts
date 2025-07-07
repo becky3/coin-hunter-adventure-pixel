@@ -54,6 +54,7 @@ export class MusicSystem {
     private loopCount: number;
     private loopStartTime: number;
     private expectedLoopTime: number;
+    private trackLoopCounts: Map<string, number>;
     
     constructor() {
 
@@ -79,6 +80,7 @@ export class MusicSystem {
         this.loopCount = 0;
         this.loopStartTime = 0;
         this.expectedLoopTime = 0;
+        this.trackLoopCounts = new Map();
     }
     
     get isInitialized(): boolean {
@@ -646,7 +648,27 @@ export class MusicSystem {
         if (!this.audioContext) return;
         
         let nextScheduleTime = 0;
-        const loopDuration = (track.pattern.duration || 4) * beatLength; // Default 4 beats
+        
+        // Calculate actual pattern duration based on pattern content
+        let patternDuration = 0;
+        if (track.pattern.duration) {
+            patternDuration = track.pattern.duration;
+        } else if (track.pattern.durations) {
+            // Sum all durations for the actual pattern length
+            patternDuration = track.pattern.durations.reduce((sum, dur) => sum + dur, 0);
+        } else if (track.pattern.beats) {
+            // For drum patterns, find the latest beat time
+            const maxTime = Math.max(...track.pattern.beats.map(beat => beat.time));
+            patternDuration = Math.ceil(maxTime + 1); // Round up to next beat
+        } else {
+            patternDuration = 4; // Default to 4 beats
+        }
+        
+        // Handle special repeat settings
+        const repeatEvery = track.pattern.repeatEvery || patternDuration;
+        const loopDuration = repeatEvery * beatLength;
+        
+        Logger.log(`[MusicSystem] Track ${track.name} - Pattern: ${patternDuration} beats, Loop every: ${repeatEvery} beats (${loopDuration}s)`)
         
         const schedulePattern = (startTime: number) => {
             if (!this.isInitialized || this.isMuted || !this.audioContext) return;
@@ -731,13 +753,14 @@ export class MusicSystem {
             // Schedule ahead by 100ms to ensure smooth playback
             while (nextScheduleTime < now + 0.1) {
                 // Track loop count for debugging
-                if (track.name === 'bass' || track.name === 'melody') {
-                    this.loopCount++;
-                    const actualTime = Date.now() - this.loopStartTime;
-                    const expectedTime = this.loopCount * this.expectedLoopTime;
-                    const drift = actualTime - expectedTime;
-                    Logger.log(`[MusicSystem] Track ${track.name} Loop #${this.loopCount} - Expected: ${expectedTime}ms, Actual: ${actualTime}ms, Drift: ${drift}ms`);
-                }
+                const loopCount = (this.trackLoopCounts.get(track.name) || 0) + 1;
+                this.trackLoopCounts.set(track.name, loopCount);
+                
+                const actualTime = Date.now() - this.loopStartTime;
+                const expectedTime = loopCount * loopDuration * 1000;
+                const drift = actualTime - expectedTime;
+                
+                Logger.log(`[MusicSystem] Track ${track.name} Loop #${loopCount} - Pattern duration: ${patternDuration} beats, Expected: ${expectedTime.toFixed(0)}ms, Actual: ${actualTime.toFixed(0)}ms, Drift: ${drift.toFixed(0)}ms`);
                 
                 schedulePattern(nextScheduleTime);
                 nextScheduleTime += loopDuration;
@@ -757,6 +780,13 @@ export class MusicSystem {
         
         // Start scheduling
         nextScheduleTime = this.audioContext.currentTime;
+        
+        // Handle startAt offset
+        if (track.pattern.startAt) {
+            nextScheduleTime += track.pattern.startAt * beatLength;
+            Logger.log(`[MusicSystem] Track ${track.name} will start at beat ${track.pattern.startAt}`);
+        }
+        
         scheduleNext();
     }
     
@@ -822,8 +852,13 @@ export class MusicSystem {
     }
     
     private stopPatternPlayback(): void {
+        Logger.log(`[MusicSystem] Stopping pattern playback, ${this.trackIntervals.size} tracks active`);
+        
         // Stop all track intervals
-        this.trackIntervals.forEach(interval => clearInterval(interval));
+        this.trackIntervals.forEach((interval, trackName) => {
+            Logger.log(`[MusicSystem] Stopping track: ${trackName}`);
+            clearTimeout(interval);
+        });
         this.trackIntervals.clear();
         this.currentMusicConfig = null;
     }
@@ -845,6 +880,7 @@ export class MusicSystem {
                 // Reset loop tracking
                 this.loopCount = 0;
                 this.loopStartTime = Date.now();
+                this.trackLoopCounts.clear();
                 if (musicConfig.tempo) {
                     const beatLength = 60 / musicConfig.tempo;
                     const trackDuration = Math.max(...musicConfig.tracks.map(t => t.pattern.duration || 4));
