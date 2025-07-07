@@ -27,7 +27,6 @@ node tests/e2e/test-enemy-damage.cjs
 | **smoke-test.cjs** | 基本動作確認 | ゲーム起動、メニュー表示、ゲーム開始 | ~10秒 |
 | **test-basic-flow.cjs** | 基本フロー検証 | プレイヤー移動、ジャンプ、ステージクリア、ポーズ | ~30秒 |
 | **test-enemy-damage.cjs** | 敵ダメージシステム | 敵衝突、踏みつけ、無敵時間、死亡・リスポーン | ~25秒 |
-| **test-fall-damage.cjs** | 落下ダメージ | 穴への落下、即死判定、残機システム | ~20秒 |
 | **test-jump-physics.cjs** | ジャンプ物理演算 | ジャンプ高さ、滞空時間、重力、最大落下速度 | ~15秒 |
 | **test-variable-jump.cjs** | 可変ジャンプ | ボタン長押し、短押し、ジャンプ中のリリース | ~20秒 |
 | **test-performance.cjs** | パフォーマンス監視 | FPS測定（60FPS維持）、レンダリング時間 | ~30秒 |
@@ -280,16 +279,27 @@ URLパラメータでテスト用ステージを指定可能：
 
 ### テスト作成のヒント
 
-1. **待機処理を適切に入れる**
+1. **イベント駆動テストを優先**
+   - 可能な限りイベント駆動でテストを実装すること
+   - 固定時間の待機 (`await t.wait()`) よりもイベント監視を推奨
+   - 必要なイベントが実装側になければ、パフォーマンスに大きな影響を与えない限り追加可能
    ```javascript
-   await t.wait(500); // アニメーション完了待ち
+   // 推奨: イベント駆動
+   await t.page.evaluate(() => {
+       return new Promise(resolve => {
+           window.addEventListener('player:respawned', resolve, { once: true });
+       });
+   });
+   
+   // 非推奨: 固定時間待機
+   await t.wait(500);
    ```
 
 2. **条件待機を使用**
    ```javascript
    await t.waitForCondition(() => {
        return window.game?.stateManager?.currentState?.name === 'play';
-   }, 'PlayState ready', 10000);
+   }, 10000, 'PlayState ready');
    ```
 
 3. **詳細な状態取得**

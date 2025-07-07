@@ -463,6 +463,18 @@ export class Player extends Entity {
         this._health = this._maxHealth;
         
         this.updateSprite();
+        
+        // Emit respawn event for testing and other systems
+        if (this.eventBus) {
+            this.eventBus.emit('player:respawned', { x, y });
+        }
+        
+        // Also emit as window event for E2E tests
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('player:respawned', { 
+                detail: { x, y } 
+            }));
+        }
     }
     
     takeDamage(): boolean {
@@ -477,6 +489,11 @@ export class Player extends Entity {
             
             if (this.eventBus) {
                 this.eventBus.emit('player:died');
+            }
+            
+            // Also emit as window event for E2E tests
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('player:died'));
             }
             return true; // Player died
         }
