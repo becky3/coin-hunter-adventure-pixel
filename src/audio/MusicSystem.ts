@@ -497,9 +497,10 @@ export class MusicSystem {
     }
 
     stopBGM(): void {
-        Logger.log(`[MusicSystem] stopBGM called, currentBGM: ${this.currentBGM}`);
+        Logger.log(`[MusicSystem] stopBGM called, currentBGM: ${this.currentBGM}, has timeout: ${!!this.patternLoopTimeout}`);
         
         if (!this.currentBGM && !this.patternLoopTimeout) {
+            Logger.log('[MusicSystem] Nothing to stop');
             return;
         }
         
@@ -509,6 +510,8 @@ export class MusicSystem {
         this.currentBGM = null;
         this.isPaused = false;
         this.pausedBGM = null;
+        
+        Logger.log('[MusicSystem] BGM stopped');
     }
 
     setVolume(volume: number): void {
@@ -643,14 +646,17 @@ export class MusicSystem {
         });
         
         const loopDurationMs = maxDuration * beatLength * 1000;
-        Logger.log(`[MusicSystem] Starting pattern playback, loop duration: ${maxDuration} beats (${loopDurationMs}ms)`);
+        Logger.log(`[MusicSystem] Starting pattern playback, loop duration: ${maxDuration} beats (${loopDurationMs}ms), looping: ${config.loop}`);
         
         // Schedule all patterns at once
         this.scheduleAllPatterns(config, beatLength, maxDuration);
         
         // If looping, schedule next iteration
         if (config.loop) {
+            Logger.log(`[MusicSystem] Scheduling loop continuation in ${loopDurationMs}ms`);
             this.scheduleNextLoop(config, beatLength, maxDuration);
+        } else {
+            Logger.log('[MusicSystem] Not looping - config.loop is false');
         }
     }
     
@@ -670,8 +676,9 @@ export class MusicSystem {
         const loopDurationMs = loopDuration * beatLength * 1000;
         
         this.patternLoopTimeout = setTimeout(() => {
-            if (!this.currentMusicConfig || this.currentMusicConfig !== config) {
-                Logger.log('[MusicSystem] Loop cancelled - config changed');
+            // Check if we should continue looping
+            if (!this.currentBGM || !this.currentMusicConfig) {
+                Logger.log('[MusicSystem] Loop cancelled - BGM stopped');
                 return;
             }
             
@@ -833,6 +840,12 @@ export class MusicSystem {
     // New unified methods using patterns
     playBGMFromPattern(name: BGMName): void {
         Logger.log(`[MusicSystem] playBGMFromPattern called for: ${name}`);
+        
+        // If already playing the same BGM, don't restart
+        if (this.currentBGM === name) {
+            Logger.log(`[MusicSystem] BGM ${name} is already playing, skipping`);
+            return;
+        }
         
         try {
             const resourceLoader = ResourceLoader.getInstance();
