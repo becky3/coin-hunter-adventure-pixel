@@ -55,31 +55,9 @@ export class Slime extends Enemy {
             this.animState = 'jump';
         }
 
-        // TODO: PhysicsSystemのレイキャスト実装後に有効化
-
-    }
-
-    checkWallAhead(): boolean {
-        // TODO: PhysicsSystemのレイキャストを使用
-
-        return false;
-    }
-
-    checkCliffAhead(): boolean {
-        // TODO: PhysicsSystemのレイキャストを使用
-
-        return false;
-    }
-
-    onGroundCollision(): void {
-
-        // TODO: PhysicsSystemでバウンス処理を実装
     }
 
     protected onDeath(): void {
-
-        // Slime defeated!
-        
         // TODO: 死亡エフェクトの生成
         // TODO: アイテムドロップ（コインなど）
     }

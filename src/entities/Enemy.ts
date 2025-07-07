@@ -149,10 +149,6 @@ export class Enemy extends Entity {
         }
     }
 
-    checkCliff(): boolean {
-        // TODO: PhysicsSystemと連携して実装
-        return false;
-    }
 
     render(renderer: PixelRenderer): void {
         if (!this.active) return;

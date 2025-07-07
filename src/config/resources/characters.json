@@ -16,10 +16,6 @@
       "x": 100,
       "y": 300
     },
-    "knockback": {
-      "vertical": -5,
-      "horizontal": 3
-    },
     "animations": {
       "idle": {
         "speed": 500,
