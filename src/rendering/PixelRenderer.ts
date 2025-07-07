@@ -28,21 +28,16 @@ export class PixelRenderer {
         }
         this.ctx = context;
         this.ctx.imageSmoothingEnabled = false;
-        (this.ctx as CanvasRenderingContext2D & { 
+        
+        // Create typed context for vendor-specific properties
+        const extCtx = this.ctx as CanvasRenderingContext2D & { 
             mozImageSmoothingEnabled?: boolean;
             webkitImageSmoothingEnabled?: boolean;
             msImageSmoothingEnabled?: boolean;
-        }).mozImageSmoothingEnabled = false;
-        (this.ctx as CanvasRenderingContext2D & { 
-            mozImageSmoothingEnabled?: boolean;
-            webkitImageSmoothingEnabled?: boolean;
-            msImageSmoothingEnabled?: boolean;
-        }).webkitImageSmoothingEnabled = false;
-        (this.ctx as CanvasRenderingContext2D & { 
-            mozImageSmoothingEnabled?: boolean;
-            webkitImageSmoothingEnabled?: boolean;
-            msImageSmoothingEnabled?: boolean;
-        }).msImageSmoothingEnabled = false;
+        };
+        extCtx.mozImageSmoothingEnabled = false;
+        extCtx.webkitImageSmoothingEnabled = false;
+        extCtx.msImageSmoothingEnabled = false;
         this.width = GAME_RESOLUTION.WIDTH;
         this.height = GAME_RESOLUTION.HEIGHT;
         this.canvasWidth = canvas.width;
@@ -300,21 +295,16 @@ export class PixelRenderer {
         this.height = GAME_RESOLUTION.HEIGHT;
         this.scale = Math.min(width / GAME_RESOLUTION.WIDTH, height / GAME_RESOLUTION.HEIGHT);
         this.ctx.imageSmoothingEnabled = false;
-        (this.ctx as CanvasRenderingContext2D & { 
+        
+        // Create typed context for vendor-specific properties
+        const extCtx = this.ctx as CanvasRenderingContext2D & { 
             mozImageSmoothingEnabled?: boolean;
             webkitImageSmoothingEnabled?: boolean;
             msImageSmoothingEnabled?: boolean;
-        }).mozImageSmoothingEnabled = false;
-        (this.ctx as CanvasRenderingContext2D & { 
-            mozImageSmoothingEnabled?: boolean;
-            webkitImageSmoothingEnabled?: boolean;
-            msImageSmoothingEnabled?: boolean;
-        }).webkitImageSmoothingEnabled = false;
-        (this.ctx as CanvasRenderingContext2D & { 
-            mozImageSmoothingEnabled?: boolean;
-            webkitImageSmoothingEnabled?: boolean;
-            msImageSmoothingEnabled?: boolean;
-        }).msImageSmoothingEnabled = false;
+        };
+        extCtx.mozImageSmoothingEnabled = false;
+        extCtx.webkitImageSmoothingEnabled = false;
+        extCtx.msImageSmoothingEnabled = false;
     }
     
     fillRect(x: number, y: number, width: number, height: number, color: string): void {

@@ -5,6 +5,7 @@ import { GAME_CONSTANTS } from '../config/GameConstants';
 import { PlayState } from '../states/PlayState';
 import { URLParams } from '../utils/urlParams';
 import { Logger } from '../utils/Logger';
+import type { StateEvent } from '../states/GameStateManager';
 
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
@@ -117,10 +118,11 @@ export class DebugOverlay {
 
     private setupEventListeners(): void {
         // Listen to state changes
-        const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: Event & { data?: { to?: string } }) => void) => void; currentState?: { name: string } } } }).game;
+        const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
         if (game?.stateManager) {
-            game.stateManager.addEventListener('stateChange', (event: Event & { data?: { to?: string } }) => {
-                this.updateStat('state', event.data?.to || 'unknown');
+            game.stateManager.addEventListener('stateChange', (event: StateEvent) => {
+                const stateData = event.data as { to?: string } | undefined;
+                this.updateStat('state', stateData?.to || 'unknown');
             });
         }
         
@@ -147,7 +149,7 @@ export class DebugOverlay {
             }
             
             // Stage selection controls
-            const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: Event & { data?: { to?: string } }) => void) => void; currentState?: { name: string } } } }).game;
+            const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
             const currentState = game?.stateManager?.currentState;
             
             // Debug: Log all arrow key presses in menu
