@@ -79,7 +79,7 @@ export class Enemy extends Entity {
 
     }
 
-    takeDamage(amount: number, source: { x?: number; y?: number } | null = null): void {
+    takeDamage(amount: number): void {
         if (this.invincibleTime > 0) return;
         
         this.health -= amount;
@@ -90,12 +90,6 @@ export class Enemy extends Entity {
         } else {
             this.state = 'hurt';
             this.stateTimer = 300;
-            
-            if (source && source.x !== undefined) {
-                const knockbackDirection = this.x > source.x ? 1 : -1;
-                this.vx = knockbackDirection * 100;
-                this.vy = -100;
-            }
         }
     }
 
@@ -155,10 +149,6 @@ export class Enemy extends Entity {
         }
     }
 
-    checkCliff(): boolean {
-        // TODO: PhysicsSystemと連携して実装
-        return false;
-    }
 
     render(renderer: PixelRenderer): void {
         if (!this.active) return;

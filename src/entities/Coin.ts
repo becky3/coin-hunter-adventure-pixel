@@ -104,7 +104,7 @@ export class Coin extends Entity {
         if (!collisionInfo || !collisionInfo.other) return;
         
         if (collisionInfo.other.constructor.name === 'Player' && !this.collected) {
-            // TODO: コイン収集処理を実装
+            // コイン収集処理はEntityManagerで実装されている
         }
     }
 

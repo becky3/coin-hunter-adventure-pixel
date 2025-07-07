@@ -220,9 +220,6 @@ export class DebugOverlay {
         this.toggleVisibility();
     }
 
-    private updateStats(): void {
-    }
-
     private updateStat(name: string, value: string): void {
         const element = this.statsElements.get(name);
         if (element) {

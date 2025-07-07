@@ -468,7 +468,6 @@ export class PlayState implements GameState {
         this.gameState = 'cleared';
         
         // Stop the timer (but don't show pause menu)
-        // this.hudManager.setPaused(true);
         
         // Play clear sound
         this.game.musicSystem?.playBGMFromPattern('victory');

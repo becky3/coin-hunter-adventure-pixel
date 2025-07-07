@@ -39,10 +39,6 @@ export interface PatternConfig {
     loop?: boolean;
     // Pattern duration (for drums)
     duration?: number;
-    // Start playing at specific beat (optional)
-    startAt?: number;
-    // Repeat every N beats (optional)
-    repeatEvery?: number;
 }
 
 export interface TrackConfig {

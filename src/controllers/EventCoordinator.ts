@@ -100,7 +100,6 @@ export class EventCoordinator {
             // Save checkpoint position
             Logger.log('Checkpoint reached at:', data.position);
             // TODO: Implement checkpoint functionality in LevelManager
-            // this.levelManager.setCheckpoint(data.position);
         }
     }
     
