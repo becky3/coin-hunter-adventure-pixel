@@ -48,13 +48,11 @@ export class MusicSystem {
     
     // For pattern-based playback
     private currentMusicConfig: MusicConfig | null;
-    private trackIntervals: Map<string, NodeJS.Timeout>;
+    private patternLoopTimeout: NodeJS.Timeout | null;
     
     // Debug tracking
     private loopCount: number;
     private loopStartTime: number;
-    private expectedLoopTime: number;
-    private trackLoopCounts: Map<string, number>;
     
     constructor() {
 
@@ -75,12 +73,10 @@ export class MusicSystem {
         this.isMuted = false;
         
         this.currentMusicConfig = null;
-        this.trackIntervals = new Map();
+        this.patternLoopTimeout = null;
         
         this.loopCount = 0;
         this.loopStartTime = 0;
-        this.expectedLoopTime = 0;
-        this.trackLoopCounts = new Map();
     }
     
     get isInitialized(): boolean {
@@ -503,7 +499,7 @@ export class MusicSystem {
     stopBGM(): void {
         Logger.log(`[MusicSystem] stopBGM called, currentBGM: ${this.currentBGM}`);
         
-        if (!this.currentBGM && this.trackIntervals.size === 0) {
+        if (!this.currentBGM && !this.patternLoopTimeout) {
             return;
         }
         
@@ -638,56 +634,92 @@ export class MusicSystem {
         const beatLength = config.tempo ? 60 / config.tempo : 0.5;
         this.currentMusicConfig = config;
         
-        // Play each track
+        // Calculate the longest pattern duration
+        let maxDuration = 0;
         config.tracks.forEach(track => {
-            this.playTrack(track, beatLength, config.loop || false, config);
+            const duration = track.pattern.repeatEvery || track.pattern.duration || 
+                            (track.pattern.durations ? track.pattern.durations.reduce((a, b) => a + b, 0) : 4);
+            maxDuration = Math.max(maxDuration, duration);
+        });
+        
+        const loopDurationMs = maxDuration * beatLength * 1000;
+        Logger.log(`[MusicSystem] Starting pattern playback, loop duration: ${maxDuration} beats (${loopDurationMs}ms)`);
+        
+        // Schedule all patterns at once
+        this.scheduleAllPatterns(config, beatLength, maxDuration);
+        
+        // If looping, schedule next iteration
+        if (config.loop) {
+            this.scheduleNextLoop(config, beatLength, maxDuration);
+        }
+    }
+    
+    private scheduleAllPatterns(config: MusicConfig, beatLength: number, loopDuration: number): void {
+        if (!this.audioContext) return;
+        
+        const startTime = this.audioContext.currentTime;
+        
+        config.tracks.forEach(track => {
+            this.scheduleTrackPattern(track, startTime, beatLength, loopDuration);
         });
     }
     
-    private playTrack(track: TrackConfig, beatLength: number, loop: boolean, config: MusicConfig): void {
+    private scheduleNextLoop(config: MusicConfig, beatLength: number, loopDuration: number): void {
         if (!this.audioContext) return;
         
-        let nextScheduleTime = 0;
+        const loopDurationMs = loopDuration * beatLength * 1000;
         
-        // Calculate actual pattern duration based on pattern content
-        let patternDuration = 0;
-        if (track.pattern.duration) {
-            patternDuration = track.pattern.duration;
-        } else if (track.pattern.durations) {
-            // Sum all durations for the actual pattern length
-            patternDuration = track.pattern.durations.reduce((sum, dur) => sum + dur, 0);
-        } else if (track.pattern.beats) {
-            // For drum patterns, find the latest beat time
-            const maxTime = Math.max(...track.pattern.beats.map(beat => beat.time));
-            patternDuration = Math.ceil(maxTime + 1); // Round up to next beat
-        } else {
-            patternDuration = 4; // Default to 4 beats
+        this.patternLoopTimeout = setTimeout(() => {
+            if (!this.currentMusicConfig || this.currentMusicConfig !== config) {
+                Logger.log('[MusicSystem] Loop cancelled - config changed');
+                return;
+            }
+            
+            this.loopCount++;
+            const actualTime = Date.now() - this.loopStartTime;
+            const expectedTime = this.loopCount * loopDurationMs;
+            const drift = actualTime - expectedTime;
+            
+            Logger.log(`[MusicSystem] Loop #${this.loopCount} - Expected: ${expectedTime}ms, Actual: ${actualTime}ms, Drift: ${drift}ms`);
+            
+            // Schedule all patterns for next loop
+            this.scheduleAllPatterns(config, beatLength, loopDuration);
+            
+            // Schedule next iteration
+            this.scheduleNextLoop(config, beatLength, loopDuration);
+        }, loopDurationMs);
+    }
+    
+    private scheduleTrackPattern(track: TrackConfig, baseStartTime: number, beatLength: number, loopDuration: number): void {
+        if (!this.audioContext) return;
+        
+        const pattern = track.pattern;
+        let startTime = baseStartTime;
+        
+        // Handle startAt offset
+        if (pattern.startAt) {
+            startTime += pattern.startAt * beatLength;
         }
         
-        // Handle special repeat settings
-        const repeatEvery = track.pattern.repeatEvery || patternDuration;
-        const loopDuration = repeatEvery * beatLength;
+        // For patterns with repeatEvery, schedule multiple times within the loop
+        const repeatEvery = pattern.repeatEvery || loopDuration;
+        const numRepeats = Math.floor(loopDuration / repeatEvery);
         
-        Logger.log(`[MusicSystem] Track ${track.name} - Pattern: ${patternDuration} beats, Loop every: ${repeatEvery} beats (${loopDuration}s)`)
-        
-        const schedulePattern = (startTime: number) => {
-            if (!this.isInitialized || this.isMuted || !this.audioContext) return;
+        for (let repeat = 0; repeat < numRepeats; repeat++) {
+            const repeatStartTime = startTime + (repeat * repeatEvery * beatLength);
             
-            const pattern = track.pattern;
-            
-            // Handle different pattern types
             if (pattern.beats && track.instrument.type === 'drums') {
                 // Drum pattern
                 pattern.beats.forEach(beat => {
-                    this.playDrum(beat.type, startTime + beat.time * beatLength);
+                    this.playDrum(beat.type, repeatStartTime + beat.time * beatLength);
                 });
             } else if (pattern.notes) {
                 // Melodic pattern
-                let currentTime = startTime + (pattern.startAt || 0) * beatLength;
+                let currentTime = repeatStartTime;
                 
                 pattern.notes.forEach((note, index) => {
                     const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
-                    const time = pattern.times ? startTime + pattern.times[index] : currentTime;
+                    const time = pattern.times ? repeatStartTime + pattern.times[index] * beatLength : currentTime;
                     
                     this.playNoteWithEnvelope(
                         this.getNoteFrequency(note),
@@ -704,11 +736,11 @@ export class MusicSystem {
                 });
             } else if (pattern.chords) {
                 // Chord pattern
-                let currentTime = startTime;
+                let currentTime = repeatStartTime;
                 
                 pattern.chords.forEach((chord, index) => {
                     const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
-                    const time = pattern.times ? startTime + pattern.times[index] : currentTime;
+                    const time = pattern.times ? repeatStartTime + pattern.times[index] * beatLength : currentTime;
                     
                     this.playChord(
                         chord,
@@ -722,72 +754,8 @@ export class MusicSystem {
                         currentTime += duration;
                     }
                 });
-            } else if (pattern.frequencies) {
-                // Frequency-based pattern (for sound effects)
-                pattern.frequencies.forEach((freq, index) => {
-                    const duration = pattern.durations ? pattern.durations[index] : 0.1;
-                    const time = pattern.times ? startTime + pattern.times[index] : startTime;
-                    
-                    this.playFrequencyRamp(
-                        freq,
-                        duration,
-                        time,
-                        track.instrument.type as OscillatorType,
-                        track.instrument.volume,
-                        track.instrument.envelope
-                    );
-                });
             }
-        };
-        
-        // Schedule the pattern using Web Audio API timing
-        const scheduleNext = () => {
-            if (!this.audioContext || !this.currentMusicConfig || this.currentMusicConfig !== config) {
-                Logger.log(`[MusicSystem] Track ${track.name} scheduling stopped`);
-                this.trackIntervals.delete(track.name);
-                return;
-            }
-            
-            const now = this.audioContext.currentTime;
-            
-            // Schedule ahead by 100ms to ensure smooth playback
-            while (nextScheduleTime < now + 0.1) {
-                // Track loop count for debugging
-                const loopCount = (this.trackLoopCounts.get(track.name) || 0) + 1;
-                this.trackLoopCounts.set(track.name, loopCount);
-                
-                const actualTime = Date.now() - this.loopStartTime;
-                const expectedTime = loopCount * loopDuration * 1000;
-                const drift = actualTime - expectedTime;
-                
-                Logger.log(`[MusicSystem] Track ${track.name} Loop #${loopCount} - Pattern duration: ${patternDuration} beats, Expected: ${expectedTime.toFixed(0)}ms, Actual: ${actualTime.toFixed(0)}ms, Drift: ${drift.toFixed(0)}ms`);
-                
-                schedulePattern(nextScheduleTime);
-                nextScheduleTime += loopDuration;
-                
-                // If not looping, schedule only once
-                if (!loop || track.pattern.loop === false) {
-                    Logger.log(`[MusicSystem] Track ${track.name} not looping, stopping`);
-                    this.trackIntervals.delete(track.name);
-                    return;
-                }
-            }
-            
-            // Use setTimeout with a shorter interval for checking
-            const timeoutId = setTimeout(scheduleNext, 50);
-            this.trackIntervals.set(track.name, timeoutId as unknown as NodeJS.Timeout);
-        };
-        
-        // Start scheduling
-        nextScheduleTime = this.audioContext.currentTime;
-        
-        // Handle startAt offset
-        if (track.pattern.startAt) {
-            nextScheduleTime += track.pattern.startAt * beatLength;
-            Logger.log(`[MusicSystem] Track ${track.name} will start at beat ${track.pattern.startAt}`);
         }
-        
-        scheduleNext();
     }
     
     private playNoteWithEnvelope(
@@ -852,14 +820,13 @@ export class MusicSystem {
     }
     
     private stopPatternPlayback(): void {
-        Logger.log(`[MusicSystem] Stopping pattern playback, ${this.trackIntervals.size} tracks active`);
+        Logger.log('[MusicSystem] Stopping pattern playback');
         
-        // Stop all track intervals
-        this.trackIntervals.forEach((interval, trackName) => {
-            Logger.log(`[MusicSystem] Stopping track: ${trackName}`);
-            clearTimeout(interval);
-        });
-        this.trackIntervals.clear();
+        if (this.patternLoopTimeout) {
+            clearTimeout(this.patternLoopTimeout);
+            this.patternLoopTimeout = null;
+        }
+        
         this.currentMusicConfig = null;
     }
     
@@ -880,12 +847,6 @@ export class MusicSystem {
                 // Reset loop tracking
                 this.loopCount = 0;
                 this.loopStartTime = Date.now();
-                this.trackLoopCounts.clear();
-                if (musicConfig.tempo) {
-                    const beatLength = 60 / musicConfig.tempo;
-                    const trackDuration = Math.max(...musicConfig.tracks.map(t => t.pattern.duration || 4));
-                    this.expectedLoopTime = trackDuration * beatLength * 1000;
-                }
                 
                 this.playMusicPattern(musicConfig);
             } else {
