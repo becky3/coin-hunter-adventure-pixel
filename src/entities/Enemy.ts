@@ -112,11 +112,11 @@ export class Enemy extends Entity {
         const enemyTop = this.y;
         
         // プレイヤーが小さい場合は踏みつけ判定を厳しくする
-        const stompThreshold = player.isSmall ? 2 : 4;
+        const stompThreshold = player.isSmall ? -2 : 4;
         
         const wasAbove = playerPrevBottom <= enemyTop + stompThreshold;
         const isNowColliding = playerBottom >= enemyTop;
-        const isFalling = player.vy >= 0;
+        const isFalling = player.vy > 0;  // 下向きの速度がある時のみ（静止状態を除外）
         
         if (wasAbove && isNowColliding && isFalling) {
             this.takeDamage(1, player);

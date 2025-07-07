@@ -48,28 +48,47 @@ async function runTest() {
         // Test 1: Verify player becomes small after first damage
         console.log('\n--- Test 1: First Damage (Large -> Small) ---');
         
-        // Move player to collide with enemy
-        await t.movePlayer('right', 1000);
-        await t.wait(500);
-        
-        // Check player became small
-        const afterFirstDamage = await t.page.evaluate(() => {
+        // Get initial lives and position
+        const beforeDamage = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
             const player = state?.player || state?.entityManager?.getPlayer?.();
-            return player ? {
-                width: player.width,
-                height: player.height,
-                isSmall: player.isSmall,
-                isDead: player.isDead
-            } : null;
+            return {
+                lives: state?.lives || 0,
+                player: player ? {
+                    x: player.x,
+                    y: player.y,
+                    width: player.width,
+                    height: player.height,
+                    isSmall: player.isSmall
+                } : null
+            };
         });
+        console.log('Before damage:', beforeDamage);
         
-        console.log('Player after first damage:', afterFirstDamage);
-        
-        if (!afterFirstDamage.isSmall) {
-            throw new Error('Player did not become small after first damage');
+        // Move right until we take damage (player becomes small)
+        let damageReceived = false;
+        for (let i = 0; i < 5 && !damageReceived; i++) {
+            await t.movePlayer('right', 300);
+            await t.wait(200);
+            
+            const currentState = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                const player = state?.player || state?.entityManager?.getPlayer?.();
+                return {
+                    lives: state?.lives || 0,
+                    isSmall: player?.isSmall || false
+                };
+            });
+            
+            if (currentState.isSmall) {
+                damageReceived = true;
+                console.log('✅ Player became small after collision');
+            }
         }
-        console.log('✅ Player became small correctly');
+        
+        if (!damageReceived) {
+            throw new Error('Failed to receive damage from enemy');
+        }
         
         await t.screenshot('player-small');
         
@@ -79,51 +98,91 @@ async function runTest() {
         // Wait for invulnerability to end
         await t.wait(2500);
         
-        // Get player spawn position for comparison
-        const spawnPosition = await t.page.evaluate(() => {
+        // Get current state before second collision
+        const beforeSecondCollision = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
-            const levelManager = state?.levelManager;
-            const spawn = levelManager?.getPlayerSpawn?.() || { x: 2, y: 11 };
-            return { x: spawn.x * 16, y: spawn.y * 16 };
+            const player = state?.player || state?.entityManager?.getPlayer?.();
+            return {
+                lives: state?.lives || 0,
+                isSmall: player?.isSmall || false,
+                position: player ? { x: player.x, y: player.y } : null
+            };
         });
-        console.log('Expected spawn position:', spawnPosition);
+        console.log('Before second collision:', beforeSecondCollision);
         
-        // Move to enemy again to die
-        await t.movePlayer('left', 300);
-        await t.wait(200);
-        await t.movePlayer('right', 1000);
-        await t.wait(1000); // Wait for death and respawn
+        // Move to collide with enemy again (should die this time)
+        let playerDied = false;
+        const initialLives = beforeSecondCollision.lives;
+        
+        for (let i = 0; i < 5 && !playerDied; i++) {
+            // Move towards enemies
+            await t.movePlayer('right', 400);
+            await t.wait(300);
+            
+            const currentState = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                return state?.lives || 0;
+            });
+            
+            if (currentState < initialLives) {
+                playerDied = true;
+                console.log(`✅ Player died! Lives: ${initialLives} -> ${currentState}`);
+                break;
+            }
+            
+            // Try moving left then right to find enemy
+            await t.movePlayer('left', 200);
+            await t.wait(200);
+        }
+        
+        if (!playerDied) {
+            throw new Error('Player did not die from second collision while small');
+        }
+        
+        // Wait for respawn animation
+        await t.wait(1000);
         
         // Check player after respawn
         const afterRespawn = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
             const player = state?.player || state?.entityManager?.getPlayer?.();
-            return player ? {
-                position: { x: player.x, y: player.y },
-                width: player.width,
-                height: player.height,
-                isSmall: player.isSmall,
-                isDead: player.isDead
-            } : null;
+            const spawn = state?.levelManager?.getPlayerSpawn?.() || { x: 2, y: 11 };
+            return {
+                player: player ? {
+                    position: { x: Math.round(player.x), y: Math.round(player.y) },
+                    width: player.width,
+                    height: player.height,
+                    isSmall: player.isSmall,
+                    isDead: player.isDead,
+                    invulnerable: player.invulnerable
+                } : null,
+                spawn: { x: spawn.x * 16, y: spawn.y * 16 }
+            };
         });
         
         console.log('Player after respawn:', afterRespawn);
         
+        // Check if player respawned at spawn position
+        if (afterRespawn.player && 
+            Math.abs(afterRespawn.player.position.x - afterRespawn.spawn.x) < 50) {
+            console.log('✅ Player respawned near spawn position');
+        }
+        
         // Verify player is large after respawn
-        if (afterRespawn.isSmall) {
+        if (afterRespawn.player.isSmall) {
             throw new Error('❌ BUG: Player is still small after respawn! Issue 106 not fixed.');
         }
         
-        if (afterRespawn.width !== initialSize.width || afterRespawn.height !== initialSize.height) {
-            throw new Error(`❌ Player size incorrect after respawn. Expected: ${initialSize.width}x${initialSize.height}, Got: ${afterRespawn.width}x${afterRespawn.height}`);
+        if (afterRespawn.player.width !== initialSize.width || afterRespawn.player.height !== initialSize.height) {
+            throw new Error(`❌ Player size incorrect after respawn. Expected: ${initialSize.width}x${initialSize.height}, Got: ${afterRespawn.player.width}x${afterRespawn.player.height}`);
         }
         
         console.log('✅ Player respawned with correct large size');
         
         await t.screenshot('player-respawned-large');
         
-        // Test 3: Verify stomping behavior when small
-        console.log('\n--- Test 3: Stomping While Small ---');
+        // Test 3: Verify horizontal collision behavior when small
+        console.log('\n--- Test 3: Horizontal Collision While Small ---');
         
         // Make player small again
         await t.wait(2500); // Wait for invulnerability
@@ -144,55 +203,89 @@ async function runTest() {
             await t.wait(500);
         }
         
-        // Position player above enemy for stomp test
-        await t.wait(2500); // Wait for invulnerability
+        // Wait for invulnerability to end
+        await t.wait(2500);
         
-        // Find enemy position
-        const enemyPos = await t.page.evaluate(() => {
+        // Find next enemy position
+        const enemyInfo = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
             const enemies = state?.entityManager?.enemies || [];
-            if (enemies.length > 1 && !enemies[1].isDead) {
-                return { x: enemies[1].x, y: enemies[1].y };
+            const aliveEnemies = enemies.filter(e => !e.isDead);
+            if (aliveEnemies.length > 0) {
+                const enemy = aliveEnemies[0];
+                return { 
+                    x: enemy.x, 
+                    y: enemy.y,
+                    index: enemies.indexOf(enemy),
+                    type: enemy.constructor.name
+                };
             }
             return null;
         });
         
-        if (enemyPos) {
-            console.log('Testing stomp from small state at enemy position:', enemyPos);
+        if (enemyInfo) {
+            console.log('Testing horizontal collision with enemy:', enemyInfo);
             
-            // Try to position for a stomp (this is difficult to do precisely)
-            // Move left of the enemy
-            await t.movePlayer('left', 500);
-            await t.wait(200);
-            
-            // Jump and move right to land on enemy
-            await t.page.keyboard.down(' '); // Start jump
-            await t.wait(100);
-            await t.movePlayer('right', 400);
-            await t.page.keyboard.up(' '); // Release jump
-            await t.wait(500);
-            
-            // Check if enemy was defeated or player took damage
-            const stompResult = await t.page.evaluate(() => {
+            // Get player position
+            const playerPos = await t.page.evaluate(() => {
                 const state = window.game?.stateManager?.currentState;
                 const player = state?.player || state?.entityManager?.getPlayer?.();
+                return player ? { x: player.x, y: player.y } : null;
+            });
+            
+            console.log('Player position before collision:', playerPos);
+            
+            // Move away and then collide horizontally (not from above)
+            await t.movePlayer('left', 800);
+            await t.wait(500);
+            
+            // Get initial game state
+            const beforeCollision = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
                 const enemies = state?.entityManager?.enemies || [];
                 return {
-                    playerAlive: player && !player.isDead,
-                    playerSmall: player?.isSmall,
-                    enemyDefeated: enemies[1]?.isDead || false,
-                    lives: state?.lives || 0
+                    lives: state?.lives || 0,
+                    enemyStates: enemies.map(e => ({ isDead: e.isDead }))
                 };
             });
             
-            console.log('Stomp attempt result:', stompResult);
+            console.log('Before collision - Lives:', beforeCollision.lives);
             
-            // With the stricter threshold, stomping while small should be harder
-            // Both outcomes are acceptable as long as the game doesn't crash
-            if (stompResult.enemyDefeated) {
-                console.log('✅ Enemy was defeated by stomp (still possible with precise timing)');
+            // Move horizontally into enemy (no jumping)
+            await t.movePlayer('right', 1500);
+            await t.wait(500);
+            
+            // Check result after collision
+            const afterCollision = await t.page.evaluate((enemyIndex) => {
+                const state = window.game?.stateManager?.currentState;
+                const player = state?.player || state?.entityManager?.getPlayer?.();
+                const enemies = state?.entityManager?.enemies || [];
+                const targetEnemy = enemies[enemyIndex];
+                
+                return {
+                    playerDied: player?.isDead || false,
+                    playerSmall: player?.isSmall,
+                    lives: state?.lives || 0,
+                    enemyDied: targetEnemy?.isDead || false,
+                    enemyIndex: enemyIndex
+                };
+            }, enemyInfo.index);
+            
+            console.log('After horizontal collision:', afterCollision);
+            
+            // Verify correct behavior
+            if (afterCollision.enemyDied && afterCollision.lives === beforeCollision.lives) {
+                throw new Error('❌ BUG: Enemy was defeated by horizontal collision while player was small! Player should have taken damage instead.');
+            }
+            
+            if (afterCollision.lives < beforeCollision.lives && !afterCollision.enemyDied) {
+                console.log('✅ Correct: Player took damage from horizontal collision while small, enemy survived');
             } else {
-                console.log('✅ Stomp failed and player took damage (expected with stricter threshold)');
+                console.log('Result:', {
+                    livesBefore: beforeCollision.lives,
+                    livesAfter: afterCollision.lives,
+                    enemyDied: afterCollision.enemyDied
+                });
             }
         }
         
