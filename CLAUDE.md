@@ -198,6 +198,7 @@ gh issue comment [Issue番号] --body "作業を開始します。
 - E2Eテストは `npm test` で実行（全てのtest-*.cjsファイルが自動実行）
 - 個別テスト: `npm run test:e2e -- tests/e2e/[テスト名].cjs`
 - テストログは `tests/logs/` に自動保存される
+- **Push時のフルテスト**: `RUN_FULL_TESTS=true git push`（重要な変更時は必須）
 
 #### テスト実行のコツ
 
