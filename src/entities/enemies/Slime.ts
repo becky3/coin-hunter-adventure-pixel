@@ -57,10 +57,6 @@ export class Slime extends Enemy {
 
     }
 
-    protected onDeath(): void {
-        // TODO: 死亡エフェクトの生成
-        // TODO: アイテムドロップ（コインなど）
-    }
 
     render(renderer: PixelRenderer): void {
         if (!this.active) return;
