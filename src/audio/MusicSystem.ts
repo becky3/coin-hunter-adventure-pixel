@@ -2,6 +2,9 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { MusicConfig, TrackConfig, FrequencyRamp } from '../config/MusicPatternConfig';
 import { Logger } from '../utils/Logger';
 
+// Constants
+const MS_PER_SEC = 1000;
+
 interface ActiveNode {
     oscillator: OscillatorNode | AudioBufferSourceNode;
     gainNode: GainNode;
@@ -36,7 +39,6 @@ export class MusicSystem {
     private listeners: Map<string, Array<(data: unknown) => void>>;
 
     private currentBGM: BGMType;
-    private bgmLoopInterval: NodeJS.Timeout | null;
 
     private isPaused: boolean;
     private pausedBGM: BGMType;
@@ -49,7 +51,8 @@ export class MusicSystem {
     
     // For pattern-based playback
     private currentMusicConfig: MusicConfig | null;
-    private trackIntervals: Map<string, NodeJS.Timeout>;
+    private patternLoopTimeout: NodeJS.Timeout | null;
+    
     
     constructor() {
 
@@ -59,7 +62,6 @@ export class MusicSystem {
         this.listeners = new Map();
 
         this.currentBGM = null;
-        this.bgmLoopInterval = null;
 
         this.isPaused = false;
         this.pausedBGM = null;
@@ -71,7 +73,7 @@ export class MusicSystem {
         this.isMuted = false;
         
         this.currentMusicConfig = null;
-        this.trackIntervals = new Map();
+        this.patternLoopTimeout = null;
     }
     
     get isInitialized(): boolean {
@@ -238,226 +240,6 @@ export class MusicSystem {
         });
     }
 
-    playTitleBGM(): void {
-        if (this.currentBGM === 'title') {
-            return;
-        }
-        
-        this.stopBGM();
-        
-        if (!this.isInitialized || !this.audioContext) {
-            return;
-        }
-        
-        const bpm = 120;
-        const beatLength = 60 / bpm;
-        
-        const playBar = () => {
-            if (!this.isInitialized || this.isMuted || this.currentBGM !== 'title' || !this.audioContext) return;
-            
-            const now = this.audioContext.currentTime;
-
-            const bassPattern = ['C3', 'C3', 'G3', 'G3', 'A3', 'A3', 'F3', 'F3'];
-            for (let i = 0; i < 8; i++) {
-                this.playNote(
-                    this.getNoteFrequency(bassPattern[i]),
-                    beatLength * 0.9,
-                    now + i * beatLength * 0.5,
-                    'sine',
-                    0.4
-                );
-            }
-
-            const chords = [
-                ['C4', 'E4', 'G4'],
-                ['G4', 'B4', 'D5'],
-                ['A4', 'C5', 'E5'],
-                ['F4', 'A4', 'C5']
-            ];
-            
-            for (let i = 0; i < 4; i++) {
-                this.playChord(
-                    chords[i],
-                    beatLength * 0.9,
-                    now + i * beatLength,
-                    'triangle',
-                    0.2
-                );
-            }
-
-            const melody: NoteInfo[] = [
-                { note: 'E5', duration: 0.5 },
-                { note: 'D5', duration: 0.5 },
-                { note: 'C5', duration: 1 },
-                { note: 'G4', duration: 1 },
-                { note: 'A4', duration: 0.5 },
-                { note: 'B4', duration: 0.5 },
-                { note: 'C5', duration: 1 }
-            ];
-            
-            let melodyTime = now;
-            melody.forEach(({ note, duration }) => {
-                if (note) {
-                    this.playNote(
-                        this.getNoteFrequency(note),
-                        duration * beatLength * 0.9,
-                        melodyTime,
-                        'square',
-                        0.3
-                    );
-                }
-                melodyTime += duration * beatLength;
-            });
-        };
-        
-        playBar();
-        
-        this.bgmLoopInterval = setInterval(() => {
-            playBar();
-        }, beatLength * 4 * 1000);
-        
-        this.currentBGM = 'title';
-    }
-
-    playGameBGM(): void {
-        if (this.currentBGM === 'game') {
-            return;
-        }
-        
-        this.stopBGM();
-        
-        if (!this.isInitialized || !this.audioContext) {
-            return;
-        }
-        
-        const bpm = 140;
-        const beatLength = 60 / bpm;
-        let currentBeat = 0;
-        
-        const playBar = () => {
-            if (!this.isInitialized || this.isMuted || this.currentBGM !== 'game' || !this.audioContext) return;
-            
-            const now = this.audioContext.currentTime;
-
-            for (let i = 0; i < 4; i++) {
-
-                this.playDrum('kick', now + i * beatLength);
-
-                if (i === 1 || i === 3) {
-                    this.playDrum('snare', now + i * beatLength);
-                }
-
-                for (let j = 0; j < 2; j++) {
-                    this.playDrum('hihat', now + i * beatLength + j * beatLength * 0.5);
-                }
-            }
-
-            const bassPattern = [
-                'C3', 'E3', 'G3', 'E3',
-                'F3', 'A3', 'C4', 'A3',
-                'G3', 'B3', 'D4', 'B3',
-                'C3', 'E3', 'G3', 'E3'
-            ];
-            
-            for (let i = 0; i < 16; i++) {
-                this.playNote(
-                    this.getNoteFrequency(bassPattern[i]),
-                    beatLength * 0.23,
-                    now + i * beatLength * 0.25,
-                    'sawtooth',
-                    0.3
-                );
-            }
-
-            if (currentBeat % 8 >= 4) {
-                const leadNotes: NoteInfo[] = [
-                    { note: 'G5', duration: 0.5 },
-                    { note: 'E5', duration: 0.5 },
-                    { note: 'C5', duration: 0.5 },
-                    { note: 'E5', duration: 0.5 },
-                    { note: 'G5', duration: 1 },
-                    { note: 'A5', duration: 0.5 },
-                    { note: 'G5', duration: 0.5 }
-                ];
-                
-                let leadTime = now;
-                leadNotes.forEach(({ note, duration }) => {
-                    if (note) {
-                        this.playNote(
-                            this.getNoteFrequency(note),
-                            duration * beatLength * 0.8,
-                            leadTime,
-                            'square',
-                            0.25
-                        );
-                    }
-                    leadTime += duration * beatLength;
-                });
-            }
-            
-            currentBeat += 4;
-        };
-        
-        playBar();
-        
-        this.bgmLoopInterval = setInterval(() => {
-            playBar();
-        }, beatLength * 4 * 1000);
-        
-        this.currentBGM = 'game';
-    }
-
-    playVictoryJingle(): void {
-        this.stopBGM();
-        if (!this.isInitialized || !this.audioContext) return;
-        
-        const now = this.audioContext.currentTime;
-        const notes: NoteInfo[] = [
-            { note: 'C5', time: 0, duration: 0.2 },
-            { note: 'E5', time: 0.2, duration: 0.2 },
-            { note: 'G5', time: 0.4, duration: 0.2 },
-            { note: 'C6', time: 0.6, duration: 0.6 }
-        ];
-        
-        notes.forEach(({ note, time, duration }) => {
-            if (note) {
-                this.playNote(
-                    this.getNoteFrequency(note),
-                    duration,
-                    now + time,
-                    'sine',
-                    0.4
-                );
-            }
-        });
-
-        this.playChord(['C4', 'E4', 'G4', 'C5'], 1.2, now, 'triangle', 0.3);
-    }
-
-    playGameOverJingle(): void {
-        this.stopBGM();
-        if (!this.isInitialized || !this.audioContext) return;
-        
-        const now = this.audioContext.currentTime;
-        const notes: NoteInfo[] = [
-            { note: 'C4', time: 0, duration: 0.3 },
-            { note: 'B3', time: 0.3, duration: 0.3 },
-            { note: 'A3', time: 0.6, duration: 0.3 },
-            { note: 'G3', time: 0.9, duration: 0.6 }
-        ];
-        
-        notes.forEach(({ note, time, duration }) => {
-            if (note) {
-                this.playNote(
-                    this.getNoteFrequency(note),
-                    duration,
-                    now + time,
-                    'sine',
-                    0.3
-                );
-            }
-        });
-    }
 
     private playSoundEffect(frequency: number, duration: number, type: OscillatorType = 'square', volume: number | null = null, envelope: EnvelopeSettings | null = null): void {
         if (!this.isInitialized || this.isMuted || !this.audioContext || !this.masterGain) return;
@@ -545,7 +327,7 @@ export class MusicSystem {
             setTimeout(() => {
                 if (!this.isInitialized || this.isMuted || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'sine', 0.5);
-            }, time * 1000);
+            }, time * MS_PER_SEC);
         });
         
         setTimeout(() => {
@@ -617,7 +399,7 @@ export class MusicSystem {
             setTimeout(() => {
                 if (!this.isInitialized || this.isMuted || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'sine', 0.6);
-            }, time * 1000);
+            }, time * MS_PER_SEC);
         });
     }
 
@@ -645,7 +427,7 @@ export class MusicSystem {
                     sustain: 0.5,
                     release: 0.2
                 });
-            }, time * 1000);
+            }, time * MS_PER_SEC);
         });
     }
 
@@ -681,11 +463,6 @@ export class MusicSystem {
 
         this.pausedBGM = this.currentBGM;
         
-        if (this.bgmLoopInterval) {
-            clearInterval(this.bgmLoopInterval);
-            this.bgmLoopInterval = null;
-        }
-        
         this.stopAllActiveNodes();
         
         this.isPaused = true;
@@ -702,24 +479,16 @@ export class MusicSystem {
         const bgmToResume = this.pausedBGM;
         this.currentBGM = null;
 
-        if (bgmToResume === 'title') {
-            this.playTitleBGM();
-        } else if (bgmToResume === 'game') {
-            this.playGameBGM();
+        if (bgmToResume) {
+            this.playBGMFromPattern(bgmToResume);
         }
         
         this.pausedBGM = null;
     }
 
     stopBGM(): void {
-
-        if (!this.currentBGM && !this.bgmLoopInterval && this.trackIntervals.size === 0) {
+        if (!this.currentBGM && !this.patternLoopTimeout) {
             return;
-        }
-        
-        if (this.bgmLoopInterval) {
-            clearInterval(this.bgmLoopInterval);
-            this.bgmLoopInterval = null;
         }
         
         this.stopPatternPlayback();
@@ -768,6 +537,9 @@ export class MusicSystem {
             this._isInitialized = false;
         } catch (error) {
             Logger.error('音楽システムのクリーンアップエラー:', error);
+            if (error instanceof Error && error.stack) {
+                Logger.error('Stack trace:', error.stack);
+            }
         }
     }
     
@@ -812,22 +584,8 @@ export class MusicSystem {
             return;
         }
         
-        switch (name) {
-        case 'title':
-            this.playTitleBGM();
-            break;
-        case 'game':
-            this.playGameBGM();
-            break;
-        case 'victory':
-            this.playVictoryJingle();
-            break;
-        case 'gameover':
-            this.playGameOverJingle();
-            break;
-        default:
-            Logger.warn(`[MusicSystem] Unknown BGM: ${name}`);
-        }
+        // Always use pattern-based playback
+        this.playBGMFromPattern(name);
     }
     
     playSE(name: SEName): void {
@@ -867,36 +625,82 @@ export class MusicSystem {
         const beatLength = config.tempo ? 60 / config.tempo : 0.5;
         this.currentMusicConfig = config;
         
-        // Play each track
+        // Calculate the longest pattern duration
+        let maxDuration = 0;
         config.tracks.forEach(track => {
-            this.playTrack(track, beatLength, config.loop || false, config);
+            const duration = track.pattern.repeatEvery || track.pattern.duration || 
+                            (track.pattern.durations ? track.pattern.durations.reduce((a, b) => a + b, 0) : 4);
+            maxDuration = Math.max(maxDuration, duration);
+        });
+        
+        // Schedule all patterns at once
+        this.scheduleAllPatterns(config, beatLength, maxDuration);
+        
+        // If looping, schedule next iteration
+        if (config.loop) {
+            this.scheduleNextLoop(config, beatLength, maxDuration);
+        }
+    }
+    
+    private scheduleAllPatterns(config: MusicConfig, beatLength: number, loopDuration: number): void {
+        if (!this.audioContext) return;
+        
+        const startTime = this.audioContext.currentTime;
+        
+        config.tracks.forEach(track => {
+            this.scheduleTrackPattern(track, startTime, beatLength, loopDuration);
         });
     }
     
-    private playTrack(track: TrackConfig, beatLength: number, loop: boolean, config: MusicConfig): void {
+    private scheduleNextLoop(config: MusicConfig, beatLength: number, loopDuration: number): void {
         if (!this.audioContext) return;
         
-        let nextScheduleTime = 0;
-        const loopDuration = (track.pattern.duration || 4) * beatLength; // Default 4 beats
+        const loopDurationMs = loopDuration * beatLength * MS_PER_SEC;
         
-        const schedulePattern = (startTime: number) => {
-            if (!this.isInitialized || this.isMuted || !this.audioContext) return;
+        this.patternLoopTimeout = setTimeout(() => {
+            // Check if we should continue looping
+            if (!this.currentBGM || !this.currentMusicConfig) {
+                return;
+            }
             
-            const pattern = track.pattern;
+            // Schedule all patterns for next loop
+            this.scheduleAllPatterns(config, beatLength, loopDuration);
             
-            // Handle different pattern types
+            // Schedule next iteration
+            this.scheduleNextLoop(config, beatLength, loopDuration);
+        }, loopDurationMs);
+    }
+    
+    private scheduleTrackPattern(track: TrackConfig, baseStartTime: number, beatLength: number, loopDuration: number): void {
+        if (!this.audioContext) return;
+        
+        const pattern = track.pattern;
+        let startTime = baseStartTime;
+        
+        // Handle startAt offset
+        if (pattern.startAt) {
+            startTime += pattern.startAt * beatLength;
+        }
+        
+        // For patterns with repeatEvery, schedule multiple times within the loop
+        const repeatEvery = pattern.repeatEvery || loopDuration;
+        const numRepeats = Math.floor(loopDuration / repeatEvery);
+        
+        for (let repeat = 0; repeat < numRepeats; repeat++) {
+            const repeatStartTime = startTime + (repeat * repeatEvery * beatLength);
+            
             if (pattern.beats && track.instrument.type === 'drums') {
                 // Drum pattern
                 pattern.beats.forEach(beat => {
-                    this.playDrum(beat.type, startTime + beat.time * beatLength);
+                    this.playDrum(beat.type, repeatStartTime + beat.time * beatLength);
                 });
             } else if (pattern.notes) {
                 // Melodic pattern
-                let currentTime = startTime + (pattern.startAt || 0) * beatLength;
+                let currentTime = repeatStartTime;
                 
                 pattern.notes.forEach((note, index) => {
                     const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
-                    const time = pattern.times ? startTime + pattern.times[index] : currentTime;
+                    const time = pattern.times ? repeatStartTime + pattern.times[index] * beatLength : currentTime;
                     
                     this.playNoteWithEnvelope(
                         this.getNoteFrequency(note),
@@ -913,11 +717,11 @@ export class MusicSystem {
                 });
             } else if (pattern.chords) {
                 // Chord pattern
-                let currentTime = startTime;
+                let currentTime = repeatStartTime;
                 
                 pattern.chords.forEach((chord, index) => {
                     const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
-                    const time = pattern.times ? startTime + pattern.times[index] : currentTime;
+                    const time = pattern.times ? repeatStartTime + pattern.times[index] * beatLength : currentTime;
                     
                     this.playChord(
                         chord,
@@ -931,53 +735,8 @@ export class MusicSystem {
                         currentTime += duration;
                     }
                 });
-            } else if (pattern.frequencies) {
-                // Frequency-based pattern (for sound effects)
-                pattern.frequencies.forEach((freq, index) => {
-                    const duration = pattern.durations ? pattern.durations[index] : 0.1;
-                    const time = pattern.times ? startTime + pattern.times[index] : startTime;
-                    
-                    this.playFrequencyRamp(
-                        freq,
-                        duration,
-                        time,
-                        track.instrument.type as OscillatorType,
-                        track.instrument.volume,
-                        track.instrument.envelope
-                    );
-                });
             }
-        };
-        
-        // Schedule the pattern using Web Audio API timing
-        const scheduleNext = () => {
-            if (!this.audioContext || !this.currentMusicConfig || this.currentMusicConfig !== config) {
-                this.trackIntervals.delete(track.name);
-                return;
-            }
-            
-            const now = this.audioContext.currentTime;
-            
-            // Schedule ahead by 100ms to ensure smooth playback
-            while (nextScheduleTime < now + 0.1) {
-                schedulePattern(nextScheduleTime);
-                nextScheduleTime += loopDuration;
-                
-                // If not looping, schedule only once
-                if (!loop || track.pattern.loop === false) {
-                    this.trackIntervals.delete(track.name);
-                    return;
-                }
-            }
-            
-            // Use setTimeout with a shorter interval for checking
-            const timeoutId = setTimeout(scheduleNext, 50);
-            this.trackIntervals.set(track.name, timeoutId as unknown as NodeJS.Timeout);
-        };
-        
-        // Start scheduling
-        nextScheduleTime = this.audioContext.currentTime;
-        scheduleNext();
+        }
     }
     
     private playNoteWithEnvelope(
@@ -1042,14 +801,21 @@ export class MusicSystem {
     }
     
     private stopPatternPlayback(): void {
-        // Stop all track intervals
-        this.trackIntervals.forEach(interval => clearInterval(interval));
-        this.trackIntervals.clear();
+        if (this.patternLoopTimeout) {
+            clearTimeout(this.patternLoopTimeout);
+            this.patternLoopTimeout = null;
+        }
+        
         this.currentMusicConfig = null;
     }
     
     // New unified methods using patterns
     playBGMFromPattern(name: BGMName): void {
+        // If already playing the same BGM, don't restart
+        if (this.currentBGM === name) {
+            return;
+        }
+        
         try {
             const resourceLoader = ResourceLoader.getInstance();
             const musicConfig = resourceLoader.getMusicPattern('bgm', name);
@@ -1058,14 +824,17 @@ export class MusicSystem {
                 this.stopBGM();
                 this.stopPatternPlayback();
                 this.currentBGM = name as BGMType;
+                
+                
                 this.playMusicPattern(musicConfig);
             } else {
-                // Fallback to existing implementation
-                this.playBGM(name);
+                Logger.error(`[MusicSystem] No pattern config found for BGM: ${name}`);
             }
-        } catch {
-            // ResourceLoader not initialized, use existing implementation
-            this.playBGM(name);
+        } catch (error) {
+            Logger.error(`[MusicSystem] Error loading BGM pattern for ${name}:`, error);
+            if (error instanceof Error && error.stack) {
+                Logger.error('Stack trace:', error.stack);
+            }
         }
     }
     

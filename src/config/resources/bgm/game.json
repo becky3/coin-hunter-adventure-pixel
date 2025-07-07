@@ -24,9 +24,23 @@
           { "type": "kick", "time": 3 },
           { "type": "snare", "time": 3 },
           { "type": "hihat", "time": 3 },
-          { "type": "hihat", "time": 3.5 }
+          { "type": "hihat", "time": 3.5 },
+          { "type": "kick", "time": 4 },
+          { "type": "hihat", "time": 4 },
+          { "type": "hihat", "time": 4.5 },
+          { "type": "kick", "time": 5 },
+          { "type": "snare", "time": 5 },
+          { "type": "hihat", "time": 5 },
+          { "type": "hihat", "time": 5.5 },
+          { "type": "kick", "time": 6 },
+          { "type": "hihat", "time": 6 },
+          { "type": "snare", "time": 6.5 },
+          { "type": "kick", "time": 7 },
+          { "type": "kick", "time": 7.25 },
+          { "type": "snare", "time": 7.5 },
+          { "type": "snare", "time": 7.75 }
         ],
-        "duration": 4,
+        "duration": 8,
         "loop": true
       }
     },
@@ -41,14 +55,23 @@
           "C3", "E3", "G3", "E3",
           "F3", "A3", "C4", "A3",
           "G3", "B3", "D4", "B3",
-          "C3", "E3", "G3", "E3"
+          "C3", "E3", "G3", "E3",
+          "F3", "A3", "C4", "A3",
+          "C3", "E3", "G3", "E3",
+          "G3", "B3", "D4", "B3",
+          "C3", "C3", "G3", "G3"
         ],
         "durations": [
           0.25, 0.25, 0.25, 0.25,
           0.25, 0.25, 0.25, 0.25,
           0.25, 0.25, 0.25, 0.25,
+          0.25, 0.25, 0.25, 0.25,
+          0.25, 0.25, 0.25, 0.25,
+          0.25, 0.25, 0.25, 0.25,
+          0.25, 0.25, 0.25, 0.25,
           0.25, 0.25, 0.25, 0.25
         ],
+        "duration": 8,
         "loop": true
       }
     },
@@ -61,8 +84,8 @@
       "pattern": {
         "notes": ["G5", "E5", "C5", "E5", "G5", "A5", "G5"],
         "durations": [0.5, 0.5, 0.5, 0.5, 1, 0.5, 0.5],
-        "startAt": 4,
-        "repeatEvery": 8,
+        "times": [4, 4.5, 5, 5.5, 6, 7, 7.5],
+        "duration": 8,
         "loop": true
       }
     }
