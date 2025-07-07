@@ -303,4 +303,4 @@ if (require.main === module) {
     runTest().catch(console.error);
 }
 
-module.exports = { runTest };
+module.exports = runTest;
