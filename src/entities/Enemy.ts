@@ -107,8 +107,6 @@ export class Enemy extends Entity {
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || !this.active || player.invulnerable) return;
         
-        const playerBottom = player.y + player.height;
-        const enemyTop = this.y;
         const enemyCenter = this.y + this.height / 2;
         
         // 踏みつけ判定：プレイヤーの中心が敵の上半分より上にあり、下向きに移動している
