@@ -440,6 +440,8 @@ export class Player extends Entity {
     
     
     respawn(x: number, y: number): void {
+        Logger.log(`[Player] respawn called at (${x}, ${y})`);
+        
         // Reset to large size first
         this.isSmall = false;
         this.width = DEFAULT_PLAYER_CONFIG.width;
@@ -464,13 +466,13 @@ export class Player extends Entity {
         
         this.updateSprite();
         
-        // Emit respawn event for testing and other systems
         if (this.eventBus) {
+            Logger.log('[Player] Emitting player:respawned event');
             this.eventBus.emit('player:respawned', { x, y });
         }
         
-        // Also emit as window event for E2E tests
         if (typeof window !== 'undefined') {
+            Logger.log('[Player] Dispatching window player:respawned event');
             window.dispatchEvent(new CustomEvent('player:respawned', { 
                 detail: { x, y } 
             }));
@@ -491,7 +493,6 @@ export class Player extends Entity {
                 this.eventBus.emit('player:died');
             }
             
-            // Also emit as window event for E2E tests
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('player:died'));
             }

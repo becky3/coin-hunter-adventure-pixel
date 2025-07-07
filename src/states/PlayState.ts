@@ -283,6 +283,7 @@ export class PlayState implements GameState {
             // Death by falling (instant death, lose a life)
             if (player.y > dimensions.height && !this.isHandlingDeath) {
                 Logger.log('[PlayState] Player fell! Instant death.');
+                Logger.log(`[PlayState] Current lives: ${this.lives}, isHandlingDeath: ${this.isHandlingDeath}`);
                 this.handlePlayerDeath();
             }
         }
@@ -519,20 +520,30 @@ export class PlayState implements GameState {
     }
 
     private handlePlayerDeath(): void {
-        if (this.isHandlingDeath) return; // Prevent multiple calls
+        if (this.isHandlingDeath) {
+            Logger.log('[PlayState] handlePlayerDeath called but already handling death');
+            return;
+        }
         
         const player = this.entityManager.getPlayer();
-        if (!player) return;
+        if (!player) {
+            Logger.log('[PlayState] handlePlayerDeath called but no player found');
+            return;
+        }
         
         this.isHandlingDeath = true; // Set flag to prevent re-entry
+        Logger.log(`[PlayState] handlePlayerDeath: lives before death: ${this.lives}`);
         
         this.lives--;
         this.hudManager.updateLives(this.lives);
+        Logger.log(`[PlayState] handlePlayerDeath: lives after death: ${this.lives}`);
         
         if (this.lives <= 0) {
+            Logger.log('[PlayState] No lives left, triggering game over');
             this.gameOver();
         } else {
             const spawn = this.levelManager.getPlayerSpawn();
+            Logger.log(`[PlayState] Respawning player at spawn: ${spawn.x}, ${spawn.y}`);
             player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
             
             // Reset flag after respawn

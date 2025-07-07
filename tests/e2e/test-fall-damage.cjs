@@ -53,27 +53,31 @@ async function runTest() {
             return { x: player.x, y: player.y, lives: state?.lives || 0 };
         });
         
-        await t.movePlayer('right', 800); // Move to the pit at x=5-11
-        
-        // Release key to prevent continuous movement
-        await t.page.keyboard.up('ArrowRight');
-        
-        // Wait for player respawn event
+        // Set up respawn event listener BEFORE moving the player
         const respawnPromise = t.page.evaluate(() => {
             return new Promise((resolve) => {
                 // Set up listener for respawn event
                 const handleRespawn = (event) => {
+                    console.log('[Test] Received player:respawned event:', event.detail);
                     resolve(event.detail);
                 };
                 window.addEventListener('player:respawned', handleRespawn, { once: true });
+                console.log('[Test] Respawn event listener set up');
                 
                 // Timeout after 5 seconds
                 setTimeout(() => {
+                    console.log('[Test] Respawn event timeout reached');
                     window.removeEventListener('player:respawned', handleRespawn);
                     resolve(null);
                 }, 5000);
             });
         });
+        
+        // Now move the player to fall
+        await t.movePlayer('right', 800); // Move to the pit at x=5-11
+        
+        // Release key to prevent continuous movement
+        await t.page.keyboard.up('ArrowRight');
         
         // Wait for respawn event
         const respawnData = await respawnPromise;
@@ -133,6 +137,9 @@ async function runTest() {
         while (currentLives > 0 && fallCount < 5) { // Increase max attempts
             fallCount++;
             console.log(`Fall attempt ${fallCount} - Current lives: ${currentLives}`);
+            
+            // Wait a bit to ensure death handling flag is reset
+            await t.wait(200);
             
             // Move to fall again
             await t.movePlayer('right', 800);
