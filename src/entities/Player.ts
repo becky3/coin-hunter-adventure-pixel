@@ -474,6 +474,14 @@ export class Player extends Entity {
         if (this.isSmall) {
             this._health = 0;
             this._isDead = true;
+            // 死亡時に大きいサイズに戻す（リスポーン時の表示を正しくするため）
+            this.isSmall = false;
+            this.width = DEFAULT_PLAYER_CONFIG.width;
+            this.height = DEFAULT_PLAYER_CONFIG.height;
+            // Y座標を調整して足元の位置を維持
+            this.y -= DEFAULT_PLAYER_CONFIG.height - DEFAULT_PLAYER_CONFIG.smallHeight;
+            this.updateSprite();
+            
             if (this.eventBus) {
                 this.eventBus.emit('player:died');
             }

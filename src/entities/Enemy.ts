@@ -111,7 +111,10 @@ export class Enemy extends Entity {
         const playerPrevBottom = player.y + player.height - player.vy;
         const enemyTop = this.y;
         
-        const wasAbove = playerPrevBottom <= enemyTop + 4;
+        // プレイヤーが小さい場合は踏みつけ判定を厳しくする
+        const stompThreshold = player.isSmall ? 2 : 4;
+        
+        const wasAbove = playerPrevBottom <= enemyTop + stompThreshold;
         const isNowColliding = playerBottom >= enemyTop;
         const isFalling = player.vy >= 0;
         
