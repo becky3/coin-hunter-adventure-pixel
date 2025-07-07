@@ -3,6 +3,7 @@ import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
+import { EventBus } from '../services/EventBus';
 
 export type AIType = 'patrol' | 'chase' | 'idle';
 export type EnemyState = 'idle' | 'hurt' | 'dead';
@@ -22,7 +23,7 @@ export class Enemy extends Entity {
     public animState: string;
     public facingRight: boolean;
     public canJump: boolean;
-    protected eventBus: any; // EventBus instance
+    protected eventBus: EventBus | null; // EventBus instance
 
     constructor(x: number, y: number, width: number = 16, height: number = 16) {
         super(x, y, width, height);
@@ -46,13 +47,15 @@ export class Enemy extends Entity {
         
         this.canJump = false;
         
+        this.eventBus = null;
+        
         // Debug: Log initial position
         if (this.constructor.name === 'Slime') {
             Logger.log('Enemy', `Created at x=${x}, y=${y}`);
         }
     }
     
-    setEventBus(eventBus: any): void {
+    setEventBus(eventBus: EventBus): void {
         this.eventBus = eventBus;
     }
 

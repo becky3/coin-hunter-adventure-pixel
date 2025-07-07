@@ -5,6 +5,7 @@ import { GAME_CONSTANTS } from '../config/GameConstants';
 import { PlayState } from '../states/PlayState';
 import { URLParams } from '../utils/urlParams';
 import { Logger } from '../utils/Logger';
+import type { StateEvent } from '../states/GameStateManager';
 
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
@@ -42,7 +43,7 @@ export class DebugOverlay {
             this.debugElement.style.display = 'block';
         }
         
-        (window as any).debugOverlay = this;
+        (window as Window & { debugOverlay?: DebugOverlay }).debugOverlay = this;
         
         Logger.log('DebugOverlay', `Initialized with stage: ${this.stageList[this.selectedStageIndex]} (index: ${this.selectedStageIndex})`);
     }
@@ -74,9 +75,14 @@ export class DebugOverlay {
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
-            this.debugElement!.appendChild(statElement);
+            if (this.debugElement) {
+                this.debugElement.appendChild(statElement);
+            }
             const key = stat.toLowerCase().replace(' ', '_');
-            this.statsElements.set(key, statElement.querySelector('span')!);
+            const spanElement = statElement.querySelector('span');
+            if (spanElement) {
+                this.statsElements.set(key, spanElement);
+            }
         });
         
         this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
@@ -87,15 +93,22 @@ export class DebugOverlay {
         stageDiv.style.paddingTop = '10px';
         stageDiv.style.borderTop = '1px solid #444';
         stageDiv.innerHTML = `Stage: <span style="color: #ffff00">${this.stageList[this.selectedStageIndex]}</span>`;
-        this.debugElement!.appendChild(stageDiv);
-        this.stageSelectElement = stageDiv.querySelector('span')!;
+        if (this.debugElement) {
+            this.debugElement.appendChild(stageDiv);
+        }
+        const spanElement = stageDiv.querySelector('span');
+        if (spanElement) {
+            this.stageSelectElement = spanElement;
+        }
         
         const helpDiv = document.createElement('div');
         helpDiv.style.marginTop = '10px';
         helpDiv.style.fontSize = '10px';
         helpDiv.style.color = '#888';
         helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset<br>D: Toggle Stage Select | ←→: Select';
-        this.debugElement!.appendChild(helpDiv);
+        if (this.debugElement) {
+            this.debugElement.appendChild(helpDiv);
+        }
         
         // Initialize default values
         this.updateStat('state', 'menu');
@@ -105,10 +118,11 @@ export class DebugOverlay {
 
     private setupEventListeners(): void {
         // Listen to state changes
-        const game = (window as any).game;
+        const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
         if (game?.stateManager) {
-            game.stateManager.addEventListener('stateChange', (event: any) => {
-                this.updateStat('state', event.data.to || 'unknown');
+            game.stateManager.addEventListener('stateChange', (event: StateEvent) => {
+                const stateData = event.data as { to?: string } | undefined;
+                this.updateStat('state', stateData?.to || 'unknown');
             });
         }
         
@@ -135,7 +149,7 @@ export class DebugOverlay {
             }
             
             // Stage selection controls
-            const game = (window as any).game;
+            const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
             const currentState = game?.stateManager?.currentState;
             
             // Debug: Log all arrow key presses in menu
@@ -171,7 +185,7 @@ export class DebugOverlay {
 
     update(_deltaTime: number): void {
         // Update player position if available
-        const game = (window as any).game;
+        const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: Event & { data?: { to?: string } }) => void) => void; currentState?: { name: string } } } }).game;
         if (!game) {
             return;
         }
@@ -241,7 +255,7 @@ export class DebugOverlay {
     }
     
     getSelectedStage(): string | null {
-        const game = (window as any).game;
+        const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: Event & { data?: { to?: string } }) => void) => void; currentState?: { name: string } } } }).game;
         const currentState = game?.stateManager?.currentState;
         
         // Only return selected stage if we're in menu state

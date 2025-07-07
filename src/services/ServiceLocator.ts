@@ -16,7 +16,7 @@ export interface IServiceLocator {
 }
 
 export class ServiceLocator implements IServiceLocator {
-    private services: Map<string, any> = new Map();
+    private services: Map<string, unknown> = new Map();
     private static instance: ServiceLocator;
     
     // Singleton pattern

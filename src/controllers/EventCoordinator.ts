@@ -18,7 +18,7 @@ export class EventCoordinator {
     private onStageClear: () => void;
     private onGameOver: () => void;
     
-    private listeners: Array<{ event: string; handler: (data: any) => void }> = [];
+    private listeners: Array<{ event: string; handler: (data: unknown) => void }> = [];
     
     constructor(config: EventCoordinatorConfig) {
         this.eventBus = config.eventBus;
@@ -32,11 +32,12 @@ export class EventCoordinator {
     
     private setupEventListeners(): void {
         // Coin collection event
-        this.addListener('coin:collected', (data: any) => {
-            Logger.log(`Coin collected! Score: ${data.score}`);
+        this.addListener('coin:collected', (data) => {
+            const coinData = data as { score: number };
+            Logger.log(`Coin collected! Score: ${coinData.score}`);
             const player = this.entityManager.getPlayer();
             if (player) {
-                player.addScore(data.score);
+                player.addScore(coinData.score);
                 player.collectCoin(1);
             }
         });
@@ -50,48 +51,50 @@ export class EventCoordinator {
         // which manages lives, respawn, and game over
         
         // Enemy defeated event
-        this.addListener('enemy:defeated', (data: any) => {
-            Logger.log(`Enemy defeated! Score: ${data.score}`);
+        this.addListener('enemy:defeated', (data) => {
+            const enemyData = data as { score: number };
+            Logger.log(`Enemy defeated! Score: ${enemyData.score}`);
             const player = this.entityManager.getPlayer();
             if (player) {
-                player.addScore(data.score);
+                player.addScore(enemyData.score);
             }
         });
         
         // Spring bounce event
-        this.addListener('spring:bounce', (data: any) => {
+        this.addListener('spring:bounce', (data) => {
             Logger.log('Spring bounced!', data);
         });
         
         // Level specific events
-        this.addListener('level:trigger', (data: any) => {
+        this.addListener('level:trigger', (data) => {
             Logger.log('Level trigger activated:', data);
             this.handleLevelTrigger(data);
         });
     }
     
-    private addListener(event: string, handler: (data: any) => void): void {
+    private addListener(event: string, handler: (data: unknown) => void): void {
         this.eventBus.on(event, handler);
         this.listeners.push({ event, handler });
     }
     
-    private handleLevelTrigger(data: any): void {
-        switch (data.type) {
+    private handleLevelTrigger(data: unknown): void {
+        const triggerData = data as { type: string; position?: { x: number; y: number }; bonusScore?: number };
+        switch (triggerData.type) {
         case 'checkpoint':
-            this.handleCheckpoint(data);
+            this.handleCheckpoint(triggerData);
             break;
         case 'secret':
-            this.handleSecretArea(data);
+            this.handleSecretArea(triggerData);
             break;
         case 'boss':
-            this.handleBossEncounter(data);
+            this.handleBossEncounter(triggerData);
             break;
         default:
-            Logger.warn('Unknown level trigger type:', data.type);
+            Logger.warn('Unknown level trigger type:', triggerData.type);
         }
     }
     
-    private handleCheckpoint(data: any): void {
+    private handleCheckpoint(data: { position?: { x: number; y: number } }): void {
         const player = this.entityManager.getPlayer();
         if (player) {
             // Save checkpoint position
@@ -101,7 +104,7 @@ export class EventCoordinator {
         }
     }
     
-    private handleSecretArea(data: any): void {
+    private handleSecretArea(data: { bonusScore?: number }): void {
         Logger.log('Secret area discovered!', data);
         // Award bonus points
         const player = this.entityManager.getPlayer();
@@ -110,7 +113,7 @@ export class EventCoordinator {
         }
     }
     
-    private handleBossEncounter(data: any): void {
+    private handleBossEncounter(data: unknown): void {
         Logger.log('Boss encounter started!', data);
         // Initialize boss battle
         this.eventBus.emit('boss:start', data);

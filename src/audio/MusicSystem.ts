@@ -33,7 +33,7 @@ export class MusicSystem {
     private audioContext: AudioContext | null;
     private masterGain: GainNode | null;
     private _isInitialized: boolean;
-    private listeners: Map<string, Array<(data: any) => void>>;
+    private listeners: Map<string, Array<(data: unknown) => void>>;
 
     private currentBGM: BGMType;
     private bgmLoopInterval: NodeJS.Timeout | null;
@@ -86,7 +86,7 @@ export class MusicSystem {
         }
         
         try {
-            const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+            const AudioContextClass = (window as Window & { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext || (window as Window & { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
             if (!AudioContextClass) {
                 Logger.warn('Web Audio API is not supported in this browser');
                 return false;
@@ -117,7 +117,7 @@ export class MusicSystem {
             this._isInitialized = true;
             Logger.log('Music system initialized successfully');
             return true;
-        } catch (error: any) {
+        } catch (error) {
 
             if (error.name === 'NotAllowedError') {
                 Logger.log('音楽システムはユーザー操作後に開始されます');
@@ -656,12 +656,14 @@ export class MusicSystem {
             try {
 
                 if (gainNode && gainNode.gain) {
-                    gainNode.gain.cancelScheduledValues(this.audioContext!.currentTime);
-                    gainNode.gain.setValueAtTime(0, this.audioContext!.currentTime);
+                    if (this.audioContext) {
+                        gainNode.gain.cancelScheduledValues(this.audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    }
                 }
 
-                if (oscillator && oscillator.stop) {
-                    oscillator.stop(this.audioContext!.currentTime);
+                if (oscillator && oscillator.stop && this.audioContext) {
+                    oscillator.stop(this.audioContext.currentTime);
                 }
             } catch {
                 // TODO: Handle oscillator stop error

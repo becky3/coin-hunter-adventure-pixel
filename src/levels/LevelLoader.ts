@@ -29,7 +29,7 @@ interface EntityData {
     type: string;
     x: number;
     y: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 
@@ -167,8 +167,11 @@ export class LevelLoader {
     getNextStageId(): string | null {
         if (!this.hasNextStage()) return null;
         
-        const currentIndex = this.stages.findIndex(s => s.id === this.currentStageId!);
-        return this.stages![currentIndex + 1].id;
+        const currentIndex = this.stages.findIndex(s => s.id === this.currentStageId);
+        if (currentIndex >= 0 && currentIndex < this.stages.length - 1) {
+            return this.stages[currentIndex + 1].id;
+        }
+        return null;
     }
     
     

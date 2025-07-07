@@ -90,7 +90,7 @@ export interface ObjectConfig {
     solid: boolean;
   };
   properties: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
   sprite?: {
     category?: string;

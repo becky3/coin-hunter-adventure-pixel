@@ -15,7 +15,7 @@ async function startGame() {
         Logger.log('Starting game initialization...');
         const gameCore = new GameCore();
 
-        (window as any).game = gameCore;
+        (window as Window & { game?: GameCore }).game = gameCore;
         
         Logger.log('Initializing GameCore...');
         await gameCore.init();

@@ -36,7 +36,7 @@ import level1 from '../levels/data/level1.json';
 import performanceTest from '../levels/data/performance-test.json';
 
 // Export all bundled data
-export const bundledResourceData: Record<string, any> = {
+export const bundledResourceData: Record<string, unknown> = {
     '/src/config/resources/index.json': resourceIndex,
     '/src/config/resources/sprites.json': resourceSprites,
     '/src/config/resources/characters.json': resourceCharacters,
@@ -45,7 +45,7 @@ export const bundledResourceData: Record<string, any> = {
     '/src/config/resources/physics.json': resourcePhysics,
 };
 
-export const bundledMusicData: Record<string, any> = {
+export const bundledMusicData: Record<string, unknown> = {
     '/src/config/resources/bgm/title.json': bgmTitle,
     '/src/config/resources/bgm/game.json': bgmGame,
     '/src/config/resources/bgm/victory.json': bgmVictory,
@@ -59,7 +59,7 @@ export const bundledMusicData: Record<string, any> = {
     '/src/config/resources/se/jump.json': seJump,
 };
 
-export const bundledStageData: Record<string, any> = {
+export const bundledStageData: Record<string, unknown> = {
     '/src/levels/data/stages.json': stageList,
     '/src/levels/data/stage0-1.json': stage0_1,
     '/src/levels/data/stage0-2.json': stage0_2,
@@ -72,7 +72,7 @@ export const bundledStageData: Record<string, any> = {
 };
 
 // Combined export for convenience
-export const allBundledData: Record<string, any> = {
+export const allBundledData: Record<string, unknown> = {
     ...bundledResourceData,
     ...bundledMusicData,
     ...bundledStageData,

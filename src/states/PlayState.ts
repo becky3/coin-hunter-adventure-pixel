@@ -1,6 +1,6 @@
-import { GameState } from './GameStateManager';
+import { GameState, GameStateManager } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { InputEvent } from '../core/InputSystem';
+import { InputSystem } from '../core/InputSystem';
 import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
 import { CameraController } from '../controllers/CameraController';
@@ -10,14 +10,17 @@ import { GameController } from '../controllers/GameController';
 import { EventCoordinator } from '../controllers/EventCoordinator';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { Logger } from '../utils/Logger';
+import { MusicSystem } from '../audio/MusicSystem';
+import { PhysicsSystem } from '../physics/PhysicsSystem';
+import { AssetLoader } from '../assets/AssetLoader';
 
 interface Game {
     renderer?: PixelRenderer;
-    inputSystem: any;
-    musicSystem?: any;
-    stateManager: any;
-    physicsSystem: any;
-    assetLoader?: any;
+    inputSystem: InputSystem;
+    musicSystem?: MusicSystem;
+    stateManager: GameStateManager;
+    physicsSystem: PhysicsSystem;
+    assetLoader?: AssetLoader;
     frameCount?: number;
     eventBus?: EventBus;
 }
@@ -76,7 +79,7 @@ export class PlayState implements GameState {
         this.eventBus = new EventBus();
         
         // Create extended game object with eventBus
-        const extendedGame: any = {
+        const extendedGame: Game & { eventBus: EventBus } = {
             ...game,
             eventBus: this.eventBus
         };
@@ -169,7 +172,7 @@ export class PlayState implements GameState {
         }
     }
 
-    async enter(params: any = {}): Promise<void> {
+    async enter(params: { level?: string; enableProgression?: boolean } = {}): Promise<void> {
         const enterStartTime = performance.now();
         Logger.log('[PlayState] enter() called with params:', params);
         Logger.log('[PlayState] Starting initialization...');

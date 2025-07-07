@@ -54,6 +54,20 @@ private position: Vector2D;
 - `any`型の使用は禁止（`unknown`型を推奨）
 - strictモードを有効化
 - インターフェースを活用した型定義
+- 未使用のインポートは削除する
+- ベンダー固有プロパティも適切に型定義する
+
+#### 型安全性のベストプラクティス
+```typescript
+// ❌ 悪い例：any型の使用
+(this.ctx as any).vendorProperty = false;
+
+// ✅ 良い例：適切な型定義
+const extCtx = this.ctx as CanvasRenderingContext2D & { 
+    vendorProperty?: boolean;
+};
+extCtx.vendorProperty = false;
+```
 
 ### コメントのルール
 **原則：実装内容の説明コメントは書かない**

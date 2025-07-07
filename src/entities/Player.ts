@@ -6,6 +6,7 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../services/EventBus';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
+import type { CharacterConfig, CharacterAnimationConfig } from '../config/ResourceConfig';
 
 
 // Default config as fallback if ResourceLoader is not available
@@ -63,8 +64,8 @@ interface PlayerState {
 }
 
 export class Player extends Entity {
-    private playerConfig: any;
-    private animationConfig: any;
+    private playerConfig: CharacterConfig | null;
+    private animationConfig: { [key: string]: CharacterAnimationConfig } | null;
     private speed: number;
     public jumpPower: number;  // Made public for testing
     private spriteKey: string | null;
@@ -276,9 +277,9 @@ export class Player extends Entity {
         this.frameCount++;
         
         // Debug: Allow dynamic jumpPower adjustment with number keys
-        if ((window as any).debugMode) {
+        if ((window as Window & { debugMode?: boolean }).debugMode) {
             for (let i = 1; i <= 9; i++) {
-                if (this.inputManager.isActionPressed(`${i}` as any)) {
+                if (this.inputManager.isActionPressed(`${i}`)) {
                     const newJumpPower = i * 2; // 2, 4, 6, 8, 10, 12, 14, 16, 18
                     if (this.jumpPower !== newJumpPower) {
                         this.jumpPower = newJumpPower;
@@ -615,7 +616,7 @@ export class Player extends Entity {
                     renderer.scale
                 );
                 return;
-            } else if ((window as any).game?.debug) {
+            } else if ((window as Window & { game?: { debug?: boolean } }).game?.debug) {
                 Logger.warn('Sprite not found:', this.spriteKey);
             }
         }
@@ -671,7 +672,8 @@ export class Player extends Entity {
         if (collisionInfo.other.constructor.name === 'Enemy' || 
             collisionInfo.other.constructor.name === 'Slime') {
             if ('onCollisionWithPlayer' in collisionInfo.other) {
-                (collisionInfo.other as any).onCollisionWithPlayer(this);
+                type EntityWithPlayerCollision = { onCollisionWithPlayer: (player: Player) => void };
+                (collisionInfo.other as unknown as EntityWithPlayerCollision).onCollisionWithPlayer(this);
             }
         }
     }

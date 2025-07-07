@@ -1,10 +1,11 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
-import { GameState } from './GameStateManager';
+import { GameState, GameStateManager } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { InputEvent } from '../core/InputSystem';
+import { InputSystem } from '../core/InputSystem';
 import { URLParams } from '../utils/urlParams';
 import { GameEnvironment } from '../utils/gameEnvironment';
 import { Logger } from '../utils/Logger';
+import { MusicSystem } from '../audio/MusicSystem';
 
 interface MenuOption {
     text: string;
@@ -13,9 +14,9 @@ interface MenuOption {
 
 interface Game {
     renderer?: PixelRenderer;
-    inputSystem: any;
-    musicSystem?: any;
-    stateManager: any;
+    inputSystem: InputSystem;
+    musicSystem?: MusicSystem;
+    stateManager: GameStateManager;
 }
 
 export class MenuState implements GameState {
@@ -287,7 +288,7 @@ export class MenuState implements GameState {
                 const stageId = urlParams.getStageId();
                 
                 // Check if debug overlay has a selected stage
-                const debugOverlay = (window as any).debugOverlay;
+                const debugOverlay = (window as Window & { debugOverlay?: { getSelectedStage?: () => string } }).debugOverlay;
                 const debugSelectedStage = debugOverlay?.getSelectedStage?.();
                 
                 // Determine which stage to use (debug selection takes priority)

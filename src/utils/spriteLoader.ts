@@ -31,8 +31,9 @@ class SpriteLoader {
     async loadSprite(category: string, name: string): Promise<SpriteData> {
         const key = `${category}/${name}`;
         
-        if (this.cache.has(key)) {
-            return this.cache.get(key)!;
+        const cachedSprite = this.cache.get(key);
+        if (cachedSprite) {
+            return cachedSprite;
         }
 
         // Try to use bundled data first

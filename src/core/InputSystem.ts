@@ -79,7 +79,10 @@ export class InputSystem {
                 if (!this.reverseKeyMap.has(key)) {
                     this.reverseKeyMap.set(key, []);
                 }
-                this.reverseKeyMap.get(key)!.push(action);
+                const keyActions = this.reverseKeyMap.get(key);
+                if (keyActions) {
+                    keyActions.push(action);
+                }
             }
         }
         
@@ -291,7 +294,10 @@ export class InputSystem {
             if (!this.reverseKeyMap.has(key)) {
                 this.reverseKeyMap.set(key, []);
             }
-            this.reverseKeyMap.get(key)!.push(action);
+            const keyActions = this.reverseKeyMap.get(key);
+            if (keyActions) {
+                keyActions.push(action);
+            }
         }
     }
     

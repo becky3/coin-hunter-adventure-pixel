@@ -35,7 +35,7 @@ import enemiesBirdFly2 from './enemies/bird_fly2.json';
 import uiHeart from './ui/heart.json';
 import uiHeartEmpty from './ui/heart_empty.json';
 
-export const spriteDataMap: Record<string, any> = {
+export const spriteDataMap: Record<string, unknown> = {
     'player/idle': playerIdle,
     'player/idle_small': playerIdleSmall,
     'player/walk1': playerWalk1,

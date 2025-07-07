@@ -1,4 +1,5 @@
 import type { PixelRenderer } from '../rendering/PixelRenderer';
+import type { SpriteData } from '../types/assetTypes';
 
 export interface Bounds {
     left: number;
@@ -54,7 +55,7 @@ export class Entity {
     public animationTime: number;
     public flipX: boolean;
     
-    public sprite: any;
+    public sprite: string | SpriteData | HTMLCanvasElement | ImageData | null;
     public spriteScale: number;
 
     constructor(x = 0, y = 0, width = 16, height = 16) {
@@ -230,7 +231,7 @@ export class Entity {
         };
     }
 
-    setSprite(sprite: any, scale = 1): void {
+    setSprite(sprite: string | SpriteData | HTMLCanvasElement | ImageData | null, scale = 1): void {
         this.sprite = sprite;
         this.spriteScale = scale;
     }

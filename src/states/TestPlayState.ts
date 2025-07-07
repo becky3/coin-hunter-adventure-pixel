@@ -2,6 +2,7 @@ import { GAME_RESOLUTION, TILE_SIZE } from '../constants/gameConstants';
 import { GameState } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
+import { InputSystem } from '../core/InputSystem';
 
 interface TestPlayer {
     x: number;
@@ -14,7 +15,7 @@ interface TestPlayer {
 }
 
 interface Game {
-    inputSystem: any;
+    inputSystem: InputSystem;
 }
 
 export class TestPlayState implements GameState {
