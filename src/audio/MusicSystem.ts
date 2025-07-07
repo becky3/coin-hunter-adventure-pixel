@@ -2,6 +2,9 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { MusicConfig, TrackConfig, FrequencyRamp } from '../config/MusicPatternConfig';
 import { Logger } from '../utils/Logger';
 
+// Constants
+const MS_PER_SEC = 1000;
+
 interface ActiveNode {
     oscillator: OscillatorNode | AudioBufferSourceNode;
     gainNode: GainNode;
@@ -324,7 +327,7 @@ export class MusicSystem {
             setTimeout(() => {
                 if (!this.isInitialized || this.isMuted || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'sine', 0.5);
-            }, time * 1000);
+            }, time * MS_PER_SEC);
         });
         
         setTimeout(() => {
@@ -396,7 +399,7 @@ export class MusicSystem {
             setTimeout(() => {
                 if (!this.isInitialized || this.isMuted || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'sine', 0.6);
-            }, time * 1000);
+            }, time * MS_PER_SEC);
         });
     }
 
@@ -424,7 +427,7 @@ export class MusicSystem {
                     sustain: 0.5,
                     release: 0.2
                 });
-            }, time * 1000);
+            }, time * MS_PER_SEC);
         });
     }
 
@@ -534,6 +537,9 @@ export class MusicSystem {
             this._isInitialized = false;
         } catch (error) {
             Logger.error('音楽システムのクリーンアップエラー:', error);
+            if (error instanceof Error && error.stack) {
+                Logger.error('Stack trace:', error.stack);
+            }
         }
     }
     
@@ -649,7 +655,7 @@ export class MusicSystem {
     private scheduleNextLoop(config: MusicConfig, beatLength: number, loopDuration: number): void {
         if (!this.audioContext) return;
         
-        const loopDurationMs = loopDuration * beatLength * 1000;
+        const loopDurationMs = loopDuration * beatLength * MS_PER_SEC;
         
         this.patternLoopTimeout = setTimeout(() => {
             // Check if we should continue looping
@@ -826,6 +832,9 @@ export class MusicSystem {
             }
         } catch (error) {
             Logger.error(`[MusicSystem] Error loading BGM pattern for ${name}:`, error);
+            if (error instanceof Error && error.stack) {
+                Logger.error('Stack trace:', error.stack);
+            }
         }
     }
     
