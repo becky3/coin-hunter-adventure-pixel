@@ -55,10 +55,6 @@ export interface CharacterConfig {
     x: number;
     y: number;
   };
-  knockback?: {
-    vertical: number;
-    horizontal: number;
-  };
   animations?: {
     [key: string]: CharacterAnimationConfig;
   };
