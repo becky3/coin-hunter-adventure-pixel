@@ -1,29 +1,37 @@
 const fs = require('fs');
 const path = require('path');
 
-// Test configuration
-const tests = [
-    {
-        name: 'Basic Flow Test',
-        file: './test-basic-flow.cjs',
-        critical: true
-    },
-    {
-        name: 'Enemy Damage Test',
-        file: './test-enemy-damage.cjs',
-        critical: true
-    },
-    {
-        name: 'Fall Damage Test',
-        file: './test-fall-damage.cjs',
-        critical: true
-    },
-    {
-        name: 'Performance Test',
-        file: './test-performance.cjs',
-        critical: true
-    }
-];
+// Automatically discover all test files
+function discoverTests() {
+    const testDir = __dirname;
+    const testFiles = fs.readdirSync(testDir)
+        .filter(file => {
+            // Include files that start with 'test-' and end with '.cjs'
+            // Exclude this runner script itself
+            return file.startsWith('test-') && file.endsWith('.cjs') && file !== 'run-all-tests.cjs';
+        })
+        .sort(); // Sort for consistent order
+
+    return testFiles.map(file => {
+        // Convert filename to human-readable name
+        const name = file
+            .replace('.cjs', '')
+            .replace(/^test-/, '')
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ') + ' Test';
+
+        return {
+            name,
+            file: `./${file}`
+        };
+    });
+}
+
+// Get all tests
+const tests = discoverTests();
+
+console.log(`📋 Discovered ${tests.length} test files:${tests.map(t => `\n   - ${t.file}`).join('')}\n`);
 
 // Test runner
 async function runAllTests() {
@@ -66,23 +74,20 @@ async function runAllTests() {
             }
         } catch (err) {
             error = err;
-            if (test.critical) {
-                failedCritical = true;
-            }
+            failedCritical = true;
         }
         
-        // If a critical test failed, stop immediately
-        if (error && test.critical) {
+        // If any test failed, stop immediately
+        if (error) {
             console.log(`\n❌ ${test.name} - FAILED`);
             console.error(`Error: ${error.message}`);
-            console.log('\n🛑 Stopping test suite due to critical test failure');
+            console.log('\n🛑 Stopping test suite due to test failure');
             
             results.push({
                 name: test.name,
                 file: test.file,
                 success: false,
                 duration: Date.now() - startTime,
-                critical: test.critical,
                 error: error.message
             });
             
@@ -96,7 +101,6 @@ async function runAllTests() {
             file: test.file,
             success,
             duration,
-            critical: test.critical,
             error: error ? error.message : null
         });
         
@@ -126,8 +130,7 @@ async function runAllTests() {
     console.log('\nDetailed Results:');
     results.forEach(result => {
         const status = result.success ? '✅' : '❌';
-        const critical = result.critical ? '[CRITICAL]' : '';
-        console.log(`${status} ${result.name} ${critical} - ${(result.duration / 1000).toFixed(2)}s`);
+        console.log(`${status} ${result.name} - ${(result.duration / 1000).toFixed(2)}s`);
         if (!result.success) {
             console.log(`   Error: ${result.error}`);
         }
@@ -156,12 +159,9 @@ async function runAllTests() {
     console.log(`\nTest report saved to: ${reportPath}`);
     
     // Exit with appropriate code
-    if (failedCritical) {
-        console.log('\n❌ CRITICAL TEST FAILURE - BUILD SHOULD NOT PROCEED');
+    if (failed > 0) {
+        console.log('\n❌ TEST FAILURE - BUILD SHOULD NOT PROCEED');
         process.exit(1);
-    } else if (failed > 0) {
-        console.log('\n⚠️  Non-critical tests failed');
-        process.exit(0);
     } else {
         console.log('\n✅ ALL TESTS PASSED!');
         process.exit(0);
