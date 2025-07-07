@@ -171,3 +171,25 @@ DEBUG = {
 - **音声エラー**: サイレントモードで継続
 - **画像エラー**: プレースホルダー表示
 - **データエラー**: エラーメッセージ表示
+
+## コード品質基準
+
+### TypeScript型安全性
+- **strictモード**: 有効（tsconfig.json）
+- **any型**: 使用禁止
+- **型推論**: 明示的な型定義を推奨
+- **イベント型**: 専用インターフェース使用
+
+### ESLint設定
+```json
+{
+  "no-unused-vars": ["error"],
+  "@typescript-eslint/no-unused-vars": ["error"],
+  "@typescript-eslint/no-explicit-any": "warn"
+}
+```
+
+### コード規約
+- 未使用インポートの削除
+- 重複コードの排除
+- ベンダープレフィックスの適切な型定義
