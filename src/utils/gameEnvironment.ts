@@ -24,10 +24,17 @@ export class GameEnvironment {
     
     /**
      * Check if stage progression should be enabled
-     * @returns true if in production mode, false in test mode
+     * @returns true unless stage is specified in URL query parameter
      */
     static shouldEnableStageProgression(): boolean {
-        return this.isProduction();
+        // If stage is specified in URL (?s=1-2), disable progression
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('s')) {
+            return false;
+        }
+        
+        // Otherwise, enable progression
+        return true;
     }
     
     /**
