@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
+const { toJSTString, getJSTLogTime } = require('./dateHelper.cjs');
 
 class TestFramework {
     constructor(options = {}) {
@@ -36,7 +37,7 @@ class TestFramework {
         
         console.log(`\n${'='.repeat(50)}`);
         console.log(`Starting test: ${testName}`);
-        console.log(`Time: ${new Date().toISOString()}`);
+        console.log(`Time: ${toJSTString()} (JST)`);
         console.log(`${'='.repeat(50)}\n`);
 
         // Launch browser
@@ -229,7 +230,7 @@ class TestFramework {
     }
 
     async screenshot(name = 'screenshot') {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const timestamp = toJSTString();
         const filename = `${this.testName}-${name}-${timestamp}.png`;
         const filepath = path.join(this.options.screenshotPath, filename);
         
@@ -274,7 +275,7 @@ class TestFramework {
         }
         
         // Generate log filename from test name
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const timestamp = toJSTString();
         const safeTestName = this.testName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
         const logFileName = `${safeTestName}-${timestamp}.log`;
         const logFilePath = path.join(logsDir, logFileName);

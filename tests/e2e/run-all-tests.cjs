@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { toJSTString } = require('./utils/dateHelper.cjs');
 
 // Automatically discover all test files
 function discoverTests() {
@@ -137,7 +138,7 @@ async function runAllTests() {
     });
     
     // Save report to file
-    const reportPath = path.join(__dirname, '../reports', `test-report-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
+    const reportPath = path.join(__dirname, '../reports', `test-report-${toJSTString()}.json`);
     const reportDir = path.dirname(reportPath);
     
     if (!fs.existsSync(reportDir)) {
@@ -145,7 +146,7 @@ async function runAllTests() {
     }
     
     fs.writeFileSync(reportPath, JSON.stringify({
-        timestamp: new Date().toISOString(),
+        timestamp: toJSTString(),
         summary: {
             total: results.length,
             passed,
