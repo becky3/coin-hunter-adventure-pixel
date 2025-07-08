@@ -494,7 +494,10 @@ export class PlayState implements GameState {
             
             if (nextLevel) {
                 // Load next level
-                this.game.stateManager.setState('play', { level: nextLevel });
+                this.game.stateManager.setState('play', { 
+                    level: nextLevel,
+                    enableProgression: this.stageProgressionEnabled 
+                });
             } else {
                 // No more levels - show ending
                 this.showEnding();
