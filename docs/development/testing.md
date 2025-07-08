@@ -209,6 +209,42 @@ RUN_FULL_TESTS=true git push
 - 全テストファイルが自動的に実行される
 - **重要な変更をプッシュする際は必ず使用**
 
+## テストディレクトリ構造
+
+```
+tests/
+├── e2e/                    # E2Eテスト（Puppeteer）
+│   ├── test-*.cjs         # 各種テストファイル
+│   └── utils/             # テストユーティリティ
+│       ├── TestFramework.cjs
+│       └── GameTestHelpers.cjs
+├── screenshots/           # テスト時のスクリーンショット
+├── logs/                  # テストログ
+└── reports/              # テストレポート
+```
+
+## アーキテクチャ変更後の主なテスト対象
+
+1. **GameCore初期化**
+   - ServiceLocatorの初期化
+   - SystemManagerへのシステム登録
+   - MusicSystemの初期化
+   - GameLoopの開始
+
+2. **State遷移**
+   - MenuState → PlayState
+   - PlayState → GameOver/Clear
+
+3. **ゲームプレイ**
+   - プレイヤー操作
+   - 物理演算
+   - アイテム収集
+   - 敵との衝突
+
+4. **システム統合**
+   - 各Adapterの動作確認
+   - EventBusによる通信
+
 ## テスト作成ガイド
 
 ### 基本構造
