@@ -90,6 +90,7 @@ export class Player extends Entity {
     private jumpStartY: number;
     private _score: number;
     private _coins: number;
+    private isSpringBounce: boolean;
     private inputManager: InputSystem | null;
     private musicSystem: MusicSystem | null;
     private assetLoader: AssetLoader | null;
@@ -188,6 +189,7 @@ export class Player extends Entity {
         
         this._score = 0;
         this._coins = 0;
+        this.isSpringBounce = false;
         
         this.inputManager = null;
         
@@ -267,6 +269,34 @@ export class Player extends Entity {
     get score(): number { return this._score; }
     get coins(): number { return this._coins; }
     
+    // Public setters for spring interaction
+    setJumpingState(jumping: boolean): void {
+        this._isJumping = jumping;
+    }
+    
+    enableVariableJump(): void {
+        this.canVariableJump = true;
+        this.jumpButtonPressed = true;
+    }
+    
+    applySpringBounce(bounceVelocity: number, isJumpButtonPressed: boolean = false): void {
+        this.vy = bounceVelocity;
+        this.grounded = false;
+        this._isJumping = true;
+        // Only enable variable jump if button is pressed at bounce time
+        this.canVariableJump = isJumpButtonPressed;
+        this.jumpButtonPressed = isJumpButtonPressed;
+        this.isSpringBounce = true;
+        this.jumpTime = 0;
+        this.jumpMaxHeight = 0;
+        this.jumpStartY = this.y;
+        
+        Logger.log('[Player] Spring bounce applied:');
+        Logger.log('  - Bounce velocity:', bounceVelocity);
+        Logger.log('  - Jump button pressed:', isJumpButtonPressed);
+        Logger.log('  - Variable jump enabled:', this.canVariableJump);
+    }
+    
     update(deltaTime: number): void {
         super.update(deltaTime);
         
@@ -336,6 +366,7 @@ export class Player extends Entity {
             this.canVariableJump = true;
             this.jumpMaxHeight = 0;
             this.jumpStartY = this.y;
+            this.isSpringBounce = false; // Reset spring bounce flag for normal jumps
             
             // Debug logging for jump initiation
             Logger.log('[Player] Jump initiated:');
@@ -354,6 +385,14 @@ export class Player extends Entity {
             this.jumpTime += deltaTime * 1000;
             
             
+            // For spring bounce, enable variable jump when button is pressed
+            if (this.isSpringBounce && input.jump && !this.canVariableJump) {
+                this.canVariableJump = true;
+                // Reset jump time to allow variable jump from spring bounce
+                this.jumpTime = 0;
+                Logger.log('[Player] Variable jump enabled for spring bounce');
+            }
+            
             // Check if button was released
             if (!input.jump && this.canVariableJump) {
                 // Immediately reduce upward velocity if still going up
@@ -370,7 +409,6 @@ export class Player extends Entity {
                     // This counteracts gravity to maintain upward movement
                     const boost = this.variableJumpBoostMultiplier * this.variableJumpBoost * deltaTime * 60;
                     this.vy -= boost;
-                    
                 } else {
                     // Max jump time reached
                     this.canVariableJump = false;
@@ -392,11 +430,16 @@ export class Player extends Entity {
         
         // Only check for landing after a minimum jump time to avoid immediate grounding
         if (this.grounded && this._isJumping && this.jumpTime > 50) {
+            // For spring bounces, require a bit more time before considering jump complete
+            if (this.isSpringBounce && this.jumpTime < 100) {
+                return;
+            }
             Logger.log('[Player] Jump completed:');
             Logger.log('  - Final max height reached:', this.jumpMaxHeight, 'pixels');
             Logger.log('  - Jump duration:', this.jumpTime, 'ms');
             this._isJumping = false;
             this.canVariableJump = false;
+            this.isSpringBounce = false; // Reset spring bounce flag
         }
     }
     

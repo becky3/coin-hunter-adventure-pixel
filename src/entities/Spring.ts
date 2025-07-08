@@ -1,18 +1,20 @@
-
 import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { ResourceLoader } from '../config/ResourceLoader';
+import { Logger } from '../utils/Logger';
+import { InputSystem } from '../core/InputSystem';
 
 export class Spring extends Entity {
-    private bouncePower: number;
+    private baseBounceMultiplier: number;
     private compression: number;
     public triggered: boolean;
     private animationSpeed: number;
     declare animationTime: number;
     public physicsSystem: PhysicsSystem | null;
-    private _debugCount?: number;
+    private cooldownFrames: number;
+    private readonly COOLDOWN_DURATION = 20; // 20フレーム = 約0.33秒（60FPS想定）
 
     constructor(x: number, y: number) {
         // Load config from ResourceLoader if available
@@ -33,88 +35,68 @@ export class Spring extends Entity {
         this.physicsEnabled = false;
         this.solid = springConfig?.physics.solid ?? true;
         
-        this.bouncePower = springConfig?.properties.bouncePower || 14;
+        this.baseBounceMultiplier = 2.5; // ジャンプ力の2.5倍
         this.compression = 0;
         this.triggered = false;
         this.animationSpeed = springConfig?.properties.expansionSpeed || 0.2;
         
         this.animationTime = 0;
         this.physicsSystem = null;
+        this.cooldownFrames = 0;
     }
 
     onUpdate(deltaTime: number): void {
+        // Update cooldown
+        if (this.cooldownFrames > 0) {
+            this.cooldownFrames--;
+        }
+        
+        // Update compression animation
         if (this.compression > 0) {
             this.compression *= 0.9;
             if (this.compression < 0.01) {
                 this.compression = 0;
-                this.triggered = false;
             }
+        }
+        
+        // Reset triggered state when spring is not compressed
+        if (this.triggered && this.compression <= 0.01) {
+            this.triggered = false;
         }
         
         this.animationTime += deltaTime;
-        
-        this.checkPlayerContact();
-        
-        if (this.triggered && this.physicsSystem) {
-            const entities = Array.from(this.physicsSystem.getEntities());
-            const player = entities.find(e => e.constructor.name === 'Player') as unknown as Player | undefined;
-            if (player) {
-                const playerBottom = player.y + player.height;
-                const notTouching = playerBottom < this.y - 5 || player.y > this.y + this.height;
-                if (notTouching) {
-                    this.triggered = false;
-                }
-            }
-        }
     }
 
-    checkPlayerContact(): void {
+    private applyBounce(player: Player): void {
         
-        if (!this.physicsSystem) return;
+        // Position player on top of spring
+        player.y = this.y - player.height;
         
-        const entities = Array.from(this.physicsSystem.getEntities());
-        const player = entities.find(e => e.constructor.name === 'Player') as Player | undefined;
-        if (!player) return;
+        // Calculate bounce velocity
+        const playerJumpPower = player.jumpPower || 10;
+        const bounceVelocity = -(playerJumpPower * this.baseBounceMultiplier);
         
-        const playerBounds = player.getBounds();
-        const springBounds = this.getBounds();
+        // Check if jump button is pressed
+        const inputManager = (window as Window & { game?: { inputManager?: InputSystem } }).game?.inputManager;
+        const isJumpPressed = inputManager ? inputManager.isActionPressed('jump') : false;
         
-        const isColliding = playerBounds.left < springBounds.right &&
-            playerBounds.right > springBounds.left &&
-            playerBounds.top < springBounds.bottom &&
-            playerBounds.bottom > springBounds.top;
-            
-        if (isColliding) {
-            const playerBottom = player.y + player.height;
-            const onTopOfSpring = Math.abs(playerBottom - this.y) <= 2;
-            
-            if (!this._debugCount) this._debugCount = 0;
-            if (this._debugCount < 10 && player.grounded) {
-                this._debugCount++;
-            }
-            
-            if (onTopOfSpring && player.grounded && player.vy >= -0.1 && !this.triggered) {
-                player.y = this.y - player.height;
-                
-                player.vy = -this.bouncePower;
-                player.grounded = false;
-                
-                this.compression = 1;
-                this.triggered = true;
-
-                if (this.physicsSystem) {
-                    // TODO: Implement sound effect playback
-                }
-            } else if (!onTopOfSpring && playerBottom > this.y && player.y < this.y + this.height) {
-                if (player.grounded && !this.triggered) {
-                    player.y = this.y - player.height;
-                    player.vy = -this.bouncePower;
-                    player.grounded = false;
-                    this.compression = 1;
-                    this.triggered = true;
-                }
-            }
+        Logger.log(`[Spring] Bounce triggered - velocity: ${bounceVelocity}, jump pressed: ${isJumpPressed}`);
+        
+        // Apply spring bounce
+        if ('applySpringBounce' in player && typeof player.applySpringBounce === 'function') {
+            (player as Player).applySpringBounce(bounceVelocity, isJumpPressed);
+        } else {
+            // Fallback for compatibility
+            player.vy = bounceVelocity;
+            player.grounded = false;
         }
+        
+        // Update spring state
+        this.compression = 1;
+        this.triggered = true;
+        this.cooldownFrames = this.COOLDOWN_DURATION;
+        
+        // TODO: Play sound effect
     }
 
     render(renderer: PixelRenderer): void {
@@ -150,23 +132,23 @@ export class Spring extends Entity {
         
         const other = collisionInfo.other;
         
+        // Check if colliding with player
         if (other && other.constructor.name === 'Player') {
             const player = other as unknown as Player;
+            
+            // Check if player is landing on top of spring
             const fromTop = collisionInfo.side === 'top' || 
                           (player.y + player.height <= this.y + 8 && player.vy > 0);
             
             if (fromTop && player.vy > 0) {
-                player.y = this.y - player.height;
-                
-                player.vy = -this.bouncePower;
-                player.grounded = false;
-                
-                this.compression = 1;
-                this.triggered = true;
-
+                // Only bounce if cooldown is complete
+                if (this.cooldownFrames <= 0) {
+                    this.applyBounce(player);
+                }
                 return true;
             }
         }
+        
         return false;
     }
 
@@ -175,5 +157,6 @@ export class Spring extends Entity {
         this.compression = 0;
         this.triggered = false;
         this.animationTime = 0;
+        this.cooldownFrames = 0;
     }
 }
