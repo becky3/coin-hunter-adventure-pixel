@@ -40,117 +40,11 @@ async function runTest() {
         });
         console.log('Initial lives:', initialLives);
         
-        // Test 1: Fall into pit
-        console.log('\n--- Test 1: First Fall ---');
+        // Test: Fall multiple times until game over (includes first fall verification)
+        console.log('\n--- Test: Multiple Falls Until Game Over ---');
         
-        // Move player to fall into pit
-        console.log('Moving player to fall into pit...');
-        
-        // Store initial position for comparison
-        const beforeFall = await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            const player = state?.player || state?.entityManager?.getPlayer?.();
-            return { x: player.x, y: player.y, lives: state?.lives || 0 };
-        });
-        
-        // Set up death detection and move player
-        const fallResult = await t.page.evaluate(() => {
-            return new Promise((resolve) => {
-                let deathDetected = false;
-                
-                const handleDeath = () => {
-                    console.log('[Test] Player died event detected');
-                    deathDetected = true;
-                    // Stop moving immediately when death is detected
-                    const upEvent = new KeyboardEvent('keyup', { code: 'ArrowRight', key: 'ArrowRight' });
-                    window.dispatchEvent(upEvent);
-                };
-                
-                const handleRespawn = (event) => {
-                    console.log('[Test] Received player:respawned event:', event.detail);
-                    if (deathDetected) {
-                        resolve({ respawned: true, detail: event.detail });
-                    }
-                };
-                
-                // Listen for death and respawn events
-                window.addEventListener('player:died', handleDeath, { once: true });
-                window.addEventListener('player:respawned', handleRespawn, { once: true });
-                console.log('[Test] Death and respawn event listeners set up');
-                
-                // Start moving right
-                const downEvent = new KeyboardEvent('keydown', { code: 'ArrowRight', key: 'ArrowRight' });
-                window.dispatchEvent(downEvent);
-                
-                // Timeout after 5 seconds
-                setTimeout(() => {
-                    console.log('[Test] Timeout reached');
-                    const upEvent = new KeyboardEvent('keyup', { code: 'ArrowRight', key: 'ArrowRight' });
-                    window.dispatchEvent(upEvent);
-                    window.removeEventListener('player:died', handleDeath);
-                    window.removeEventListener('player:respawned', handleRespawn);
-                    resolve({ respawned: false, timeout: true });
-                }, 5000);
-            });
-        });
-        
-        if (!fallResult.respawned) {
-            throw new Error('Player respawn timeout - no respawn event received');
-        }
-        
-        const respawnData = fallResult.detail;
-        
-        if (!respawnData) {
-            throw new Error('Player respawn timeout - no respawn event received');
-        }
-        
-        console.log('Player respawned at:', respawnData);
-        
-        // Check if player respawned
-        const afterFirstFall = await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            const player = state?.player || state?.entityManager?.getPlayer?.();
-            return player ? {
-                position: { x: player.x, y: player.y },
-                isSmall: player.isSmall
-            } : null;
-        });
-        
-        console.log('Player after first fall:', afterFirstFall);
-        
-        // Check lives decreased (at least by 1)
-        const livesAfterFirstFall = await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            return state?.lives || 0;
-        });
-        console.log('Lives after first fall:', livesAfterFirstFall);
-        
-        if (livesAfterFirstFall >= initialLives) {
-            throw new Error(`Lives did not decrease. Initial: ${initialLives}, Current: ${livesAfterFirstFall}`);
-        }
-        
-        // Log how many lives were lost (for debugging)
-        const livesLost = initialLives - livesAfterFirstFall;
-        console.log(`Lives lost in first fall: ${livesLost}`);
-        
-        // Check HUD display for lives
-        await t.wait(500); // Wait for HUD to update
-        
-        // Take screenshot to verify HUD
-        await t.screenshot('after-first-fall');
-        
-        // Get debug info
-        const debugInfo = await t.page.evaluate(() => {
-            const debugElement = document.getElementById('debug-info');
-            return debugElement ? debugElement.textContent : 'Debug info not found';
-        });
-        console.log('Debug info:', debugInfo);
-        
-        // Test 2: Fall multiple times
-        console.log('\n--- Test 2: Multiple Falls ---');
-        
-        let currentLives = livesAfterFirstFall;
-        let fallCount = 1;
+        let currentLives = initialLives;
+        let fallCount = 0;
         
         while (currentLives > 0 && fallCount < 5) { // Increase max attempts
             fallCount++;
@@ -227,6 +121,11 @@ async function runTest() {
             });
             console.log(`Lives after fall ${fallCount}: ${currentLives}`);
             
+            // 最初の落下では1ライフ減ることを確認
+            if (fallCount === 1 && currentLives >= initialLives) {
+                throw new Error(`Lives did not decrease after first fall. Initial: ${initialLives}, Current: ${currentLives}`);
+            }
+            
             if (fallResult.result === 'gameover') {
                 console.log('✅ Game over triggered correctly after losing all lives');
                 break;
@@ -235,8 +134,8 @@ async function runTest() {
             await t.screenshot(`after-fall-${fallCount}`);
         }
         
-        // Test 3: Verify HUD shows correct lives
-        console.log('\n--- Test 3: HUD Verification ---');
+        // Test 2: Verify HUD shows correct lives
+        console.log('\n--- Test 2: HUD Verification ---');
         
         // Get current internal lives
         const finalLives = await t.page.evaluate(() => {
