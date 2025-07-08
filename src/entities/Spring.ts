@@ -4,6 +4,7 @@ import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { ResourceLoader } from '../config/ResourceLoader';
+import { Logger } from '../utils/Logger';
 
 export class Spring extends Entity {
     private baseBounceMultiplier: number;
@@ -13,6 +14,7 @@ export class Spring extends Entity {
     declare animationTime: number;
     public physicsSystem: PhysicsSystem | null;
     private _debugCount?: number;
+    private lastBounceTime: number;
 
     constructor(x: number, y: number) {
         // Load config from ResourceLoader if available
@@ -33,13 +35,14 @@ export class Spring extends Entity {
         this.physicsEnabled = false;
         this.solid = springConfig?.physics.solid ?? true;
         
-        this.baseBounceMultiplier = 1.5; // ジャンプ力の1.5倍
+        this.baseBounceMultiplier = 2.5; // ジャンプ力の2.5倍
         this.compression = 0;
         this.triggered = false;
         this.animationSpeed = springConfig?.properties.expansionSpeed || 0.2;
         
         this.animationTime = 0;
         this.physicsSystem = null;
+        this.lastBounceTime = 0;
     }
 
     onUpdate(deltaTime: number): void {
@@ -60,8 +63,17 @@ export class Spring extends Entity {
             const player = entities.find(e => e.constructor.name === 'Player') as unknown as Player | undefined;
             if (player) {
                 const playerBottom = player.y + player.height;
-                const notTouching = playerBottom < this.y - 5 || player.y > this.y + this.height;
-                if (notTouching) {
+                const playerLeft = player.x;
+                const playerRight = player.x + player.width;
+                const springLeft = this.x;
+                const springRight = this.x + this.width;
+                
+                // Check if player is not touching the spring (vertically and horizontally)
+                const notTouchingVertically = playerBottom < this.y - 5 || player.y > this.y + this.height;
+                const notTouchingHorizontally = playerRight < springLeft || playerLeft > springRight;
+                
+                if (notTouchingVertically || notTouchingHorizontally) {
+                    Logger.log(`[Spring] Resetting trigger - Player no longer touching`);
                     this.triggered = false;
                 }
             }
@@ -93,20 +105,36 @@ export class Spring extends Entity {
                 this._debugCount++;
             }
             
-            if (onTopOfSpring && player.grounded && player.vy >= -0.1 && !this.triggered) {
+            if (onTopOfSpring && player.grounded && player.vy >= -0.1) {
+                // Check cooldown
+                const currentTime = Date.now();
+                const cooldownTime = 1000; // 1 second cooldown
+                
+                if (this.triggered && (currentTime - this.lastBounceTime) < cooldownTime) {
+                    return;
+                }
+                
                 player.y = this.y - player.height;
                 
                 const playerJumpPower = player.jumpPower || 10;
-                player.vy = -(playerJumpPower * this.baseBounceMultiplier);
-                player.grounded = false;
+                const bounceVelocity = -(playerJumpPower * this.baseBounceMultiplier);
                 
-                // 可変ジャンプを有効化
-                // Spring-specific properties that need to be set
-                player.setJumpingState(true);
-                player.enableVariableJump();
+                Logger.log(`[Spring] Bounce triggered from checkPlayerContact - bounceVelocity: ${bounceVelocity}`);
+                
+                // Apply spring bounce using the dedicated method
+                if ('applySpringBounce' in player && typeof player.applySpringBounce === 'function') {
+                    (player as Player).applySpringBounce(bounceVelocity);
+                } else {
+                    // Fallback to old method if applySpringBounce doesn't exist
+                    player.vy = bounceVelocity;
+                    player.grounded = false;
+                    player.setJumpingState(true);
+                    player.enableVariableJump();
+                }
                 
                 this.compression = 1;
                 this.triggered = true;
+                this.lastBounceTime = currentTime;
 
                 if (this.physicsSystem) {
                     // TODO: Implement sound effect playback
@@ -115,14 +143,14 @@ export class Spring extends Entity {
                 if (player.grounded && !this.triggered) {
                     player.y = this.y - player.height;
                     const playerJumpPower = player.jumpPower || 10;
-                    player.vy = -(playerJumpPower * this.baseBounceMultiplier);
+                    const bounceVelocity = -(playerJumpPower * this.baseBounceMultiplier);
+                    player.vy = bounceVelocity;
                     player.grounded = false;
                     
                     // 可変ジャンプを有効化
-                    player.isJumping = true;
-                    player.canVariableJump = true;
-                    player.jumpButtonPressed = true;
-                    player.jumpButtonReleaseTime = 0;
+                    // Spring-specific properties that need to be set
+                    player.setJumpingState(true);
+                    player.enableVariableJump();
                     
                     this.compression = 1;
                     this.triggered = true;
@@ -170,19 +198,35 @@ export class Spring extends Entity {
                           (player.y + player.height <= this.y + 8 && player.vy > 0);
             
             if (fromTop && player.vy > 0) {
+                // Check cooldown to prevent rapid re-triggers
+                const currentTime = Date.now();
+                const cooldownTime = 1000; // 1 second cooldown
+                
+                if (this.triggered && (currentTime - this.lastBounceTime) < cooldownTime) {
+                    return false;
+                }
+                
                 player.y = this.y - player.height;
                 
                 const playerJumpPower = player.jumpPower || 10;
-                player.vy = -(playerJumpPower * this.baseBounceMultiplier);
-                player.grounded = false;
+                const bounceVelocity = -(playerJumpPower * this.baseBounceMultiplier);
                 
-                // 可変ジャンプを有効化
-                // Spring-specific properties that need to be set
-                player.setJumpingState(true);
-                player.enableVariableJump();
+                Logger.log(`[Spring] Bounce triggered from onCollision - bounceVelocity: ${bounceVelocity}`);
+                
+                // Apply spring bounce using the dedicated method
+                if ('applySpringBounce' in player && typeof player.applySpringBounce === 'function') {
+                    (player as Player).applySpringBounce(bounceVelocity);
+                } else {
+                    // Fallback to old method if applySpringBounce doesn't exist
+                    player.vy = bounceVelocity;
+                    player.grounded = false;
+                    player.setJumpingState(true);
+                    player.enableVariableJump();
+                }
                 
                 this.compression = 1;
                 this.triggered = true;
+                this.lastBounceTime = currentTime;
 
                 return true;
             }

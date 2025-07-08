@@ -6,21 +6,32 @@
 export class Logger {
     private static isProduction = typeof process !== 'undefined' && process.env?.NODE_ENV === 'production';
     private static debugEnabled = !this.isProduction || (window as Window & { debugMode?: boolean }).debugMode;
+    private static includeTimestamp = true;
+
+    private static getTimestamp(): string {
+        const now = new Date();
+        const ms = now.getMilliseconds().toString().padStart(3, '0');
+        const time = now.toTimeString().split(' ')[0];
+        return `[${time}.${ms}]`;
+    }
 
     static log(message: string, ...args: unknown[]): void {
         if (this.debugEnabled) {
-            console.log(message, ...args);
+            const timestamp = this.includeTimestamp ? this.getTimestamp() + ' ' : '';
+            console.log(timestamp + message, ...args);
         }
     }
 
     static warn(message: string, ...args: unknown[]): void {
         // Warnings are always shown
-        console.warn(message, ...args);
+        const timestamp = this.includeTimestamp ? this.getTimestamp() + ' ' : '';
+        console.warn(timestamp + message, ...args);
     }
 
     static error(message: string, ...args: unknown[]): void {
         // Errors are always shown
-        console.error(message, ...args);
+        const timestamp = this.includeTimestamp ? this.getTimestamp() + ' ' : '';
+        console.error(timestamp + message, ...args);
     }
 
     static group(label: string): void {
@@ -66,6 +77,13 @@ export class Logger {
      */
     static isDebugMode(): boolean {
         return this.debugEnabled;
+    }
+
+    /**
+     * Enable or disable timestamp in log messages
+     */
+    static setTimestampEnabled(enabled: boolean): void {
+        this.includeTimestamp = enabled;
     }
 }
 
