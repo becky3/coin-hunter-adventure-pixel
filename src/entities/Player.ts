@@ -491,10 +491,6 @@ export class Player extends Entity {
             if (this.eventBus) {
                 this.eventBus.emit('player:died');
             }
-            
-            if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('player:died'));
-            }
             return true; // Player died
         }
         

@@ -115,6 +115,14 @@ export class Enemy extends Entity {
         const isFalling = player.vy > 0;
         
         if (isAboveEnemy && isFalling) {
+            // 踏みつけ判定時のみX軸の重なりチェック
+            const playerLeft = player.x;
+            const playerRight = player.x + player.width;
+            const enemyLeft = this.x;
+            const enemyRight = this.x + this.width;
+            const hasHorizontalOverlap = playerRight > enemyLeft && playerLeft < enemyRight;
+            
+            if (!hasHorizontalOverlap) return;
             this.takeDamage(1, player);
             player.vy = -5;
             // 敵を踏み潰した時のスコア加算とイベント発行

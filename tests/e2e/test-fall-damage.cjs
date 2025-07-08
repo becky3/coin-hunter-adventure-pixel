@@ -67,10 +67,13 @@ async function runTest() {
                         window.dispatchEvent(upEvent);
                     };
                     
+                    let gameOverInterval;
+                    
                     const handleRespawn = (event) => {
                         if (!resolved && deathDetected) {
                             console.log('[Test] Respawn after death detected');
                             resolved = true;
+                            if (gameOverInterval) clearInterval(gameOverInterval);
                             resolve({ result: 'respawned', detail: event.detail });
                         }
                     };
@@ -88,7 +91,7 @@ async function runTest() {
                     window.addEventListener('player:respawned', handleRespawn, { once: true });
                     
                     // Check for game over periodically
-                    const gameOverInterval = setInterval(checkGameOver, 100);
+                    gameOverInterval = setInterval(checkGameOver, 100);
                     
                     // Start moving right by dispatching keyboard event
                     const downEvent = new KeyboardEvent('keydown', { code: 'ArrowRight', key: 'ArrowRight' });
