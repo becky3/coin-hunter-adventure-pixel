@@ -73,7 +73,7 @@ export class Spring extends Entity {
                 const notTouchingHorizontally = playerRight < springLeft || playerLeft > springRight;
                 
                 if (notTouchingVertically || notTouchingHorizontally) {
-                    Logger.log(`[Spring] Resetting trigger - Player no longer touching`);
+                    Logger.log('[Spring] Resetting trigger - Player no longer touching');
                     this.triggered = false;
                 }
             }
