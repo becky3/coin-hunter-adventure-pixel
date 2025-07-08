@@ -122,6 +122,24 @@ PRを作成すると、GitHub Copilotが自動的にコードレビューを行�
    - Copilotの指摘に対応した場合は、その内容をコミットメッセージに記載
    - 対応しない場合は、PRコメントで理由を説明
 
+#### Copilotコメントの確認方法
+
+GitHub Copilotのレビューコメントは、通常の`gh pr view`コマンドでは表示されません。以下の方法で確認できます：
+
+```bash
+# PRのレビューコメント（スレッドコメント）を取得
+gh api repos/becky3/coin-hunter-adventure-pixel/pulls/[PR番号]/comments
+
+# 例：PR #112のコメントを確認
+gh api repos/becky3/coin-hunter-adventure-pixel/pulls/112/comments
+```
+
+レスポンスには以下の情報が含まれます：
+- `body`: コメント内容
+- `path`: 対象ファイル
+- `line`: 該当行番号
+- `user.login`: "Copilot"（Copilotのコメントの場合）
+
 ## 作業開始時の手順
 
 **重要: 以下の手順を必ず順番通りに実行してください**
