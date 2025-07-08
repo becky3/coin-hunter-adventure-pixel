@@ -32,7 +32,7 @@ node tests/e2e/test-enemy-damage.cjs
 | **test-performance.cjs** | パフォーマンス監視 | FPS測定（60FPS維持）、レンダリング時間 | ~30秒 |
 | **bgm-and-debug-test.cjs** | BGM・デバッグ機能 | BGM再生/停止、ミュート、デバッグオーバーレイ | ~15秒 |
 | **test-player-respawn-size.cjs** | Issue #106検証 | 小サイズ死亡後のリスポーンサイズ、横衝突判定 | ~25秒 |
-| **test-spring-bounce.cjs** | ジャンプ台機能 | プレイヤーのジャンプ力×2.5倍のバウンス、可変ジャンプは無効化 | ~25秒 |
+| **test-spring-bounce.cjs** | ジャンプ台機能 | プレイヤーのジャンプ力×2.5倍のバウンス、可変ジャンプ対応、複数回バウンス可能 | ~25秒 |
 
 ### テストログ
 - テスト実行時のログは `tests/logs/` に自動保存

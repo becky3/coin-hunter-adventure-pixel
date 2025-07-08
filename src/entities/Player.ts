@@ -279,15 +279,22 @@ export class Player extends Entity {
         this.jumpButtonPressed = true;
     }
     
-    applySpringBounce(bounceVelocity: number): void {
+    applySpringBounce(bounceVelocity: number, isJumpButtonPressed: boolean = false): void {
         this.vy = bounceVelocity;
         this.grounded = false;
         this._isJumping = true;
-        this.canVariableJump = false; // Disable variable jump for spring bounce
+        // Only enable variable jump if button is pressed at bounce time
+        this.canVariableJump = isJumpButtonPressed;
+        this.jumpButtonPressed = isJumpButtonPressed;
         this.isSpringBounce = true;
         this.jumpTime = 0;
         this.jumpMaxHeight = 0;
         this.jumpStartY = this.y;
+        
+        Logger.log('[Player] Spring bounce applied:');
+        Logger.log('  - Bounce velocity:', bounceVelocity);
+        Logger.log('  - Jump button pressed:', isJumpButtonPressed);
+        Logger.log('  - Variable jump enabled:', this.canVariableJump);
     }
     
     update(deltaTime: number): void {
@@ -378,20 +385,25 @@ export class Player extends Entity {
             this.jumpTime += deltaTime * 1000;
             
             
+            // For spring bounce, enable variable jump when button is pressed
+            if (this.isSpringBounce && input.jump && !this.canVariableJump) {
+                this.canVariableJump = true;
+                // Reset jump time to allow variable jump from spring bounce
+                this.jumpTime = 0;
+                Logger.log('[Player] Variable jump enabled for spring bounce');
+            }
+            
             // Check if button was released
             if (!input.jump && this.canVariableJump) {
-                // Don't reduce velocity if this is a spring bounce
-                if (!this.isSpringBounce) {
-                    // Immediately reduce upward velocity if still going up
-                    if (this.vy < 0) {
-                        this.vy *= 0.5;
-                        Logger.log('[Player] Jump button released at time:', this.jumpTime, 'ms, velocity reduced from', this.vy * 2, 'to', this.vy);
-                    }
+                // Immediately reduce upward velocity if still going up
+                if (this.vy < 0) {
+                    this.vy *= 0.5;
+                    Logger.log('[Player] Jump button released at time:', this.jumpTime, 'ms, velocity reduced from', this.vy * 2, 'to', this.vy);
                 }
                 this.canVariableJump = false;
             }
             // If button is still held and we can still boost
-            else if (input.jump && this.canVariableJump && !this.isSpringBounce) {
+            else if (input.jump && this.canVariableJump) {
                 if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
                     // Apply additional upward force for variable jump
                     // This counteracts gravity to maintain upward movement
@@ -418,6 +430,10 @@ export class Player extends Entity {
         
         // Only check for landing after a minimum jump time to avoid immediate grounding
         if (this.grounded && this._isJumping && this.jumpTime > 50) {
+            // For spring bounces, require a bit more time before considering jump complete
+            if (this.isSpringBounce && this.jumpTime < 100) {
+                return;
+            }
             Logger.log('[Player] Jump completed:');
             Logger.log('  - Final max height reached:', this.jumpMaxHeight, 'pixels');
             Logger.log('  - Jump duration:', this.jumpTime, 'ms');

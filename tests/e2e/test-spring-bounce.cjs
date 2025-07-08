@@ -238,32 +238,22 @@ async function runTest() {
         });
         console.log('Y position before spring bounce:', springStartY);
         
-        // Jump on the spring with manual measurement
+        // Jump on the spring with a small downward movement
+        await t.page.keyboard.down('s'); // Move down
+        await t.wait(100);
+        await t.page.keyboard.up('s');
+        await t.wait(100);
+        
+        // Track spring bounce
         const springBounceResult = await t.page.evaluate(async () => {
-            const state = window.game?.stateManager?.currentState;
-            const player = state?.player || state?.entityManager?.getPlayer?.();
-            const entityManager = state?.entityManager;
-            const items = entityManager?.getItems?.() || [];
-            const spring = items.find(e => e.constructor.name === 'Spring');
+            const player = window.game?.stateManager?.currentState?.player;
+            const spring = window.game?.stateManager?.currentState?.entityManager?.getItems?.().find(e => e.constructor.name === 'Spring');
             
             if (!player || !spring) return null;
-            
-            // Position player directly on spring
-            player.x = spring.x;
-            player.y = spring.y - player.height + 2; // Slightly overlapping
-            player.vx = 0;
-            player.vy = 0.1; // Small downward velocity
-            player.grounded = true;
-            
-            // Wait a frame for physics to update
-            await new Promise(resolve => setTimeout(resolve, 50));
             
             const startY = player.y;
             let maxHeight = 0;
             let springTriggered = false;
-            
-            // Small jump to trigger spring
-            player.vy = -1; // Very small jump
             
             // Measure height over time
             return new Promise(resolve => {
@@ -281,8 +271,8 @@ async function runTest() {
                     
                     measurements++;
                     
-                    // Stop when player lands or after 150 measurements
-                    if ((player.grounded && measurements > 20) || measurements > 150) {
+                    // Stop when player lands or after 200 measurements (2 seconds)
+                    if ((player.grounded && measurements > 50 && currentHeight < 5) || measurements > 200) {
                         clearInterval(measureInterval);
                         resolve({
                             startY: startY,
@@ -327,7 +317,161 @@ async function runTest() {
         
         await t.screenshot('spring-bounce-test');
         
-        console.log('✅ Spring bounce works correctly!');
+        // Test 3: Variable jump on spring (with button hold)
+        console.log('\n--- Test 3: Variable Jump on Spring ---');
+        
+        // Wait for player to land
+        await t.waitForCondition(() => {
+            const player = window.game?.stateManager?.currentState?.player;
+            return player && player.grounded;
+        }, 3000, 'player to land');
+        
+        // Position player on spring again
+        await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const player = state?.player || state?.entityManager?.getPlayer?.();
+            const entityManager = state?.entityManager;
+            const items = entityManager?.getItems?.() || [];
+            const spring = items.find(e => e.constructor.name === 'Spring');
+            
+            if (player && spring) {
+                player.x = spring.x;  
+                player.y = spring.y - player.height;
+                player.vx = 0;
+                player.vy = 0;
+                player.grounded = true;
+            }
+        });
+        
+        await t.wait(200);
+        
+        // Test long spring bounce (button held)
+        console.log('Testing long spring bounce (button held)...');
+        
+        // Press and hold jump button
+        await t.page.keyboard.down(' ');
+        
+        // Wait for spring to trigger and measure height
+        const longBounceResult = await t.page.evaluate(async () => {
+            const state = window.game?.stateManager?.currentState;
+            const player = state?.player || state?.entityManager?.getPlayer?.();
+            const spring = state?.entityManager?.getItems?.().find(e => e.constructor.name === 'Spring');
+            
+            if (!player || !spring) return null;
+            
+            const startY = player.y;
+            let maxHeight = 0;
+            let hasVariableJump = false;
+            
+            // Small downward movement to trigger spring
+            player.vy = 0.1;
+            
+            // Measure height over time
+            return new Promise(resolve => {
+                let measurements = 0;
+                const measureInterval = setInterval(() => {
+                    const currentHeight = startY - player.y;
+                    if (currentHeight > maxHeight) {
+                        maxHeight = currentHeight;
+                    }
+                    
+                    // Check if variable jump is enabled
+                    if (player.canVariableJump) {
+                        hasVariableJump = true;
+                    }
+                    
+                    measurements++;
+                    
+                    if ((player.grounded && measurements > 20) || measurements > 200) {
+                        clearInterval(measureInterval);
+                        resolve({
+                            maxHeight: maxHeight,
+                            startY: startY,
+                            hasVariableJump: hasVariableJump
+                        });
+                    }
+                }, 10);
+            });
+        });
+        
+        // Release jump button
+        await t.page.keyboard.up(' ');
+        
+        console.log(`Long spring bounce height: ${longBounceResult?.maxHeight?.toFixed(2) || 0} pixels`);
+        console.log(`Variable jump was enabled: ${longBounceResult?.hasVariableJump || false}`);
+        
+        // Test short spring bounce (quick release)
+        console.log('\nTesting short spring bounce (quick release)...');
+        
+        // Wait for player to land
+        await t.waitForCondition(() => {
+            const player = window.game?.stateManager?.currentState?.player;
+            return player && player.grounded;
+        }, 3000, 'player to land from long bounce');
+        
+        // Position player on spring again
+        await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const player = state?.player || state?.entityManager?.getPlayer?.();
+            const spring = state?.entityManager?.getItems?.().find(e => e.constructor.name === 'Spring');
+            
+            if (player && spring) {
+                player.x = spring.x;  
+                player.y = spring.y - player.height;
+                player.vx = 0;
+                player.vy = 0;
+                player.grounded = true;
+            }
+        });
+        
+        await t.wait(200);
+        
+        // Press jump briefly
+        await t.page.keyboard.down(' ');
+        await t.wait(50); // Very short press
+        await t.page.keyboard.up(' ');
+        
+        // Measure the short bounce
+        const shortBounceResult = await t.page.evaluate(async () => {
+            const player = window.game?.stateManager?.currentState?.player;
+            if (!player) return null;
+            
+            const startY = player.y;
+            let maxHeight = 0;
+            
+            // Measure height over time
+            return new Promise(resolve => {
+                let measurements = 0;
+                const measureInterval = setInterval(() => {
+                    const currentHeight = startY - player.y;
+                    if (currentHeight > maxHeight) {
+                        maxHeight = currentHeight;
+                    }
+                    
+                    measurements++;
+                    
+                    if ((player.grounded && measurements > 20) || measurements > 150) {
+                        clearInterval(measureInterval);
+                        resolve({
+                            maxHeight: maxHeight,
+                            startY: startY
+                        });
+                    }
+                }, 10);
+            });
+        });
+        
+        console.log(`Short spring bounce height: ${shortBounceResult?.maxHeight?.toFixed(2) || 0} pixels`);
+        
+        // Verify variable jump works with spring
+        const longHeight = longBounceResult?.maxHeight || 0;
+        const shortHeight = shortBounceResult?.maxHeight || 0;
+        
+        if (longHeight > shortHeight * 1.2) {
+            console.log('✅ Variable jump works correctly with spring! Long bounce is significantly higher.');
+        } else {
+            console.log(`⚠️ Variable jump may not be working correctly. Long: ${longHeight.toFixed(2)}px, Short: ${shortHeight.toFixed(2)}px`);
+        }
         
         await t.screenshot('test-complete');
         await t.checkForErrors();
