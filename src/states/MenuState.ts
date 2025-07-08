@@ -3,7 +3,6 @@ import { GameState, GameStateManager } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputSystem } from '../core/InputSystem';
 import { URLParams } from '../utils/urlParams';
-import { GameEnvironment } from '../utils/gameEnvironment';
 import { Logger } from '../utils/Logger';
 import { MusicSystem } from '../audio/MusicSystem';
 
@@ -294,20 +293,13 @@ export class MenuState implements GameState {
                 // Determine which stage to use (debug selection takes priority)
                 const selectedStage = debugSelectedStage || stageId;
                 
-                // Determine if stage progression should be enabled based on environment
-                const enableProgression = GameEnvironment.shouldEnableStageProgression();
-                Logger.log('MenuState', `Environment: ${GameEnvironment.getEnvironmentName()}, Stage progression: ${enableProgression ? 'ENABLED' : 'DISABLED'}`);
-                
                 if (selectedStage) {
                     Logger.log('MenuState', `Starting stage: ${selectedStage} (source: ${debugSelectedStage ? 'debug overlay' : 'URL parameter'}`);
                     this.game.stateManager.setState('play', { 
-                        level: selectedStage,
-                        enableProgression: enableProgression 
+                        level: selectedStage
                     });
                 } else {
-                    this.game.stateManager.setState('play', { 
-                        enableProgression: enableProgression 
-                    });
+                    this.game.stateManager.setState('play');
                 }
             } catch (error) {
                 Logger.error('MenuState', 'Error transitioning to play state:', error);

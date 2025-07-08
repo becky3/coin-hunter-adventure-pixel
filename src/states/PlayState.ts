@@ -52,7 +52,6 @@ export class PlayState implements GameState {
     private inputListeners: Array<() => void> = [];
     private stageClearTimer: number | null = null;
     private lives: number = 3; // 残機はPlayStateで管理
-    private stageProgressionEnabled: boolean = false; // ステージ遷移フラグ
     private isHandlingDeath: boolean = false; // 死亡処理中フラグ
 
     // Public getters for testing
@@ -120,7 +119,7 @@ export class PlayState implements GameState {
         this.gameState = 'playing';
         this.lives = 3;
         this.isHandlingDeath = false;
-        // Note: lastTimeUpdate, stageClearTimer, and stageProgressionEnabled 
+        // Note: lastTimeUpdate and stageClearTimer
         // are handled separately as they have specific initialization requirements
     }
 
@@ -179,10 +178,6 @@ export class PlayState implements GameState {
 
         // Reset game state for new game
         this.resetGameState();
-        
-        // Store progression mode from params (default: disabled for testing)
-        this.stageProgressionEnabled = params.enableProgression || false;
-        Logger.log(`[PlayState] Stage progression: ${this.stageProgressionEnabled ? 'ENABLED' : 'DISABLED'}`);
 
         // Preload sprites
         await this.preloadSprites();
@@ -475,16 +470,6 @@ export class PlayState implements GameState {
         // Show clear message (until state changes)
         this.hudManager.showMessage('STAGE CLEAR!', 999999);
         
-        // Check if stage progression is enabled
-        if (!this.stageProgressionEnabled) {
-            // Return to menu instead of progressing
-            this.stageClearTimer = window.setTimeout(() => {
-                this.stageClearTimer = null;
-                this.game.stateManager.setState('menu');
-            }, 3000);
-            return;
-        }
-        
         // Get next level from LevelManager
         const nextLevel = this.levelManager.getNextLevel();
         
@@ -494,10 +479,7 @@ export class PlayState implements GameState {
             
             if (nextLevel) {
                 // Load next level
-                this.game.stateManager.setState('play', { 
-                    level: nextLevel,
-                    enableProgression: this.stageProgressionEnabled 
-                });
+                this.game.stateManager.setState('play', { level: nextLevel });
             } else {
                 // No more levels - show ending
                 this.showEnding();
