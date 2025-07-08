@@ -267,6 +267,16 @@ export class Player extends Entity {
     get score(): number { return this._score; }
     get coins(): number { return this._coins; }
     
+    // Public setters for spring interaction
+    setJumpingState(jumping: boolean): void {
+        this._isJumping = jumping;
+    }
+    
+    enableVariableJump(): void {
+        this.canVariableJump = true;
+        this.jumpButtonPressed = true;
+    }
+    
     update(deltaTime: number): void {
         super.update(deltaTime);
         

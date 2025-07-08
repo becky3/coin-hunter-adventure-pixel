@@ -118,14 +118,17 @@ export class EntityManager {
             this.items.push(entity);
             break;
                 
-        case 'spring':
-            entity = new Spring(
+        case 'spring': {
+            const spring = new Spring(
                 config.x * TILE_SIZE,
                 config.y * TILE_SIZE
             );
-            this.items.push(entity);
-            this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ITEM);
+            spring.physicsSystem = this.physicsSystem;
+            this.items.push(spring);
+            this.physicsSystem.addEntity(spring, this.physicsSystem.layers.ITEM);
+            entity = spring;
             break;
+        }
                 
         case 'goal':
             entity = new GoalFlag(

@@ -6,7 +6,7 @@ import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { ResourceLoader } from '../config/ResourceLoader';
 
 export class Spring extends Entity {
-    private bouncePower: number;
+    private baseBounceMultiplier: number;
     private compression: number;
     public triggered: boolean;
     private animationSpeed: number;
@@ -33,7 +33,7 @@ export class Spring extends Entity {
         this.physicsEnabled = false;
         this.solid = springConfig?.physics.solid ?? true;
         
-        this.bouncePower = springConfig?.properties.bouncePower || 14;
+        this.baseBounceMultiplier = 1.5; // ジャンプ力の1.5倍
         this.compression = 0;
         this.triggered = false;
         this.animationSpeed = springConfig?.properties.expansionSpeed || 0.2;
@@ -96,8 +96,14 @@ export class Spring extends Entity {
             if (onTopOfSpring && player.grounded && player.vy >= -0.1 && !this.triggered) {
                 player.y = this.y - player.height;
                 
-                player.vy = -this.bouncePower;
+                const playerJumpPower = player.jumpPower || 10;
+                player.vy = -(playerJumpPower * this.baseBounceMultiplier);
                 player.grounded = false;
+                
+                // 可変ジャンプを有効化
+                // Spring-specific properties that need to be set
+                player.setJumpingState(true);
+                player.enableVariableJump();
                 
                 this.compression = 1;
                 this.triggered = true;
@@ -108,8 +114,16 @@ export class Spring extends Entity {
             } else if (!onTopOfSpring && playerBottom > this.y && player.y < this.y + this.height) {
                 if (player.grounded && !this.triggered) {
                     player.y = this.y - player.height;
-                    player.vy = -this.bouncePower;
+                    const playerJumpPower = player.jumpPower || 10;
+                    player.vy = -(playerJumpPower * this.baseBounceMultiplier);
                     player.grounded = false;
+                    
+                    // 可変ジャンプを有効化
+                    player.isJumping = true;
+                    player.canVariableJump = true;
+                    player.jumpButtonPressed = true;
+                    player.jumpButtonReleaseTime = 0;
+                    
                     this.compression = 1;
                     this.triggered = true;
                 }
@@ -158,8 +172,14 @@ export class Spring extends Entity {
             if (fromTop && player.vy > 0) {
                 player.y = this.y - player.height;
                 
-                player.vy = -this.bouncePower;
+                const playerJumpPower = player.jumpPower || 10;
+                player.vy = -(playerJumpPower * this.baseBounceMultiplier);
                 player.grounded = false;
+                
+                // 可変ジャンプを有効化
+                // Spring-specific properties that need to be set
+                player.setJumpingState(true);
+                player.enableVariableJump();
                 
                 this.compression = 1;
                 this.triggered = true;
