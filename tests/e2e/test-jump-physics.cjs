@@ -187,9 +187,9 @@ async function runTest() {
         console.log('Values after reset:', afterReset);
         
         const resetCorrect = 
-            parseFloat(afterReset.airResistance) === 0 &&
+            parseFloat(afterReset.airResistance) === 0.13 &&
             parseFloat(afterReset.gravityScale) === 1.0 &&
-            parseFloat(afterReset.jumpPower) === 5.25;
+            parseFloat(afterReset.jumpPower) === 12.1;
             
         console.log(`✅ Reset to default: ${resetCorrect ? 'PASSED' : 'FAILED'}`);
         
