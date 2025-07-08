@@ -440,6 +440,8 @@ export class Player extends Entity {
     
     
     respawn(x: number, y: number): void {
+        Logger.log(`[Player] respawn called at (${x}, ${y})`);
+        
         // Reset to large size first
         this.isSmall = false;
         this.width = DEFAULT_PLAYER_CONFIG.width;
@@ -451,8 +453,8 @@ export class Player extends Entity {
         this.vx = 0;
         this.vy = 0;
         this._isDead = false;
-        this._invulnerable = false;
-        this.invulnerabilityTime = 0;
+        this._invulnerable = true;  // リスポーン時は無敵状態にする
+        this.invulnerabilityTime = DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
         this._animState = 'idle';
         this.animFrame = 0;
         this.animTimer = 0;
@@ -463,6 +465,17 @@ export class Player extends Entity {
         this._health = this._maxHealth;
         
         this.updateSprite();
+        
+        if (this.eventBus) {
+            this.eventBus.emit('player:respawned', { x, y });
+        }
+        
+        if (typeof window !== 'undefined') {
+            Logger.log('[Player] Dispatching window player:respawned event');
+            window.dispatchEvent(new CustomEvent('player:respawned', { 
+                detail: { x, y } 
+            }));
+        }
     }
     
     takeDamage(): boolean {
@@ -474,6 +487,7 @@ export class Player extends Entity {
         if (this.isSmall) {
             this._health = 0;
             this._isDead = true;
+            
             if (this.eventBus) {
                 this.eventBus.emit('player:died');
             }

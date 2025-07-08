@@ -13,7 +13,7 @@ Coin Hunter Adventure Pixelの開発に参加する方向けのドキュメン�
 2. [アーキテクチャ]({{ site.baseurl }}/development/architecture.html) - システム設計と構造
 3. [物理システム]({{ site.baseurl }}/development/physics-system.html) - 物理演算とパラメータ設定
 4. [マネージャーAPI]({{ site.baseurl }}/development/managers.html) - 主要マネージャークラスのAPI
-5. [テストガイド]({{ site.baseurl }}/development/testing.html) - テストの書き方と実行方法
+5. [テストガイド]({{ site.baseurl }}/development/testing.html) - テストの書き方と実行方法、既存テスト一覧
 
 ## 開発の流れ
 

@@ -107,15 +107,22 @@ export class Enemy extends Entity {
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || !this.active || player.invulnerable) return;
         
-        const playerBottom = player.y + player.height;
-        const playerPrevBottom = player.y + player.height - player.vy;
-        const enemyTop = this.y;
+        const enemyCenter = this.y + this.height / 2;
         
-        const wasAbove = playerPrevBottom <= enemyTop + 4;
-        const isNowColliding = playerBottom >= enemyTop;
-        const isFalling = player.vy >= 0;
+        // 踏みつけ判定：プレイヤーの中心が敵の上半分より上にあり、下向きに移動している
+        const playerCenter = player.y + player.height / 2;
+        const isAboveEnemy = playerCenter < enemyCenter;
+        const isFalling = player.vy > 0;
         
-        if (wasAbove && isNowColliding && isFalling) {
+        if (isAboveEnemy && isFalling) {
+            // 踏みつけ判定時のみX軸の重なりチェック
+            const playerLeft = player.x;
+            const playerRight = player.x + player.width;
+            const enemyLeft = this.x;
+            const enemyRight = this.x + this.width;
+            const hasHorizontalOverlap = playerRight > enemyLeft && playerLeft < enemyRight;
+            
+            if (!hasHorizontalOverlap) return;
             this.takeDamage(1, player);
             player.vy = -5;
             // 敵を踏み潰した時のスコア加算とイベント発行

@@ -526,13 +526,22 @@ export class PlayState implements GameState {
         
         this.isHandlingDeath = true; // Set flag to prevent re-entry
         
+        // Emit death event for testing and other systems
+        this.eventBus.emit('player:died');
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('player:died'));
+        }
+        
         this.lives--;
         this.hudManager.updateLives(this.lives);
+        Logger.log(`[PlayState] handlePlayerDeath: lives after decrement: ${this.lives}`);
         
         if (this.lives <= 0) {
+            Logger.log('[PlayState] No lives left, triggering game over');
             this.gameOver();
         } else {
             const spawn = this.levelManager.getPlayerSpawn();
+            Logger.log(`[PlayState] Respawning player at: ${spawn.x}, ${spawn.y}`);
             player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
             
             // Reset flag after respawn

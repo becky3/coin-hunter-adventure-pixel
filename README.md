@@ -61,7 +61,7 @@ git push
 RUN_FULL_TESTS=true git push
 ```
 
-詳細は [E2Eテストドキュメント](tests/e2e/README.md) を参照してください。
+詳細は [テストガイド](docs/development/testing.md) を参照してください。
 
 ## 📖 ドキュメント
 
