@@ -53,34 +53,52 @@ async function runTest() {
             return { x: player.x, y: player.y, lives: state?.lives || 0 };
         });
         
-        // Set up respawn event listener BEFORE moving the player
-        const respawnPromise = t.page.evaluate(() => {
+        // Set up death detection and move player
+        const fallResult = await t.page.evaluate(() => {
             return new Promise((resolve) => {
-                // Set up listener for respawn event
+                let deathDetected = false;
+                
+                const handleDeath = () => {
+                    console.log('[Test] Player died event detected');
+                    deathDetected = true;
+                    // Stop moving immediately when death is detected
+                    const upEvent = new KeyboardEvent('keyup', { code: 'ArrowRight', key: 'ArrowRight' });
+                    window.dispatchEvent(upEvent);
+                };
+                
                 const handleRespawn = (event) => {
                     console.log('[Test] Received player:respawned event:', event.detail);
-                    resolve(event.detail);
+                    if (deathDetected) {
+                        resolve({ respawned: true, detail: event.detail });
+                    }
                 };
+                
+                // Listen for death and respawn events
+                window.addEventListener('player:died', handleDeath, { once: true });
                 window.addEventListener('player:respawned', handleRespawn, { once: true });
-                console.log('[Test] Respawn event listener set up');
+                console.log('[Test] Death and respawn event listeners set up');
+                
+                // Start moving right
+                const downEvent = new KeyboardEvent('keydown', { code: 'ArrowRight', key: 'ArrowRight' });
+                window.dispatchEvent(downEvent);
                 
                 // Timeout after 5 seconds
                 setTimeout(() => {
-                    console.log('[Test] Respawn event timeout reached');
+                    console.log('[Test] Timeout reached');
+                    const upEvent = new KeyboardEvent('keyup', { code: 'ArrowRight', key: 'ArrowRight' });
+                    window.dispatchEvent(upEvent);
+                    window.removeEventListener('player:died', handleDeath);
                     window.removeEventListener('player:respawned', handleRespawn);
-                    resolve(null);
+                    resolve({ respawned: false, timeout: true });
                 }, 5000);
             });
         });
         
-        // Now move the player to fall
-        await t.movePlayer('right', 800); // Move to the pit at x=5-11
+        if (!fallResult.respawned) {
+            throw new Error('Player respawn timeout - no respawn event received');
+        }
         
-        // Release key to prevent continuous movement
-        await t.page.keyboard.up('ArrowRight');
-        
-        // Wait for respawn event
-        const respawnData = await respawnPromise;
+        const respawnData = fallResult.detail;
         
         if (!respawnData) {
             throw new Error('Player respawn timeout - no respawn event received');
@@ -141,54 +159,66 @@ async function runTest() {
             // Wait a bit to ensure death handling flag is reset
             await t.wait(200);
             
-            // Move to fall again
-            await t.movePlayer('right', 800);
-            
-            // Release key
-            await t.page.keyboard.up('ArrowRight');
-            
-            // Wait for either respawn or game over
-            const result = await t.page.evaluate(() => {
+            // Set up event listeners for death and respawn/gameover
+            const fallResult = await t.page.evaluate(() => {
                 return new Promise((resolve) => {
+                    let deathDetected = false;
                     let resolved = false;
                     
-                    const handleRespawn = () => {
-                        if (!resolved) {
+                    const handleDeath = () => {
+                        console.log('[Test] Death event detected');
+                        deathDetected = true;
+                        // Stop moving immediately when death is detected
+                        const upEvent = new KeyboardEvent('keyup', { code: 'ArrowRight', key: 'ArrowRight' });
+                        window.dispatchEvent(upEvent);
+                    };
+                    
+                    const handleRespawn = (event) => {
+                        if (!resolved && deathDetected) {
+                            console.log('[Test] Respawn after death detected');
                             resolved = true;
-                            resolve('respawned');
+                            resolve({ result: 'respawned', detail: event.detail });
                         }
                     };
                     
                     const checkGameOver = () => {
                         const state = window.game?.stateManager?.currentState;
-                        if (state?.gameState === 'gameover' && !resolved) {
+                        if (state?.gameState === 'gameover' && !resolved && deathDetected) {
                             resolved = true;
-                            resolve('gameover');
+                            resolve({ result: 'gameover' });
                         }
                     };
                     
-                    // Listen for respawn event
+                    // Listen for death and respawn events
+                    window.addEventListener('player:died', handleDeath, { once: true });
                     window.addEventListener('player:respawned', handleRespawn, { once: true });
                     
                     // Check for game over periodically
                     const gameOverInterval = setInterval(checkGameOver, 100);
                     
+                    // Start moving right by dispatching keyboard event
+                    const downEvent = new KeyboardEvent('keydown', { code: 'ArrowRight', key: 'ArrowRight' });
+                    window.dispatchEvent(downEvent);
+                    
                     // Timeout after 5 seconds
                     setTimeout(() => {
+                        const upEvent = new KeyboardEvent('keyup', { code: 'ArrowRight', key: 'ArrowRight' });
+                        window.dispatchEvent(upEvent);
                         clearInterval(gameOverInterval);
                         if (!resolved) {
+                            window.removeEventListener('player:died', handleDeath);
                             window.removeEventListener('player:respawned', handleRespawn);
-                            resolve('timeout');
+                            resolve({ result: 'timeout' });
                         }
                     }, 5000);
                 });
             });
             
-            if (result === 'timeout') {
-                throw new Error('Timeout waiting for respawn or game over');
+            if (fallResult.result === 'timeout') {
+                throw new Error('Timeout waiting for fall death');
             }
             
-            console.log(`Fall ${fallCount} result: ${result}`);
+            console.log(`Fall ${fallCount} result: ${fallResult.result}`);
             
             // Check lives
             currentLives = await t.page.evaluate(() => {
@@ -197,14 +227,7 @@ async function runTest() {
             });
             console.log(`Lives after fall ${fallCount}: ${currentLives}`);
             
-            // Check game state
-            const gameState = await t.page.evaluate(() => {
-                const state = window.game?.stateManager?.currentState;
-                return state?.gameState || 'unknown';
-            });
-            console.log(`Game state: ${gameState}`);
-            
-            if (gameState === 'gameover') {
+            if (fallResult.result === 'gameover') {
                 console.log('✅ Game over triggered correctly after losing all lives');
                 break;
             }

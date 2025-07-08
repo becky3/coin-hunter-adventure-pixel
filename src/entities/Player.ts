@@ -467,7 +467,6 @@ export class Player extends Entity {
         this.updateSprite();
         
         if (this.eventBus) {
-            Logger.log('[Player] Emitting player:respawned event');
             this.eventBus.emit('player:respawned', { x, y });
         }
         
