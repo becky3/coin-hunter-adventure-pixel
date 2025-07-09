@@ -20,12 +20,24 @@ export class GameLoop {
         const gameLoop = (currentTime: number): void => {
             if (!this._running) return;
             
-            const deltaTime = currentTime - this._lastTime;
+            let elapsed = currentTime - this._lastTime;
             
-            if (deltaTime >= this.frameTime) {
-
-                updateCallback(deltaTime / 1000);
-                this._lastTime = currentTime - (deltaTime % this.frameTime);
+            // Panic prevention for tab switches or long pauses
+            if (elapsed > 1000) {
+                elapsed = this.frameTime;
+            }
+            
+            // Fixed timestep updates
+            while (elapsed >= this.frameTime && this._running) {
+                updateCallback(this.frameTime / 1000);
+                elapsed -= this.frameTime;
+                this._lastTime += this.frameTime;
+                
+                // Prevent spiral of death (max 5 frames per update)
+                if (currentTime - this._lastTime > this.frameTime * 5) {
+                    this._lastTime = currentTime - this.frameTime;
+                    break;
+                }
             }
             
             this.animationFrameId = requestAnimationFrame(gameLoop);

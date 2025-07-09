@@ -12,7 +12,6 @@ class TestFramework {
         
         this.options = {
             headless: options.headless ?? true,
-            slowMo: options.slowMo ?? 0,
             devtools: options.devtools ?? false,
             screenshotPath: options.screenshotPath ?? 'tests/screenshots',
             timeout: options.timeout,
@@ -49,9 +48,15 @@ class TestFramework {
         // Launch browser
         this.browser = await puppeteer.launch({
             headless: this.options.headless,
-            slowMo: this.options.slowMo,
             devtools: this.options.devtools,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage', // Helps with limited shared memory
+                '--disable-gpu', // Helps with headless mode stability
+                '--no-first-run',
+                '--disable-extensions'
+            ],
             protocolTimeout: 180000 // 3 minutes timeout for protocol operations
         });
 
@@ -97,6 +102,11 @@ class TestFramework {
     }
 
     async safeScreenshot(name) {
+        if (this.isClosing || !this.page) {
+            console.log('Skipping screenshot - test is closing or page is null');
+            return;
+        }
+        
         try {
             await Promise.race([
                 this.screenshot(name),
@@ -252,6 +262,11 @@ class TestFramework {
     }
 
     async screenshot(name = 'screenshot') {
+        if (this.isClosing || !this.page) {
+            console.log('Skipping screenshot - test is closing or page is null');
+            return null;
+        }
+        
         const timestamp = toJSTString();
         const filename = `${this.testName}-${name}-${timestamp}.png`;
         const filepath = path.join(this.options.screenshotPath, filename);
@@ -262,9 +277,14 @@ class TestFramework {
             fs.mkdirSync(dir, { recursive: true });
         }
         
-        await this.page.screenshot({ path: filepath, fullPage: true });
-        console.log(`📸 Screenshot saved: ${filename}`);
-        return filepath;
+        try {
+            await this.page.screenshot({ path: filepath, fullPage: true });
+            console.log(`📸 Screenshot saved: ${filename}`);
+            return filepath;
+        } catch (error) {
+            console.error(`Screenshot failed: ${error.message}`);
+            return null;
+        }
     }
 
     async wait(ms) {
@@ -278,8 +298,21 @@ class TestFramework {
     async cleanup() {
         this.isClosing = true;  // 終了処理開始
         
-        if (this.browser) {
-            await this.browser.close();
+        try {
+            // Close page first
+            if (this.page) {
+                this.page.removeAllListeners();
+                await this.page.close().catch(() => {});
+                this.page = null;
+            }
+            
+            // Then close browser
+            if (this.browser) {
+                await this.browser.close().catch(() => {});
+                this.browser = null;
+            }
+        } catch (error) {
+            console.error('Error during cleanup:', error.message);
         }
         
         if (this.startTime) {

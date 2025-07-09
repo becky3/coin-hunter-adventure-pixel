@@ -70,8 +70,14 @@ async function runAllTests() {
             
             // Add a delay between tests to ensure cleanup
             if (tests.indexOf(test) < tests.length - 1) {
-                console.log('\n⏳ Waiting 2 seconds before next test...');
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                console.log('\n⏳ Waiting 5 seconds before next test...');
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                
+                // Force garbage collection if available (requires --expose-gc flag)
+                if (global.gc) {
+                    console.log('🧹 Running garbage collection...');
+                    global.gc();
+                }
             }
         } catch (err) {
             error = err;

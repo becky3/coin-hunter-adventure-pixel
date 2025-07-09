@@ -4,7 +4,6 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 async function runTest() {
     const test = new GameTestHelpers({
         headless: false,  // Set to false to see the browser
-        slowMo: 0,       // Slow down for debugging
         verbose: true,    // More console logs
         timeout: 20000
     });

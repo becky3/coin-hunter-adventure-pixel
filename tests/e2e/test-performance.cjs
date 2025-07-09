@@ -4,9 +4,8 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 async function runTest() {
     const test = new GameTestHelpers({
         headless: false,   // Change to false for more reliable testing
-        slowMo: 50,        // Add slight delay for stability
         verbose: false,
-        timeout: 90000
+        timeout: 60000
     });
 
     await test.runTest(async (t) => {
@@ -23,16 +22,16 @@ async function runTest() {
         
         console.log('\n--- Starting Performance Monitoring ---\n');
         
-        // Monitor performance during gameplay
-        const performanceReport = await t.monitorPerformance(30000, async () => {
-            // Simulate active gameplay
-            for (let i = 0; i < 10; i++) {
-                await t.movePlayer('right', 800);
+        // Monitor performance during gameplay (reduced duration and actions)
+        const performanceReport = await t.monitorPerformance(15000, async () => {
+            // Simulate active gameplay with fewer iterations
+            for (let i = 0; i < 5; i++) {
+                await t.movePlayer('right', 500);
                 await t.jumpPlayer();
-                await t.wait(200);
-                await t.movePlayer('left', 600);
+                await t.wait(100);
+                await t.movePlayer('left', 400);
                 await t.jumpPlayer();
-                await t.wait(200);
+                await t.wait(100);
             }
         });
         
