@@ -321,6 +321,17 @@ async function runTest() {
         // Test 3: Variable jump on spring (with button hold)
         console.log('\n--- Test 3: Variable Jump on Spring ---');
         
+        // Move player away from spring to allow landing
+        await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const player = state?.player || state?.entityManager?.getPlayer?.();
+            if (player) {
+                player.x = 150;  // Move away from spring
+                player.vx = 0;
+                player.vy = 0;
+            }
+        });
+        
         // Wait for player to land
         await t.waitForCondition(() => {
             const player = window.game?.stateManager?.currentState?.player;
@@ -403,6 +414,17 @@ async function runTest() {
         
         // Test short spring bounce (quick release)
         console.log('\nTesting short spring bounce (quick release)...');
+        
+        // Move player away from spring to allow landing
+        await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const player = state?.player || state?.entityManager?.getPlayer?.();
+            if (player) {
+                player.x = 150;  // Move away from spring
+                player.vx = 0;
+                player.vy = 0;
+            }
+        });
         
         // Wait for player to land
         await t.waitForCondition(() => {
