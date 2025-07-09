@@ -1,5 +1,38 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 
+// Helper function to move player away from spring
+async function movePlayerAwayFromSpring(t) {
+    await t.page.evaluate(() => {
+        const state = window.game?.stateManager?.currentState;
+        const player = state?.player || state?.entityManager?.getPlayer?.();
+        if (player) {
+            player.x = 150;  // Move away from spring
+            player.vx = 0;
+            player.vy = 0;
+        }
+    });
+}
+
+// Helper function to position player on spring
+async function positionPlayerOnSpring(t) {
+    await t.page.evaluate(() => {
+        const state = window.game?.stateManager?.currentState;
+        const player = state?.player || state?.entityManager?.getPlayer?.();
+        const entityManager = state?.entityManager;
+        const items = entityManager?.getItems?.() || [];
+        const spring = items.find(e => e.constructor.name === 'Spring');
+        
+        if (player && spring) {
+            player.x = spring.x;  
+            player.y = spring.y - player.height;
+            player.vx = 0;
+            player.vy = 0;
+            player.grounded = true;
+            console.log(`Teleported player to x=${player.x}, y=${player.y} (spring at x=${spring.x}, y=${spring.y})`);
+        }
+    });
+}
+
 async function runTest() {
     const test = new GameTestHelpers({ 
         headless: false,
@@ -40,23 +73,7 @@ async function runTest() {
         
         // Teleport player directly on top of spring (spring is at x=80, y=160)
         console.log('Teleporting player on top of spring...');
-        await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            const player = state?.player || state?.entityManager?.getPlayer?.();
-            const entityManager = state?.entityManager;
-            const items = entityManager?.getItems?.() || [];
-            const spring = items.find(e => e.constructor.name === 'Spring');
-            
-            if (player && spring) {
-                // Place player directly on top of the spring
-                player.x = spring.x;  
-                player.y = spring.y - player.height; // On top of spring
-                player.vx = 0;
-                player.vy = 0;
-                player.grounded = true;
-                console.log(`Teleported player to x=${player.x}, y=${player.y} (spring at x=${spring.x}, y=${spring.y})`);
-            }
-        });
+        await positionPlayerOnSpring(t);
         
         // Get initial player stats
         const initialStats = await t.getPlayerStats();
@@ -322,15 +339,7 @@ async function runTest() {
         console.log('\n--- Test 3: Variable Jump on Spring ---');
         
         // Move player away from spring to allow landing
-        await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            const player = state?.player || state?.entityManager?.getPlayer?.();
-            if (player) {
-                player.x = 150;  // Move away from spring
-                player.vx = 0;
-                player.vy = 0;
-            }
-        });
+        await movePlayerAwayFromSpring(t);
         
         // Wait for player to land
         await t.waitForCondition(() => {
@@ -416,15 +425,7 @@ async function runTest() {
         console.log('\nTesting short spring bounce (quick release)...');
         
         // Move player away from spring to allow landing
-        await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            const player = state?.player || state?.entityManager?.getPlayer?.();
-            if (player) {
-                player.x = 150;  // Move away from spring
-                player.vx = 0;
-                player.vy = 0;
-            }
-        });
+        await movePlayerAwayFromSpring(t);
         
         // Wait for player to land
         await t.waitForCondition(() => {
@@ -433,19 +434,7 @@ async function runTest() {
         }, 3000, 'player to land from long bounce');
         
         // Position player on spring again
-        await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            const player = state?.player || state?.entityManager?.getPlayer?.();
-            const spring = state?.entityManager?.getItems?.().find(e => e.constructor.name === 'Spring');
-            
-            if (player && spring) {
-                player.x = spring.x;  
-                player.y = spring.y - player.height;
-                player.vx = 0;
-                player.vy = 0;
-                player.grounded = true;
-            }
-        });
+        await positionPlayerOnSpring(t);
         
         await t.wait(200);
         
