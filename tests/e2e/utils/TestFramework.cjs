@@ -5,12 +5,17 @@ const { toJSTString, getJSTLogTime } = require('./dateHelper.cjs');
 
 class TestFramework {
     constructor(options = {}) {
+        // Require timeout to be explicitly set
+        if (!options.timeout) {
+            throw new Error('Timeout must be explicitly set for each test. Please specify timeout in milliseconds.');
+        }
+        
         this.options = {
             headless: options.headless ?? true,
             slowMo: options.slowMo ?? 0,
             devtools: options.devtools ?? false,
             screenshotPath: options.screenshotPath ?? 'tests/screenshots',
-            timeout: options.timeout ?? 30000,
+            timeout: options.timeout,
             logToFile: options.logToFile ?? true,
             logPath: options.logPath ?? 'tests/logs',
             ...options
@@ -24,6 +29,7 @@ class TestFramework {
         this.originalConsoleLog = console.log;
         this.originalConsoleError = console.error;
         this.originalConsoleWarn = console.warn;
+        this.isClosing = false;  // 終了処理中フラグ
     }
 
     async init(testName) {
@@ -57,8 +63,9 @@ class TestFramework {
             height: 720
         });
 
-        // Set default timeout
+        // Set page timeout
         this.page.setDefaultTimeout(this.options.timeout);
+        console.log(`Test timeout set to: ${this.options.timeout}ms`);
 
         // Setup console logging
         this.page.on('console', msg => {
@@ -218,10 +225,25 @@ class TestFramework {
     }
 
     async holdKey(key, duration = 100) {
-        console.log(`Holding key: ${key} for ${duration}ms`);
-        await this.page.keyboard.down(key);
-        await this.wait(duration);
-        await this.page.keyboard.up(key);
+        if (this.isClosing || !this.page) {
+            console.log('Test is closing, skipping holdKey');
+            return;
+        }
+        
+        try {
+            console.log(`Holding key: ${key} for ${duration}ms`);
+            await this.page.keyboard.down(key);
+            await this.wait(duration);
+            if (!this.isClosing && this.page) {
+                await this.page.keyboard.up(key);
+            }
+        } catch (error) {
+            if (error.message.includes('Session closed') || error.message.includes('Target closed')) {
+                console.log('Page already closed, ignoring error');
+                return;
+            }
+            throw error;
+        }
     }
 
     async clickAt(x, y) {
@@ -246,10 +268,16 @@ class TestFramework {
     }
 
     async wait(ms) {
+        if (this.isClosing) {
+            console.log('Test is closing, skipping wait');
+            return;
+        }
         await new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async cleanup() {
+        this.isClosing = true;  // 終了処理開始
+        
         if (this.browser) {
             await this.browser.close();
         }

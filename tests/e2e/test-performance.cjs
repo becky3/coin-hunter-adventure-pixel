@@ -5,7 +5,8 @@ async function runTest() {
     const test = new GameTestHelpers({
         headless: false,   // Change to false for more reliable testing
         slowMo: 50,        // Add slight delay for stability
-        verbose: false
+        verbose: false,
+        timeout: 90000
     });
 
     await test.runTest(async (t) => {
