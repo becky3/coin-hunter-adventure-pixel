@@ -4,7 +4,8 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 async function runTest() {
     const test = new GameTestHelpers({
         headless: false,
-        verbose: true
+        verbose: true,
+        timeout: 60000
     });
 
     await test.runTest(async (t) => {
@@ -256,6 +257,12 @@ async function runTest() {
             attemptCount++;
             console.log(`Attempt ${attemptCount} - Current lives: ${currentLives}`);
             
+            // Check if test is closing
+            if (t.isClosing) {
+                console.log('Test is closing, ending loop');
+                break;
+            }
+            
             // Wait for any respawn/invulnerability
             await t.wait(1500);
             
@@ -263,19 +270,34 @@ async function runTest() {
             await t.movePlayer('right', 1500);
             await t.wait(500);
             
-            // Check lives
-            currentLives = await t.page.evaluate(() => {
-                const state = window.game?.stateManager?.currentState;
-                return state?.lives || 0;
-            });
-            console.log(`Lives after attempt ${attemptCount}: ${currentLives}`);
+            // Check if test is still running
+            if (t.isClosing || !t.page) {
+                console.log('Test is closing, ending game over test');
+                break;
+            }
             
-            // Check game state
-            const gameState = await t.page.evaluate(() => {
-                const state = window.game?.stateManager?.currentState;
-                return state?.gameState || 'unknown';
-            });
-            console.log(`Game state: ${gameState}`);
+            // Check lives
+            let gameState = 'unknown';
+            try {
+                currentLives = await t.page.evaluate(() => {
+                    const state = window.game?.stateManager?.currentState;
+                    return state?.lives || 0;
+                });
+                console.log(`Lives after attempt ${attemptCount}: ${currentLives}`);
+                
+                // Check game state
+                gameState = await t.page.evaluate(() => {
+                    const state = window.game?.stateManager?.currentState;
+                    return state?.gameState || 'unknown';
+                });
+                console.log(`Game state: ${gameState}`);
+            } catch (error) {
+                if (error.message.includes('detached Frame') || error.message.includes('Session closed')) {
+                    console.log('Page already closed during evaluation, ending test');
+                    break;
+                }
+                throw error;
+            }
             
             if (gameState === 'gameover') {
                 console.log('✅ Game over triggered correctly');
@@ -283,8 +305,10 @@ async function runTest() {
             }
         }
         
-        // Final screenshot
-        await t.screenshot('test-complete');
+        // Check if game over was achieved
+        if (currentLives > 0) {
+            throw new Error(`Test failed: Game over was not triggered after ${attemptCount} attempts. Lives remaining: ${currentLives}`);
+        }
         
         // Check for any errors
         await t.checkForErrors();

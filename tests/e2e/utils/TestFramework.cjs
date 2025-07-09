@@ -1,15 +1,21 @@
 const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
+const { toJSTString, getJSTLogTime } = require('./dateHelper.cjs');
 
 class TestFramework {
     constructor(options = {}) {
+        // Require timeout to be explicitly set
+        if (!options.timeout) {
+            throw new Error('Timeout must be explicitly set for each test. Please specify timeout in milliseconds.');
+        }
+        
         this.options = {
             headless: options.headless ?? true,
             slowMo: options.slowMo ?? 0,
             devtools: options.devtools ?? false,
             screenshotPath: options.screenshotPath ?? 'tests/screenshots',
-            timeout: options.timeout ?? 30000,
+            timeout: options.timeout,
             logToFile: options.logToFile ?? true,
             logPath: options.logPath ?? 'tests/logs',
             ...options
@@ -23,6 +29,7 @@ class TestFramework {
         this.originalConsoleLog = console.log;
         this.originalConsoleError = console.error;
         this.originalConsoleWarn = console.warn;
+        this.isClosing = false;  // 終了処理中フラグ
     }
 
     async init(testName) {
@@ -36,7 +43,7 @@ class TestFramework {
         
         console.log(`\n${'='.repeat(50)}`);
         console.log(`Starting test: ${testName}`);
-        console.log(`Time: ${new Date().toISOString()}`);
+        console.log(`Time: ${toJSTString()} (JST)`);
         console.log(`${'='.repeat(50)}\n`);
 
         // Launch browser
@@ -56,8 +63,9 @@ class TestFramework {
             height: 720
         });
 
-        // Set default timeout
+        // Set page timeout
         this.page.setDefaultTimeout(this.options.timeout);
+        console.log(`Test timeout set to: ${this.options.timeout}ms`);
 
         // Setup console logging
         this.page.on('console', msg => {
@@ -217,10 +225,25 @@ class TestFramework {
     }
 
     async holdKey(key, duration = 100) {
-        console.log(`Holding key: ${key} for ${duration}ms`);
-        await this.page.keyboard.down(key);
-        await this.wait(duration);
-        await this.page.keyboard.up(key);
+        if (this.isClosing || !this.page) {
+            console.log('Test is closing, skipping holdKey');
+            return;
+        }
+        
+        try {
+            console.log(`Holding key: ${key} for ${duration}ms`);
+            await this.page.keyboard.down(key);
+            await this.wait(duration);
+            if (!this.isClosing && this.page) {
+                await this.page.keyboard.up(key);
+            }
+        } catch (error) {
+            if (error.message.includes('Session closed') || error.message.includes('Target closed')) {
+                console.log('Page already closed, ignoring error');
+                return;
+            }
+            throw error;
+        }
     }
 
     async clickAt(x, y) {
@@ -229,7 +252,7 @@ class TestFramework {
     }
 
     async screenshot(name = 'screenshot') {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const timestamp = toJSTString();
         const filename = `${this.testName}-${name}-${timestamp}.png`;
         const filepath = path.join(this.options.screenshotPath, filename);
         
@@ -245,10 +268,16 @@ class TestFramework {
     }
 
     async wait(ms) {
+        if (this.isClosing) {
+            console.log('Test is closing, skipping wait');
+            return;
+        }
         await new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async cleanup() {
+        this.isClosing = true;  // 終了処理開始
+        
         if (this.browser) {
             await this.browser.close();
         }
@@ -274,7 +303,7 @@ class TestFramework {
         }
         
         // Generate log filename from test name
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const timestamp = toJSTString();
         const safeTestName = this.testName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
         const logFileName = `${safeTestName}-${timestamp}.log`;
         const logFilePath = path.join(logsDir, logFileName);

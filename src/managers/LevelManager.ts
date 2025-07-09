@@ -32,6 +32,10 @@ export class LevelManager {
     private levelHeight: number = 0;
     private backgroundColor: string = '#5C94FC';
     private timeLimit: number = 300;
+    
+    // Stage configuration constants
+    private static readonly MAX_AREAS_PER_STAGE = 3;
+    private static readonly MAX_STAGES = 1; // Currently only stage 1 exists
 
     constructor(game: GameServices) {
         this.levelLoader = new LevelLoader();
@@ -170,15 +174,11 @@ export class LevelManager {
             // Custom nextLevel property could be added to LevelData interface if needed
         }
         
-        // Default progression logic
-        const maxAreasPerStage = 3;
-        const maxStages = 1; // Currently only stage 1 exists
-        
         // Calculate next area
-        if (areaNum < maxAreasPerStage) {
+        if (areaNum < LevelManager.MAX_AREAS_PER_STAGE) {
             // Go to next area in same stage
             return `stage${stageNum}-${areaNum + 1}`;
-        } else if (stageNum < maxStages) {
+        } else if (stageNum < LevelManager.MAX_STAGES) {
             // Go to first area of next stage
             return `stage${stageNum + 1}-1`;
         } else {

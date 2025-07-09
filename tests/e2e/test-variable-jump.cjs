@@ -4,7 +4,8 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 async function runTest() {
     const test = new GameTestHelpers({
         headless: false,
-        verbose: true
+        verbose: true,
+        timeout: 29000
     });
 
     await test.runTest(async (t) => {
