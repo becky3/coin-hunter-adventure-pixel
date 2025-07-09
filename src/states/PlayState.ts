@@ -494,8 +494,8 @@ export class PlayState implements GameState {
         // Play ending music
         this.game.musicSystem?.playBGMFromPattern('victory');
         
-        // Show ending message
-        this.hudManager.showMessage('CONGRATULATIONS! GAME COMPLETE!', 999999);
+        // Show ending message (with line break)
+        this.hudManager.showMessage('CONGRATULATIONS!\nGAME COMPLETE!', 999999);
         
         // Return to menu after 5 seconds
         setTimeout(() => {
