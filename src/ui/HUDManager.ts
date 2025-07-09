@@ -271,9 +271,13 @@ export class HUDManager {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         const centerY = GAME_RESOLUTION.HEIGHT / 2;
         
-        // Draw message background
+        // Split message by newlines
+        const lines = this._message ? this._message.split('\n') : [];
+        const lineHeight = 16;
+        
+        // Calculate background size based on number of lines
         const bgWidth = 240;
-        const bgHeight = 60;
+        const bgHeight = 40 + (lines.length - 1) * lineHeight;
         const bgX = centerX - bgWidth / 2;
         const bgY = centerY - bgHeight / 2;
         
@@ -281,9 +285,12 @@ export class HUDManager {
         renderer.drawRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4, '#FFD700');
         renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, '#000000');
         
-        // Draw message text
-        if (this._message) {
-            renderer.drawTextCentered(this._message, centerX, centerY - 4, '#FFD700');
+        // Draw message text lines
+        if (lines.length > 0) {
+            const textStartY = centerY - ((lines.length - 1) * lineHeight) / 2;
+            lines.forEach((line, index) => {
+                renderer.drawTextCentered(line, centerX, textStartY + index * lineHeight - 4, '#FFD700');
+            });
         }
     }
 
