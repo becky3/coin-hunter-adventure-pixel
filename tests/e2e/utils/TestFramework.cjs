@@ -12,7 +12,6 @@ class TestFramework {
         
         this.options = {
             headless: options.headless ?? true,
-            slowMo: options.slowMo ?? 0,
             devtools: options.devtools ?? false,
             screenshotPath: options.screenshotPath ?? 'tests/screenshots',
             timeout: options.timeout,
@@ -49,7 +48,6 @@ class TestFramework {
         // Launch browser
         this.browser = await puppeteer.launch({
             headless: this.options.headless,
-            slowMo: this.options.slowMo,
             devtools: this.options.devtools,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
             protocolTimeout: 180000 // 3 minutes timeout for protocol operations

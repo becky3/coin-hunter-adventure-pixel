@@ -362,7 +362,12 @@ class GameTestHelpers extends TestFramework {
         while (Date.now() < endTime) {
             const metrics = await this.page.metrics();
             const fps = await this.page.evaluate(() => {
-                return window.game?.debug?.fps || 0;
+                // Try to get FPS from DebugOverlay
+                const debugOverlay = window.debugOverlay;
+                if (debugOverlay && typeof debugOverlay.getFPS === 'function') {
+                    return debugOverlay.getFPS();
+                }
+                return 0;
             });
             
             samples.push({

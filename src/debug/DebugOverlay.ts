@@ -21,6 +21,11 @@ export class DebugOverlay {
     private selectedStageIndex: number = 0;
     private stageSelectElement?: HTMLElement;
     
+    // FPS measurement
+    private fps: number = 0;
+    private frameCount: number = 0;
+    private lastFPSUpdate: number = 0;
+    
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
         
@@ -45,7 +50,14 @@ export class DebugOverlay {
         
         (window as Window & { debugOverlay?: DebugOverlay }).debugOverlay = this;
         
+        // Initialize FPS measurement
+        this.lastFPSUpdate = performance.now();
+        
         Logger.log('DebugOverlay', `Initialized with stage: ${this.stageList[this.selectedStageIndex]} (index: ${this.selectedStageIndex})`);
+    }
+    
+    getFPS(): number {
+        return this.fps;
     }
 
     private createDebugUI(): void {
@@ -71,7 +83,7 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['Speed', 'State', 'Player X', 'Player Y'];
+        const stats = ['FPS', 'Speed', 'State', 'Player X', 'Player Y'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
@@ -184,6 +196,16 @@ export class DebugOverlay {
     }
 
     update(_deltaTime: number): void {
+        // Calculate FPS
+        this.frameCount++;
+        const currentTime = performance.now();
+        if (currentTime >= this.lastFPSUpdate + 1000) {
+            this.fps = Math.round((this.frameCount * 1000) / (currentTime - this.lastFPSUpdate));
+            this.frameCount = 0;
+            this.lastFPSUpdate = currentTime;
+            this.updateStat('fps', this.fps.toString());
+        }
+        
         // Update player position if available
         const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: Event & { data?: { to?: string } }) => void) => void; currentState?: { name: string } } } }).game;
         if (!game) {

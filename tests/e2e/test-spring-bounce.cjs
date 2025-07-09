@@ -115,7 +115,7 @@ async function runTest() {
             return new Promise(resolve => {
                 let measurements = 0;
                 const measureInterval = setInterval(() => {
-                    const currentHeight = startY - player.y;
+                    const currentHeight = Math.abs(startY - player.y);
                     if (currentHeight > maxHeight) {
                         maxHeight = currentHeight;
                     }
@@ -371,7 +371,7 @@ async function runTest() {
             return new Promise(resolve => {
                 let measurements = 0;
                 const measureInterval = setInterval(() => {
-                    const currentHeight = startY - player.y;
+                    const currentHeight = Math.abs(startY - player.y);
                     if (currentHeight > maxHeight) {
                         maxHeight = currentHeight;
                     }
@@ -444,7 +444,7 @@ async function runTest() {
             return new Promise(resolve => {
                 let measurements = 0;
                 const measureInterval = setInterval(() => {
-                    const currentHeight = startY - player.y;
+                    const currentHeight = Math.abs(startY - player.y);
                     if (currentHeight > maxHeight) {
                         maxHeight = currentHeight;
                     }
