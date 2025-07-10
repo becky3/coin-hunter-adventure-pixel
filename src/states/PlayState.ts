@@ -208,6 +208,9 @@ export class PlayState implements GameState {
         // Setup level bounds for camera
         const dimensions = this.levelManager.getLevelDimensions();
         this.cameraController.setLevelBounds(dimensions.width, dimensions.height);
+        
+        // Initialize background elements based on level
+        this.initializeBackground(levelName, dimensions);
 
         // Initialize HUD with level data
         this.hudManager.updateTime(this.levelManager.getTimeLimit());
@@ -323,8 +326,8 @@ export class PlayState implements GameState {
         const camera = this.cameraController.getCamera();
         renderer.setCamera(camera.x, camera.y);
         
-        // Render background layers (temporarily disabled due to sprite loading issues)
-        // this.backgroundRenderer.render(renderer, camera.x, camera.y);
+        // Render background layers
+        this.backgroundRenderer.render(renderer, camera.x, camera.y);
 
         // Render tile map
         this.renderTileMap(renderer);
@@ -425,15 +428,12 @@ export class PlayState implements GameState {
                 const tile = tileMap[row][col];
                 
                 if (tile > 0) {
-                    // Temporarily use simple colored rectangles instead of sprite renderer
-                    const colors = ['', '#654321', '#DC143C'];  // empty, ground, spike
-                    const color = colors[tile] || '#FF00FF';
-                    renderer.drawRect(
+                    // Use TileRenderer for sprite-based rendering
+                    this.tileRenderer.renderTile(
+                        renderer,
+                        tile,
                         col * TILE_SIZE,
-                        row * TILE_SIZE,
-                        TILE_SIZE,
-                        TILE_SIZE,
-                        color
+                        row * TILE_SIZE
                     );
                 }
             }
@@ -510,6 +510,33 @@ export class PlayState implements GameState {
                 this.showEnding();
             }
         }, 3000);
+    }
+    
+    private initializeBackground(levelName: string, dimensions: { width: number; height: number }): void {
+        // Clear existing background
+        this.backgroundRenderer = new BackgroundRenderer();
+        
+        // Add background elements based on stage
+        if (levelName.startsWith('stage1-')) {
+            // Forest/grassland theme
+            // Far layer - clouds
+            for (let i = 0; i < 5; i++) {
+                this.backgroundRenderer.addElement(0, {
+                    spriteKey: i % 2 === 0 ? 'environment/cloud1' : 'environment/cloud2',
+                    x: Math.random() * dimensions.width,
+                    y: 20 + Math.random() * 60
+                });
+            }
+            
+            // Mid layer - trees
+            for (let i = 0; i < 8; i++) {
+                this.backgroundRenderer.addElement(1, {
+                    spriteKey: 'environment/tree1',
+                    x: i * 200 + Math.random() * 100,
+                    y: 120
+                });
+            }
+        }
     }
     
     private showEnding(): void {
