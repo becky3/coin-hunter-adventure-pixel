@@ -522,18 +522,22 @@ export class PlayState implements GameState {
             // Far layer - clouds
             for (let i = 0; i < 5; i++) {
                 this.backgroundRenderer.addElement(0, {
+                    type: 'cloud' as const,
                     spriteKey: i % 2 === 0 ? 'environment/cloud1' : 'environment/cloud2',
                     x: Math.random() * dimensions.width,
                     y: 20 + Math.random() * 60
                 });
             }
             
-            // Mid layer - trees
+            // Mid layer - trees (placed on ground)
+            const groundY = 13 * 16; // 13 tiles * 16 pixels per tile
+            const treeHeight = 32; // Approximate tree sprite height
             for (let i = 0; i < 8; i++) {
                 this.backgroundRenderer.addElement(1, {
+                    type: 'tree' as const,
                     spriteKey: 'environment/tree1',
                     x: i * 200 + Math.random() * 100,
-                    y: 120
+                    y: groundY - treeHeight
                 });
             }
         }

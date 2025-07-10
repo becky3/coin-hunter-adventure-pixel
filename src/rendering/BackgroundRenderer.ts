@@ -32,7 +32,7 @@ export class BackgroundRenderer {
                 { type: 'cloud', x: 1300, y: 50, spriteKey: 'environment/cloud1' },
                 { type: 'cloud', x: 1500, y: 85, spriteKey: 'environment/cloud2' }
             ],
-            scrollSpeed: 0.2
+            scrollSpeed: 1.0  // パララックス無効化
         });
         
         // Middle background layer (distant trees)
@@ -47,7 +47,7 @@ export class BackgroundRenderer {
                 { type: 'tree', x: 1450, y: 280, spriteKey: 'environment/tree1' },
                 { type: 'tree', x: 1650, y: 280, spriteKey: 'environment/tree1' }
             ],
-            scrollSpeed: 0.5
+            scrollSpeed: 1.0  // パララックス無効化
         });
     }
     
