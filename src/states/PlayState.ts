@@ -13,6 +13,8 @@ import { Logger } from '../utils/Logger';
 import { MusicSystem } from '../audio/MusicSystem';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { AssetLoader } from '../assets/AssetLoader';
+import { BackgroundRenderer } from '../rendering/BackgroundRenderer';
+import { TileRenderer } from '../rendering/TileRenderer';
 
 interface Game {
     renderer?: PixelRenderer;
@@ -45,6 +47,10 @@ export class PlayState implements GameState {
     // Controllers
     private gameController: GameController;
     private eventCoordinator: EventCoordinator;
+    
+    // Renderers
+    private backgroundRenderer: BackgroundRenderer;
+    private tileRenderer: TileRenderer;
 
     // Game state
     private gameState: 'playing' | 'paused' | 'cleared' | 'gameover' = 'playing';
@@ -105,6 +111,10 @@ export class PlayState implements GameState {
             onStageClear: () => this.stageClear(),
             onGameOver: () => this.gameOver()
         });
+        
+        // Initialize renderers
+        this.backgroundRenderer = new BackgroundRenderer();
+        this.tileRenderer = new TileRenderer();
 
         // Setup debug functions
         if (typeof window !== 'undefined') {
@@ -159,7 +169,16 @@ export class PlayState implements GameState {
 
                 // Enemy sprites
                 this.game.assetLoader.loadAnimation('enemies', 'slime_idle', 2, 500),
-                this.game.assetLoader.loadAnimation('enemies', 'bird_fly', 2, 200)
+                this.game.assetLoader.loadAnimation('enemies', 'bird_fly', 2, 200),
+                
+                // Environment sprites
+                this.game.assetLoader.loadSprite('environment', 'cloud1'),
+                this.game.assetLoader.loadSprite('environment', 'cloud2'),
+                this.game.assetLoader.loadSprite('environment', 'tree1'),
+                
+                // Tile sprites
+                this.game.assetLoader.loadSprite('tiles', 'ground'),
+                this.game.assetLoader.loadSprite('tiles', 'grass_ground')
             ];
             
             await Promise.all(loadPromises);
@@ -303,6 +322,9 @@ export class PlayState implements GameState {
         // Set camera for world rendering
         const camera = this.cameraController.getCamera();
         renderer.setCamera(camera.x, camera.y);
+        
+        // Render background layers (temporarily disabled due to sprite loading issues)
+        // this.backgroundRenderer.render(renderer, camera.x, camera.y);
 
         // Render tile map
         this.renderTileMap(renderer);
@@ -402,13 +424,16 @@ export class PlayState implements GameState {
             for (let col = startCol; col < endCol && col < tileMap[row].length; col++) {
                 const tile = tileMap[row][col];
                 
-                if (tile === 1) {
+                if (tile > 0) {
+                    // Temporarily use simple colored rectangles instead of sprite renderer
+                    const colors = ['', '#654321', '#DC143C'];  // empty, ground, spike
+                    const color = colors[tile] || '#FF00FF';
                     renderer.drawRect(
                         col * TILE_SIZE,
                         row * TILE_SIZE,
                         TILE_SIZE,
                         TILE_SIZE,
-                        '#228B22'
+                        color
                     );
                 }
             }

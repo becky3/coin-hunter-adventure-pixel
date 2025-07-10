@@ -27,6 +27,7 @@ import itemsCoinSpin2 from './items/coin_spin2.json';
 import itemsCoinSpin3 from './items/coin_spin3.json';
 import itemsCoinSpin4 from './items/coin_spin4.json';
 
+import enemiesSlime from './enemies/slime.json';
 import enemiesSlimeIdle1 from './enemies/slime_idle1.json';
 import enemiesSlimeIdle2 from './enemies/slime_idle2.json';
 import enemiesBirdFly1 from './enemies/bird_fly1.json';
@@ -34,6 +35,14 @@ import enemiesBirdFly2 from './enemies/bird_fly2.json';
 
 import uiHeart from './ui/heart.json';
 import uiHeartEmpty from './ui/heart_empty.json';
+
+import environmentCloud1 from './environment/cloud1.json';
+import environmentCloud2 from './environment/cloud2.json';
+import environmentTree1 from './environment/tree1.json';
+
+import tilesGround from './tiles/ground.json';
+import tilesGrassGround from './tiles/grass_ground.json';
+import tilesSpike from './tiles/spike.json';
 
 export const spriteDataMap: Record<string, unknown> = {
     'player/idle': playerIdle,
@@ -59,10 +68,17 @@ export const spriteDataMap: Record<string, unknown> = {
     'items/coin_spin2': itemsCoinSpin2,
     'items/coin_spin3': itemsCoinSpin3,
     'items/coin_spin4': itemsCoinSpin4,
+    'enemies/slime': enemiesSlime,
     'enemies/slime_idle1': enemiesSlimeIdle1,
     'enemies/slime_idle2': enemiesSlimeIdle2,
     'enemies/bird_fly1': enemiesBirdFly1,
     'enemies/bird_fly2': enemiesBirdFly2,
     'ui/heart': uiHeart,
     'ui/heart_empty': uiHeartEmpty,
+    'environment/cloud1': environmentCloud1,
+    'environment/cloud2': environmentCloud2,
+    'environment/tree1': environmentTree1,
+    'tiles/ground': tilesGround,
+    'tiles/grass_ground': tilesGrassGround,
+    'tiles/spike': tilesSpike,
 };

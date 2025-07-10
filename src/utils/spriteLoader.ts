@@ -25,7 +25,7 @@ class SpriteLoader {
 
     constructor() {
         this.cache = new Map();
-        this.basePath = '/sprites/';
+        this.basePath = '/src/assets/sprites/';
     }
 
     async loadSprite(category: string, name: string): Promise<SpriteData> {

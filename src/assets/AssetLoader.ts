@@ -211,6 +211,8 @@ export class AssetLoader {
             'enemies': 'enemy',
             'items': 'items',
             'terrain': 'grassland',
+            'tiles': 'grassland',
+            'environment': 'grassland',
             'ui': 'ui'
         };
         

@@ -29,7 +29,7 @@ export class Slime extends Enemy {
         this.moveSpeed = slimeConfig?.physics.moveSpeed || 0.25;
         
         
-        this.spriteKey = 'slime';
+        this.spriteKey = 'enemies/slime';
         this.animState = 'idle';
         
         this.bounceHeight = 0.3;
@@ -65,11 +65,25 @@ export class Slime extends Enemy {
             return;
         }
         
-        // TODO: PixelArtRendererとの統合後にスプライト描画を実装
+        // Use animation system like Player does
+        if (renderer.pixelArtRenderer) {
+            const screenPos = renderer.worldToScreen(this.x, this.y);
+            const animation = renderer.pixelArtRenderer.animations.get('enemies/slime_idle');
+            
+            if (animation) {
+                animation.update(Date.now());
+                animation.draw(
+                    renderer.ctx,
+                    screenPos.x,
+                    screenPos.y,
+                    this.direction === -1, // flipX when moving left
+                    renderer.scale
+                );
+                return;
+            }
+        }
         
-        renderer.drawRect(this.x, this.y, this.width, this.height, '#00FF00');
-        
-        renderer.drawRect(this.x + 4, this.y + 4, 2, 2, '#000000');
-        renderer.drawRect(this.x + 10, this.y + 4, 2, 2, '#000000');
+        // Fallback to parent render if animation not found
+        super.render(renderer);
     }
 }

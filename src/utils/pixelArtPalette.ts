@@ -192,9 +192,9 @@ function getColorPalette(paletteName: string): ColorPalette {
         },
         grassland: {
             0: null,
-            1: '#C0C0C0',
-            2: '#808080',
-            3: '#FF0000'
+            1: '#654321',  // dark brown
+            2: '#8B6914',  // medium brown
+            3: '#228B22'   // green
         },
         ui: {
             0: null,

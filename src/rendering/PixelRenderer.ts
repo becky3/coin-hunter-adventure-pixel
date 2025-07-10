@@ -98,6 +98,11 @@ export class PixelRenderer {
             finalSprite = sprite;
         }
 
+        if (!finalSprite) {
+            console.error(`Sprite not found: ${sprite}`);
+            return;
+        }
+
         const spriteWidth = 'width' in finalSprite ? finalSprite.width : 0;
         const spriteHeight = 'height' in finalSprite ? finalSprite.height : 0;
 

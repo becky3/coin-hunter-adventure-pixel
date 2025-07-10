@@ -26,6 +26,14 @@
         {
           "name": "slime",
           "type": "sprite"
+        },
+        {
+          "name": "slime_idle1",
+          "type": "sprite"
+        },
+        {
+          "name": "slime_idle2",
+          "type": "sprite"
         }
       ],
       "animations": [
@@ -67,6 +75,40 @@
         },
         {
           "name": "heart_empty",
+          "type": "sprite"
+        }
+      ],
+      "animations": []
+    },
+    "environment": {
+      "sprites": [
+        {
+          "name": "cloud1",
+          "type": "sprite"
+        },
+        {
+          "name": "cloud2",
+          "type": "sprite"
+        },
+        {
+          "name": "tree1",
+          "type": "sprite"
+        }
+      ],
+      "animations": []
+    },
+    "tiles": {
+      "sprites": [
+        {
+          "name": "ground",
+          "type": "sprite"
+        },
+        {
+          "name": "grass_ground",
+          "type": "sprite"
+        },
+        {
+          "name": "spike",
           "type": "sprite"
         }
       ],
