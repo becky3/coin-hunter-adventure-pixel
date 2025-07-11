@@ -20,6 +20,10 @@ interface GameServices {
     physicsSystem: PhysicsSystem;
 }
 
+/**
+ * Manages level functionality
+ */
+
 export class LevelManager {
     private levelLoader: LevelLoader;
     private eventBus: EventBus;
@@ -35,7 +39,8 @@ export class LevelManager {
     
     // Stage configuration constants
     private static readonly MAX_AREAS_PER_STAGE = 3;
-    private static readonly MAX_STAGES = 1; // Currently only stage 1 exists
+    // Currently only stage 1 exists
+    private static readonly MAX_STAGES = 1;
 
     constructor(game: GameServices) {
         this.levelLoader = new LevelLoader();
@@ -129,7 +134,8 @@ export class LevelManager {
                 y: this.levelData.playerSpawn.y
             };
         }
-        return { x: 2, y: 10 }; // Default spawn
+        // Default spawn
+        return { x: 2, y: 10 };
     }
 
     getEntities(): Array<{ type: string; x: number; y: number }> {

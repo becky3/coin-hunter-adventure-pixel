@@ -11,6 +11,10 @@ export interface EventCoordinatorConfig {
     onGameOver: () => void;
 }
 
+/**
+ * EventCoordinator implementation
+ */
+
 export class EventCoordinator {
     private eventBus: EventBus;
     private entityManager: EntityManager;

@@ -13,6 +13,10 @@ interface GameServices {
     eventBus?: EventBus;
 }
 
+/**
+ * Controls camera behavior
+ */
+
 export class CameraController {
     private camera: Camera;
     private eventBus: EventBus;

@@ -2,6 +2,10 @@ import { Enemy } from '../Enemy';
 import { PixelRenderer } from '../../rendering/PixelRenderer';
 import { ResourceLoader } from '../../config/ResourceLoader';
 
+/**
+ * Slime enemy that moves horizontally
+ */
+
 export class Slime extends Enemy {
     public spriteKey: string;
     private bounceHeight: number;
@@ -76,7 +80,8 @@ export class Slime extends Enemy {
                     renderer.ctx,
                     screenPos.x,
                     screenPos.y,
-                    this.direction === -1, // flipX when moving left
+                    // flipX when moving left
+                    this.direction === -1,
                     renderer.scale
                 );
                 return;

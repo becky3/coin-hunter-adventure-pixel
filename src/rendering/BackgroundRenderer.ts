@@ -12,6 +12,10 @@ export interface BackgroundElement {
     spriteKey: string;
 }
 
+/**
+ * Handles rendering of background elements
+ */
+
 export class BackgroundRenderer {
     private layers: BackgroundLayer[] = [];
     
@@ -26,7 +30,8 @@ export class BackgroundRenderer {
         // Simple cloud placement every 150 pixels
         for (let x = 0; x < 6000; x += 150) {
             const cloudType = (x / 150) % 2 === 0 ? 'environment/cloud1' : 'environment/cloud2';
-            const yOffset = Math.sin(x / 200) * 20; // Slight wave pattern
+            // Slight wave pattern
+            const yOffset = Math.sin(x / 200) * 20;
             clouds.push({
                 type: 'cloud',
                 x: x,
@@ -36,7 +41,8 @@ export class BackgroundRenderer {
         }
         
         // Simple tree placement every 200 pixels
-        const groundY = 160; // Ground level for trees
+        // Ground level for trees
+        const groundY = 160;
         for (let x = 50; x < 6000; x += 200) {
             trees.push({
                 type: 'tree',

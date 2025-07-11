@@ -5,6 +5,10 @@ import { SystemPriorities } from '../../services/SystemPriorities';
 import { PixelRenderer } from '../../rendering/PixelRenderer';
 import { GameStateManager } from '../../states/GameStateManager';
 
+/**
+ * RenderSystemAdapter implementation
+ */
+
 export class RenderSystemAdapter implements ISystem {
     readonly name = 'RenderSystem';
     readonly priority = SystemPriorities.RENDER;

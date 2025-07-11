@@ -33,6 +33,11 @@ interface EntityData {
 }
 
 
+/**
+ * LevelLoader implementation
+ */
+
+
 export class LevelLoader {
     private stages: StageInfo[] | null;
     private currentStageData: StageData | null;

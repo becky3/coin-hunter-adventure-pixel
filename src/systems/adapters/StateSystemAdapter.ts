@@ -4,6 +4,10 @@ import { ISystem } from '../../services/SystemManager';
 import { SystemPriorities } from '../../services/SystemPriorities';
 import { GameStateManager } from '../../states/GameStateManager';
 
+/**
+ * StateSystemAdapter implementation
+ */
+
 export class StateSystemAdapter implements ISystem {
     readonly name = 'StateSystem';
     readonly priority = SystemPriorities.GAME_LOGIC;

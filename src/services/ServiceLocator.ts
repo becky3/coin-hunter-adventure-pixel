@@ -15,6 +15,10 @@ export interface IServiceLocator {
     clear(): void;
 }
 
+/**
+ * ServiceLocator implementation
+ */
+
 export class ServiceLocator implements IServiceLocator {
     private services: Map<string, unknown> = new Map();
     private static instance: ServiceLocator;

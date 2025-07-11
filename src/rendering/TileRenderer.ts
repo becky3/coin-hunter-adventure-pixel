@@ -1,5 +1,9 @@
 import { PixelRenderer } from './PixelRenderer';
 
+/**
+ * Handles rendering of tile elements
+ */
+
 export class TileRenderer {
     private tilePatterns: Map<number, TilePattern>;
     

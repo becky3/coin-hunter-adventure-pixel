@@ -33,6 +33,10 @@ declare global {
     }
 }
 
+/**
+ * Game state for play mode
+ */
+
 export class PlayState implements GameState {
     public name = 'play';
     private game: Game;
@@ -57,8 +61,10 @@ export class PlayState implements GameState {
     private lastTimeUpdate: number = 0;
     private inputListeners: Array<() => void> = [];
     private stageClearTimer: number | null = null;
-    private lives: number = 3; // 残機はPlayStateで管理
-    private isHandlingDeath: boolean = false; // 死亡処理中フラグ
+    // 残機はPlayStateで管理
+    private lives: number = 3;
+    // 死亡処理中フラグ
+    private isHandlingDeath: boolean = false;
 
     // Public getters for testing
     public get player() {
@@ -529,12 +535,14 @@ export class PlayState implements GameState {
     }
 
     private handlePlayerDeath(): void {
-        if (this.isHandlingDeath) return; // Prevent multiple calls
+        // Prevent multiple calls
+        if (this.isHandlingDeath) return;
         
         const player = this.entityManager.getPlayer();
         if (!player) return;
         
-        this.isHandlingDeath = true; // Set flag to prevent re-entry
+        // Set flag to prevent re-entry
+        this.isHandlingDeath = true;
         
         // Emit death event for testing and other systems
         this.eventBus.emit('player:died');

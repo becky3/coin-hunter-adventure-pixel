@@ -4,7 +4,12 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 
 // Constants for animation calculations
-const WAVE_SPEED_MULTIPLIER = 0.03; // Multiplier to adjust wave speed relative to deltaTime
+// Multiplier to adjust wave speed relative to deltaTime
+const WAVE_SPEED_MULTIPLIER = 0.03;
+
+/**
+ * GoalFlag implementation
+ */
 
 export class GoalFlag extends Entity {
     private cleared: boolean;

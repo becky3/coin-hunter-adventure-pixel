@@ -35,6 +35,10 @@ interface DebugInfo {
     };
 }
 
+/**
+ * System for managing input operations
+ */
+
 export class InputSystem {
     private keys: Map<string, boolean>;
     private previousKeys: Map<string, boolean>;

@@ -32,6 +32,10 @@ type OscillatorType = OscillatorNode['type'];
 export type BGMName = 'title' | 'game' | 'victory' | 'gameover';
 export type SEName = 'coin' | 'jump' | 'damage' | 'button' | 'powerup' | 'gameStart';
 
+/**
+ * System for managing music operations
+ */
+
 export class MusicSystem {
     private audioContext: AudioContext | null;
     private masterGain: GainNode | null;
@@ -608,7 +612,8 @@ export class MusicSystem {
             this.playButtonClickSound();
             break;
         case 'powerup':
-            this.playGoalSound(); // 仮にpowerupとして使用
+            // 仮にpowerupとして使用
+            this.playGoalSound();
             break;
         case 'gameStart':
             this.playGameStartSound();

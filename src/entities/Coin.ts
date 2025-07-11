@@ -4,8 +4,14 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 
 // Constants for animation calculations
-const FLOAT_SPEED_MULTIPLIER = 0.1; // Multiplier to adjust float speed relative to deltaTime
-const PIXELS_PER_UNIT = 16; // Conversion factor from amplitude units to pixels
+// Multiplier to adjust float speed relative to deltaTime
+const FLOAT_SPEED_MULTIPLIER = 0.1;
+// Conversion factor from amplitude units to pixels
+const PIXELS_PER_UNIT = 16;
+
+/**
+ * Collectible coin item
+ */
 
 export class Coin extends Entity {
     private collected: boolean;

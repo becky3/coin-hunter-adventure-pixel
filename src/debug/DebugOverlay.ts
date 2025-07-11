@@ -7,6 +7,10 @@ import { URLParams } from '../utils/urlParams';
 import { Logger } from '../utils/Logger';
 import type { StateEvent } from '../states/GameStateManager';
 
+/**
+ * DebugOverlay implementation
+ */
+
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
     private debugElement?: HTMLDivElement;
@@ -192,7 +196,8 @@ export class DebugOverlay {
                     Logger.log('DebugOverlay', `Stage right: ${this.stageList[this.selectedStageIndex]}`);
                 }
             }
-        }, true);  // Use capture phase to handle events before InputSystem
+        // Use capture phase to handle events before InputSystem
+        }, true);
     }
 
     update(_deltaTime: number): void {

@@ -6,6 +6,10 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import { InputSystem } from '../core/InputSystem';
 
+/**
+ * Spring platform that bounces the player
+ */
+
 export class Spring extends Entity {
     private baseBounceMultiplier: number;
     private compression: number;
@@ -14,7 +18,8 @@ export class Spring extends Entity {
     declare animationTime: number;
     public physicsSystem: PhysicsSystem | null;
     private cooldownFrames: number;
-    private readonly COOLDOWN_DURATION = 20; // 20フレーム = 約0.33秒（60FPS想定）
+    // 20フレーム = 約0.33秒（60FPS想定）
+    private readonly COOLDOWN_DURATION = 20;
 
     constructor(x: number, y: number) {
         // Load config from ResourceLoader if available
@@ -35,7 +40,8 @@ export class Spring extends Entity {
         this.physicsEnabled = false;
         this.solid = springConfig?.physics.solid ?? true;
         
-        this.baseBounceMultiplier = 2.5; // ジャンプ力の2.5倍
+        // ジャンプ力の2.5倍
+        this.baseBounceMultiplier = 2.5;
         this.compression = 0;
         this.triggered = false;
         this.animationSpeed = springConfig?.properties.expansionSpeed || 0.2;

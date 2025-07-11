@@ -5,6 +5,11 @@ import { AssetLoader } from '../assets/AssetLoader';
 import { SpriteData } from '../types/assetTypes';
 
 
+/**
+ * Handles rendering of pixel elements
+ */
+
+
 export class PixelRenderer {
     private canvas: HTMLCanvasElement;
     public ctx: CanvasRenderingContext2D;

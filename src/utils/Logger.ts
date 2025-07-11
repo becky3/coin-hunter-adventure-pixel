@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console -- Logger class needs console access for output */
 /**
  * Logger utility for debug output
  * Automatically disables console output in production environment
@@ -91,3 +91,4 @@ export class Logger {
 export const log = Logger.log.bind(Logger);
 export const warn = Logger.warn.bind(Logger);
 export const error = Logger.error.bind(Logger);
+/* eslint-enable no-console */

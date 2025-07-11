@@ -1,6 +1,10 @@
 type PixelData = number[][];
 type ColorMap = { [key: number]: string | null };
 
+/**
+ * PixelArtSprite implementation
+ */
+
 class PixelArtSprite {
     private pixelData: PixelData;
     private colors: ColorMap;
@@ -75,6 +79,10 @@ class PixelArtSprite {
     }
 }
 
+/**
+ * PixelArtAnimation implementation
+ */
+
 class PixelArtAnimation {
     private frames: PixelArtSprite[];
     private frameDuration: number;
@@ -104,6 +112,10 @@ class PixelArtAnimation {
         this.lastFrameTime = 0;
     }
 }
+
+/**
+ * Handles rendering of pixelart elements
+ */
 
 class PixelArtRenderer {
     private canvas: HTMLCanvasElement;

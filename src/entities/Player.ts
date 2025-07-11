@@ -17,8 +17,10 @@ const DEFAULT_PLAYER_CONFIG = {
     smallHeight: 16,
     speed: 1.17,
     jumpPower: 10,
-    minJumpTime: 0,      // 最小時間なし - いつでもジャンプを中断可能
-    maxJumpTime: 400,    // 400ms = 0.4秒（約24フレーム）
+    // 最小時間なし - いつでもジャンプを中断可能
+    minJumpTime: 0,
+    // 400ms = 0.4秒（約24フレーム）
+    maxJumpTime: 400,
     maxHealth: 3,
     invulnerabilityTime: 2000,
     spawnX: 100,
@@ -63,11 +65,16 @@ interface PlayerState {
     isJumping: boolean;
 }
 
+/**
+ * Player character entity with movement and interaction capabilities
+ */
+
 export class Player extends Entity {
     private playerConfig: CharacterConfig | null;
     private animationConfig: { [key: string]: CharacterAnimationConfig } | null;
     private speed: number;
-    public jumpPower: number;  // Made public for testing
+    // Made public for testing
+    public jumpPower: number;
     private spriteKey: string | null;
     private _health: number;
     private _maxHealth: number;
@@ -95,7 +102,8 @@ export class Player extends Entity {
     private musicSystem: MusicSystem | null;
     private assetLoader: AssetLoader | null;
     private eventBus: EventBus | null;
-    public variableJumpBoost: number;  // For testing purposes
+    // For testing purposes
+    public variableJumpBoost: number;
     private variableJumpBoostMultiplier: number;
     private frameCount: number;
 
@@ -213,8 +221,10 @@ export class Player extends Entity {
         } else {
             // Use default values if physics config not available
             this.jumpPower = config.jumpPower;
-            this.variableJumpBoost = 0.5;  // Default variable jump boost
-            this.variableJumpBoostMultiplier = 0.4;  // Default multiplier
+            // Default variable jump boost
+            this.variableJumpBoost = 0.5;
+            // Default multiplier
+            this.variableJumpBoostMultiplier = 0.4;
         }
         
         // Override minJumpTime/maxJumpTime from physics.json if available
@@ -310,7 +320,8 @@ export class Player extends Entity {
         if ((window as Window & { debugMode?: boolean }).debugMode) {
             for (let i = 1; i <= 9; i++) {
                 if (this.inputManager.isActionPressed(`${i}`)) {
-                    const newJumpPower = i * 2; // 2, 4, 6, 8, 10, 12, 14, 16, 18
+                    // 2, 4, 6, 8, 10, 12, 14, 16, 18
+                    const newJumpPower = i * 2;
                     if (this.jumpPower !== newJumpPower) {
                         this.jumpPower = newJumpPower;
                         Logger.log(`[Player] Jump power changed to: ${this.jumpPower}`);
@@ -366,7 +377,8 @@ export class Player extends Entity {
             this.canVariableJump = true;
             this.jumpMaxHeight = 0;
             this.jumpStartY = this.y;
-            this.isSpringBounce = false; // Reset spring bounce flag for normal jumps
+            // Reset spring bounce flag for normal jumps
+            this.isSpringBounce = false;
             
             // Debug logging for jump initiation
             Logger.log('[Player] Jump initiated:');
@@ -439,7 +451,8 @@ export class Player extends Entity {
             Logger.log('  - Jump duration:', this.jumpTime, 'ms');
             this._isJumping = false;
             this.canVariableJump = false;
-            this.isSpringBounce = false; // Reset spring bounce flag
+            // Reset spring bounce flag
+            this.isSpringBounce = false;
         }
     }
     
@@ -496,7 +509,8 @@ export class Player extends Entity {
         this.vx = 0;
         this.vy = 0;
         this._isDead = false;
-        this._invulnerable = true;  // リスポーン時は無敵状態にする
+        // リスポーン時は無敵状態にする
+        this._invulnerable = true;
         this.invulnerabilityTime = DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
         this._animState = 'idle';
         this.animFrame = 0;
@@ -534,7 +548,8 @@ export class Player extends Entity {
             if (this.eventBus) {
                 this.eventBus.emit('player:died');
             }
-            return true; // Player died
+            // Player died
+            return true;
         }
         
         // 大きい状態で攻撃を受けたら小さくなる
@@ -556,7 +571,8 @@ export class Player extends Entity {
         }
         
         
-        return false; // Player survived
+        // Player survived
+        return false;
     }
     
     addScore(points: number): void {

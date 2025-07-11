@@ -28,6 +28,10 @@ interface GameServices {
     inputSystem: InputSystem;
 }
 
+/**
+ * Manages entity functionality
+ */
+
 export class EntityManager {
     private player: Player | null = null;
     private enemies: Enemy[] = [];
@@ -41,7 +45,8 @@ export class EntityManager {
 
     constructor(game: GameServices) {
         // Get services from game proxy
-        this.eventBus = game.eventBus || new EventBus(); // Use shared instance if available
+        // Use shared instance if available
+        this.eventBus = game.eventBus || new EventBus();
         this.physicsSystem = game.physicsSystem;
         this.musicSystem = game.musicSystem;
         this.assetLoader = game.assetLoader;

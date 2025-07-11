@@ -28,6 +28,10 @@ export interface AssetToLoad {
 
 export type ProgressCallback = (loaded: number, total: number) => void;
 
+/**
+ * AssetLoader implementation
+ */
+
 export class AssetLoader {
     private spriteLoader: SpriteLoader;
     public loadedAssets: Map<string, LoadedAsset>;

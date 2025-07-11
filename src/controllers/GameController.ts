@@ -24,6 +24,10 @@ export interface GameControllerConfig {
     hudManager: HUDManager;
 }
 
+/**
+ * Controls game behavior
+ */
+
 export class GameController {
     private services: GameServices;
     private entityManager: EntityManager;

@@ -18,6 +18,10 @@ interface Game {
     stateManager: GameStateManager;
 }
 
+/**
+ * Game state for menu mode
+ */
+
 export class MenuState implements GameState {
     public name = 'menu';
     private game: Game;

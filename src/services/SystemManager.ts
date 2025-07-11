@@ -35,6 +35,10 @@ export interface ISystemManager {
     destroySystems(): void;
 }
 
+/**
+ * Manages system functionality
+ */
+
 export class SystemManager implements ISystemManager {
     private _systems: Map<string, ISystem> = new Map();
     private sortedSystems: ISystem[] = [];

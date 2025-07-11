@@ -24,6 +24,10 @@ import { StateSystemAdapter } from '../systems/adapters/StateSystemAdapter';
 import { RenderSystemAdapter } from '../systems/adapters/RenderSystemAdapter';
 import { DebugSystemAdapter } from '../systems/adapters/DebugSystemAdapter';
 
+/**
+ * GameCore implementation
+ */
+
 export class GameCore {
     private _serviceLocator: ServiceLocator;
     private gameLoop: GameLoop;

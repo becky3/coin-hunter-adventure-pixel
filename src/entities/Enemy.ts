@@ -8,6 +8,10 @@ import { EventBus } from '../services/EventBus';
 export type AIType = 'patrol' | 'chase' | 'idle';
 export type EnemyState = 'idle' | 'hurt' | 'dead';
 
+/**
+ * Base enemy entity class
+ */
+
 export class Enemy extends Entity {
     public maxHealth: number;
     public health: number;
@@ -23,7 +27,8 @@ export class Enemy extends Entity {
     public animState: string;
     public facingRight: boolean;
     public canJump: boolean;
-    protected eventBus: EventBus | null; // EventBus instance
+    // EventBus instance
+    protected eventBus: EventBus | null;
 
     constructor(x: number, y: number, width: number = 16, height: number = 16) {
         super(x, y, width, height);

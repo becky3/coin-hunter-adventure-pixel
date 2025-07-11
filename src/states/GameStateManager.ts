@@ -45,6 +45,10 @@ export interface StateEvent {
 
 type EventListener = (event: StateEvent) => void;
 
+/**
+ * Manages gamestate functionality
+ */
+
 export class GameStateManager {
     private states: Map<string, GameState>;
     private _currentState: GameState | null;

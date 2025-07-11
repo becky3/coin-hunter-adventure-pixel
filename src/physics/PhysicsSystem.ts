@@ -35,6 +35,10 @@ interface IRenderer {
     drawRect(x: number, y: number, width: number, height: number, color: string, fill?: boolean): void;
 }
 
+/**
+ * System for managing physics operations
+ */
+
 export class PhysicsSystem {
     private _gravity: number;
     private _maxFallSpeed: number;
@@ -114,7 +118,8 @@ export class PhysicsSystem {
     
     clearEntities(): void {
         this.entities.clear();
-        this.frameCount = 0; // Reset frame count
+        // Reset frame count
+        this.frameCount = 0;
     }
     
     setTileMap(tileMap: number[][], tileSize = 16): void {
@@ -146,7 +151,8 @@ export class PhysicsSystem {
         
         
         // Clamp deltaTime to prevent huge jumps
-        const clampedDeltaTime = Math.min(deltaTime, 0.033); // Max 33ms (30fps)
+        // Max 33ms (30fps)
+        const clampedDeltaTime = Math.min(deltaTime, 0.033);
         
         for (const entity of this.entities) {
             if (entity.active) {
