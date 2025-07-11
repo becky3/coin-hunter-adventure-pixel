@@ -148,7 +148,7 @@ export class AssetLoader {
         }
         
         if (this.renderer) {
-            const paletteName = this._getPaletteForCategory(category);
+            const paletteName = this._getPaletteForCategory(category, name);
             const colors = getColorPalette(paletteName);
             const spriteKey = `${category}/${name}`;
             this.renderer.addSprite(
@@ -180,7 +180,7 @@ export class AssetLoader {
         }
         
         if (this.renderer) {
-            const paletteName = this._getPaletteForCategory(category);
+            const paletteName = this._getPaletteForCategory(category, name);
             const colors = getColorPalette(paletteName);
             const animKey = `${category}/${baseName}`;
             this.renderer.addAnimation(
@@ -205,12 +205,23 @@ export class AssetLoader {
         };
     }
     
-    private _getPaletteForCategory(category: string): string {
+    private _getPaletteForCategory(category: string, spriteName?: string): string {
+        // Special handling for environment sprites
+        if (category === 'environment' && spriteName) {
+            if (spriteName.includes('cloud')) {
+                return 'sky';
+            } else if (spriteName.includes('tree')) {
+                return 'nature';
+            }
+        }
+        
         const paletteMap: { [key: string]: string } = {
             'player': 'character',
             'enemies': 'enemy',
             'items': 'items',
             'terrain': 'grassland',
+            'tiles': 'grassland',
+            'environment': 'nature',
             'ui': 'ui'
         };
         

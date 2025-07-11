@@ -150,6 +150,66 @@ shake(duration: number, intensity: number): void
 - `camera:target-changed`: ターゲット変更時
 - `level:loaded`: レベル読み込み時（自動的にバウンドを設定）
 
+## BackgroundRenderer
+
+ゲームの背景要素（雲、木など）をレンダリングするクラスです。
+
+### コンストラクタ
+
+```typescript
+constructor()
+```
+
+背景レイヤーと要素を初期化します。
+
+### メソッド
+
+#### render(renderer: PixelRenderer)
+```typescript
+render(renderer: PixelRenderer): void
+```
+
+すべての背景レイヤーをレンダリングします。
+
+**パラメータ:**
+- `renderer`: PixelRendererインスタンス
+
+**動作:**
+- 各背景要素をワールド座標で配置
+- カメラと1:1で移動（パララックスなし）
+- 画面外の要素はカリング
+
+#### addElement(layer: number, element: BackgroundElement)
+```typescript
+addElement(layer: number, element: BackgroundElement): void
+```
+
+指定したレイヤーに背景要素を追加します。
+
+**パラメータ:**
+- `layer`: レイヤー番号（0: 雲、1: 木）
+- `element`: 追加する背景要素
+  - `type`: 'cloud' | 'tree' | 'mountain'
+  - `x`, `y`: ワールド座標
+  - `spriteKey`: スプライトのキー
+
+#### clearLayer(layer: number)
+```typescript
+clearLayer(layer: number): void
+```
+
+指定したレイヤーのすべての要素をクリアします。
+
+### 背景要素の配置
+
+- **雲**: 150ピクセル間隔で配置、高さに波パターン
+- **木**: 200ピクセル間隔で配置、地面レベル（Y=160）に固定
+
+### 座標系の注意点
+
+背景要素はワールド座標で配置され、`drawSprite`メソッドに直接渡されます。
+カメラ変換は`drawSprite`内部で行われるため、事前の座標変換は不要です。
+
 ## LevelManager
 
 レベルデータとタイルマップを管理するクラスです。

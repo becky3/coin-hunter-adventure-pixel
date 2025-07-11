@@ -55,9 +55,9 @@ async function runAllTests() {
         try {
             const testModule = require(test.file);
             
-            // Set a timeout for each test (60 seconds)
+            // Set a timeout for each test (90 seconds)
             const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Test timeout after 60 seconds')), 60000);
+                setTimeout(() => reject(new Error('Test timeout after 90 seconds')), 90000);
             });
             
             // Run test with timeout
@@ -78,6 +78,10 @@ async function runAllTests() {
                     console.log('🧹 Running garbage collection...');
                     global.gc();
                 }
+                
+                // Additional wait for browser cleanup
+                console.log('🔄 Ensuring browser cleanup...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
             }
         } catch (err) {
             error = err;

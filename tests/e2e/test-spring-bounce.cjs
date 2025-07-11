@@ -53,11 +53,11 @@ async function runTest() {
         // Navigate to stage 0-1 which has a spring and safer layout
         await t.navigateToGame('http://localhost:3000?s=0-1');
         await t.waitForGameInitialization();
-        await t.screenshot('test-initialized');
+        // await t.screenshot('test-initialized');
         
         // Start new game
         await t.startNewGame();
-        await t.screenshot('game-started');
+        // await t.screenshot('game-started');
         
         // Verify we're in play state
         await t.assertState('play');
@@ -333,7 +333,7 @@ async function runTest() {
             throw new Error(`Spring bounce ratio ${bounceRatio.toFixed(2)} is too low (should be at least 1.5x)`);
         }
         
-        await t.screenshot('spring-bounce-test');
+        // await t.screenshot('spring-bounce-test');
         
         // Test 3: Variable jump on spring (with button hold)
         console.log('\n--- Test 3: Variable Jump on Spring ---');
@@ -485,7 +485,7 @@ async function runTest() {
             console.log(`⚠️ Variable jump may not be working correctly. Long: ${longHeight.toFixed(2)}px, Short: ${shortHeight.toFixed(2)}px`);
         }
         
-        await t.screenshot('test-complete');
+        // await t.screenshot('test-complete');
         await t.checkForErrors();
         
         console.log('\n✅ All spring bounce tests passed! Issue 111 has been fixed.');

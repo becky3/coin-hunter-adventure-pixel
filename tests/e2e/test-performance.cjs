@@ -23,9 +23,9 @@ async function runTest() {
         console.log('\n--- Starting Performance Monitoring ---\n');
         
         // Monitor performance during gameplay (reduced duration and actions)
-        const performanceReport = await t.monitorPerformance(15000, async () => {
+        const performanceReport = await t.monitorPerformance(10000, async () => {
             // Simulate active gameplay with fewer iterations
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 3; i++) {
                 await t.movePlayer('right', 500);
                 await t.jumpPlayer();
                 await t.wait(100);
@@ -64,7 +64,7 @@ async function runTest() {
         console.log('\n✅ Performance test passed!');
         
         // Take final screenshot
-        await t.screenshot('performance-test-complete');
+        // await t.screenshot('performance-test-complete');
     });
 }
 

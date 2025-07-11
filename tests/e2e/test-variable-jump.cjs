@@ -148,13 +148,16 @@ async function runTest() {
         console.log('\n✅ Variable jump is working correctly!');
         
         // スクリーンショットを保存
-        await t.screenshot('variable-jump-test-complete');
+        // await t.screenshot('variable-jump-test-complete');
     });
 }
 
 // 単体実行の場合
 if (require.main === module) {
-    runTest().catch(console.error);
+    runTest().catch(error => {
+        console.error('Test failed:', error);
+        process.exit(1);
+    });
 }
 
 module.exports = runTest;

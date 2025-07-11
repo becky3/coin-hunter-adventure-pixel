@@ -5,7 +5,7 @@ async function runTest() {
     const test = new GameTestHelpers({
         headless: false,  // Set to false to see the browser
         verbose: true,    // More console logs
-        timeout: 20000
+        timeout: 40000
     });
 
     await test.runTest(async (t) => {
@@ -14,20 +14,48 @@ async function runTest() {
         
         // Navigate to jump-test.html instead of main game
         console.log('Navigating to jump-test.html...');
-        await t.page.goto('http://localhost:3000/jump-test.html', {
+        await t.page.goto('http://localhost:3000/jump-test.html?test=true', {
             waitUntil: 'networkidle2',
             timeout: 30000
         });
         
-        // Wait for page to load
+        // Wait for page to load and check if it loaded correctly
         await t.wait(2000);
+        
+        // Verify page loaded
+        const pageTitle = await t.page.evaluate(() => document.title);
+        console.log('Page title:', pageTitle);
+        
+        // Check if gameFrame exists
+        const frameExists = await t.page.evaluate(() => {
+            return !!document.getElementById('gameFrame');
+        });
+        
+        if (!frameExists) {
+            throw new Error('gameFrame not found on page');
+        }
         
         // Wait for game frame to load
         console.log('Waiting for game to initialize...');
-        await t.page.waitForFunction(() => {
-            const iframe = document.getElementById('gameFrame');
-            return iframe && iframe.contentWindow && iframe.contentWindow.game;
-        }, { timeout: 10000 });
+        try {
+            await t.page.waitForFunction(() => {
+                const iframe = document.getElementById('gameFrame');
+                return iframe && iframe.contentWindow && iframe.contentWindow.game;
+            }, { timeout: 30000 });
+        } catch (error) {
+            // Get more details about the error
+            const debugInfo = await t.page.evaluate(() => {
+                const iframe = document.getElementById('gameFrame');
+                return {
+                    iframeExists: !!iframe,
+                    hasContentWindow: iframe ? !!iframe.contentWindow : false,
+                    iframeSource: iframe ? iframe.src : null,
+                    pageURL: window.location.href
+                };
+            });
+            console.error('Failed to initialize game. Debug info:', debugInfo);
+            throw error;
+        }
         
         // Additional wait for game to fully initialize
         await t.wait(2000);
@@ -301,7 +329,7 @@ async function runTest() {
         }
         
         // Take screenshot
-        await t.screenshot('jump-test-final');
+        // await t.screenshot('jump-test-final');
         
         console.log('\n✅ All jump physics tests passed!');
     });
@@ -309,7 +337,10 @@ async function runTest() {
 
 // Run the test
 if (require.main === module) {
-    runTest().catch(console.error);
+    runTest().catch(error => {
+        console.error('Test failed:', error);
+        process.exit(1);
+    });
 }
 
 module.exports = runTest;

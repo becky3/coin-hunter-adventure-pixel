@@ -20,11 +20,11 @@ async function runTest() {
         await t.waitForGameInitialization();
         
         // Take initial screenshot
-        await t.screenshot('test-initialized');
+        // await t.screenshot('test-initialized');
         
         // Start new game
         await t.startNewGame();
-        await t.screenshot('game-started');
+        // await t.screenshot('game-started');
         
         // Verify game state
         await t.assertState('play');
@@ -135,7 +135,7 @@ async function runTest() {
                 break;
             }
             
-            await t.screenshot(`after-fall-${fallCount}`);
+            // await t.screenshot(`after-fall-${fallCount}`);
         }
         
         // Test 2: Verify HUD shows correct lives
@@ -162,7 +162,7 @@ async function runTest() {
         }
         
         // Final screenshot
-        await t.screenshot('test-complete');
+        // await t.screenshot('test-complete');
         
         // Check for any errors
         await t.checkForErrors();

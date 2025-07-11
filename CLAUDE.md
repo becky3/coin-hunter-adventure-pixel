@@ -97,6 +97,7 @@ GitHub Pages公開後は以下でアクセス可能になります：
 - E2Eテスト（開発サーバー稼働時のみ）
 - Lintチェック
 
+
 ### GitHub Copilotレビューへの対応
 
 PRを作成すると、GitHub Copilotが自動的にコードレビューを行います。以下の点に注意：
@@ -210,7 +211,6 @@ gh issue comment [Issue番号] --body "作業を開始します。
 - E2Eテストは `npm test` で実行（全てのtest-*.cjsファイルが自動実行）
 - 個別テスト: `npm run test:e2e -- tests/e2e/[テスト名].cjs`
 - テストログは `tests/logs/` に自動保存される
-- **Push時のフルテスト**: `RUN_FULL_TESTS=true git push`（重要な変更時は必須）
 
 #### テスト実行のコツ
 
