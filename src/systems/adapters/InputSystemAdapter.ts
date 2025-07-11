@@ -6,9 +6,8 @@ import { InputSystem } from '../../core/InputSystem';
 import { Logger } from '../../utils/Logger';
 
 /**
- * InputSystemAdapter implementation
+ * Adapter for input system integration
  */
-
 export class InputSystemAdapter implements ISystem {
     readonly name = 'InputSystem';
     readonly priority = SystemPriorities.INPUT;

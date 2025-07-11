@@ -14,7 +14,6 @@ export interface EventCoordinatorConfig {
 /**
  * EventCoordinator implementation
  */
-
 export class EventCoordinator {
     private eventBus: EventBus;
     private entityManager: EntityManager;

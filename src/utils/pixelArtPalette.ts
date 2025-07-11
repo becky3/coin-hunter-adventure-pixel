@@ -26,7 +26,6 @@ interface SpriteData {
 /**
  * System for managing palette operations
  */
-
 class PaletteSystem {
     private masterPalette: Record<number, string>;
     private currentStagePalette: StagePalette | null;

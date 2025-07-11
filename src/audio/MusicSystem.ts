@@ -35,7 +35,6 @@ export type SEName = 'coin' | 'jump' | 'damage' | 'button' | 'powerup' | 'gameSt
 /**
  * System for managing music operations
  */
-
 export class MusicSystem {
     private audioContext: AudioContext | null;
     private masterGain: GainNode | null;

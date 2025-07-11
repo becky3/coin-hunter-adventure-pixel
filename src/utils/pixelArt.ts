@@ -4,7 +4,6 @@ type ColorMap = { [key: number]: string | null };
 /**
  * PixelArtSprite implementation
  */
-
 class PixelArtSprite {
     private pixelData: PixelData;
     private colors: ColorMap;
@@ -80,9 +79,8 @@ class PixelArtSprite {
 }
 
 /**
- * PixelArtAnimation implementation
+ * Handles sprite animation sequences
  */
-
 class PixelArtAnimation {
     private frames: PixelArtSprite[];
     private frameDuration: number;
@@ -114,9 +112,8 @@ class PixelArtAnimation {
 }
 
 /**
- * Handles rendering of pixelart elements
+ * Renders pixel art sprites and animations
  */
-
 class PixelArtRenderer {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;

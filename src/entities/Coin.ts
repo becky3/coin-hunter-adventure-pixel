@@ -12,7 +12,6 @@ const PIXELS_PER_UNIT = 16;
 /**
  * Collectible coin item
  */
-
 export class Coin extends Entity {
     private collected: boolean;
     declare animationTime: number;

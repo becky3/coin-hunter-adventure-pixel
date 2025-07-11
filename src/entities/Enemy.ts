@@ -11,7 +11,6 @@ export type EnemyState = 'idle' | 'hurt' | 'dead';
 /**
  * Base enemy entity class
  */
-
 export class Enemy extends Entity {
     public maxHealth: number;
     public health: number;

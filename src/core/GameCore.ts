@@ -27,7 +27,6 @@ import { DebugSystemAdapter } from '../systems/adapters/DebugSystemAdapter';
 /**
  * GameCore implementation
  */
-
 export class GameCore {
     private _serviceLocator: ServiceLocator;
     private gameLoop: GameLoop;

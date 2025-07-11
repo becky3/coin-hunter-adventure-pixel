@@ -19,7 +19,6 @@ interface GameServices {
 /**
  * Manages hud functionality
  */
-
 export class HUDManager {
     private eventBus: EventBus;
     private hudData: HUDData;

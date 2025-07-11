@@ -23,7 +23,6 @@ interface GameServices {
 /**
  * Manages level functionality
  */
-
 export class LevelManager {
     private levelLoader: LevelLoader;
     private eventBus: EventBus;

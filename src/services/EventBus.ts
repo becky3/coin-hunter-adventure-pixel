@@ -21,7 +21,6 @@ export interface IEventBus {
 /**
  * EventBus implementation
  */
-
 export class EventBus implements IEventBus {
     private events: Map<string, Set<EventHandler<unknown>>> = new Map();
     

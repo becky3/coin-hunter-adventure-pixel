@@ -25,7 +25,6 @@ let entityIdCounter = 0;
 /**
  * Base entity class for all game objects
  */
-
 export class Entity {
     public id: number;
     

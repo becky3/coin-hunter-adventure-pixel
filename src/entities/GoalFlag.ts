@@ -10,7 +10,6 @@ const WAVE_SPEED_MULTIPLIER = 0.03;
 /**
  * GoalFlag implementation
  */
-
 export class GoalFlag extends Entity {
     private cleared: boolean;
     declare animationTime: number;

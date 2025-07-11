@@ -10,7 +10,6 @@ import type { StateEvent } from '../states/GameStateManager';
 /**
  * DebugOverlay implementation
  */
-
 export class DebugOverlay {
     private serviceLocator: ServiceLocator;
     private debugElement?: HTMLDivElement;

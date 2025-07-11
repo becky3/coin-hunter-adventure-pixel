@@ -4,7 +4,6 @@ import { Logger } from '../utils/Logger';
 /**
  * GameLoop implementation
  */
-
 export class GameLoop {
     private _running: boolean = false;
     private _lastTime: number = 0;

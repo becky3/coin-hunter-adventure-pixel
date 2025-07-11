@@ -9,7 +9,6 @@ import { InputSystem } from '../core/InputSystem';
 /**
  * Spring platform that bounces the player
  */
-
 export class Spring extends Entity {
     private baseBounceMultiplier: number;
     private compression: number;

@@ -6,9 +6,8 @@ import { PixelRenderer } from '../../rendering/PixelRenderer';
 import { GameStateManager } from '../../states/GameStateManager';
 
 /**
- * RenderSystemAdapter implementation
+ * Adapter for render system integration
  */
-
 export class RenderSystemAdapter implements ISystem {
     readonly name = 'RenderSystem';
     readonly priority = SystemPriorities.RENDER;

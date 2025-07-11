@@ -38,7 +38,6 @@ interface IRenderer {
 /**
  * System for managing physics operations
  */
-
 export class PhysicsSystem {
     private _gravity: number;
     private _maxFallSpeed: number;

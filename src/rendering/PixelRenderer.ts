@@ -10,6 +10,9 @@ import { SpriteData } from '../types/assetTypes';
  */
 
 
+/**
+ * PixelRenderer
+ */
 export class PixelRenderer {
     private canvas: HTMLCanvasElement;
     public ctx: CanvasRenderingContext2D;

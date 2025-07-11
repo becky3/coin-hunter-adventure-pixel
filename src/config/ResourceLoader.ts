@@ -12,7 +12,6 @@ import { Logger } from '../utils/Logger';
 /**
  * ResourceLoader implementation
  */
-
 export class ResourceLoader {
     private static instance: ResourceLoader;
     private resourceIndex: ResourceIndexConfig | null = null;

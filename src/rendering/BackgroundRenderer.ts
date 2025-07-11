@@ -15,7 +15,6 @@ export interface BackgroundElement {
 /**
  * Handles rendering of background elements
  */
-
 export class BackgroundRenderer {
     private layers: BackgroundLayer[] = [];
     

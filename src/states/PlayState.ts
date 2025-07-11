@@ -36,7 +36,6 @@ declare global {
 /**
  * Game state for play mode
  */
-
 export class PlayState implements GameState {
     public name = 'play';
     private game: Game;

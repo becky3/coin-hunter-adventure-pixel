@@ -21,7 +21,6 @@ interface LoadedSprite {
 /**
  * SpriteLoader implementation
  */
-
 class SpriteLoader {
     private cache: Map<string, SpriteData>;
     private basePath: string;

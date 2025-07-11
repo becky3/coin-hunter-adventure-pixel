@@ -68,7 +68,6 @@ interface PlayerState {
 /**
  * Player character entity with movement and interaction capabilities
  */
-
 export class Player extends Entity {
     private playerConfig: CharacterConfig | null;
     private animationConfig: { [key: string]: CharacterAnimationConfig } | null;

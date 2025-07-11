@@ -31,7 +31,6 @@ interface GameServices {
 /**
  * Manages entity functionality
  */
-
 export class EntityManager {
     private player: Player | null = null;
     private enemies: Enemy[] = [];

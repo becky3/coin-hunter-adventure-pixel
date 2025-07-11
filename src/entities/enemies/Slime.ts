@@ -5,7 +5,6 @@ import { ResourceLoader } from '../../config/ResourceLoader';
 /**
  * Slime enemy that moves horizontally
  */
-
 export class Slime extends Enemy {
     public spriteKey: string;
     private bounceHeight: number;
