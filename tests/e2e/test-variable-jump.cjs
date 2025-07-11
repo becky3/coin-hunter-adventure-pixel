@@ -148,7 +148,7 @@ async function runTest() {
         console.log('\n✅ Variable jump is working correctly!');
         
         // スクリーンショットを保存
-        await t.screenshot('variable-jump-test-complete');
+        // await t.screenshot('variable-jump-test-complete');
     });
 }
 

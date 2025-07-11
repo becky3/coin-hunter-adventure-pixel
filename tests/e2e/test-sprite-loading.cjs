@@ -30,7 +30,7 @@ async function runTest() {
         
         // Start new game
         await t.startNewGame();
-        await t.screenshot('game-started');
+        // await t.screenshot('game-started');
         
         // Check for sprite loading errors in console
         console.log('\n--- Console Logs ---');
@@ -152,7 +152,7 @@ async function runTest() {
         }
         
         // Take final screenshot
-        await t.screenshot('rendering-test-complete');
+        // await t.screenshot('rendering-test-complete');
         
         // Check for any errors
         await t.checkForErrors();

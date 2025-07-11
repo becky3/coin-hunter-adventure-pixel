@@ -20,11 +20,11 @@ async function runTest() {
         await t.waitForGameInitialization();
         
         // Take initial screenshot
-        await t.screenshot('test-initialized');
+        // await t.screenshot('test-initialized');
         
         // Start new game
         await t.startNewGame();
-        await t.screenshot('game-started');
+        // await t.screenshot('game-started');
         
         // Verify game state
         await t.assertState('play');
@@ -91,7 +91,7 @@ async function runTest() {
             throw new Error('Failed to receive damage from enemy');
         }
         
-        await t.screenshot('player-small');
+        // await t.screenshot('player-small');
         
         // Test 2: Player dies while small and respawns with correct size
         console.log('\n--- Test 2: Death While Small -> Respawn Large ---');
@@ -180,7 +180,7 @@ async function runTest() {
         
         console.log('✅ Player respawned with correct large size');
         
-        await t.screenshot('player-respawned-large');
+        // await t.screenshot('player-respawned-large');
         
         // Test 3: Verify horizontal collision behavior when small
         console.log('\n--- Test 3: Horizontal Collision While Small ---');
@@ -290,7 +290,7 @@ async function runTest() {
             }
         }
         
-        await t.screenshot('test-complete');
+        // await t.screenshot('test-complete');
         
         // Check for any errors
         await t.checkForErrors();

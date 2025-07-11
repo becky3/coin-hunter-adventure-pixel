@@ -329,7 +329,7 @@ async function runTest() {
         }
         
         // Take screenshot
-        await t.screenshot('jump-test-final');
+        // await t.screenshot('jump-test-final');
         
         console.log('\n✅ All jump physics tests passed!');
     });

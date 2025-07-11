@@ -20,11 +20,11 @@ async function runTest() {
         await t.waitForGameInitialization();
         
         // Take initial screenshot
-        await t.screenshot('test-initialized');
+        // await t.screenshot('test-initialized');
         
         // Start new game
         await t.startNewGame();
-        await t.screenshot('game-started');
+        // await t.screenshot('game-started');
         
         // Verify game state
         await t.assertState('play');
@@ -198,7 +198,7 @@ async function runTest() {
             throw new Error(`Lives changed after first damage. Expected: ${initialLives}, Got: ${livesAfterFirstDamage}`);
         }
         
-        await t.screenshot('after-first-damage');
+        // await t.screenshot('after-first-damage');
         
         // Test 2: Second damage while small should kill player
         console.log('\n--- Test 2: Second Enemy Damage (Small -> Death) ---');
@@ -245,7 +245,7 @@ async function runTest() {
         });
         console.log('Debug HUD text:', hudText);
         
-        await t.screenshot('after-second-damage');
+        // await t.screenshot('after-second-damage');
         
         // Test 3: Continue until game over
         console.log('\n--- Test 3: Game Over Test ---');

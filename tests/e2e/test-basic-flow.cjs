@@ -19,14 +19,14 @@ async function runTest() {
         await t.waitForGameInitialization();
         
         // Take initial screenshot
-        await t.screenshot('game-initialized');
+        // await t.screenshot('game-initialized');
         
         // Verify initial state
         await t.assertState('menu');
         
         // Start new game
         await t.startNewGame();
-        await t.screenshot('game-started');
+        // await t.screenshot('game-started');
         
         // Verify game state
         await t.assertState('play');
@@ -147,7 +147,7 @@ async function runTest() {
         // Test pause/resume
         console.log('\n--- Testing Pause/Resume ---');
         await t.pauseGame();
-        await t.screenshot('game-paused');
+        // await t.screenshot('game-paused');
         await t.wait(1000);
         await t.resumeGame();
         
@@ -165,7 +165,7 @@ async function runTest() {
         console.log(`Found ${coins.length} coins`);
         
         // Final screenshot
-        await t.screenshot('test-complete');
+        // await t.screenshot('test-complete');
         
         // Check for any errors
         await t.checkForErrors();
