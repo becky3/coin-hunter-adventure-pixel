@@ -201,6 +201,18 @@ function getColorPalette(paletteName: string): ColorPalette {
             1: '#FF0000',
             2: '#FFFFFF',
             3: '#000000'
+        },
+        sky: {
+            0: null,
+            1: '#87CEEB',  // sky blue
+            2: '#E0F6FF',  // light blue
+            3: '#FFFFFF'   // white
+        },
+        nature: {
+            0: null,
+            1: '#8B4513',  // brown (trunk)
+            2: '#A0522D',  // light brown
+            3: '#228B22'   // green (leaves)
         }
     };
     
