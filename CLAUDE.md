@@ -97,28 +97,6 @@ GitHub Pages公開後は以下でアクセス可能になります：
 - E2Eテスト（開発サーバー稼働時のみ）
 - Lintチェック
 
-### フルテストでのプッシュ方法
-
-通常のプッシュはクイックテスト（スモークテストのみ）が実行されます。
-フルテストを実行したい場合は、以下のいずれかの方法を使用してください：
-
-1. **環境変数を使用**（推奨）
-   ```bash
-   RUN_FULL_TESTS=true git push
-   ```
-
-2. **npm scriptを使用**
-   ```bash
-   npm run push:full
-   ```
-
-3. **専用スクリプトを使用**（タイムアウト回避）
-   ```bash
-   ./scripts/push-with-full-tests.sh origin branch-name
-   ```
-   このスクリプトは、フルテストを実行してから、プッシュフックをスキップしてプッシュします。
-
-**注意**: フルテストには約3-5分かかる場合があります。
 
 ### GitHub Copilotレビューへの対応
 
@@ -233,7 +211,6 @@ gh issue comment [Issue番号] --body "作業を開始します。
 - E2Eテストは `npm test` で実行（全てのtest-*.cjsファイルが自動実行）
 - 個別テスト: `npm run test:e2e -- tests/e2e/[テスト名].cjs`
 - テストログは `tests/logs/` に自動保存される
-- **Push時のフルテスト**: `RUN_FULL_TESTS=true git push`（重要な変更時は必須）
 
 #### テスト実行のコツ
 
