@@ -327,7 +327,7 @@ export class PlayState implements GameState {
         renderer.setCamera(camera.x, camera.y);
         
         // Render background layers
-        this.backgroundRenderer.render(renderer, camera.x, camera.y);
+        this.backgroundRenderer.render(renderer);
 
         // Render tile map
         this.renderTileMap(renderer);

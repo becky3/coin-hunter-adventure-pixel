@@ -48,7 +48,7 @@ export class BackgroundRenderer {
         });
     }
     
-    render(renderer: PixelRenderer, cameraX: number, cameraY: number): void {
+    render(renderer: PixelRenderer): void {
         // Render each layer
         for (const layer of this.layers) {
             for (const element of layer.elements) {
