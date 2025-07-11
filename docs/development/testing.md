@@ -34,8 +34,6 @@ node tests/e2e/test-enemy-damage.cjs
 | **test-player-respawn-size.cjs** | Issue #106検証 | 小サイズ死亡後のリスポーンサイズ、横衝突判定 | ~25秒 |
 | **test-spring-bounce.cjs** | ジャンプ台機能 | プレイヤーのジャンプ力×2.5倍のバウンス、可変ジャンプ対応、複数回バウンス可能 | ~20秒 |
 | **test-fall-damage.cjs** | 落下ダメージ | 画面外落下による即死判定、ライフ減少、ゲームオーバー | ~20秒 |
-| **test-background-rendering.cjs** | 背景要素表示検証 | 雲・木の生成確認、カメラ位置での可視性確認、要素の座標検証 | ~20秒 |
-| **test-background-movement.cjs** | 背景移動検証 | プレイヤー移動時の背景スクロール方向、カメラ追従、座標変換の正確性 | ~15秒 |
 
 ### テストログ
 - テスト実行時のログは `tests/logs/` に自動保存
