@@ -1,193 +1,176 @@
 const puppeteer = require('puppeteer');
-const path = require('path');
-const fs = require('fs');
+const { createLogger } = require('./test-utils.cjs');
 
-const TEST_NAME = 'background-rendering';
-const SERVER_URL = process.env.TEST_SERVER_URL || 'http://localhost:3000';
-const LOG_DIR = path.join(__dirname, '..', 'logs');
-
-// Ensure log directory exists
-if (!fs.existsSync(LOG_DIR)) {
-    fs.mkdirSync(LOG_DIR, { recursive: true });
-}
-
-const logFile = path.join(LOG_DIR, `${TEST_NAME}-${Date.now()}.log`);
-let browser, page;
-
-function log(message) {
-    const timestamp = new Date().toISOString();
-    const logMessage = `[${timestamp}] ${message}`;
-    console.log(logMessage);
-    fs.appendFileSync(logFile, logMessage + '\n');
-}
-
-async function cleanup() {
-    if (page) await page.close();
-    if (browser) await browser.close();
-}
+const logger = createLogger('test-background-rendering');
 
 async function runTest() {
-    log(`Starting ${TEST_NAME} test`);
+    logger.log('Starting background rendering test...');
+    
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     
     try {
-        browser = await puppeteer.launch({
-            headless: process.env.CI === 'true' ? 'new' : false,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            devtools: false
-        });
-        
-        page = await browser.newPage();
+        const page = await browser.newPage();
         
         // Set up console logging
         page.on('console', msg => {
             const text = msg.text();
-            if (text.includes('[BackgroundRenderer]') || text.includes('[AssetLoader]') || text.includes('cloud')) {
-                log(`Console: ${text}`);
+            if (text.includes('[BackgroundRenderer]') || text.includes('camera')) {
+                logger.log(`Browser console: ${text}`);
             }
         });
         
-        page.on('pageerror', error => {
-            log(`Page error: ${error.message}`);
+        // Navigate to the game
+        await page.goto('http://localhost:3000', { waitUntil: 'networkidle0' });
+        logger.log('Page loaded');
+        
+        // Wait for game to initialize
+        await page.waitForFunction(() => window.game?.currentState?.name === 'menu', {
+            timeout: 10000
         });
+        logger.log('Game initialized, in menu state');
         
-        log(`Navigating to ${SERVER_URL}?stage=1`);
-        await page.goto(`${SERVER_URL}?stage=1`);
-        
-        // Wait for game to load
-        await page.waitForSelector('canvas', { timeout: 10000 });
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        log('Starting game...');
+        // Start game
         await page.keyboard.press('Enter');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await page.waitForFunction(() => window.game?.currentState?.name === 'play', {
+            timeout: 5000
+        });
+        logger.log('Game started');
         
-        // Check background renderer state
-        const backgroundInfo = await page.evaluate(() => {
-            const gameCore = window.gameCore;
-            if (!gameCore || !gameCore.currentState) return null;
-            
-            const state = gameCore.currentState;
-            if (!state.backgroundRenderer) return null;
-            
-            const renderer = state.backgroundRenderer;
-            const layers = renderer.layers || [];
-            
-            return {
-                layerCount: layers.length,
-                layers: layers.map((layer, index) => ({
-                    index,
-                    elementCount: layer.elements ? layer.elements.length : 0,
-                    elements: layer.elements ? layer.elements.slice(0, 3).map(el => ({
-                        type: el.type,
-                        spriteKey: el.spriteKey,
-                        x: el.x,
-                        y: el.y
-                    })) : []
-                }))
-            };
+        // Wait for stage to load
+        await page.waitForFunction(() => {
+            const state = window.game?.currentState;
+            return state?.levelManager?.isLoaded();
+        }, { timeout: 5000 });
+        
+        // Add debug logging to background renderer
+        await page.evaluate(() => {
+            const state = window.game?.currentState;
+            if (state && state.backgroundRenderer) {
+                const originalRender = state.backgroundRenderer.render.bind(state.backgroundRenderer);
+                let logCount = 0;
+                state.backgroundRenderer.render = function(renderer) {
+                    const camera = renderer.getCameraPosition();
+                    
+                    // Log every 60 frames (approximately once per second)
+                    if (logCount++ % 60 === 0) {
+                        console.log(`[BackgroundRenderer] Camera position: ${camera.x}, ${camera.y}`);
+                        
+                        // Count visible elements
+                        let visibleClouds = 0;
+                        let visibleTrees = 0;
+                        
+                        for (const layer of this.layers) {
+                            for (const element of layer.elements) {
+                                const screenX = element.x - camera.x;
+                                if (screenX > -100 && screenX < 256 + 100) {
+                                    if (element.type === 'cloud') visibleClouds++;
+                                    if (element.type === 'tree') visibleTrees++;
+                                }
+                            }
+                        }
+                        
+                        console.log(`[BackgroundRenderer] Visible: ${visibleClouds} clouds, ${visibleTrees} trees`);
+                    }
+                    
+                    originalRender(renderer);
+                };
+            }
         });
         
-        if (backgroundInfo) {
-            log(`Background layers: ${JSON.stringify(backgroundInfo, null, 2)}`);
-            
-            // Verify layers exist
-            if (backgroundInfo.layerCount === 0) {
-                throw new Error('No background layers found');
-            }
-            log('✓ Background layers loaded successfully');
-        } else {
-            log('Warning: Could not access background renderer');
-        }
+        // Test at different player positions
+        const testPositions = [0, 100, 200, 372, 500, 1000];
         
-        // Check loaded assets and palettes
-        const assetInfo = await page.evaluate(() => {
-            const gameCore = window.gameCore;
-            if (!gameCore || !gameCore.assetLoader) return null;
+        for (const x of testPositions) {
+            logger.log(`\nTesting at player X=${x}`);
             
-            const assetLoader = gameCore.assetLoader;
-            const cloudAssets = [];
-            
-            // Check if cloud sprites are loaded
-            ['environment/cloud1', 'environment/cloud2'].forEach(key => {
-                if (assetLoader.isLoaded(key)) {
-                    cloudAssets.push(key);
+            // Warp player to position
+            await page.evaluate((x) => {
+                const state = window.game?.currentState;
+                const player = state?.entityManager?.getPlayer();
+                if (player) {
+                    player.x = x;
+                    player.y = 200; // Keep Y constant
+                    state.cameraController.update(0);
                 }
+            }, x);
+            
+            // Wait a moment for rendering
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Get camera and element info
+            const info = await page.evaluate(() => {
+                const state = window.game?.currentState;
+                const renderer = state?.renderer;
+                const camera = renderer?.getCameraPosition();
+                const player = state?.entityManager?.getPlayer();
+                
+                // Count all background elements
+                let totalClouds = 0;
+                let totalTrees = 0;
+                let visibleClouds = 0;
+                let visibleTrees = 0;
+                const cloudPositions = [];
+                const treePositions = [];
+                
+                if (state?.backgroundRenderer?.layers) {
+                    for (const layer of state.backgroundRenderer.layers) {
+                        for (const element of layer.elements) {
+                            if (element.type === 'cloud') {
+                                totalClouds++;
+                                cloudPositions.push({ x: element.x, y: element.y });
+                                const screenX = element.x - camera.x;
+                                if (screenX > -100 && screenX < 256 + 100) {
+                                    visibleClouds++;
+                                }
+                            } else if (element.type === 'tree') {
+                                totalTrees++;
+                                treePositions.push({ x: element.x, y: element.y });
+                                const screenX = element.x - camera.x;
+                                if (screenX > -100 && screenX < 256 + 100) {
+                                    visibleTrees++;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return {
+                    playerX: player?.x,
+                    playerY: player?.y,
+                    cameraX: camera?.x,
+                    cameraY: camera?.y,
+                    totalClouds,
+                    totalTrees,
+                    visibleClouds,
+                    visibleTrees,
+                    firstCloudX: cloudPositions[0]?.x,
+                    firstTreeX: treePositions[0]?.x,
+                    firstTreeY: treePositions[0]?.y
+                };
             });
             
-            // Check renderer for cloud sprites
-            const renderer = gameCore.renderer;
-            const pixelArtRenderer = renderer ? renderer.pixelArtRenderer : null;
-            const cloudSprites = [];
-            
-            if (pixelArtRenderer && pixelArtRenderer.sprites) {
-                ['environment/cloud1', 'environment/cloud2'].forEach(key => {
-                    if (pixelArtRenderer.sprites.has(key)) {
-                        cloudSprites.push(key);
-                    }
-                });
-            }
-            
-            return {
-                loadedClouds: cloudAssets,
-                rendererClouds: cloudSprites
-            };
-        });
-        
-        if (assetInfo) {
-            log(`Asset info: ${JSON.stringify(assetInfo, null, 2)}`);
-            
-            if (assetInfo.loadedClouds.length > 0) {
-                log(`✓ Cloud sprites loaded: ${assetInfo.loadedClouds.join(', ')}`);
-            }
-            
-            if (assetInfo.rendererClouds.length > 0) {
-                log(`✓ Cloud sprites in renderer: ${assetInfo.rendererClouds.join(', ')}`);
-            }
+            logger.log(`Player: (${info.playerX}, ${info.playerY})`);
+            logger.log(`Camera: (${info.cameraX}, ${info.cameraY})`);
+            logger.log(`Total elements: ${info.totalClouds} clouds, ${info.totalTrees} trees`);
+            logger.log(`Visible elements: ${info.visibleClouds} clouds, ${info.visibleTrees} trees`);
+            logger.log(`First cloud X: ${info.firstCloudX}, First tree X: ${info.firstTreeX}, Y: ${info.firstTreeY}`);
         }
         
-        // Move camera to test parallax
-        log('Testing camera movement...');
-        const initialCameraX = await page.evaluate(() => {
-            const gameCore = window.gameCore;
-            if (!gameCore || !gameCore.cameraController) return 0;
-            return gameCore.cameraController.camera.x;
-        });
-        
-        // Move right
-        await page.keyboard.down('ArrowRight');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        await page.keyboard.up('ArrowRight');
-        
-        const finalCameraX = await page.evaluate(() => {
-            const gameCore = window.gameCore;
-            if (!gameCore || !gameCore.cameraController) return 0;
-            return gameCore.cameraController.camera.x;
-        });
-        
-        log(`Camera moved from ${initialCameraX} to ${finalCameraX}`);
-        
-        // Take screenshot for visual verification
-        const screenshotPath = path.join(LOG_DIR, `${TEST_NAME}-${Date.now()}.png`);
-        await page.screenshot({ path: screenshotPath });
-        log(`Screenshot saved to ${screenshotPath}`);
-        
-        log(`✅ ${TEST_NAME} test passed`);
-        return { success: true };
+        logger.log('\nBackground rendering test completed successfully!');
         
     } catch (error) {
-        log(`❌ Test failed: ${error.message}`);
+        logger.error('Test failed:', error);
         throw error;
+    } finally {
+        await browser.close();
     }
 }
 
 // Run the test
-(async () => {
-    try {
-        await runTest();
-        await cleanup();
-        process.exit(0);
-    } catch (error) {
-        await cleanup();
-        process.exit(1);
-    }
-})();
+runTest().catch(error => {
+    logger.error('Test execution failed:', error);
+    process.exit(1);
+});

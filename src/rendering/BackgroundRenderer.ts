@@ -1,4 +1,5 @@
 import { PixelRenderer } from './PixelRenderer';
+import { GAME_RESOLUTION } from '../constants/gameConstants';
 
 export interface BackgroundLayer {
     elements: BackgroundElement[];
@@ -19,46 +20,52 @@ export class BackgroundRenderer {
     }
     
     private initializeLayers(): void {
-        // Far background layer (clouds)
-        this.layers.push({
-            elements: [
-                { type: 'cloud', x: 100, y: 50, spriteKey: 'environment/cloud1' },
-                { type: 'cloud', x: 300, y: 80, spriteKey: 'environment/cloud2' },
-                { type: 'cloud', x: 500, y: 40, spriteKey: 'environment/cloud1' },
-                { type: 'cloud', x: 700, y: 90, spriteKey: 'environment/cloud2' },
-                { type: 'cloud', x: 900, y: 60, spriteKey: 'environment/cloud1' },
-                { type: 'cloud', x: 1100, y: 70, spriteKey: 'environment/cloud2' },
-                { type: 'cloud', x: 1300, y: 50, spriteKey: 'environment/cloud1' },
-                { type: 'cloud', x: 1500, y: 85, spriteKey: 'environment/cloud2' }
-            ],
-        });
+        const clouds: BackgroundElement[] = [];
+        const trees: BackgroundElement[] = [];
         
-        // Middle background layer (distant trees)
-        this.layers.push({
-            elements: [
-                { type: 'tree', x: 150, y: 280, spriteKey: 'environment/tree1' },
-                { type: 'tree', x: 350, y: 280, spriteKey: 'environment/tree1' },
-                { type: 'tree', x: 600, y: 280, spriteKey: 'environment/tree1' },
-                { type: 'tree', x: 850, y: 280, spriteKey: 'environment/tree1' },
-                { type: 'tree', x: 1050, y: 280, spriteKey: 'environment/tree1' },
-                { type: 'tree', x: 1250, y: 280, spriteKey: 'environment/tree1' },
-                { type: 'tree', x: 1450, y: 280, spriteKey: 'environment/tree1' },
-                { type: 'tree', x: 1650, y: 280, spriteKey: 'environment/tree1' }
-            ],
-        });
+        // Simple cloud placement every 150 pixels
+        for (let x = 0; x < 6000; x += 150) {
+            const cloudType = (x / 150) % 2 === 0 ? 'environment/cloud1' : 'environment/cloud2';
+            const yOffset = Math.sin(x / 200) * 20; // Slight wave pattern
+            clouds.push({
+                type: 'cloud',
+                x: x,
+                y: 50 + yOffset,
+                spriteKey: cloudType
+            });
+        }
+        
+        // Simple tree placement every 200 pixels
+        const groundY = 160; // Ground level for trees
+        for (let x = 50; x < 6000; x += 200) {
+            trees.push({
+                type: 'tree',
+                x: x,
+                y: groundY,
+                spriteKey: 'environment/tree1'
+            });
+        }
+        
+        // Far background layer (clouds)
+        this.layers.push({ elements: clouds });
+        
+        // Middle background layer (trees)
+        this.layers.push({ elements: trees });
     }
     
     render(renderer: PixelRenderer): void {
+        // Get camera position
+        const camera = renderer.getCameraPosition();
+        
         // Render each layer
         for (const layer of this.layers) {
             for (const element of layer.elements) {
-                // Background elements are fixed in screen space, not affected by camera
-                const screenX = element.x;
-                const screenY = element.y;
+                // Pass world coordinates directly to drawSprite
+                // drawSprite will handle the camera transformation
                 
-                // Only render if on screen
-                if (screenX > -200 && screenX < renderer.width + 200) {
-                    renderer.drawSprite(element.spriteKey, screenX, screenY);
+                // Only render if roughly on screen (check with world coordinates)
+                if (element.x > camera.x - 100 && element.x < camera.x + GAME_RESOLUTION.WIDTH + 100) {
+                    renderer.drawSprite(element.spriteKey, element.x, element.y);
                 }
             }
         }

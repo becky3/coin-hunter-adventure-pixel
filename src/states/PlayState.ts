@@ -210,7 +210,6 @@ export class PlayState implements GameState {
         this.cameraController.setLevelBounds(dimensions.width, dimensions.height);
         
         // Initialize background elements based on level
-        this.initializeBackground(levelName, dimensions);
 
         // Initialize HUD with level data
         this.hudManager.updateTime(this.levelManager.getTimeLimit());
@@ -512,36 +511,6 @@ export class PlayState implements GameState {
         }, 3000);
     }
     
-    private initializeBackground(levelName: string, dimensions: { width: number; height: number }): void {
-        // Clear existing background
-        this.backgroundRenderer = new BackgroundRenderer();
-        
-        // Add background elements based on stage
-        if (levelName.startsWith('stage1-')) {
-            // Forest/grassland theme
-            // Far layer - clouds
-            for (let i = 0; i < 5; i++) {
-                this.backgroundRenderer.addElement(0, {
-                    type: 'cloud' as const,
-                    spriteKey: i % 2 === 0 ? 'environment/cloud1' : 'environment/cloud2',
-                    x: Math.random() * dimensions.width,
-                    y: 20 + Math.random() * 60
-                });
-            }
-            
-            // Mid layer - trees (placed on ground)
-            const groundY = 13 * 16; // 13 tiles * 16 pixels per tile
-            const treeHeight = 32; // Approximate tree sprite height
-            for (let i = 0; i < 8; i++) {
-                this.backgroundRenderer.addElement(1, {
-                    type: 'tree' as const,
-                    spriteKey: 'environment/tree1',
-                    x: i * 200 + Math.random() * 100,
-                    y: groundY - treeHeight
-                });
-            }
-        }
-    }
     
     private showEnding(): void {
         // Stop any playing music
