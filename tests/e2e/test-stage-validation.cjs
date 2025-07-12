@@ -37,14 +37,16 @@ async function runStageValidationTest() {
                 coinCollisions: [],
                 floatingEntities: [],
                 unreachableItems: [],
-                embeddedEntities: []
+                embeddedEntities: [],
+                spawnCollisions: [],
+                goalCollisions: []
             };
             
             // 1. 穴の幅チェック
             const gapIssues = checkGapWidths(stageData);
             issues.gaps = gapIssues;
             
-            // 2. コイン配置チェック
+            // 2. コイン配置チェック（ブロックとの衝突）
             const coinIssues = checkCoinPlacements(stageData);
             issues.coinCollisions = coinIssues;
             
@@ -60,13 +62,23 @@ async function runStageValidationTest() {
             const embeddedIssues = checkEmbeddedEntities(stageData);
             issues.embeddedEntities = embeddedIssues;
             
+            // 6. プレイヤースポーン位置チェック
+            const spawnIssues = checkSpawnPoint(stageData);
+            issues.spawnCollisions = spawnIssues;
+            
+            // 7. ゴール位置チェック
+            const goalIssues = checkGoalPosition(stageData);
+            issues.goalCollisions = goalIssues;
+            
             // 結果を集計
             const stageIssueCount = 
                 issues.gaps.length + 
                 issues.coinCollisions.length + 
                 issues.floatingEntities.length +
                 issues.unreachableItems.length +
-                issues.embeddedEntities.length;
+                issues.embeddedEntities.length +
+                issues.spawnCollisions.length +
+                issues.goalCollisions.length;
             
             totalIssues += stageIssueCount;
             
@@ -101,7 +113,7 @@ async function runStageValidationTest() {
                 if (issues.floatingEntities.length > 0) {
                     console.log('\n  Floating Entity Issues:');
                     issues.floatingEntities.forEach(entity => {
-                        console.log(`    - ${entity.type} at (${entity.x}, ${entity.y}) is floating ${entity.height} tiles above ground`);
+                        console.log(`    - ${entity.type} at (${entity.x}, ${entity.y}) is floating ${entity.height} tiles above block`);
                     });
                 }
                 
@@ -118,6 +130,20 @@ async function runStageValidationTest() {
                         console.log(`    - ${entity.type} at (${entity.x}, ${entity.y}) is embedded in wall`);
                     });
                 }
+                
+                if (issues.spawnCollisions.length > 0) {
+                    console.log('\n  Player Spawn Issues:');
+                    issues.spawnCollisions.forEach(issue => {
+                        console.log(`    - ${issue.message}`);
+                    });
+                }
+                
+                if (issues.goalCollisions.length > 0) {
+                    console.log('\n  Goal Position Issues:');
+                    issues.goalCollisions.forEach(issue => {
+                        console.log(`    - ${issue.message}`);
+                    });
+                }
             } else {
                 console.log('✅ No issues found');
             }
@@ -130,17 +156,20 @@ async function runStageValidationTest() {
         let infoCount = 0;
         
         validationResults.forEach(result => {
-            // クリティカル：穴が広すぎる（ジャンプ台なしで6タイル以上）、コインが地面と重なる
+            // クリティカル：穴が広すぎる（10タイル以上は無理）、コインがブロックと重なる
             result.issues.gaps.forEach(gap => {
-                if (gap.width >= 6 && !gap.hasSpring) criticalCount++;
+                if (gap.width >= 10) criticalCount++;  // ジャンプ台があっても10タイル以上は無理
+                else if (gap.width >= 6 && !gap.hasSpring) warningCount++;
                 else if (gap.width >= 4) warningCount++;
             });
             result.issues.coinCollisions.forEach(() => criticalCount++);
             result.issues.embeddedEntities.forEach(() => criticalCount++);
+            result.issues.spawnCollisions.forEach(() => criticalCount++);
+            result.issues.goalCollisions.forEach(() => criticalCount++);
             
             // 警告：高すぎるアイテム（7タイル以上）、浮いている敵
             result.issues.unreachableItems.forEach(item => {
-                const heightMatch = item.reason.match(/(\d+) tiles above ground/);
+                const heightMatch = item.reason.match(/(\d+) tiles above block/);
                 if (heightMatch && parseInt(heightMatch[1]) >= 7) warningCount++;
                 else infoCount++;
             });
@@ -166,6 +195,7 @@ async function runStageValidationTest() {
         // テスト結果の判定
         if (criticalCount > 0) {
             console.error(`\n❌ Stage validation found ${criticalCount} CRITICAL issues that must be fixed!`);
+            throw new Error(`Stage validation failed: ${criticalCount} critical issues found`);
         } else if (warningCount > 0) {
             console.warn(`\n⚠️  Stage validation found ${warningCount} warnings that should be reviewed.`);
         } else if (infoCount > 0) {
@@ -185,8 +215,8 @@ function checkGapWidths(stageData) {
     const height = stageData.height;
     const width = stageData.width;
     
-    // 地面レベルを検出（通常は下から2-3行目）
-    const groundRows = [height - 2, height - 3];
+    // 床レベルを検出（最下層のみ）
+    const groundRows = [height - 1];
     
     for (const row of groundRows) {
         if (row < 0 || row >= height) continue;
@@ -194,12 +224,12 @@ function checkGapWidths(stageData) {
         let gapStart = -1;
         
         for (let col = 0; col <= width; col++) {
-            const isGround = col < width && tilemap[row][col] === 1;
+            const isBlock = col < width && tilemap[row][col] === 1;
             
-            if (!isGround && gapStart === -1) {
+            if (!isBlock && gapStart === -1) {
                 // 穴の開始
                 gapStart = col;
-            } else if ((isGround || col === width) && gapStart !== -1) {
+            } else if ((isBlock || col === width) && gapStart !== -1) {
                 // 穴の終了
                 const gapWidth = col - gapStart;
                 
@@ -234,7 +264,7 @@ function checkForSpringInGap(stageData, startX, endX, groundRow) {
     for (const spring of springs) {
         // ジャンプ台が穴の範囲内にあるかチェック
         if (spring.x >= startX && spring.x < endX) {
-            // ジャンプ台が地面の近くにあるかチェック（1-2タイル上）
+            // ジャンプ台が床の近くにあるかチェック（1-2タイル上）
             if (spring.y >= groundRow - 2 && spring.y <= groundRow + 1) {
                 return { found: true, x: spring.x };
             }
@@ -245,7 +275,7 @@ function checkForSpringInGap(stageData, startX, endX, groundRow) {
 }
 
 /**
- * コインが地面ブロックと重なっていないかチェック
+ * コインがブロックと重なっていないかチェック
  */
 function checkCoinPlacements(stageData) {
     const issues = [];
@@ -278,7 +308,7 @@ function checkCoinPlacements(stageData) {
 }
 
 /**
- * エンティティが地面から浮いていないかチェック
+ * エンティティが浮いていないかチェック
  */
 function checkFloatingEntities(stageData) {
     const issues = [];
@@ -289,26 +319,26 @@ function checkFloatingEntities(stageData) {
     
     for (const entity of entities) {
         const tileX = entity.x;
-        let groundTileY = -1;
+        let blockTileY = -1;
         
         // エンティティの位置を配列インデックスに変換
         const entityTileY = stageData.height - 1 - entity.y;
         
-        // エンティティの下方向に地面を探す（配列では下方向 = インデックス増加）
+        // エンティティの下方向にブロックを探す（配列では下方向 = インデックス増加）
         for (let tileY = entityTileY + 1; tileY < stageData.height; tileY++) {
             if (tileX >= 0 && tileX < stageData.width) {
                 if (tilemap[tileY][tileX] === 1) {
-                    groundTileY = tileY;
+                    blockTileY = tileY;
                     break;
                 }
             }
         }
         
-        // 地面が見つかった場合、高さをチェック
-        if (groundTileY !== -1) {
+        // ブロックが見つかった場合、高さをチェック
+        if (blockTileY !== -1) {
             // 配列インデックスをゲーム座標に変換
-            const groundY = stageData.height - 1 - groundTileY;
-            const floatingHeight = entity.y - groundY - 1;
+            const blockY = stageData.height - 1 - blockTileY;
+            const floatingHeight = entity.y - blockY - 1;
             
             // 2タイル以上浮いている場合は問題とする
             if (floatingHeight >= 2) {
@@ -337,23 +367,23 @@ function checkUnreachableItems(stageData) {
     
     for (const item of items) {
         // 簡易的なチェック：高すぎる位置にあるアイテム
-        // 通常のジャンプ高さは約3-4タイル、地面からの高さで判定
+        // 通常のジャンプ高さは約3-4タイル
         const itemTileY = stageData.height - 1 - item.y;
-        let groundLevel = -1;
+        let blockLevel = -1;
         
-        // アイテムの下の地面を探す
+        // アイテムの下のブロックを探す
         for (let y = itemTileY + 1; y < stageData.height; y++) {
             if (tilemap[y][item.x] === 1) {
-                groundLevel = stageData.height - 1 - y;
+                blockLevel = stageData.height - 1 - y;
                 break;
             }
         }
         
-        if (groundLevel !== -1) {
-            const heightAboveGround = item.y - groundLevel;
+        if (blockLevel !== -1) {
+            const heightAboveBlock = item.y - blockLevel;
             
-            // 地面から5タイル以上高い場合は到達困難と判定
-            if (heightAboveGround >= 5) {
+            // ブロックから5タイル以上高い場合は到達困難と判定
+            if (heightAboveBlock >= 5) {
                 // 近くにジャンプ台があるかチェック
                 const nearbySpring = stageData.entities.find(e => 
                     e.type === 'spring' &&
@@ -366,7 +396,7 @@ function checkUnreachableItems(stageData) {
                         type: item.type,
                         x: item.x,
                         y: item.y,
-                        reason: `Too high (${heightAboveGround} tiles above ground)`
+                        reason: `Too high (${heightAboveBlock} tiles above block)`
                     });
                 }
             }
@@ -438,6 +468,83 @@ function checkEmbeddedEntities(stageData) {
                         y: entity.y
                     });
                 }
+            }
+        }
+    }
+    
+    return issues;
+}
+
+/**
+ * プレイヤースポーン位置をチェック
+ */
+function checkSpawnPoint(stageData) {
+    const issues = [];
+    const tilemap = stageData.tilemap;
+    
+    // playerSpawnまたはspawnPointプロパティをチェック
+    const spawn = stageData.playerSpawn || stageData.spawnPoint;
+    if (!spawn) return issues;
+    
+    const tileY = spawn.y;
+    const tileX = spawn.x;
+    
+    // 範囲チェック
+    if (tileY >= 0 && tileY < stageData.height && 
+        tileX >= 0 && tileX < stageData.width) {
+        
+        // スポーン位置にブロックがあるかチェック
+        if (tilemap[tileY][tileX] === 1) {
+            issues.push({
+                message: `Player spawn at (${spawn.x}, ${spawn.y}) is inside a block`
+            });
+        }
+    }
+    
+    return issues;
+}
+
+/**
+ * ゴール位置をチェック
+ */
+function checkGoalPosition(stageData) {
+    const issues = [];
+    const tilemap = stageData.tilemap;
+    
+    // goalプロパティをチェック
+    const goal = stageData.goal;
+    if (!goal) {
+        // エンティティからゴールを探す
+        const goalEntity = stageData.entities.find(e => e.type === 'goal');
+        if (!goalEntity) return issues;
+        
+        const tileY = goalEntity.y;
+        const tileX = goalEntity.x;
+        
+        // 範囲チェック
+        if (tileY >= 0 && tileY < stageData.height && 
+            tileX >= 0 && tileX < stageData.width) {
+            
+            // ゴール位置にブロックがあるかチェック
+            if (tilemap[tileY][tileX] === 1) {
+                issues.push({
+                    message: `Goal at (${goalEntity.x}, ${goalEntity.y}) is inside a block`
+                });
+            }
+        }
+    } else {
+        const tileY = goal.y;
+        const tileX = goal.x;
+        
+        // 範囲チェック
+        if (tileY >= 0 && tileY < stageData.height && 
+            tileX >= 0 && tileX < stageData.width) {
+            
+            // ゴール位置にブロックがあるかチェック
+            if (tilemap[tileY][tileX] === 1) {
+                issues.push({
+                    message: `Goal at (${goal.x}, ${goal.y}) is inside a block`
+                });
             }
         }
     }
