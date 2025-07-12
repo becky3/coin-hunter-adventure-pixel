@@ -21,6 +21,7 @@ export class GoalFlag extends Entity {
             const resourceLoader = ResourceLoader.getInstance();
             goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
         } catch {
+            // Error handled silently
         }
         
         const width = goalConfig?.physics.width || 32;

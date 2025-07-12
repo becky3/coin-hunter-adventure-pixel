@@ -160,6 +160,7 @@ export class AssetLoader {
             const endTime = performance.now();
             Logger.log(`[AssetLoader] Loaded sprite ${spriteKey} in ${(endTime - startTime).toFixed(2)}ms`);
         } else {
+            // Error handled silently
         }
         
         return {
@@ -191,6 +192,7 @@ export class AssetLoader {
             const endTime = performance.now();
             Logger.log(`[AssetLoader] Loaded animation ${animKey} (${frameCount} frames) in ${(endTime - startTime).toFixed(2)}ms`);
         } else {
+            // Error handled silently
         }
         
         return {

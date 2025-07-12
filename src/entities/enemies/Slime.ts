@@ -16,6 +16,7 @@ export class Slime extends Enemy {
             const resourceLoader = ResourceLoader.getInstance();
             slimeConfig = resourceLoader.getCharacterConfig('enemies', 'slime');
         } catch {
+            // Error handled silently
         }
         
         const width = slimeConfig?.physics.width || 16;

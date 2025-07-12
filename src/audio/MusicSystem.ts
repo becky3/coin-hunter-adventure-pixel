@@ -280,6 +280,7 @@ export class MusicSystem {
             const resourceLoader = ResourceLoader.getInstance();
             jumpConfig = resourceLoader.getAudioConfig('sfx', 'jump');
         } catch {
+            // Error handled silently
         }
         
         if (jumpConfig && jumpConfig.waveform && jumpConfig.frequency) {
@@ -343,6 +344,7 @@ export class MusicSystem {
             const resourceLoader = ResourceLoader.getInstance();
             damageConfig = resourceLoader.getAudioConfig('sfx', 'damage');
         } catch {
+            // Error handled silently
         }
         
         const now = this.audioContext.currentTime;

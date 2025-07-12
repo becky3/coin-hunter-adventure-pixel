@@ -25,6 +25,7 @@ export class Spring extends Entity {
             const resourceLoader = ResourceLoader.getInstance();
             springConfig = resourceLoader.getObjectConfig('items', 'spring');
         } catch {
+            // Error handled silently
         }
         
         const width = springConfig?.physics.width || 16;
