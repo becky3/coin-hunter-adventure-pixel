@@ -12,7 +12,7 @@ import { TILE_SIZE } from '../constants/gameConstants';
 import { Logger } from '../utils/Logger';
 import { MusicSystem } from '../audio/MusicSystem';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
-import { AssetLoader } from '../assets/AssetLoader';
+import { AssetLoader, StageType } from '../assets/AssetLoader';
 import { BackgroundRenderer } from '../rendering/BackgroundRenderer';
 import { TileRenderer } from '../rendering/TileRenderer';
 
@@ -179,6 +179,12 @@ export class PlayState implements GameState {
         await this.preloadSprites();
 
         const levelName = params.level || 'stage1-1';
+        
+        const stageType = this.determineStageType(levelName);
+        if (this.game.assetLoader) {
+            this.game.assetLoader.setStageType(stageType);
+        }
+        
         const levelData = await this.gameController.initializeLevel(levelName);
         
         const dimensions = this.levelManager.getLevelDimensions();
@@ -500,5 +506,16 @@ export class PlayState implements GameState {
         this.cameraController.update(0);
         
         Logger.log(`Player warped to (${pixelX}, ${pixelY})`);
+    }
+    
+    private determineStageType(levelName: string): StageType {
+        if (levelName.startsWith('stage1')) {
+            return 'grassland';
+        } else if (levelName.startsWith('stage2')) {
+            return 'cave';
+        } else if (levelName.startsWith('stage3')) {
+            return 'snow';
+        }
+        return 'grassland';
     }
 }
