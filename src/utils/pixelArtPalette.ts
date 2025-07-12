@@ -27,7 +27,7 @@ interface SpriteData {
  * System for managing palette operations
  */
 class PaletteSystem {
-    private masterPalette: Record<number, string>;
+    public readonly masterPalette: Record<number, string>;
     private currentStagePalette: StagePalette | null;
     private spriteLoader: SpriteLoader;
 
@@ -173,58 +173,36 @@ const STAGE_PALETTES: Record<string, PaletteConfig> = {
     }
 } as const;
 
+const paletteSystem = new PaletteSystem();
+
+const PALETTE_NAME_TO_MASTER_PALETTE: Record<string, number[]> = {
+    character: [0, 0x11, 0x33, 0x50],
+    enemy: [0, 0x61, 0x62, 0x60],
+    items: [0, 0x52, 0x53, 0x51],
+    grassland: [0, 0x50, 0x51, 0x61],
+    ui: [0, 0x41, 0x03, 0x00],
+    sky: [0, 0x12, 0x13, 0x03],
+    nature: [0, 0x50, 0x51, 0x61]
+};
+
 /**
  * Returns color palette for the specified palette name
  */
-
 function getColorPalette(paletteName: string): ColorPalette {
-    const palettes: Record<string, ColorPalette> = {
-        character: {
-            0: null,
-            1: '#4169E1',
-            2: '#FFB6C1',
-            3: '#8B4513'
-        },
-        enemy: {
-            0: null,
-            1: '#228B22',
-            2: '#90EE90',
-            3: '#006400'
-        },
-        items: {
-            0: null,
-            1: '#FFD700',
-            2: '#FFA500',
-            3: '#FF8C00'
-        },
-        grassland: {
-            0: null,
-            1: '#654321',
-            2: '#8B6914',
-            3: '#228B22'
-        },
-        ui: {
-            0: null,
-            1: '#FF0000',
-            2: '#FFFFFF',
-            3: '#000000'
-        },
-        sky: {
-            0: null,
-            1: '#87CEEB',
-            2: '#E0F6FF',
-            3: '#FFFFFF'
-        },
-        nature: {
-            0: null,
-            1: '#8B4513',
-            2: '#A0522D',
-            3: '#228B22'
-        }
-    };
+    const masterIndices = PALETTE_NAME_TO_MASTER_PALETTE[paletteName] || PALETTE_NAME_TO_MASTER_PALETTE.character;
+    const palette: ColorPalette = {};
     
-    return palettes[paletteName] || palettes.character;
+    for (let i = 0; i < masterIndices.length; i++) {
+        const colorIndex = masterIndices[i];
+        if (colorIndex === 0) {
+            palette[i] = null;
+        } else {
+            palette[i] = paletteSystem.masterPalette[colorIndex] || '#000000';
+        }
+    }
+    
+    return palette;
 }
 
-export { PaletteSystem, STAGE_PALETTES, SPRITE_DEFINITIONS, getColorPalette };
+export { PaletteSystem, STAGE_PALETTES, SPRITE_DEFINITIONS, getColorPalette, paletteSystem };
 export type { ColorHex, Palette, PaletteConfig, StagePalette, ColorPalette, SpriteData };

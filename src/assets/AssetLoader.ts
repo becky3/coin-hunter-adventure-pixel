@@ -1,5 +1,5 @@
 import { SpriteLoader } from '../utils/spriteLoader';
-import { getColorPalette } from '../utils/pixelArtPalette';
+import { getColorPalette, paletteSystem, STAGE_PALETTES } from '../utils/pixelArtPalette';
 import { PixelArtRenderer } from '../utils/pixelArt';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
@@ -28,6 +28,8 @@ export interface AssetToLoad {
 
 export type ProgressCallback = (loaded: number, total: number) => void;
 
+export type StageType = 'grassland' | 'cave' | 'snow';
+
 /**
  * AssetLoader implementation
  */
@@ -38,6 +40,7 @@ export class AssetLoader {
     private totalAssets: number;
     private loadedCount: number;
     public renderer?: PixelArtRenderer;
+    private currentStageType: StageType = 'grassland';
 
     constructor() {
         this.spriteLoader = new SpriteLoader();
@@ -49,6 +52,12 @@ export class AssetLoader {
     
     setRenderer(renderer: PixelArtRenderer): void {
         this.renderer = renderer;
+    }
+    
+    setStageType(stageType: StageType): void {
+        this.currentStageType = stageType;
+        paletteSystem.setStagePalette(paletteSystem.createStagePalette(STAGE_PALETTES[stageType]));
+        Logger.log(`[AssetLoader] Stage type set to: ${stageType}`);
     }
     
     async loadSprite(category: string, name: string): Promise<LoadedAsset> {
@@ -217,13 +226,13 @@ export class AssetLoader {
             'player': 'character',
             'enemies': 'enemy',
             'items': 'items',
-            'terrain': 'grassland',
-            'tiles': 'grassland',
+            'terrain': this.currentStageType,
+            'tiles': this.currentStageType,
             'environment': 'nature',
             'ui': 'ui'
         };
         
-        return paletteMap[category] || 'grassland';
+        return paletteMap[category] || this.currentStageType;
     }
     
     getLoadingProgress(): { loaded: number; total: number; percentage: number } {
