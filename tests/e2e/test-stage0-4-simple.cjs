@@ -12,11 +12,15 @@ async function runTest() {
         await t.injectErrorTracking();
         
         // Stage 0-4を開く
-        await t.navigateToGame('http://localhost:3000?s=0-4');
+        await t.navigateToGame('http://localhost:3000?s=0-4&skip_title=true');
         await t.waitForGameInitialization();
         
-        // Start new game as normal
-        await t.startNewGame();
+        // With skip_title=true, we should go directly to play state
+        await t.assertState('play');
+        
+        // Ensure input focus and wait for stage to fully load
+        await t.clickAt(100, 100);
+        await t.wait(2000);  // stage0-4のロードに時間がかかるため長めに待機
         await t.assertPlayerExists();
         
         console.log('✅ Stage 0-4 loaded successfully');
