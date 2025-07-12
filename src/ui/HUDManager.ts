@@ -1,6 +1,7 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../services/EventBus';
+import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
 
 export interface HUDData {
     score: number;
@@ -127,25 +128,26 @@ export class HUDManager {
 
     private renderHUD(renderer: PixelRenderer): void {
         const blackPattern = this.createSolidPattern(1);
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
         
         for (let y = 0; y < 24; y += 8) {
             for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
-                this.drawPatternTile(renderer, x, y, blackPattern, '#000000');
+                this.drawPatternTile(renderer, x, y, blackPattern, blackColor);
             }
         }
         
         this.renderHorizontalBorder(renderer, 24);
 
-        renderer.drawText(`SCORE: ${this.hudData.score}`, 8, 8, '#FFFFFF');
-        renderer.drawText(`LIVES: ${this.hudData.lives}`, 88, 8, '#FFFFFF');
+        renderer.drawText(`SCORE: ${this.hudData.score}`, 8, 8, getMasterColor(UI_PALETTE_INDICES.white));
+        renderer.drawText(`LIVES: ${this.hudData.lives}`, 88, 8, getMasterColor(UI_PALETTE_INDICES.white));
         
         const minutes = Math.floor(this.hudData.time / 60);
         const seconds = this.hudData.time % 60;
         const timeStr = `TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-        renderer.drawText(timeStr, 8, 16, '#FFFFFF');
+        renderer.drawText(timeStr, 8, 16, getMasterColor(UI_PALETTE_INDICES.white));
         
         if (this.hudData.stageName) {
-            renderer.drawText(this.hudData.stageName, 120, 16, '#FFFFFF');
+            renderer.drawText(this.hudData.stageName, 120, 16, getMasterColor(UI_PALETTE_INDICES.white));
         }
     }
 
@@ -156,45 +158,48 @@ export class HUDManager {
         const menuY = (GAME_RESOLUTION.HEIGHT - menuHeight) / 2;
         
         const blackPattern = this.createSolidPattern(1);
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
         
         for (let y = menuY; y < menuY + menuHeight; y += 8) {
             for (let x = menuX; x < menuX + menuWidth; x += 8) {
-                this.drawPatternTile(renderer, x, y, blackPattern, '#000000');
+                this.drawPatternTile(renderer, x, y, blackPattern, blackColor);
             }
         }
         
         this.renderBoxBorder(renderer, menuX - 8, menuY - 8, menuWidth + 16, menuHeight + 16);
 
-        renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 32, '#FFFFFF');
-        renderer.drawTextCentered('PRESS ESC TO RESUME', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 8, '#FFFFFF');
-        renderer.drawTextCentered('PRESS Q TO QUIT', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 16, '#FFFFFF');
+        renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 32, getMasterColor(UI_PALETTE_INDICES.white));
+        renderer.drawTextCentered('PRESS ESC TO RESUME', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 8, getMasterColor(UI_PALETTE_INDICES.white));
+        renderer.drawTextCentered('PRESS Q TO QUIT', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 16, getMasterColor(UI_PALETTE_INDICES.white));
     }
 
     private renderHorizontalBorder(renderer: PixelRenderer, y: number): void {
         const blackPattern = this.createSolidPattern(1);
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
         
         for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
-            this.drawPatternTile(renderer, x, y - 2, blackPattern, '#000000');
+            this.drawPatternTile(renderer, x, y - 2, blackPattern, blackColor);
         }
     }
 
     private renderBoxBorder(renderer: PixelRenderer, x: number, y: number, width: number, height: number): void {
         const blackPattern = this.createSolidPattern(1);
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
 
         for (let i = x; i < x + width; i += 8) {
-            this.drawPatternTile(renderer, i, y, blackPattern, '#000000');
+            this.drawPatternTile(renderer, i, y, blackPattern, blackColor);
         }
 
         for (let i = x; i < x + width; i += 8) {
-            this.drawPatternTile(renderer, i, y + height - 8, blackPattern, '#000000');
+            this.drawPatternTile(renderer, i, y + height - 8, blackPattern, blackColor);
         }
 
         for (let i = y + 8; i < y + height - 8; i += 8) {
-            this.drawPatternTile(renderer, x, i, blackPattern, '#000000');
+            this.drawPatternTile(renderer, x, i, blackPattern, blackColor);
         }
 
         for (let i = y + 8; i < y + height - 8; i += 8) {
-            this.drawPatternTile(renderer, x + width - 8, i, blackPattern, '#000000');
+            this.drawPatternTile(renderer, x + width - 8, i, blackPattern, blackColor);
         }
     }
 
@@ -266,14 +271,14 @@ export class HUDManager {
         const bgX = centerX - bgWidth / 2;
         const bgY = centerY - bgHeight / 2;
         
-        renderer.drawRect(bgX, bgY, bgWidth, bgHeight, '#000000');
-        renderer.drawRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4, '#FFD700');
-        renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, '#000000');
+        renderer.drawRect(bgX, bgY, bgWidth, bgHeight, getMasterColor(UI_PALETTE_INDICES.black));
+        renderer.drawRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4, getMasterColor(UI_PALETTE_INDICES.gold));
+        renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, getMasterColor(UI_PALETTE_INDICES.black));
         
         if (lines.length > 0) {
             const textStartY = centerY - ((lines.length - 1) * lineHeight) / 2;
             lines.forEach((line, index) => {
-                renderer.drawTextCentered(line, centerX, textStartY + index * lineHeight - 4, '#FFD700');
+                renderer.drawTextCentered(line, centerX, textStartY + index * lineHeight - 4, getMasterColor(UI_PALETTE_INDICES.gold));
             });
         }
     }

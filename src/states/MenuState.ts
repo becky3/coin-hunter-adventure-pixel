@@ -5,6 +5,7 @@ import { InputSystem } from '../core/InputSystem';
 import { URLParams } from '../utils/urlParams';
 import { Logger } from '../utils/Logger';
 import { MusicSystem } from '../audio/MusicSystem';
+import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
 
 interface MenuOption {
     text: string;
@@ -168,7 +169,7 @@ export class MenuState implements GameState {
     }
     
     render(renderer: PixelRenderer): void {
-        renderer.clear('#000000');
+        renderer.clear(getMasterColor(UI_PALETTE_INDICES.black));
         
         if (this.showHowTo) {
             this.renderHowToPlay(renderer);
@@ -179,14 +180,14 @@ export class MenuState implements GameState {
             this.drawMenuOptions(renderer);
         }
         this.drawMuteButton(renderer);
-        renderer.drawText('v0.1.0', 8, GAME_RESOLUTION.HEIGHT - 16, '#666666');
+        renderer.drawText('v0.1.0', 8, GAME_RESOLUTION.HEIGHT - 16, getMasterColor(UI_PALETTE_INDICES.darkGray));
     }
     
     private drawTitleLogo(renderer: PixelRenderer): void {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         const titleY = this.logoY;
-        renderer.drawTextCentered('COIN HUNTER', centerX, titleY, '#FFD700', 1, true);
-        renderer.drawTextCentered('ADVENTURE', centerX, titleY + 16, '#FF6B6B', 1, true);
+        renderer.drawTextCentered('COIN HUNTER', centerX, titleY, getMasterColor(UI_PALETTE_INDICES.gold), 1, true);
+        renderer.drawTextCentered('ADVENTURE', centerX, titleY + 16, getMasterColor(UI_PALETTE_INDICES.lightRed), 1, true);
     }
     
     private drawMenuOptions(renderer: PixelRenderer): void {
@@ -195,11 +196,13 @@ export class MenuState implements GameState {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         const startY = 104;
         const lineHeight = 24;
+        const goldColor = getMasterColor(UI_PALETTE_INDICES.gold);
+        const whiteColor = getMasterColor(UI_PALETTE_INDICES.white);
         
         this.options.forEach((option, index) => {
             const y = startY + index * lineHeight;
             const isSelected = index === this.selectedOption;
-            const color = isSelected ? '#FFD700' : '#FFFFFF';
+            const color = isSelected ? goldColor : whiteColor;
             const prevAlpha = renderer.ctx.globalAlpha;
             renderer.ctx.globalAlpha = this.optionsAlpha;
             
@@ -207,7 +210,7 @@ export class MenuState implements GameState {
             if (isSelected) {
                 const textWidth = option.text.length * 8;
                 const cursorX = centerX - Math.floor(textWidth / 2) - 16;
-                renderer.drawText('>', cursorX, y, '#FFD700');
+                renderer.drawText('>', cursorX, y, goldColor);
             }
             
             renderer.ctx.globalAlpha = prevAlpha;
@@ -215,15 +218,15 @@ export class MenuState implements GameState {
         const prevAlpha = renderer.ctx.globalAlpha;
         renderer.ctx.globalAlpha = this.optionsAlpha;
         
-        renderer.drawTextCentered('ARROWS:SELECT', centerX, 184, '#999999');
-        renderer.drawTextCentered('ENTER/SPACE:OK', centerX, 192, '#999999');
+        renderer.drawTextCentered('ARROWS:SELECT', centerX, 184, getMasterColor(UI_PALETTE_INDICES.gray));
+        renderer.drawTextCentered('ENTER/SPACE:OK', centerX, 192, getMasterColor(UI_PALETTE_INDICES.gray));
         
         renderer.ctx.globalAlpha = prevAlpha;
     }
 
     private renderHowToPlay(renderer: PixelRenderer): void {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
-        renderer.drawTextCentered('HOW TO PLAY', centerX, 24, '#FFD700');
+        renderer.drawTextCentered('HOW TO PLAY', centerX, 24, getMasterColor(UI_PALETTE_INDICES.gold));
         const instructions = [
             { key: 'ARROWS', desc: 'MOVE' },
             { key: 'UP/SPACE', desc: 'JUMP' },
@@ -234,19 +237,19 @@ export class MenuState implements GameState {
         
         let y = 56;
         instructions.forEach(inst => {
-            renderer.drawText(inst.key, 40, y, '#4ECDC4');
-            renderer.drawText(inst.desc, 120, y, '#FFFFFF');
+            renderer.drawText(inst.key, 40, y, getMasterColor(UI_PALETTE_INDICES.cyan));
+            renderer.drawText(inst.desc, 120, y, getMasterColor(UI_PALETTE_INDICES.white));
             y += 16;
         });
-        renderer.drawTextCentered('COLLECT ALL COINS!', centerX, 160, '#FFFFFF');
-        renderer.drawTextCentered('REACH THE GOAL!', centerX, 176, '#FFFFFF');
-        renderer.drawTextCentered('AVOID ENEMIES!', centerX, 192, '#FF6B6B');
-        renderer.drawTextCentered('ESC/ENTER TO RETURN', centerX, 216, '#999999');
+        renderer.drawTextCentered('COLLECT ALL COINS!', centerX, 160, getMasterColor(UI_PALETTE_INDICES.white));
+        renderer.drawTextCentered('REACH THE GOAL!', centerX, 176, getMasterColor(UI_PALETTE_INDICES.white));
+        renderer.drawTextCentered('AVOID ENEMIES!', centerX, 192, getMasterColor(UI_PALETTE_INDICES.lightRed));
+        renderer.drawTextCentered('ESC/ENTER TO RETURN', centerX, 216, getMasterColor(UI_PALETTE_INDICES.gray));
     }
     
     private renderCredits(renderer: PixelRenderer): void {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
-        renderer.drawTextCentered('CREDITS', centerX, 24, '#FFD700');
+        renderer.drawTextCentered('CREDITS', centerX, 24, getMasterColor(UI_PALETTE_INDICES.gold));
         const credits = [
             { role: 'ORIGINAL', name: 'SVG TEAM' },
             { role: 'PIXEL VER', name: 'CANVAS TEAM' },
@@ -256,23 +259,23 @@ export class MenuState implements GameState {
         
         let y = 56;
         credits.forEach(credit => {
-            renderer.drawText(credit.role, 40, y, '#4ECDC4');
-            renderer.drawText(credit.name, 40, y + 8, '#FFFFFF');
+            renderer.drawText(credit.role, 40, y, getMasterColor(UI_PALETTE_INDICES.cyan));
+            renderer.drawText(credit.name, 40, y + 8, getMasterColor(UI_PALETTE_INDICES.white));
             y += 32;
         });
-        renderer.drawTextCentered('ESC/ENTER TO RETURN', centerX, 216, '#999999');
+        renderer.drawTextCentered('ESC/ENTER TO RETURN', centerX, 216, getMasterColor(UI_PALETTE_INDICES.gray));
     }
     
     private drawMuteButton(renderer: PixelRenderer): void {
         const muteState = this.game.musicSystem?.getMuteState() || false;
         const buttonText = muteState ? 'SOUND:OFF' : 'SOUND:ON';
-        const buttonColor = muteState ? '#FF0000' : '#00FF00';
+        const buttonColor = muteState ? getMasterColor(UI_PALETTE_INDICES.brightRed) : getMasterColor(UI_PALETTE_INDICES.green);
         
         const x = GAME_RESOLUTION.WIDTH - 80;
         const y = 8;
         
         renderer.drawText(buttonText, x, y, buttonColor);
-        renderer.drawText('(M)', x + 16, y + 8, '#666666');
+        renderer.drawText('(M)', x + 16, y + 8, getMasterColor(UI_PALETTE_INDICES.darkGray));
     }
     
     private executeOption(): void {
