@@ -18,6 +18,9 @@ interface Game {
     stateManager: GameStateManager;
 }
 
+/**
+ * Game state for menu mode
+ */
 export class MenuState implements GameState {
     public name = 'menu';
     private game: Game;
@@ -158,7 +161,6 @@ export class MenuState implements GameState {
             }
         }
         
-        // デバッグ: 初回のみログ出力
         if (!this._firstUpdateLogged) {
             Logger.log('MenuState', `update called, optionsAlpha: ${this.optionsAlpha}`);
             this._firstUpdateLogged = true;
@@ -282,15 +284,12 @@ export class MenuState implements GameState {
                 this.game.musicSystem.playSEFromPattern('gameStart');
             }
             try {
-                // URLパラメータからステージIDを取得
                 const urlParams = new URLParams();
                 const stageId = urlParams.getStageId();
                 
-                // Check if debug overlay has a selected stage
                 const debugOverlay = (window as Window & { debugOverlay?: { getSelectedStage?: () => string } }).debugOverlay;
                 const debugSelectedStage = debugOverlay?.getSelectedStage?.();
                 
-                // Determine which stage to use (debug selection takes priority)
                 const selectedStage = debugSelectedStage || stageId;
                 
                 if (selectedStage) {
@@ -325,7 +324,6 @@ export class MenuState implements GameState {
     exit(): void {
         this.removeInputListeners();
         
-        // Stop menu BGM when leaving menu
         if (this.game.musicSystem) {
             this.game.musicSystem.stopBGM();
         }

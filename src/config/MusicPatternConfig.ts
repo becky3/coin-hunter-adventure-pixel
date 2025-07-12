@@ -23,21 +23,13 @@ export interface DrumBeat {
 }
 
 export interface PatternConfig {
-    // For melodic patterns
     notes?: string[];
-    // For chord patterns
     chords?: string[][];
-    // For frequency-based patterns
     frequencies?: FrequencyRamp[];
-    // For drum patterns
     beats?: DrumBeat[];
-    // Durations for each note/chord/frequency
     durations?: number[];
-    // Specific times for each event (overrides durations)
     times?: number[];
-    // Loop the pattern
     loop?: boolean;
-    // Pattern duration (for drums)
     duration?: number;
 }
 

@@ -35,6 +35,9 @@ interface IRenderer {
     drawRect(x: number, y: number, width: number, height: number, color: string, fill?: boolean): void;
 }
 
+/**
+ * System for managing physics operations
+ */
 export class PhysicsSystem {
     private _gravity: number;
     private _maxFallSpeed: number;
@@ -47,7 +50,6 @@ export class PhysicsSystem {
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
-        // Load physics config from ResourceLoader
         const resourceLoader = ResourceLoader.getInstance();
         const physicsConfig = resourceLoader.getPhysicsConfig('global');
         
@@ -114,7 +116,7 @@ export class PhysicsSystem {
     
     clearEntities(): void {
         this.entities.clear();
-        this.frameCount = 0; // Reset frame count
+        this.frameCount = 0;
     }
     
     setTileMap(tileMap: number[][], tileSize = 16): void {
@@ -145,8 +147,7 @@ export class PhysicsSystem {
         this.frameCount++;
         
         
-        // Clamp deltaTime to prevent huge jumps
-        const clampedDeltaTime = Math.min(deltaTime, 0.033); // Max 33ms (30fps)
+        const clampedDeltaTime = Math.min(deltaTime, 0.033);
         
         for (const entity of this.entities) {
             if (entity.active) {
@@ -169,20 +170,16 @@ export class PhysicsSystem {
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
         
-        // Apply effective gravity = base gravity * entity's gravity scale
         const effectiveGravity = this.gravity * (entity.gravityScale || 1.0);
         entity.vy += effectiveGravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
         
-        // Apply air resistance to all vertical movement
         if (entity.airResistance && entity.airResistance > 0) {
             entity.vy *= (1 - entity.airResistance);
         }
         
         
-        // Use entity's maxFallSpeed if defined, otherwise use system's default
         const maxFall = entity.maxFallSpeed !== undefined ? entity.maxFallSpeed : this.maxFallSpeed;
         
-        // Only clamp downward velocity (positive vy)
         if (entity.vy > 0 && entity.vy > maxFall) {
             entity.vy = maxFall;
         }

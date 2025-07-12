@@ -1,6 +1,4 @@
 {
-    // ESLint configuration for TypeScript project
-    // Strict type checking - no any types or non-null assertions allowed
     "env": {
         "browser": true,
         "es2021": true,
@@ -8,7 +6,9 @@
     },
     "extends": [
         "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
+        "plugin:@typescript-eslint/recommended",
+        "plugin:jsdoc/recommended-typescript",
+        "plugin:@eslint-community/eslint-comments/recommended"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -17,7 +17,10 @@
         "project": "./tsconfig.json"
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "jsdoc",
+        "@eslint-community/eslint-comments",
+        "local-rules"
     ],
     "rules": {
         "indent": ["error", 4],
@@ -31,13 +34,55 @@
         }],
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/no-non-null-assertion": "error",
-        "no-console": ["error", { "allow": ["warn", "error", "info"] }]
+        "no-console": ["error", { "allow": ["warn", "error", "info"] }],
+        "jsdoc/require-jsdoc": ["error", {
+            "require": {
+                "FunctionDeclaration": false,
+                "MethodDefinition": false,
+                "ClassDeclaration": true,
+                "ArrowFunctionExpression": false,
+                "FunctionExpression": false
+            },
+            "contexts": [],
+            "checkConstructors": false
+        }],
+        "jsdoc/require-param": "off",
+        "jsdoc/require-returns": "off",
+        "jsdoc/require-description": ["error", {
+            "contexts": ["ClassDeclaration"]
+        }],
+        "jsdoc/check-alignment": "error",
+        "jsdoc/check-param-names": "error",
+        "jsdoc/check-tag-names": "error",
+        "jsdoc/check-types": "error",
+        "jsdoc/valid-types": "error",
+        "no-inline-comments": "error",
+        "no-warning-comments": ["warn", { 
+            "terms": ["TODO", "FIXME", "HACK"], 
+            "location": "start" 
+        }],
+        "capitalized-comments": ["error", "always", {
+            "ignorePattern": "eslint|TODO|FIXME|HACK",
+            "ignoreInlineComments": false,
+            "ignoreConsecutiveComments": false
+        }],
+        "@eslint-community/eslint-comments/no-unused-disable": "error",
+        "@eslint-community/eslint-comments/require-description": ["error", {
+            "ignore": ["eslint-enable"]
+        }],
+        "local-rules/no-standalone-comments": "error"
     },
     "overrides": [
         {
             "files": ["*.js"],
             "rules": {
                 "@typescript-eslint/no-var-requires": "off"
+            }
+        },
+        {
+            "files": ["src/data/bundledData.ts", "src/data/spriteData.ts"],
+            "rules": {
+                "spaced-comment": "off"
             }
         }
     ],

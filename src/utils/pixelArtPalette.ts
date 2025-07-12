@@ -23,6 +23,9 @@ interface SpriteData {
     data: number[][];
 }
 
+/**
+ * System for managing palette operations
+ */
 class PaletteSystem {
     private masterPalette: Record<number, string>;
     private currentStagePalette: StagePalette | null;
@@ -170,6 +173,10 @@ const STAGE_PALETTES: Record<string, PaletteConfig> = {
     }
 } as const;
 
+/**
+ * Returns color palette for the specified palette name
+ */
+
 function getColorPalette(paletteName: string): ColorPalette {
     const palettes: Record<string, ColorPalette> = {
         character: {
@@ -192,9 +199,9 @@ function getColorPalette(paletteName: string): ColorPalette {
         },
         grassland: {
             0: null,
-            1: '#654321',  // dark brown
-            2: '#8B6914',  // medium brown
-            3: '#228B22'   // green
+            1: '#654321',
+            2: '#8B6914',
+            3: '#228B22'
         },
         ui: {
             0: null,
@@ -204,15 +211,15 @@ function getColorPalette(paletteName: string): ColorPalette {
         },
         sky: {
             0: null,
-            1: '#87CEEB',  // sky blue
-            2: '#E0F6FF',  // light blue
-            3: '#FFFFFF'   // white
+            1: '#87CEEB',
+            2: '#E0F6FF',
+            3: '#FFFFFF'
         },
         nature: {
             0: null,
-            1: '#8B4513',  // brown (trunk)
-            2: '#A0522D',  // light brown
-            3: '#228B22'   // green (leaves)
+            1: '#8B4513',
+            2: '#A0522D',
+            3: '#228B22'
         }
     };
     

@@ -18,6 +18,9 @@ interface Game {
     inputSystem: InputSystem;
 }
 
+/**
+ * Game state for testplay mode
+ */
 export class TestPlayState implements GameState {
     public name = 'testplay';
     private game: Game;

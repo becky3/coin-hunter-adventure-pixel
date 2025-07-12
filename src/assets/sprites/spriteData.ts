@@ -1,5 +1,3 @@
-// Auto-generated sprite data imports
-// This file imports all sprite JSON files to bundle them with the app
 
 import playerIdle from './player/idle.json';
 import playerIdleSmall from './player/idle_small.json';

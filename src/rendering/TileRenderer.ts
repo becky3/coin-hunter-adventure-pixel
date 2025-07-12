@@ -1,5 +1,8 @@
 import { PixelRenderer } from './PixelRenderer';
 
+/**
+ * Handles rendering of tile elements
+ */
 export class TileRenderer {
     private tilePatterns: Map<number, TilePattern>;
     
@@ -9,13 +12,11 @@ export class TileRenderer {
     }
     
     private initializeTilePatterns(): void {
-        // Ground tile pattern
         this.tilePatterns.set(1, {
             type: 'ground',
             spriteKey: 'tiles/grass_ground'
         });
         
-        // Spike tile pattern
         this.tilePatterns.set(2, {
             type: 'spike',
             spriteKey: 'tiles/spike'

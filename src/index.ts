@@ -26,12 +26,10 @@ async function startGame() {
         Logger.log('Game started successfully');
     } catch (error) {
         Logger.error('Failed to start game:', error);
-        // Loading画面を非表示にする
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {
             loadingScreen.style.display = 'none';
         }
-        // エラーメッセージを表示
         const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
         if (canvas) {
             const ctx = canvas.getContext('2d');

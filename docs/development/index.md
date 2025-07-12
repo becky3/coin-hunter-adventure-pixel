@@ -10,10 +10,11 @@ Coin Hunter Adventure Pixelの開発に参加する方向けのドキュメン�
 ## 目次
 
 1. [開発ガイドライン]({{ site.baseurl }}/development/guidelines.html) - コーディング規約とベストプラクティス
-2. [アーキテクチャ]({{ site.baseurl }}/development/architecture.html) - システム設計と構造
-3. [物理システム]({{ site.baseurl }}/development/physics-system.html) - 物理演算とパラメータ設定
-4. [マネージャーAPI]({{ site.baseurl }}/development/managers.html) - 主要マネージャークラスのAPI
-5. [テストガイド]({{ site.baseurl }}/development/testing.html) - テストの書き方と実行方法、既存テスト一覧
+2. [コメントルール]({{ site.baseurl }}/development/comment-rules.html) - ESLintによるコメント規約
+3. [アーキテクチャ]({{ site.baseurl }}/development/architecture.html) - システム設計と構造
+4. [物理システム]({{ site.baseurl }}/development/physics-system.html) - 物理演算とパラメータ設定
+5. [マネージャーAPI]({{ site.baseurl }}/development/managers.html) - 主要マネージャークラスのAPI
+6. [テストガイド]({{ site.baseurl }}/development/testing.html) - テストの書き方と実行方法、既存テスト一覧
 
 ## 開発の流れ
 
@@ -25,12 +26,13 @@ Coin Hunter Adventure Pixelの開発に参加する方向けのドキュメン�
 
 ## 主要な技術スタック
 
-- **フレームワーク**: Phaser 3
 - **言語**: TypeScript
 - **ビルドツール**: Vite
-- **テスト**: Jest
-- **リンター**: ESLint
-- **フォーマッター**: Prettier
+- **レンダリング**: Canvas API（独自実装）
+- **テスト**: Puppeteer（E2E）
+- **リンター**: ESLint + 以下のプラグイン
+  - `eslint-plugin-jsdoc` - JSDocコメントの検証
+  - `@eslint-community/eslint-plugin-eslint-comments` - ESLintディレクティブの検証
 
 ## 開発環境
 

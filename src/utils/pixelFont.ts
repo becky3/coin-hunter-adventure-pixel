@@ -4,6 +4,9 @@ export type FontData = { [key: string]: number[][] };
 
 let instance: PixelFont | null = null;
 
+/**
+ * PixelFont implementation
+ */
 export class PixelFont {
     private fontData: FontData;
     public charWidth: number;

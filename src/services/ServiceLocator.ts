@@ -15,11 +15,13 @@ export interface IServiceLocator {
     clear(): void;
 }
 
+/**
+ * ServiceLocator implementation
+ */
 export class ServiceLocator implements IServiceLocator {
     private services: Map<string, unknown> = new Map();
     private static instance: ServiceLocator;
     
-    // Singleton pattern
     static getInstance(): ServiceLocator {
         if (!ServiceLocator.instance) {
             ServiceLocator.instance = new ServiceLocator();
@@ -58,7 +60,6 @@ export class ServiceLocator implements IServiceLocator {
         this.services.clear();
     }
     
-    // Static helper methods for convenience
     static get<T>(name: string): T {
         return ServiceLocator.getInstance().get<T>(name);
     }

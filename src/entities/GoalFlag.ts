@@ -2,10 +2,13 @@
 import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
+import { Logger } from '../utils/Logger';
 
-// Constants for animation calculations
-const WAVE_SPEED_MULTIPLIER = 0.03; // Multiplier to adjust wave speed relative to deltaTime
+const WAVE_SPEED_MULTIPLIER = 0.03;
 
+/**
+ * GoalFlag implementation
+ */
 export class GoalFlag extends Entity {
     private cleared: boolean;
     declare animationTime: number;
@@ -14,13 +17,12 @@ export class GoalFlag extends Entity {
     private waveAmplitude: number;
 
     constructor(x: number, y: number) {
-        // Load config from ResourceLoader if available
         let goalConfig = null;
         try {
             const resourceLoader = ResourceLoader.getInstance();
             goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
-        } catch {
-            // ResourceLoader not initialized yet, use defaults
+        } catch (error) {
+            Logger.warn('Failed to load goal flag config:', error);
         }
         
         const width = goalConfig?.physics.width || 32;

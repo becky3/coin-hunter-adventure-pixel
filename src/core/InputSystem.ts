@@ -35,6 +35,9 @@ interface DebugInfo {
     };
 }
 
+/**
+ * System for managing input operations
+ */
 export class InputSystem {
     private keys: Map<string, boolean>;
     private previousKeys: Map<string, boolean>;
@@ -154,7 +157,6 @@ export class InputSystem {
     private triggerKeyPress(key: string): void {
         const actions = this.reverseKeyMap.get(key) || [];
         
-        // デバッグログ（Spaceキーの場合のみ）
         if (key === 'Space') {
             Logger.log('InputSystem: Space key pressed, actions:', actions);
         }

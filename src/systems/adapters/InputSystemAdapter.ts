@@ -5,6 +5,9 @@ import { SystemPriorities } from '../../services/SystemPriorities';
 import { InputSystem } from '../../core/InputSystem';
 import { Logger } from '../../utils/Logger';
 
+/**
+ * Adapter for input system integration
+ */
 export class InputSystemAdapter implements ISystem {
     readonly name = 'InputSystem';
     readonly priority = SystemPriorities.INPUT;

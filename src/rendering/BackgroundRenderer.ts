@@ -12,6 +12,9 @@ export interface BackgroundElement {
     spriteKey: string;
 }
 
+/**
+ * Handles rendering of background elements
+ */
 export class BackgroundRenderer {
     private layers: BackgroundLayer[] = [];
     
@@ -23,10 +26,9 @@ export class BackgroundRenderer {
         const clouds: BackgroundElement[] = [];
         const trees: BackgroundElement[] = [];
         
-        // Simple cloud placement every 150 pixels
         for (let x = 0; x < 6000; x += 150) {
             const cloudType = (x / 150) % 2 === 0 ? 'environment/cloud1' : 'environment/cloud2';
-            const yOffset = Math.sin(x / 200) * 20; // Slight wave pattern
+            const yOffset = Math.sin(x / 200) * 20;
             clouds.push({
                 type: 'cloud',
                 x: x,
@@ -35,8 +37,7 @@ export class BackgroundRenderer {
             });
         }
         
-        // Simple tree placement every 200 pixels
-        const groundY = 160; // Ground level for trees
+        const groundY = 160;
         for (let x = 50; x < 6000; x += 200) {
             trees.push({
                 type: 'tree',
@@ -46,24 +47,17 @@ export class BackgroundRenderer {
             });
         }
         
-        // Far background layer (clouds)
         this.layers.push({ elements: clouds });
         
-        // Middle background layer (trees)
         this.layers.push({ elements: trees });
     }
     
     render(renderer: PixelRenderer): void {
-        // Get camera position
         const camera = renderer.getCameraPosition();
         
-        // Render each layer
         for (const layer of this.layers) {
             for (const element of layer.elements) {
-                // Pass world coordinates directly to drawSprite
-                // drawSprite will handle the camera transformation
                 
-                // Only render if roughly on screen (check with world coordinates)
                 if (element.x > camera.x - 100 && element.x < camera.x + GAME_RESOLUTION.WIDTH + 100) {
                     renderer.drawSprite(element.spriteKey, element.x, element.y);
                 }
