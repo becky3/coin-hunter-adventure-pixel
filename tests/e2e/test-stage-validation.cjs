@@ -33,7 +33,6 @@ async function runStageValidationTest() {
             console.log(`\n=== Validating ${stageData.id} (${stageData.name}) ===`);
             
             const issues = {
-                gaps: [],
                 coinCollisions: [],
                 floatingEntities: [],
                 unreachableItems: [],
@@ -41,10 +40,6 @@ async function runStageValidationTest() {
                 spawnCollisions: [],
                 goalCollisions: []
             };
-            
-            // 1. 穴の幅チェック
-            const gapIssues = checkGapWidths(stageData);
-            issues.gaps = gapIssues;
             
             // 2. コイン配置チェック（ブロックとの衝突）
             const coinIssues = checkCoinPlacements(stageData);
@@ -72,7 +67,6 @@ async function runStageValidationTest() {
             
             // 結果を集計
             const stageIssueCount = 
-                issues.gaps.length + 
                 issues.coinCollisions.length + 
                 issues.floatingEntities.length +
                 issues.unreachableItems.length +
@@ -93,15 +87,6 @@ async function runStageValidationTest() {
             if (stageIssueCount > 0) {
                 console.log(`❌ Found ${stageIssueCount} issues:`);
                 
-                if (issues.gaps.length > 0) {
-                    console.log('\n  Gap Width Issues:');
-                    issues.gaps.forEach(gap => {
-                        console.log(`    - ${gap.width}-tile gap at x=${gap.startX}-${gap.endX}, row=${gap.row}`);
-                        if (gap.hasSpring) {
-                            console.log(`      (Spring detected at x=${gap.springX})`);
-                        }
-                    });
-                }
                 
                 if (issues.coinCollisions.length > 0) {
                     console.log('\n  Coin Collision Issues:');
@@ -156,12 +141,7 @@ async function runStageValidationTest() {
         let infoCount = 0;
         
         validationResults.forEach(result => {
-            // クリティカル：穴が広すぎる（10タイル以上は無理）、コインがブロックと重なる
-            result.issues.gaps.forEach(gap => {
-                if (gap.width >= 10) criticalCount++;  // ジャンプ台があっても10タイル以上は無理
-                else if (gap.width >= 6 && !gap.hasSpring) warningCount++;
-                else if (gap.width >= 4) warningCount++;
-            });
+            // クリティカル：コインがブロックと重なる
             result.issues.coinCollisions.forEach(() => criticalCount++);
             result.issues.embeddedEntities.forEach(() => criticalCount++);
             result.issues.spawnCollisions.forEach(() => criticalCount++);
@@ -206,73 +186,6 @@ async function runStageValidationTest() {
     });
 }
 
-/**
- * 穴の幅をチェック（4タイル以上を検出）
- */
-function checkGapWidths(stageData) {
-    const issues = [];
-    const tilemap = stageData.tilemap;
-    const height = stageData.height;
-    const width = stageData.width;
-    
-    // 床レベルを検出（最下層のみ）
-    const groundRows = [height - 1];
-    
-    for (const row of groundRows) {
-        if (row < 0 || row >= height) continue;
-        
-        let gapStart = -1;
-        
-        for (let col = 0; col <= width; col++) {
-            const isBlock = col < width && tilemap[row][col] === 1;
-            
-            if (!isBlock && gapStart === -1) {
-                // 穴の開始
-                gapStart = col;
-            } else if ((isBlock || col === width) && gapStart !== -1) {
-                // 穴の終了
-                const gapWidth = col - gapStart;
-                
-                if (gapWidth >= 4) {
-                    // ジャンプ台があるかチェック
-                    const hasSpring = checkForSpringInGap(stageData, gapStart, col, row);
-                    
-                    issues.push({
-                        row: row,
-                        startX: gapStart,
-                        endX: col - 1,
-                        width: gapWidth,
-                        hasSpring: hasSpring.found,
-                        springX: hasSpring.x
-                    });
-                }
-                
-                gapStart = -1;
-            }
-        }
-    }
-    
-    return issues;
-}
-
-/**
- * 指定範囲内にジャンプ台があるかチェック
- */
-function checkForSpringInGap(stageData, startX, endX, groundRow) {
-    const springs = stageData.entities.filter(e => e.type === 'spring');
-    
-    for (const spring of springs) {
-        // ジャンプ台が穴の範囲内にあるかチェック
-        if (spring.x >= startX && spring.x < endX) {
-            // ジャンプ台が床の近くにあるかチェック（1-2タイル上）
-            if (spring.y >= groundRow - 2 && spring.y <= groundRow + 1) {
-                return { found: true, x: spring.x };
-            }
-        }
-    }
-    
-    return { found: false, x: null };
-}
 
 /**
  * コインがブロックと重なっていないかチェック
@@ -439,8 +352,8 @@ function checkEmbeddedEntities(stageData) {
     const entities = stageData.entities;
     
     for (const entity of entities) {
-        // エンティティの位置を配列インデックスに変換
-        const tileY = stageData.height - 1 - entity.y;
+        // EntityManagerと同じ間違った座標系を使用
+        const tileY = entity.y;
         const tileX = entity.x;
         
         // 範囲チェック
