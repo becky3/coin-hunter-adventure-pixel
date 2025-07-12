@@ -34,6 +34,7 @@ node tests/e2e/test-enemy-damage.cjs
 | **test-player-respawn-size.cjs** | Issue #106検証 | 小サイズ死亡後のリスポーンサイズ、横衝突判定 | ~25秒 |
 | **test-spring-bounce.cjs** | ジャンプ台機能 | プレイヤーのジャンプ力×2.5倍のバウンス、可変ジャンプ対応、複数回バウンス可能 | ~20秒 |
 | **test-fall-damage.cjs** | 落下ダメージ | 画面外落下による即死判定、ライフ減少、ゲームオーバー | ~20秒 |
+| **test-stage-validation.cjs** | ステージデータ検証 | 穴の幅、コイン配置、エンティティ配置の妥当性チェック | ~2秒 |
 
 ### テストログ
 - テスト実行時のログは `tests/logs/` に自動保存
