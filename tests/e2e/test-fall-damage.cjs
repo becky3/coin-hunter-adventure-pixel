@@ -16,18 +16,18 @@ async function runTest() {
         await t.injectErrorTracking();
         
         // Navigate to game with stage 0-3 (fall damage test stage)
-        await t.navigateToGame('http://localhost:3000?s=0-3');
+        await t.navigateToGame('http://localhost:3000?s=0-3&skip_title=true');
         await t.waitForGameInitialization();
         
         // Take initial screenshot
         // await t.screenshot('test-initialized');
         
-        // Start new game
-        await t.startNewGame();
-        // await t.screenshot('game-started');
-        
-        // Verify game state
+        // With skip_title=true, we should go directly to play state
         await t.assertState('play');
+        
+        // Ensure input focus
+        await t.clickAt(100, 100);
+        await t.wait(500);
         await t.assertPlayerExists();
         
         // Get initial player stats

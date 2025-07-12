@@ -33,4 +33,11 @@ export class URLParams {
     isE2ETestMode(): boolean {
         return this.params.get('e2e') === 'true';
     }
+    
+    /**
+     * タイトル画面をスキップするかどうか
+     */
+    shouldSkipTitle(): boolean {
+        return this.params.get('skip_title') === 'true';
+    }
 }

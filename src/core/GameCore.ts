@@ -17,6 +17,7 @@ import { MenuState } from '../states/MenuState';
 import { PlayState } from '../states/PlayState';
 import { Logger } from '../utils/Logger';
 import { ResourceLoader } from '../config/ResourceLoader';
+import { URLParams } from '../utils/urlParams';
 
 import { InputSystemAdapter } from '../systems/adapters/InputSystemAdapter';
 import { PhysicsSystemAdapter } from '../systems/adapters/PhysicsSystemAdapter';
@@ -181,8 +182,15 @@ export class GameCore {
         
         Logger.log('GameCore: Game loop started, running:', this.gameLoop.isRunning());
         
-        stateManager.setState('menu');
-        Logger.log('GameCore: Initial state set to menu');
+        const urlParams = new URLParams();
+        if (urlParams.shouldSkipTitle()) {
+            const stageId = urlParams.getStageId() || 'stage1-1';
+            Logger.log('GameCore: Skipping title, starting directly with stage:', stageId);
+            stateManager.setState('play', { level: stageId });
+        } else {
+            stateManager.setState('menu');
+            Logger.log('GameCore: Initial state set to menu');
+        }
     }
 
     stop(): void {

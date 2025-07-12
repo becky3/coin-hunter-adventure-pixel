@@ -16,12 +16,15 @@ async function runTest() {
         await t.injectErrorTracking();
         
         // Navigate to game with test stage
-        await t.navigateToGame('http://localhost:3000/');
+        await t.navigateToGame('http://localhost:3000/?skip_title=true');
         await t.waitForGameInitialization();
         
-        // Start new game
-        await t.startNewGame();
+        // With skip_title=true, we should go directly to play state
         await t.assertState('play');
+        
+        // Ensure input focus
+        await t.clickAt(100, 100);
+        await t.wait(500);
         await t.assertPlayerExists();
         
         console.log('\n=== Testing Variable Jump ===');

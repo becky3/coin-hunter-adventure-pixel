@@ -51,16 +51,16 @@ async function runTest() {
         await t.injectErrorTracking();
         
         // Navigate to stage 0-1 which has a spring and safer layout
-        await t.navigateToGame('http://localhost:3000?s=0-1');
+        await t.navigateToGame('http://localhost:3000?s=0-1&skip_title=true');
         await t.waitForGameInitialization();
         // await t.screenshot('test-initialized');
         
-        // Start new game
-        await t.startNewGame();
-        // await t.screenshot('game-started');
-        
-        // Verify we're in play state
+        // With skip_title=true, we should go directly to play state
         await t.assertState('play');
+        
+        // Ensure input focus
+        await t.clickAt(100, 100);
+        await t.wait(500);
         
         // Verify player exists
         const playerExists = await t.page.evaluate(() => {
