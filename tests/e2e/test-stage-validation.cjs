@@ -6,7 +6,7 @@ const path = require('path');
  * ステージデータの妥当性を検証するE2Eテスト
  * 穴の幅、コイン配置、エンティティ配置などをチェック
  */
-async function runStageValidationTest() {
+async function runTest() {
     const test = new GameTestHelpers({ 
         headless: true,
         verbose: true,
@@ -467,10 +467,10 @@ function checkGoalPosition(stageData) {
 
 // テストの実行
 if (require.main === module) {
-    runStageValidationTest().catch(error => {
+    runTest().catch(error => {
         console.error('Test failed:', error);
         process.exit(1);
     });
 }
 
-module.exports = runStageValidationTest;
+module.exports = runTest;

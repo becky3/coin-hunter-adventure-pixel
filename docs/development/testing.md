@@ -25,7 +25,7 @@ node tests/e2e/test-enemy-damage.cjs
 | ファイル名 | 目的 | 主なテスト内容 | 実行時間 |
 |------------|------|----------------|----------|
 | **smoke-test.cjs** | 基本動作確認 | ゲーム起動、メニュー表示、ゲーム開始 | ~10秒 |
-| **test-basic-flow.cjs** | 基本フロー検証 | プレイヤー移動、ジャンプ、ステージクリア、ポーズ | ~30秒 |
+| **test-basic-flow.cjs** | 基本フロー検証 | プレイヤー移動、ジャンプ、ステージクリア、ポーズ（skip_title使用） | ~30秒 |
 | **test-enemy-damage.cjs** | 敵ダメージシステム | 敵衝突、踏みつけ、無敵時間、死亡・リスポーン | ~25秒 |
 | **test-jump-physics.cjs** | ジャンプ物理演算 | ジャンプ高さ、滞空時間、重力、最大落下速度 | ~15秒 |
 | **test-variable-jump.cjs** | 可変ジャンプ | ボタン長押し、短押し、ジャンプ中のリリース | ~20秒 |
@@ -308,6 +308,8 @@ async function runTest() {
         
         // ゲーム開始
         await t.navigateToGame('http://localhost:3000');
+        // skip_titleパラメータを使用する場合:
+        // await t.navigateToGame('http://localhost:3000?skip_title=true');
         await t.waitForGameInitialization();
         await t.startNewGame();
         
@@ -355,6 +357,38 @@ URLパラメータでテスト用ステージを指定可能：
 | stage1-2 | 上級ステージ | `?s=1-2` |
 | stage0-1 | チュートリアル | `?s=0-1` |
 | stage0-2 | 敵ダメージテスト用 | `?s=0-2` |
+| stage0-4 | 敵生成デモ | `?s=0-4` |
+
+### URLパラメータ
+
+ゲーム動作をカスタマイズできるURLパラメータ：
+
+| パラメータ | 説明 | 使用例 | 備考 |
+|------------|------|--------|------|
+| **s** | ステージを指定 | `?s=1-1` | ステージIDを指定 |
+| **skip_title** | タイトル画面をスキップしてゲームを開始 | `?skip_title=true` | E2Eテスト用 |
+
+#### skip_titleパラメータの詳細
+
+`skip_title`パラメータはE2Eテストの効率化のために実装された機能です：
+
+**動作**
+- `?skip_title=true` を指定すると、タイトル画面をスキップして直接ゲームを開始
+- ステージ指定と組み合わせ可能: `?s=0-2&skip_title=true`
+- デフォルトステージ（stage1-1）から開始
+
+**注意事項**
+- タイトル画面でのキー入力待機をスキップするため、初期フォーカスが設定されない
+- E2Eテストでは明示的にフォーカスを設定する必要がある:
+  ```javascript
+  await t.clickAt(100, 100);  // または
+  await t.page.focus('body');
+  ```
+- 通常のプレイでは使用を推奨しない（タイトル画面のBGMやアニメーションがスキップされる）
+
+**実装場所**
+- `src/utils/urlParams.ts` - URLパラメータの解析（shouldSkipTitle()メソッド）
+- `src/core/GameCore.ts` - 初期状態の制御（skip_titleチェックロジック）
 
 ### テスト作成のヒント
 

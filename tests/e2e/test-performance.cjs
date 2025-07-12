@@ -12,11 +12,14 @@ async function runTest() {
         // Initialize
         await t.init('Performance Test');
         await t.injectErrorTracking();
-        await t.navigateToGame('http://localhost:3000?s=0-1');
+        await t.navigateToGame('http://localhost:3000?s=0-1&skip_title=true');
         await t.waitForGameInitialization();
         
-        // Start game
-        await t.startNewGame();
+        // With skip_title=true, we should go directly to play state
+        await t.assertState('play');
+        
+        // Ensure input focus
+        await t.clickAt(100, 100);
         await t.wait(1000); // Wait for game state to stabilize
         await t.assertPlayerExists();
         
