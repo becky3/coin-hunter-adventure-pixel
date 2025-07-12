@@ -36,9 +36,7 @@ export class LevelManager {
     private backgroundColor: string = '#5C94FC';
     private timeLimit: number = 300;
     
-    // Stage configuration constants
     private static readonly MAX_AREAS_PER_STAGE = 3;
-    // Currently only stage 1 exists
     private static readonly MAX_STAGES = 1;
 
     constructor(game: GameServices) {
@@ -62,19 +60,15 @@ export class LevelManager {
             const levelData = await this.levelLoader.loadStage(levelName);
             this.levelData = levelData;
             
-            // Create tile map
             this.tileMap = this.levelLoader.createTileMap(levelData);
             this.levelWidth = levelData.width * levelData.tileSize;
             this.levelHeight = levelData.height * levelData.tileSize;
             
-            // Set physics tile map
             this.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
             
-            // Extract level properties
             this.backgroundColor = this.levelLoader.getBackgroundColor(levelData) || '#5C94FC';
             this.timeLimit = this.levelLoader.getTimeLimit(levelData) || 300;
             
-            // Emit level loaded event
             this.eventBus.emit('level:loaded', {
                 name: levelName,
                 width: this.levelWidth,
@@ -88,13 +82,11 @@ export class LevelManager {
         } catch (error) {
             Logger.error('Failed to load level:', error);
             
-            // Emit level load error event
             this.eventBus.emit('level:load-error', {
                 levelName,
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
             
-            // Fall back to test level
             this.createTestLevel();
         }
     }
@@ -133,7 +125,6 @@ export class LevelManager {
                 y: this.levelData.playerSpawn.y
             };
         }
-        // Default spawn
         return { x: 2, y: 10 };
     }
 
@@ -145,7 +136,6 @@ export class LevelManager {
         return this.levelLoader;
     }
 
-    // Get tile at world position
     getTileAt(worldX: number, worldY: number): number {
         const tileX = Math.floor(worldX / TILE_SIZE);
         const tileY = Math.floor(worldY / TILE_SIZE);
@@ -157,42 +147,31 @@ export class LevelManager {
         return 0;
     }
 
-    // Check if position is solid
     isSolid(worldX: number, worldY: number): boolean {
         return this.getTileAt(worldX, worldY) === 1;
     }
     
-    // Get next level based on current level
     getNextLevel(): string | null {
         if (!this.currentLevel) return null;
         
-        // Parse stage and area numbers from level name (e.g., "stage1-2" -> stage=1, area=2)
         const match = this.currentLevel.match(/^stage(\d+)-(\d+)$/);
         if (!match) return null;
         
         const stageNum = parseInt(match[1]);
         const areaNum = parseInt(match[2]);
         
-        // Check if level data has a specific next level defined (for special cases like bonus stages)
         if (this.levelData && this.levelData.name) {
-            // For now, use the default progression logic
-            // Custom nextLevel property could be added to LevelData interface if needed
         }
         
-        // Calculate next area
         if (areaNum < LevelManager.MAX_AREAS_PER_STAGE) {
-            // Go to next area in same stage
             return `stage${stageNum}-${areaNum + 1}`;
         } else if (stageNum < LevelManager.MAX_STAGES) {
-            // Go to first area of next stage
             return `stage${stageNum + 1}-1`;
         } else {
-            // No more levels - end of game
             return null;
         }
     }
     
-    // Check if current level is the final level
     isFinalLevel(): boolean {
         const nextLevel = this.getNextLevel();
         return nextLevel === null;
@@ -253,8 +232,6 @@ export class LevelManager {
     }
     
     renderTileMap(_renderer: unknown): void {
-        // Tile map rendering is handled by PlayState
-        // This method is here for compatibility with GameController
     }
     
 }

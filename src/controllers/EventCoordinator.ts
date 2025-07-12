@@ -34,7 +34,6 @@ export class EventCoordinator {
     }
     
     private setupEventListeners(): void {
-        // Coin collection event
         this.addListener('coin:collected', (data) => {
             const coinData = data as { score: number };
             Logger.log(`Coin collected! Score: ${coinData.score}`);
@@ -45,15 +44,11 @@ export class EventCoordinator {
             }
         });
         
-        // Goal reached event
         this.addListener('goal:reached', () => {
             this.onStageClear();
         });
         
-        // Player death event is handled entirely by PlayState
-        // which manages lives, respawn, and game over
         
-        // Enemy defeated event
         this.addListener('enemy:defeated', (data) => {
             const enemyData = data as { score: number };
             Logger.log(`Enemy defeated! Score: ${enemyData.score}`);
@@ -63,12 +58,10 @@ export class EventCoordinator {
             }
         });
         
-        // Spring bounce event
         this.addListener('spring:bounce', (data) => {
             Logger.log('Spring bounced!', data);
         });
         
-        // Level specific events
         this.addListener('level:trigger', (data) => {
             Logger.log('Level trigger activated:', data);
             this.handleLevelTrigger(data);
@@ -100,7 +93,6 @@ export class EventCoordinator {
     private handleCheckpoint(data: { position?: { x: number; y: number } }): void {
         const player = this.entityManager.getPlayer();
         if (player) {
-            // Save checkpoint position
             Logger.log('Checkpoint reached at:', data.position);
             // TODO: Implement checkpoint functionality in LevelManager
         }
@@ -108,7 +100,6 @@ export class EventCoordinator {
     
     private handleSecretArea(data: { bonusScore?: number }): void {
         Logger.log('Secret area discovered!', data);
-        // Award bonus points
         const player = this.entityManager.getPlayer();
         if (player) {
             player.addScore(data.bonusScore || 500);
@@ -117,12 +108,10 @@ export class EventCoordinator {
     
     private handleBossEncounter(data: unknown): void {
         Logger.log('Boss encounter started!', data);
-        // Initialize boss battle
         this.eventBus.emit('boss:start', data);
     }
     
     cleanup(): void {
-        // Remove all event listeners
         for (const { event, handler } of this.listeners) {
             this.eventBus.off(event, handler);
         }

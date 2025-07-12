@@ -23,13 +23,11 @@ export class Logger {
     }
 
     static warn(message: string, ...args: unknown[]): void {
-        // Warnings are always shown
         const timestamp = this.includeTimestamp ? this.getTimestamp() + ' ' : '';
         console.warn(timestamp + message, ...args);
     }
 
     static error(message: string, ...args: unknown[]): void {
-        // Errors are always shown
         const timestamp = this.includeTimestamp ? this.getTimestamp() + ' ' : '';
         console.error(timestamp + message, ...args);
     }
@@ -87,7 +85,6 @@ export class Logger {
     }
 }
 
-// Create a global shorthand
 export const log = Logger.log.bind(Logger);
 export const warn = Logger.warn.bind(Logger);
 export const error = Logger.error.bind(Logger);

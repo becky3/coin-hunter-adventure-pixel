@@ -60,7 +60,6 @@ export class LevelLoader {
         try {
             const url = this.basePath + 'stages.json';
             
-            // Check bundled data first
             if (bundledStageData[url]) {
                 Logger.log(`[LevelLoader] Using bundled data for: ${url}`);
                 const data = bundledStageData[url] as StageList;
@@ -69,7 +68,6 @@ export class LevelLoader {
                 return data;
             }
             
-            // Fall back to fetch
             const startTime = performance.now();
             const response = await fetch(url);
             const fetchTime = performance.now() - startTime;
@@ -99,7 +97,6 @@ export class LevelLoader {
             
             const url = this.basePath + stageInfo.filename;
             
-            // Check bundled data first
             if (bundledStageData[url]) {
                 Logger.log(`[LevelLoader] Using bundled data for: ${url}`);
                 const stageData = bundledStageData[url] as StageData;
@@ -109,7 +106,6 @@ export class LevelLoader {
                 return stageData;
             }
             
-            // Fall back to fetch
             const startTime = performance.now();
             const response = await fetch(url);
             const fetchTime = performance.now() - startTime;

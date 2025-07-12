@@ -3,10 +3,7 @@ import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 
-// Constants for animation calculations
-// Multiplier to adjust float speed relative to deltaTime
 const FLOAT_SPEED_MULTIPLIER = 0.1;
-// Conversion factor from amplitude units to pixels
 const PIXELS_PER_UNIT = 16;
 
 /**
@@ -22,13 +19,11 @@ export class Coin extends Entity {
     public scoreValue: number;
 
     constructor(x: number, y: number) {
-        // Load config from ResourceLoader if available
         let coinConfig = null;
         try {
             const resourceLoader = ResourceLoader.getInstance();
             coinConfig = resourceLoader.getObjectConfig('items', 'coin');
         } catch {
-            // ResourceLoader not initialized yet, use defaults
         }
         
         const width = coinConfig?.physics.width || 16;
@@ -109,7 +104,6 @@ export class Coin extends Entity {
         if (!collisionInfo || !collisionInfo.other) return;
         
         if (collisionInfo.other.constructor.name === 'Player' && !this.collected) {
-            // コイン収集処理はEntityManagerで実装されている
         }
     }
 

@@ -107,11 +107,9 @@ export class AssetLoader {
     }
     
     async preloadGameAssets(progressCallback?: ProgressCallback): Promise<void> {
-        // Initialize ResourceLoader
         const resourceLoader = ResourceLoader.getInstance();
         await resourceLoader.initialize();
         
-        // Get all sprite assets from configuration
         const assetsToLoad = resourceLoader.getAllSpriteAssets();
         
         this.totalAssets = assetsToLoad.length;
@@ -159,11 +157,9 @@ export class AssetLoader {
                 spriteData.data,
                 colors
             );
-            // Sprite loaded and added to renderer
             const endTime = performance.now();
             Logger.log(`[AssetLoader] Loaded sprite ${spriteKey} in ${(endTime - startTime).toFixed(2)}ms`);
         } else {
-            // Renderer not set when loading sprite
         }
         
         return {
@@ -192,11 +188,9 @@ export class AssetLoader {
                 colors,
                 frameDuration
             );
-            // Animation loaded and added to renderer
             const endTime = performance.now();
             Logger.log(`[AssetLoader] Loaded animation ${animKey} (${frameCount} frames) in ${(endTime - startTime).toFixed(2)}ms`);
         } else {
-            // Renderer not set when loading animation
         }
         
         return {
@@ -209,7 +203,6 @@ export class AssetLoader {
     }
     
     private _getPaletteForCategory(category: string, spriteName?: string): string {
-        // Special handling for environment sprites
         if (category === 'environment' && spriteName) {
             if (spriteName.includes('cloud')) {
                 return 'sky';

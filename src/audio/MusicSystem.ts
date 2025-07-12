@@ -2,7 +2,6 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { MusicConfig, TrackConfig, FrequencyRamp } from '../config/MusicPatternConfig';
 import { Logger } from '../utils/Logger';
 
-// Constants
 const MS_PER_SEC = 1000;
 
 interface ActiveNode {
@@ -52,7 +51,6 @@ export class MusicSystem {
     private sfxVolume: number;
     private isMuted: boolean;
     
-    // For pattern-based playback
     private currentMusicConfig: MusicConfig | null;
     private patternLoopTimeout: NodeJS.Timeout | null;
     
@@ -282,7 +280,6 @@ export class MusicSystem {
             const resourceLoader = ResourceLoader.getInstance();
             jumpConfig = resourceLoader.getAudioConfig('sfx', 'jump');
         } catch {
-            // ResourceLoader not initialized yet
         }
         
         if (jumpConfig && jumpConfig.waveform && jumpConfig.frequency) {
@@ -301,7 +298,6 @@ export class MusicSystem {
                 }, 20);
             }
         } else {
-            // Fallback to hardcoded values
             this.playSoundEffect(
                 440,
                 0.1,
@@ -347,7 +343,6 @@ export class MusicSystem {
             const resourceLoader = ResourceLoader.getInstance();
             damageConfig = resourceLoader.getAudioConfig('sfx', 'damage');
         } catch {
-            // ResourceLoader not initialized yet
         }
         
         const now = this.audioContext.currentTime;
@@ -361,7 +356,6 @@ export class MusicSystem {
             gainNode.gain.setValueAtTime(damageConfig.volume, now);
             gainNode.gain.exponentialRampToValueAtTime(0.001, now + (damageConfig.duration || 0.5));
         } else {
-            // Fallback to hardcoded values
             oscillator.type = 'sawtooth';
             oscillator.frequency.setValueAtTime(400, now);
             oscillator.frequency.exponentialRampToValueAtTime(80, now + 0.5);
@@ -580,14 +574,12 @@ export class MusicSystem {
         };
     }
     
-    // 統一的なインターフェース
     playBGM(name: BGMName): void {
         if (!this.isInitialized) {
             Logger.warn(`[MusicSystem] Cannot play BGM '${name}' - system not initialized`);
             return;
         }
         
-        // Always use pattern-based playback
         this.playBGMFromPattern(name);
     }
     
@@ -611,7 +603,6 @@ export class MusicSystem {
             this.playButtonClickSound();
             break;
         case 'powerup':
-            // 仮にpowerupとして使用
             this.playGoalSound();
             break;
         case 'gameStart':
@@ -622,14 +613,12 @@ export class MusicSystem {
         }
     }
     
-    // Pattern-based music playback methods
     private playMusicPattern(config: MusicConfig): void {
         if (!this.isInitialized || !this.audioContext) return;
         
         const beatLength = config.tempo ? 60 / config.tempo : 0.5;
         this.currentMusicConfig = config;
         
-        // Calculate the longest pattern duration
         let maxDuration = 0;
         config.tracks.forEach(track => {
             const duration = track.pattern.repeatEvery || track.pattern.duration || 
@@ -637,10 +626,8 @@ export class MusicSystem {
             maxDuration = Math.max(maxDuration, duration);
         });
         
-        // Schedule all patterns at once
         this.scheduleAllPatterns(config, beatLength, maxDuration);
         
-        // If looping, schedule next iteration
         if (config.loop) {
             this.scheduleNextLoop(config, beatLength, maxDuration);
         }
@@ -662,15 +649,12 @@ export class MusicSystem {
         const loopDurationMs = loopDuration * beatLength * MS_PER_SEC;
         
         this.patternLoopTimeout = setTimeout(() => {
-            // Check if we should continue looping
             if (!this.currentBGM || !this.currentMusicConfig) {
                 return;
             }
             
-            // Schedule all patterns for next loop
             this.scheduleAllPatterns(config, beatLength, loopDuration);
             
-            // Schedule next iteration
             this.scheduleNextLoop(config, beatLength, loopDuration);
         }, loopDurationMs);
     }
@@ -681,12 +665,10 @@ export class MusicSystem {
         const pattern = track.pattern;
         let startTime = baseStartTime;
         
-        // Handle startAt offset
         if (pattern.startAt) {
             startTime += pattern.startAt * beatLength;
         }
         
-        // For patterns with repeatEvery, schedule multiple times within the loop
         const repeatEvery = pattern.repeatEvery || loopDuration;
         const numRepeats = Math.floor(loopDuration / repeatEvery);
         
@@ -694,12 +676,10 @@ export class MusicSystem {
             const repeatStartTime = startTime + (repeat * repeatEvery * beatLength);
             
             if (pattern.beats && track.instrument.type === 'drums') {
-                // Drum pattern
                 pattern.beats.forEach(beat => {
                     this.playDrum(beat.type, repeatStartTime + beat.time * beatLength);
                 });
             } else if (pattern.notes) {
-                // Melodic pattern
                 let currentTime = repeatStartTime;
                 
                 pattern.notes.forEach((note, index) => {
@@ -720,7 +700,6 @@ export class MusicSystem {
                     }
                 });
             } else if (pattern.chords) {
-                // Chord pattern
                 let currentTime = repeatStartTime;
                 
                 pattern.chords.forEach((chord, index) => {
@@ -813,9 +792,7 @@ export class MusicSystem {
         this.currentMusicConfig = null;
     }
     
-    // New unified methods using patterns
     playBGMFromPattern(name: BGMName): void {
-        // If already playing the same BGM, don't restart
         if (this.currentBGM === name) {
             return;
         }
@@ -850,11 +827,9 @@ export class MusicSystem {
             if (seConfig) {
                 this.playMusicPattern(seConfig);
             } else {
-                // Fallback to existing implementation
                 this.playSE(name as SEName);
             }
         } catch {
-            // ResourceLoader not initialized, use existing implementation
             if (['coin', 'jump', 'damage', 'button', 'powerup', 'gameStart'].includes(name)) {
                 this.playSE(name as SEName);
             }

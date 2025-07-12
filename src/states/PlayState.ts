@@ -41,31 +41,24 @@ export class PlayState implements GameState {
     private game: Game;
     private eventBus: EventBus;
 
-    // Managers
     private entityManager: EntityManager;
     private levelManager: LevelManager;
     private cameraController: CameraController;
     private hudManager: HUDManager;
     
-    // Controllers
     private gameController: GameController;
     private eventCoordinator: EventCoordinator;
     
-    // Renderers
     private backgroundRenderer: BackgroundRenderer;
     private tileRenderer: TileRenderer;
 
-    // Game state
     private gameState: 'playing' | 'paused' | 'cleared' | 'gameover' = 'playing';
     private lastTimeUpdate: number = 0;
     private inputListeners: Array<() => void> = [];
     private stageClearTimer: number | null = null;
-    // 残機はPlayStateで管理
     private lives: number = 3;
-    // 死亡処理中フラグ
     private isHandlingDeath: boolean = false;
 
-    // Public getters for testing
     public get player() {
         return this.entityManager.getPlayer();
     }
@@ -85,22 +78,18 @@ export class PlayState implements GameState {
     constructor(game: Game) {
         this.game = game;
         
-        // Create shared EventBus instance
         this.eventBus = new EventBus();
         
-        // Create extended game object with eventBus
         const extendedGame: Game & { eventBus: EventBus } = {
             ...game,
             eventBus: this.eventBus
         };
         
-        // Initialize managers with extended game services
         this.entityManager = new EntityManager(extendedGame);
         this.levelManager = new LevelManager(extendedGame);
         this.cameraController = new CameraController(extendedGame);
         this.hudManager = new HUDManager(extendedGame);
         
-        // Initialize controllers
         this.gameController = new GameController({
             services: extendedGame,
             entityManager: this.entityManager,
@@ -117,29 +106,22 @@ export class PlayState implements GameState {
             onGameOver: () => this.gameOver()
         });
         
-        // Initialize renderers
         this.backgroundRenderer = new BackgroundRenderer();
         this.tileRenderer = new TileRenderer();
 
-        // Setup debug functions
         if (typeof window !== 'undefined') {
-            // Debug warp function
             window.debugWarp = (x: number, y: number, tileCoords?: boolean) => 
                 this.debugWarp(x, y, tileCoords);
         }
     }
 
     private resetGameState(): void {
-        // Reset core game state to initial values
         this.gameState = 'playing';
         this.lives = 3;
         this.isHandlingDeath = false;
-        // Note: lastTimeUpdate and stageClearTimer
-        // are handled separately as they have specific initialization requirements
     }
 
     private setupEventListeners(): void {
-        // Event handling is now managed by EventCoordinator
     }
 
     private async preloadSprites(): Promise<void> {
@@ -153,35 +135,27 @@ export class PlayState implements GameState {
         try {
             Logger.log('[PlayState] Checking/loading sprites...');
             
-            // Load sprites in parallel for better performance
             const loadPromises = [
-                // Player sprites (large)
                 this.game.assetLoader.loadSprite('player', 'idle'),
                 this.game.assetLoader.loadAnimation('player', 'walk', 4, 100),
                 this.game.assetLoader.loadAnimation('player', 'jump', 2, 100),
                 
-                // Player sprites (small)
                 this.game.assetLoader.loadSprite('player', 'idle_small'),
                 this.game.assetLoader.loadAnimation('player', 'walk_small', 4, 100),
                 this.game.assetLoader.loadAnimation('player', 'jump_small', 2, 100),
 
-                // Terrain sprites
                 this.game.assetLoader.loadSprite('terrain', 'spring'),
                 this.game.assetLoader.loadSprite('terrain', 'goal_flag'),
 
-                // Item sprites
                 this.game.assetLoader.loadAnimation('items', 'coin_spin', 4, 100),
 
-                // Enemy sprites
                 this.game.assetLoader.loadAnimation('enemies', 'slime_idle', 2, 500),
                 this.game.assetLoader.loadAnimation('enemies', 'bird_fly', 2, 200),
                 
-                // Environment sprites
                 this.game.assetLoader.loadSprite('environment', 'cloud1'),
                 this.game.assetLoader.loadSprite('environment', 'cloud2'),
                 this.game.assetLoader.loadSprite('environment', 'tree1'),
                 
-                // Tile sprites
                 this.game.assetLoader.loadSprite('tiles', 'ground'),
                 this.game.assetLoader.loadSprite('tiles', 'grass_ground')
             ];
@@ -200,54 +174,41 @@ export class PlayState implements GameState {
         Logger.log('[PlayState] enter() called with params:', params);
         Logger.log('[PlayState] Starting initialization...');
 
-        // Reset game state for new game
         this.resetGameState();
 
-        // Preload sprites
         await this.preloadSprites();
 
-        // Initialize level with GameController
         const levelName = params.level || 'stage1-1';
         const levelData = await this.gameController.initializeLevel(levelName);
         
-        // Setup level bounds for camera
         const dimensions = this.levelManager.getLevelDimensions();
         this.cameraController.setLevelBounds(dimensions.width, dimensions.height);
         
-        // Initialize background elements based on level
 
-        // Initialize HUD with level data
         this.hudManager.updateTime(this.levelManager.getTimeLimit());
         this.hudManager.updateLives(this.lives);
         
-        // Setup player death listener for combat damage only
         this.eventBus.on('player:died', () => {
-            // Only handle if not already handling death (prevents double death from fall)
             if (!this.isHandlingDeath) {
                 this.handlePlayerDeath();
             }
         });
         
-        // Set stage name in HUD
         Logger.log('[PlayState] levelData:', levelData);
         Logger.log('[PlayState] levelData.name:', levelData?.name);
         if (levelData && levelData.name) {
             this.hudManager.updateStageName(levelData.name);
             Logger.log('[PlayState] Stage name set to:', levelData.name);
         } else {
-            // Fallback to using the level ID
             const stageName = levelName.toUpperCase().replace('-', ' ');
             this.hudManager.updateStageName(stageName);
             Logger.log('[PlayState] Stage name set to fallback:', stageName);
         }
 
-        // Setup input listeners
         this.setupInputListeners();
 
-        // Initialize timer
         this.lastTimeUpdate = Date.now();
 
-        // Play BGM
         Logger.log('[PlayState] MusicSystem status:', {
             exists: !!this.game.musicSystem,
             isInitialized: this.game.musicSystem?.isInitialized
@@ -257,11 +218,9 @@ export class PlayState implements GameState {
             this.game.musicSystem.playBGMFromPattern('game');
         }
         
-        // プレイヤーが作成されたことを確認
         const player = this.entityManager.getPlayer();
         if (player) {
             Logger.log('[PlayState] Player created successfully');
-            // グローバルイベントとして通知（テスト用）
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('playstate:ready', { 
                     detail: { player: true } 
@@ -276,45 +235,34 @@ export class PlayState implements GameState {
     }
 
     update(deltaTime: number): void {
-        // Always update HUD (even when paused or cleared, for messages)
         this.hudManager.update(deltaTime);
         
-        // Only update game logic when playing
         if (this.gameState !== 'playing') return;
 
-        // Update timer
         this.updateTimer();
 
-        // Update physics
         this.game.physicsSystem.update(deltaTime);
 
-        // Update entities
         this.entityManager.updateAll(deltaTime);
 
-        // Update player-specific logic
         const player = this.entityManager.getPlayer();
         if (player) {
-            // Boundary checks
             const dimensions = this.levelManager.getLevelDimensions();
             if (player.x < 0) player.x = 0;
             if (player.x + player.width > dimensions.width) {
                 player.x = dimensions.width - player.width;
             }
 
-            // Death by falling (instant death, lose a life)
             if (player.y > dimensions.height && !this.isHandlingDeath) {
                 Logger.log('[PlayState] Player fell! Instant death.');
                 this.handlePlayerDeath();
             }
         }
 
-        // Check item collisions
         this.entityManager.checkItemCollisions();
 
-        // Update camera
         this.cameraController.update(deltaTime);
 
-        // Check game over conditions
         const hudData = this.hudManager.getHUDData();
         if (hudData.time <= 0 || this.lives <= 0) {
             this.gameOver();
@@ -322,55 +270,42 @@ export class PlayState implements GameState {
     }
 
     render(renderer: PixelRenderer): void {
-        // Clear screen with background color
         const backgroundColor = this.levelManager.getBackgroundColor();
         renderer.clear(backgroundColor);
 
-        // Set camera for world rendering
         const camera = this.cameraController.getCamera();
         renderer.setCamera(camera.x, camera.y);
         
-        // Render background layers
         this.backgroundRenderer.render(renderer);
 
-        // Render tile map
         this.renderTileMap(renderer);
 
-        // Render entities
         this.entityManager.renderAll(renderer);
 
-        // Reset camera for HUD rendering
         renderer.setCamera(0, 0);
 
-        // Render HUD
         this.hudManager.render(renderer);
     }
 
     exit(): void {
-        // Reset game state for next play session
         this.resetGameState();
 
-        // Clear stage clear timer if exists
         if (this.stageClearTimer) {
             clearTimeout(this.stageClearTimer);
             this.stageClearTimer = null;
         }
 
-        // Remove input listeners
         this.removeInputListeners();
 
-        // Stop music
         if (this.game.musicSystem) {
             this.game.musicSystem.stopBGM();
         }
 
-        // Clear physics system
         if (this.game.physicsSystem) {
             this.game.physicsSystem.entities.clear();
             this.game.physicsSystem.tileMap = null;
         }
 
-        // Reset managers
         this.entityManager.clear();
         this.levelManager.reset();
         this.cameraController.reset();
@@ -417,7 +352,6 @@ export class PlayState implements GameState {
     private renderTileMap(renderer: PixelRenderer): void {
         const tileMap = this.levelManager.getTileMap();
         if (!tileMap || tileMap.length === 0) {
-            // TileMap not loaded yet, this is normal during initialization
             return;
         }
         
@@ -432,7 +366,6 @@ export class PlayState implements GameState {
                 const tile = tileMap[row][col];
                 
                 if (tile > 0) {
-                    // Use TileRenderer for sprite-based rendering
                     this.tileRenderer.renderTile(
                         renderer,
                         tile,
@@ -460,7 +393,6 @@ export class PlayState implements GameState {
                 this.game.musicSystem.resumeBGM();
             }
         }
-        // Don't toggle pause during cleared or gameover states
     }
 
     private gameOver(): void {
@@ -469,48 +401,37 @@ export class PlayState implements GameState {
         Logger.log('Game Over!');
         this.gameState = 'gameover';
         
-        // Stop the BGM
         if (this.game.musicSystem) {
             this.game.musicSystem.stopBGM();
         }
         
-        // Show game over message
         this.hudManager.showMessage('GAME OVER', 999999);
         
-        // Transition to menu after 2 seconds
         setTimeout(() => {
             this.game.stateManager.setState('menu');
         }, 2000);
     }
 
     private stageClear(): void {
-        // 既にクリア済みならスキップ
         if (this.stageClearTimer !== null) {
             return;
         }
         
         this.gameState = 'cleared';
         
-        // Stop the timer (but don't show pause menu)
         
-        // Play clear sound
         this.game.musicSystem?.playBGMFromPattern('victory');
         
-        // Show clear message (until state changes)
         this.hudManager.showMessage('STAGE CLEAR!', 999999);
         
-        // Get next level from LevelManager
         const nextLevel = this.levelManager.getNextLevel();
         
-        // Transition after 3 seconds
         this.stageClearTimer = window.setTimeout(() => {
             this.stageClearTimer = null;
             
             if (nextLevel) {
-                // Load next level
                 this.game.stateManager.setState('play', { level: nextLevel });
             } else {
-                // No more levels - show ending
                 this.showEnding();
             }
         }, 3000);
@@ -518,32 +439,25 @@ export class PlayState implements GameState {
     
     
     private showEnding(): void {
-        // Stop any playing music
         this.game.musicSystem?.stopBGM();
         
-        // Play ending music
         this.game.musicSystem?.playBGMFromPattern('victory');
         
-        // Show ending message (with line break)
         this.hudManager.showMessage('CONGRATULATIONS!\nGAME COMPLETE!', 999999);
         
-        // Return to menu after 5 seconds
         setTimeout(() => {
             this.game.stateManager.setState('menu');
         }, 5000);
     }
 
     private handlePlayerDeath(): void {
-        // Prevent multiple calls
         if (this.isHandlingDeath) return;
         
         const player = this.entityManager.getPlayer();
         if (!player) return;
         
-        // Set flag to prevent re-entry
         this.isHandlingDeath = true;
         
-        // Emit death event for testing and other systems
         this.eventBus.emit('player:died');
         if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('player:died'));
@@ -561,7 +475,6 @@ export class PlayState implements GameState {
             Logger.log(`[PlayState] Respawning player at: ${spawn.x}, ${spawn.y}`);
             player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
             
-            // Reset flag after respawn
             setTimeout(() => {
                 this.isHandlingDeath = false;
             }, 100);

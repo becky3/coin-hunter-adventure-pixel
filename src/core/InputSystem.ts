@@ -157,7 +157,6 @@ export class InputSystem {
     private triggerKeyPress(key: string): void {
         const actions = this.reverseKeyMap.get(key) || [];
         
-        // デバッグログ（Spaceキーの場合のみ）
         if (key === 'Space') {
             Logger.log('InputSystem: Space key pressed, actions:', actions);
         }

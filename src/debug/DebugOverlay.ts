@@ -15,7 +15,6 @@ export class DebugOverlay {
     private debugElement?: HTMLDivElement;
     private statsElements: Map<string, HTMLElement> = new Map();
     
-    // Stage selection
     private stageList: string[] = [
         'stage1-1', 'stage1-2', 'stage1-3',
         'stage0-1', 'stage0-2', 'stage0-3',
@@ -24,7 +23,6 @@ export class DebugOverlay {
     private selectedStageIndex: number = 0;
     private stageSelectElement?: HTMLElement;
     
-    // FPS measurement
     private fps: number = 0;
     private frameCount: number = 0;
     private lastFPSUpdate: number = 0;
@@ -32,7 +30,6 @@ export class DebugOverlay {
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
         
-        // Initialize selected stage from URL parameters
         const urlParams = new URLParams();
         const urlStage = urlParams.getStageId();
         if (urlStage) {
@@ -53,7 +50,6 @@ export class DebugOverlay {
         
         (window as Window & { debugOverlay?: DebugOverlay }).debugOverlay = this;
         
-        // Initialize FPS measurement
         this.lastFPSUpdate = performance.now();
         
         Logger.log('DebugOverlay', `Initialized with stage: ${this.stageList[this.selectedStageIndex]} (index: ${this.selectedStageIndex})`);
@@ -102,7 +98,6 @@ export class DebugOverlay {
         
         this.updateStat('speed', `${GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER.toFixed(1)}x`);
         
-        // Add stage selection UI
         const stageDiv = document.createElement('div');
         stageDiv.style.marginTop = '10px';
         stageDiv.style.paddingTop = '10px';
@@ -125,14 +120,12 @@ export class DebugOverlay {
             this.debugElement.appendChild(helpDiv);
         }
         
-        // Initialize default values
         this.updateStat('state', 'menu');
         
         document.body.appendChild(this.debugElement);
     }
 
     private setupEventListeners(): void {
-        // Listen to state changes
         const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
         if (game?.stateManager) {
             game.stateManager.addEventListener('stateChange', (event: StateEvent) => {
@@ -163,11 +156,9 @@ export class DebugOverlay {
                 this.resetSpeed();
             }
             
-            // Stage selection controls
             const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
             const currentState = game?.stateManager?.currentState;
             
-            // Debug: Log all arrow key presses in menu
             if (currentState && currentState.name === 'menu' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
                 Logger.log('DebugOverlay', `Arrow key pressed: ${e.key}, defaultPrevented: ${e.defaultPrevented}`);
             }
@@ -195,12 +186,10 @@ export class DebugOverlay {
                     Logger.log('DebugOverlay', `Stage right: ${this.stageList[this.selectedStageIndex]}`);
                 }
             }
-        // Use capture phase to handle events before InputSystem
         }, true);
     }
 
     update(_deltaTime: number): void {
-        // Calculate FPS
         this.frameCount++;
         const currentTime = performance.now();
         if (currentTime >= this.lastFPSUpdate + 1000) {
@@ -210,7 +199,6 @@ export class DebugOverlay {
             this.updateStat('fps', this.fps.toString());
         }
         
-        // Update player position if available
         const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: Event & { data?: { to?: string } }) => void) => void; currentState?: { name: string } } } }).game;
         if (!game) {
             return;
@@ -221,9 +209,7 @@ export class DebugOverlay {
             return;
         }
         
-        // Check if the current state is PlayState (has player getter)
         if (currentState && currentState.name === 'play') {
-            // Cast to PlayState to access player property
             const playState = currentState as PlayState;
             
             const player = playState.player;
@@ -231,12 +217,10 @@ export class DebugOverlay {
                 this.updateStat('player_x', Math.floor(player.x).toString());
                 this.updateStat('player_y', Math.floor(player.y).toString());
             } else {
-                // Player not available yet
                 this.updateStat('player_x', '-');
                 this.updateStat('player_y', '-');
             }
         } else {
-            // Not in play state, clear player position
             this.updateStat('player_x', '-');
             this.updateStat('player_y', '-');
         }
@@ -281,7 +265,6 @@ export class DebugOverlay {
         const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: Event & { data?: { to?: string } }) => void) => void; currentState?: { name: string } } } }).game;
         const currentState = game?.stateManager?.currentState;
         
-        // Only return selected stage if we're in menu state
         if (currentState && currentState.name === 'menu') {
             return this.stageList[this.selectedStageIndex];
         }

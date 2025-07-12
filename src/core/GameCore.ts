@@ -40,7 +40,6 @@ export class GameCore {
     async init(): Promise<void> {
         Logger.log('GameCore: init() started');
         
-        // Initialize ResourceLoader first
         Logger.log('GameCore: Initializing ResourceLoader...');
         const resourceLoader = ResourceLoader.getInstance();
         await resourceLoader.initialize();
@@ -120,11 +119,9 @@ export class GameCore {
 
         await systemManager.initSystems();
 
-        // MusicSystemの初期化
         const musicSystem = this._serviceLocator.get<MusicSystem>(ServiceNames.AUDIO);
         try {
             Logger.log('GameCore: Initializing MusicSystem...');
-            // タイムアウトを設定
             const initPromise = musicSystem.init();
             const timeoutPromise = new Promise<boolean>((_, reject) => 
                 setTimeout(() => reject(new Error('MusicSystem init timeout')), 5000)
@@ -174,7 +171,6 @@ export class GameCore {
 
             systemManager.updateSystems(deltaTime);
             
-            // Update debug overlay directly if it exists
             if (this.debugOverlay) {
                 this.debugOverlay.update(deltaTime);
             }
@@ -185,7 +181,6 @@ export class GameCore {
         
         Logger.log('GameCore: Game loop started, running:', this.gameLoop.isRunning());
         
-        // Set initial state to menu
         stateManager.setState('menu');
         Logger.log('GameCore: Initial state set to menu');
     }

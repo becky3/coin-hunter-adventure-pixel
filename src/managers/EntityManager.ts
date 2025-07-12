@@ -43,20 +43,16 @@ export class EntityManager {
     private inputSystem: InputSystem;
 
     constructor(game: GameServices) {
-        // Get services from game proxy
-        // Use shared instance if available
         this.eventBus = game.eventBus || new EventBus();
         this.physicsSystem = game.physicsSystem;
         this.musicSystem = game.musicSystem;
         this.assetLoader = game.assetLoader;
         this.inputSystem = game.inputSystem;
         
-        // 敵を倒した時のイベントリスナーを設定
         this.setupEventListeners();
     }
     
     private setupEventListeners(): void {
-        // 敵が倒された時の処理
         this.eventBus.on('enemy:defeated', (_data: unknown) => {
             if (this.musicSystem?.isInitialized) {
                 this.musicSystem.playSEFromPattern('enemyDefeat');
@@ -107,7 +103,6 @@ export class EntityManager {
     createEntity(config: EntityConfig): Entity | null {
         let entity: Entity | null = null;
         
-        // Check if entity spawn position is valid
         const tileMap = this.physicsSystem.tileMap;
         if (tileMap && tileMap[config.y] && tileMap[config.y][config.x] === 1) {
             Logger.warn(`[EntityManager] 警告: エンティティ(${config.type})のスポーン位置(${config.x}, ${config.y})が地面の中です！`);
@@ -152,7 +147,6 @@ export class EntityManager {
             slime.setEventBus(this.eventBus);
             this.enemies.push(slime);
             
-            // Debug: Check physics system state before adding entity
             Logger.log(`[EntityManager] Creating slime at (${config.x * TILE_SIZE}, ${config.y * TILE_SIZE})`);
             Logger.log(`[EntityManager] Physics system has tilemap: ${this.physicsSystem.tileMap !== null}`);
             
@@ -170,7 +164,6 @@ export class EntityManager {
     }
 
     createTestEntities(): void {
-        // Test slimes
         const slime1 = new Slime(150, 180);
         slime1.direction = -1;
         slime1.setEventBus(this.eventBus);
@@ -183,7 +176,6 @@ export class EntityManager {
         this.enemies.push(slime2);
         this.physicsSystem.addEntity(slime2, this.physicsSystem.layers.ENEMY);
         
-        // Test items
         const spring = new Spring(5 * TILE_SIZE, 10 * TILE_SIZE);
         this.items.push(spring);
         this.physicsSystem.addEntity(spring, this.physicsSystem.layers.ITEM);
@@ -244,12 +236,10 @@ export class EntityManager {
                         position: { x: item.x, y: item.y }
                     });
                     
-                    // Goal sound is played in PlayState.stageClear()
                 }
             }
         });
         
-        // Remove collected items
         this.items = this.items.filter(item => {
             if (item.constructor.name === 'Coin') {
                 return !(item as Coin).isCollected();
@@ -259,21 +249,18 @@ export class EntityManager {
     }
 
     renderAll(renderer: PixelRenderer): void {
-        // Render items first (behind player)
         this.items.forEach(item => {
             if (item.render) {
                 item.render(renderer);
             }
         });
         
-        // Render enemies
         this.enemies.forEach(enemy => {
             if (enemy.render) {
                 enemy.render(renderer);
             }
         });
         
-        // Render player last (on top)
         if (this.player && this.player.render) {
             this.player.render(renderer);
         }

@@ -39,7 +39,6 @@ class SpriteLoader {
             return cachedSprite;
         }
 
-        // Try to use bundled data first
         if (this.useBundledData && spriteDataMap[key]) {
             Logger.log(`[SpriteLoader] Using bundled data for: ${key}`);
             const data = spriteDataMap[key] as SpriteData;
@@ -51,7 +50,6 @@ class SpriteLoader {
             return data;
         }
 
-        // Fall back to fetch if not in bundle
         const url = `${this.basePath}${category}/${name}.json`;
         Logger.log(`[SpriteLoader] Fetching: ${url}`);
         const startTime = performance.now();

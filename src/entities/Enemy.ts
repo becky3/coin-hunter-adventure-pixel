@@ -26,7 +26,6 @@ export class Enemy extends Entity {
     public animState: string;
     public facingRight: boolean;
     public canJump: boolean;
-    // EventBus instance
     protected eventBus: EventBus | null;
 
     constructor(x: number, y: number, width: number = 16, height: number = 16) {
@@ -53,7 +52,6 @@ export class Enemy extends Entity {
         
         this.eventBus = null;
         
-        // Debug: Log initial position
         if (this.constructor.name === 'Slime') {
             Logger.log('Enemy', `Created at x=${x}, y=${y}`);
         }
@@ -113,13 +111,11 @@ export class Enemy extends Entity {
         
         const enemyCenter = this.y + this.height / 2;
         
-        // 踏みつけ判定：プレイヤーの中心が敵の上半分より上にあり、下向きに移動している
         const playerCenter = player.y + player.height / 2;
         const isAboveEnemy = playerCenter < enemyCenter;
         const isFalling = player.vy > 0;
         
         if (isAboveEnemy && isFalling) {
-            // 踏みつけ判定時のみX軸の重なりチェック
             const playerLeft = player.x;
             const playerRight = player.x + player.width;
             const enemyLeft = this.x;
@@ -129,7 +125,6 @@ export class Enemy extends Entity {
             if (!hasHorizontalOverlap) return;
             this.takeDamage(1, player);
             player.vy = -5;
-            // 敵を踏み潰した時のスコア加算とイベント発行
             const scoreGained = 100;
             player.addScore(scoreGained);
             

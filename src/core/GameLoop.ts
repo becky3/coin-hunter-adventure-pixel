@@ -25,18 +25,15 @@ export class GameLoop {
             
             let elapsed = currentTime - this._lastTime;
             
-            // Panic prevention for tab switches or long pauses
             if (elapsed > 1000) {
                 elapsed = this.frameTime;
             }
             
-            // Fixed timestep updates
             while (elapsed >= this.frameTime && this._running) {
                 updateCallback(this.frameTime / 1000);
                 elapsed -= this.frameTime;
                 this._lastTime += this.frameTime;
                 
-                // Prevent spiral of death (max 5 frames per update)
                 if (currentTime - this._lastTime > this.frameTime * 5) {
                     this._lastTime = currentTime - this.frameTime;
                     break;

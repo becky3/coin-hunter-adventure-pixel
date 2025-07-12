@@ -60,16 +60,10 @@
             "terms": ["TODO", "FIXME", "HACK"], 
             "location": "start" 
         }],
-        "spaced-comment": ["error", "always", {
-            "line": {
-                "markers": ["/"],
-                "exceptions": ["-", "+", "*"]
-            },
-            "block": {
-                "markers": ["!", "*"],
-                "exceptions": ["*"],
-                "balanced": true
-            }
+        "capitalized-comments": ["error", "always", {
+            "ignorePattern": "eslint|TODO|FIXME|HACK",
+            "ignoreInlineComments": false,
+            "ignoreConsecutiveComments": false
         }],
         "@eslint-community/eslint-comments/no-unused-disable": "error",
         "@eslint-community/eslint-comments/require-description": ["error", {

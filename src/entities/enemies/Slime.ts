@@ -11,13 +11,11 @@ export class Slime extends Enemy {
     declare friction: number;
 
     constructor(x: number, y: number) {
-        // Load config from ResourceLoader if available
         let slimeConfig = null;
         try {
             const resourceLoader = ResourceLoader.getInstance();
             slimeConfig = resourceLoader.getCharacterConfig('enemies', 'slime');
         } catch {
-            // ResourceLoader not initialized yet, use defaults
         }
         
         const width = slimeConfig?.physics.width || 16;
@@ -25,7 +23,6 @@ export class Slime extends Enemy {
         
         super(x, y, width, height);
         
-        // Apply configuration values
         this.maxHealth = slimeConfig?.stats.maxHealth || 1;
         this.health = this.maxHealth;
         this.damage = slimeConfig?.stats.damage || 1;
@@ -38,7 +35,6 @@ export class Slime extends Enemy {
         this.bounceHeight = 0.3;
         this.friction = 0.8;
         
-        // Apply AI configuration if available
         if (slimeConfig?.ai) {
             this.aiType = (slimeConfig.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
             this.detectRange = slimeConfig.ai.detectRange || 100;
@@ -68,7 +64,6 @@ export class Slime extends Enemy {
             return;
         }
         
-        // Use animation system like Player does
         if (renderer.pixelArtRenderer) {
             const screenPos = renderer.worldToScreen(this.x, this.y);
             const animation = renderer.pixelArtRenderer.animations.get('enemies/slime_idle');
@@ -79,7 +74,6 @@ export class Slime extends Enemy {
                     renderer.ctx,
                     screenPos.x,
                     screenPos.y,
-                    // flipX when moving left
                     this.direction === -1,
                     renderer.scale
                 );
@@ -87,7 +81,6 @@ export class Slime extends Enemy {
             }
         }
         
-        // Fallback to parent render if animation not found
         super.render(renderer);
     }
 }

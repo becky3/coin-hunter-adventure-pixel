@@ -121,26 +121,43 @@ constructor(services: GameServices) {
 ```typescript
 // ❌ 悪い例
 const speed = 5; // プレイヤーの速度
-
-// ✅ 良い例
-// プレイヤーの基本移動速度
-const speed = 5;
 ```
 
-### 2. 動作説明コメント
+### 2. 独立した行の説明コメント
 
-自明な動作の説明は禁止：
+実装内容を説明するコメントは禁止：
 
 ```typescript
-// ❌ 悪い例
+// ❌ 悪い例 - 変数の説明
+// デフォルトのジャンプ力
+const jumpPower = 10;
+
+// ❌ 悪い例 - 動作の説明
 // プレイヤーを右に移動
 player.x += speed;
 
-// ✅ 良い例（コメントなし）
+// ✅ 良い例 - 自己文書化されたコード（コメントなし）
+const DEFAULT_JUMP_POWER = 10;
 player.x += speed;
 ```
 
-### 3. コメントアウトされたコード
+### 3. 値の説明コメント
+
+値の意味を説明するコメントは変数名で表現：
+
+```typescript
+// ❌ 悪い例
+// 最大体力
+this.maxHealth = 3;
+// 無敵時間（ミリ秒）
+this.invulnerabilityTime = 2000;
+
+// ✅ 良い例
+const MAX_HEALTH = 3;
+const INVULNERABILITY_DURATION_MS = 2000;
+```
+
+### 4. コメントアウトされたコード
 
 使用しないコードは削除：
 

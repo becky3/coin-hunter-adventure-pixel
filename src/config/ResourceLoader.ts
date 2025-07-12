@@ -32,14 +32,12 @@ export class ResourceLoader {
     }
   
     async initialize(): Promise<void> {
-        // Load resource index
         this.resourceIndex = await this.loadJSON('/src/config/resources/index.json');
   
         if (!this.resourceIndex) {
             throw new Error('Failed to load resource index');
         }
   
-        // Load all resource configs
         await Promise.all([
             this.loadSprites(),
             this.loadCharacters(),
@@ -49,18 +47,15 @@ export class ResourceLoader {
             this.loadPhysics()
         ]);
   
-        // Resource configuration loaded successfully
     }
   
     private async loadJSON<T = unknown>(path: string): Promise<T | null> {
-        // Check bundled data first
         const allBundled = { ...bundledResourceData, ...bundledMusicData };
         if (allBundled[path]) {
             Logger.log(`[ResourceLoader] Using bundled data for: ${path}`);
             return allBundled[path];
         }
         
-        // Fall back to fetch
         try {
             const startTime = performance.now();
             const response = await fetch(path);
@@ -72,10 +67,8 @@ export class ResourceLoader {
             }
             return await response.json() as T;
         } catch (error) {
-            // Store error for debugging
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             Logger.error(`Failed to load resource: ${path}`, errorMessage);
-            // In production, this could be sent to a logging service
             return null;
         }
     }
@@ -111,7 +104,6 @@ export class ResourceLoader {
     private async loadMusicPatterns(): Promise<void> {
         if (!this.resourceIndex) return;
         
-        // Load all BGM and SE files
         const bgmFiles = ['title', 'game', 'victory', 'gameover'];
         const seFiles = ['coin', 'jump', 'damage', 'button', 'gameStart', 'goal', 'enemyDefeat'];
         
@@ -120,7 +112,6 @@ export class ResourceLoader {
             se: {}
         };
         
-        // Load BGM files
         for (const file of bgmFiles) {
             const bgmPath = `/src/config/resources/bgm/${file}.json`;
             const bgmData = await this.loadJSON(bgmPath);
@@ -129,7 +120,6 @@ export class ResourceLoader {
             }
         }
         
-        // Load SE files
         for (const file of seFiles) {
             const sePath = `/src/config/resources/se/${file}.json`;
             const seData = await this.loadJSON(sePath);
@@ -146,7 +136,6 @@ export class ResourceLoader {
         this.physics = await this.loadJSON(physicsPath);
     }
   
-    // Getter methods
     getSpritesConfig(): SpritesConfig | null {
         return this.sprites;
     }
@@ -180,7 +169,6 @@ export class ResourceLoader {
         return this.resourceIndex?.settings || null;
     }
   
-    // Helper method to get all sprite assets for preloading
     getAllSpriteAssets(): Array<{ type: string; category: string; name?: string; baseName?: string; frameCount?: number; frameDuration?: number }> {
         if (!this.sprites) return [];
     
@@ -188,7 +176,6 @@ export class ResourceLoader {
         const assets: Array<AssetType> = [];
     
         for (const [category, config] of Object.entries(this.sprites.categories)) {
-            // Add sprites
             for (const sprite of config.sprites) {
                 assets.push({
                     type: 'sprite',
@@ -197,7 +184,6 @@ export class ResourceLoader {
                 });
             }
       
-            // Add animations
             for (const animation of config.animations) {
                 assets.push({
                     type: 'animation',
@@ -212,7 +198,6 @@ export class ResourceLoader {
         return assets;
     }
     
-    // Music pattern methods
     getMusicPattern(type: 'bgm' | 'se', name: string): MusicConfig | null {
         if (!this.musicPatterns || !this.musicPatterns[type]) {
             return null;

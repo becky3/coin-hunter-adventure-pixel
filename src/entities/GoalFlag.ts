@@ -3,8 +3,6 @@ import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 
-// Constants for animation calculations
-// Multiplier to adjust wave speed relative to deltaTime
 const WAVE_SPEED_MULTIPLIER = 0.03;
 
 /**
@@ -18,13 +16,11 @@ export class GoalFlag extends Entity {
     private waveAmplitude: number;
 
     constructor(x: number, y: number) {
-        // Load config from ResourceLoader if available
         let goalConfig = null;
         try {
             const resourceLoader = ResourceLoader.getInstance();
             goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
         } catch {
-            // ResourceLoader not initialized yet, use defaults
         }
         
         const width = goalConfig?.physics.width || 32;

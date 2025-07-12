@@ -13,9 +13,6 @@ export class GameEnvironment {
         
         const pathname = window.location.pathname;
         
-        // Check if running from index.html or root path
-        // Production: /index.html, /, or ends with /
-        // Test: anything else (e.g., /test.html, /tests/...)
         return pathname === '/' || 
                pathname === '/index.html' || 
                pathname.endsWith('/index.html') ||

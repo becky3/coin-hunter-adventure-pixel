@@ -37,7 +37,6 @@ export class PixelRenderer {
         this.ctx = context;
         this.ctx.imageSmoothingEnabled = false;
         
-        // Create typed context for vendor-specific properties
         const extCtx = this.ctx as CanvasRenderingContext2D & { 
             mozImageSmoothingEnabled?: boolean;
             webkitImageSmoothingEnabled?: boolean;
@@ -169,7 +168,6 @@ export class PixelRenderer {
         const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
         const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
         
-        // Check if text will be drawn outside the game resolution bounds
         const textWidth = text.length * FONT.GRID;
         const textHeight = FONT.SIZE;
         
@@ -309,7 +307,6 @@ export class PixelRenderer {
         this.scale = Math.min(width / GAME_RESOLUTION.WIDTH, height / GAME_RESOLUTION.HEIGHT);
         this.ctx.imageSmoothingEnabled = false;
         
-        // Create typed context for vendor-specific properties
         const extCtx = this.ctx as CanvasRenderingContext2D & { 
             mozImageSmoothingEnabled?: boolean;
             webkitImageSmoothingEnabled?: boolean;

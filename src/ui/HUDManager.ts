@@ -40,7 +40,6 @@ export class HUDManager {
     }
 
     private setupEventListeners(): void {
-        // Listen for game events
         this.eventBus.on('coin:collected', (data: { score: number }) => {
             this.hudData.score += data.score;
             this.hudData.coinsCollected++;
@@ -91,11 +90,9 @@ export class HUDManager {
     }
     
     initialize(): void {
-        // Initialize HUD
     }
     
     cleanup(): void {
-        // Cleanup HUD resources
     }
     
     showPauseOverlay(): void {
@@ -121,7 +118,6 @@ export class HUDManager {
     render(renderer: PixelRenderer): void {
         this.renderHUD(renderer);
         
-        // メッセージがある時はPAUSEメニューを表示しない
         if (this._message) {
             this.renderMessage(renderer);
         } else if (this.isPaused) {
@@ -130,7 +126,6 @@ export class HUDManager {
     }
 
     private renderHUD(renderer: PixelRenderer): void {
-        // Black background for HUD area
         const blackPattern = this.createSolidPattern(1);
         
         for (let y = 0; y < 24; y += 8) {
@@ -139,20 +134,16 @@ export class HUDManager {
             }
         }
         
-        // Bottom border of HUD
         this.renderHorizontalBorder(renderer, 24);
 
-        // Render HUD text - First line
         renderer.drawText(`SCORE: ${this.hudData.score}`, 8, 8, '#FFFFFF');
         renderer.drawText(`LIVES: ${this.hudData.lives}`, 88, 8, '#FFFFFF');
         
-        // Render HUD text - Second line
         const minutes = Math.floor(this.hudData.time / 60);
         const seconds = this.hudData.time % 60;
         const timeStr = `TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
         renderer.drawText(timeStr, 8, 16, '#FFFFFF');
         
-        // Render stage name on second line
         if (this.hudData.stageName) {
             renderer.drawText(this.hudData.stageName, 120, 16, '#FFFFFF');
         }
@@ -166,17 +157,14 @@ export class HUDManager {
         
         const blackPattern = this.createSolidPattern(1);
         
-        // Draw pause menu background
         for (let y = menuY; y < menuY + menuHeight; y += 8) {
             for (let x = menuX; x < menuX + menuWidth; x += 8) {
                 this.drawPatternTile(renderer, x, y, blackPattern, '#000000');
             }
         }
         
-        // Draw pause menu border
         this.renderBoxBorder(renderer, menuX - 8, menuY - 8, menuWidth + 16, menuHeight + 16);
 
-        // Draw pause menu text
         renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 32, '#FFFFFF');
         renderer.drawTextCentered('PRESS ESC TO RESUME', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 8, '#FFFFFF');
         renderer.drawTextCentered('PRESS Q TO QUIT', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 16, '#FFFFFF');
@@ -193,22 +181,18 @@ export class HUDManager {
     private renderBoxBorder(renderer: PixelRenderer, x: number, y: number, width: number, height: number): void {
         const blackPattern = this.createSolidPattern(1);
 
-        // Top border
         for (let i = x; i < x + width; i += 8) {
             this.drawPatternTile(renderer, i, y, blackPattern, '#000000');
         }
 
-        // Bottom border
         for (let i = x; i < x + width; i += 8) {
             this.drawPatternTile(renderer, i, y + height - 8, blackPattern, '#000000');
         }
 
-        // Left border
         for (let i = y + 8; i < y + height - 8; i += 8) {
             this.drawPatternTile(renderer, x, i, blackPattern, '#000000');
         }
 
-        // Right border
         for (let i = y + 8; i < y + height - 8; i += 8) {
             this.drawPatternTile(renderer, x + width - 8, i, blackPattern, '#000000');
         }
@@ -274,11 +258,9 @@ export class HUDManager {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         const centerY = GAME_RESOLUTION.HEIGHT / 2;
         
-        // Split message by newlines
         const lines = this._message ? this._message.split('\n') : [];
         const lineHeight = 16;
         
-        // Calculate background size based on number of lines
         const bgWidth = 240;
         const bgHeight = 40 + (lines.length - 1) * lineHeight;
         const bgX = centerX - bgWidth / 2;
@@ -288,7 +270,6 @@ export class HUDManager {
         renderer.drawRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4, '#FFD700');
         renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, '#000000');
         
-        // Draw message text lines
         if (lines.length > 0) {
             const textStartY = centerY - ((lines.length - 1) * lineHeight) / 2;
             lines.forEach((line, index) => {

@@ -9,7 +9,6 @@ import { Logger } from '../utils/Logger';
 import type { CharacterConfig, CharacterAnimationConfig } from '../config/ResourceConfig';
 
 
-// Default config as fallback if ResourceLoader is not available
 const DEFAULT_PLAYER_CONFIG = {
     width: 16,
     height: 32,
@@ -17,9 +16,7 @@ const DEFAULT_PLAYER_CONFIG = {
     smallHeight: 16,
     speed: 1.17,
     jumpPower: 10,
-    // 最小時間なし - いつでもジャンプを中断可能
     minJumpTime: 0,
-    // 400ms = 0.4秒（約24フレーム）
     maxJumpTime: 400,
     maxHealth: 3,
     invulnerabilityTime: 2000,
@@ -42,7 +39,6 @@ const DEFAULT_ANIMATION_CONFIG = {
     }
 } as const;
 
-// Variable jump settings will be loaded from physics.json
 
 type AnimationState = 'idle' | 'walk' | 'jump' | 'fall';
 type Facing = 'left' | 'right';
@@ -72,7 +68,6 @@ export class Player extends Entity {
     private playerConfig: CharacterConfig | null;
     private animationConfig: { [key: string]: CharacterAnimationConfig } | null;
     private speed: number;
-    // Made public for testing
     public jumpPower: number;
     private spriteKey: string | null;
     private _health: number;
@@ -101,13 +96,11 @@ export class Player extends Entity {
     private musicSystem: MusicSystem | null;
     private assetLoader: AssetLoader | null;
     private eventBus: EventBus | null;
-    // For testing purposes
     public variableJumpBoost: number;
     private variableJumpBoostMultiplier: number;
     private frameCount: number;
 
     constructor(x?: number, y?: number) {
-        // Load config from ResourceLoader if available
         let playerConfig = null;
         let physicsConfig = null;
         try {
@@ -115,7 +108,6 @@ export class Player extends Entity {
             playerConfig = resourceLoader.getCharacterConfig('player', 'main');
             physicsConfig = resourceLoader.getPhysicsConfig('player');
         } catch {
-            // Fall back to default config for standalone tests
             Logger.warn('[Player] ResourceLoader not available, using default configuration');
             playerConfig = null;
             physicsConfig = null;
@@ -135,13 +127,11 @@ export class Player extends Entity {
             spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY
         } : DEFAULT_PLAYER_CONFIG;
         
-        // yはすでにピクセル座標（左下基準）で渡されているので、高さを引いて左上座標に変換
         super(x ?? config.spawnX, (y ?? config.spawnY) - config.height, config.width, config.height);
         
         this.speed = config.speed;
         this.jumpPower = config.jumpPower;
         
-        // Apply new physics properties from config
         if (playerConfig?.physics?.airResistance !== undefined) {
             this.airResistance = playerConfig.physics.airResistance;
         }
@@ -152,10 +142,8 @@ export class Player extends Entity {
             this.maxFallSpeed = playerConfig.physics.maxFallSpeed;
         }
         
-        // Store configs for later use
         this.playerConfig = config;
         
-        // Debug logging for jump configuration
         Logger.log('[Player] Jump Configuration Debug:');
         Logger.log('  - Config source:', 'physics.json');
         Logger.log('  - jumpPower:', this.jumpPower);
@@ -181,7 +169,6 @@ export class Player extends Entity {
         this.animFrame = 0;
         this.animTimer = 0;
         
-        // Size management
         this.originalWidth = config.width;
         this.originalHeight = config.height;
         this.isSmall = false;
@@ -206,27 +193,21 @@ export class Player extends Entity {
         
         this.eventBus = null;
         
-        // Merge animation config with defaults
         this.animationConfig = playerConfig?.animations ? {
             speed: { ...DEFAULT_ANIMATION_CONFIG.speed, ...playerConfig.animations.speed },
             frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
         } : DEFAULT_ANIMATION_CONFIG;
         
-        // Load physics settings from physics.json
         if (physicsConfig) {
             this.jumpPower = physicsConfig.jumpPower;
             this.variableJumpBoost = physicsConfig.variableJumpBoost;
             this.variableJumpBoostMultiplier = physicsConfig.variableJumpBoostMultiplier;
         } else {
-            // Use default values if physics config not available
             this.jumpPower = config.jumpPower;
-            // Default variable jump boost
             this.variableJumpBoost = 0.5;
-            // Default multiplier
             this.variableJumpBoostMultiplier = 0.4;
         }
         
-        // Override minJumpTime/maxJumpTime from physics.json if available
         if (physicsConfig) {
             if (physicsConfig.minJumpTime !== undefined) {
                 this.playerConfig.minJumpTime = physicsConfig.minJumpTime;
@@ -235,7 +216,6 @@ export class Player extends Entity {
                 this.playerConfig.maxJumpTime = physicsConfig.maxJumpTime;
             }
             
-            // Apply physics properties
             if (physicsConfig.airResistance !== undefined) {
                 this.airResistance = physicsConfig.airResistance;
             }
@@ -247,7 +227,6 @@ export class Player extends Entity {
             }
         }
         
-        // Gravity strength adjustment removed - now handled by PhysicsSystem
         this.gravityStrength = 1.0;
         this.frameCount = 0;
     }
@@ -278,7 +257,6 @@ export class Player extends Entity {
     get score(): number { return this._score; }
     get coins(): number { return this._coins; }
     
-    // Public setters for spring interaction
     setJumpingState(jumping: boolean): void {
         this._isJumping = jumping;
     }
@@ -292,7 +270,6 @@ export class Player extends Entity {
         this.vy = bounceVelocity;
         this.grounded = false;
         this._isJumping = true;
-        // Only enable variable jump if button is pressed at bounce time
         this.canVariableJump = isJumpButtonPressed;
         this.jumpButtonPressed = isJumpButtonPressed;
         this.isSpringBounce = true;
@@ -315,11 +292,9 @@ export class Player extends Entity {
         
         this.frameCount++;
         
-        // Debug: Allow dynamic jumpPower adjustment with number keys
         if ((window as Window & { debugMode?: boolean }).debugMode) {
             for (let i = 1; i <= 9; i++) {
                 if (this.inputManager.isActionPressed(`${i}`)) {
-                    // 2, 4, 6, 8, 10, 12, 14, 16, 18
                     const newJumpPower = i * 2;
                     if (this.jumpPower !== newJumpPower) {
                         this.jumpPower = newJumpPower;
@@ -376,10 +351,8 @@ export class Player extends Entity {
             this.canVariableJump = true;
             this.jumpMaxHeight = 0;
             this.jumpStartY = this.y;
-            // Reset spring bounce flag for normal jumps
             this.isSpringBounce = false;
             
-            // Debug logging for jump initiation
             Logger.log('[Player] Jump initiated:');
             Logger.log('  - Initial Y position:', this.y);
             Logger.log('  - Jump power applied:', this.jumpPower);
@@ -396,32 +369,24 @@ export class Player extends Entity {
             this.jumpTime += deltaTime * 1000;
             
             
-            // For spring bounce, enable variable jump when button is pressed
             if (this.isSpringBounce && input.jump && !this.canVariableJump) {
                 this.canVariableJump = true;
-                // Reset jump time to allow variable jump from spring bounce
                 this.jumpTime = 0;
                 Logger.log('[Player] Variable jump enabled for spring bounce');
             }
             
-            // Check if button was released
             if (!input.jump && this.canVariableJump) {
-                // Immediately reduce upward velocity if still going up
                 if (this.vy < 0) {
                     this.vy *= 0.5;
                     Logger.log('[Player] Jump button released at time:', this.jumpTime, 'ms, velocity reduced from', this.vy * 2, 'to', this.vy);
                 }
                 this.canVariableJump = false;
             }
-            // If button is still held and we can still boost
             else if (input.jump && this.canVariableJump) {
                 if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
-                    // Apply additional upward force for variable jump
-                    // This counteracts gravity to maintain upward movement
                     const boost = this.variableJumpBoostMultiplier * this.variableJumpBoost * deltaTime * 60;
                     this.vy -= boost;
                 } else {
-                    // Max jump time reached
                     this.canVariableJump = false;
                     Logger.log('[Player] Variable jump ended: max time reached at', this.jumpTime, 'ms');
                 }
@@ -439,9 +404,7 @@ export class Player extends Entity {
             this.jumpButtonPressed = false;
         }
         
-        // Only check for landing after a minimum jump time to avoid immediate grounding
         if (this.grounded && this._isJumping && this.jumpTime > 50) {
-            // For spring bounces, require a bit more time before considering jump complete
             if (this.isSpringBounce && this.jumpTime < 100) {
                 return;
             }
@@ -450,7 +413,6 @@ export class Player extends Entity {
             Logger.log('  - Jump duration:', this.jumpTime, 'ms');
             this._isJumping = false;
             this.canVariableJump = false;
-            // Reset spring bounce flag
             this.isSpringBounce = false;
         }
     }
@@ -497,18 +459,15 @@ export class Player extends Entity {
     respawn(x: number, y: number): void {
         Logger.log(`[Player] respawn called at (${x}, ${y})`);
         
-        // Reset to large size first
         this.isSmall = false;
         this.width = DEFAULT_PLAYER_CONFIG.width;
         this.height = DEFAULT_PLAYER_CONFIG.height;
         
-        // yはすでにピクセル座標（左下基準）で渡されているので、高さを引いて左上座標に変換
         this.x = x;
         this.y = y - this.height;
         this.vx = 0;
         this.vy = 0;
         this._isDead = false;
-        // リスポーン時は無敵状態にする
         this._invulnerable = true;
         this.invulnerabilityTime = DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
         this._animState = 'idle';
@@ -539,7 +498,6 @@ export class Player extends Entity {
             return false;
         }
         
-        // 小さい状態で攻撃を受けたら死亡
         if (this.isSmall) {
             this._health = 0;
             this._isDead = true;
@@ -547,30 +505,24 @@ export class Player extends Entity {
             if (this.eventBus) {
                 this.eventBus.emit('player:died');
             }
-            // Player died
             return true;
         }
         
-        // 大きい状態で攻撃を受けたら小さくなる
         this.isSmall = true;
         this.width = DEFAULT_PLAYER_CONFIG.smallWidth;
         this.height = DEFAULT_PLAYER_CONFIG.smallHeight;
-        // Adjust Y position to keep feet at same level
         this.y += DEFAULT_PLAYER_CONFIG.height - DEFAULT_PLAYER_CONFIG.smallHeight;
         this.updateSprite();
         
         
-        // Make invulnerable after taking damage
         this._invulnerable = true;
         this.invulnerabilityTime = DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
         
-        // Play damage sound
         if (this.musicSystem) {
             this.musicSystem.playSE('damage');
         }
         
         
-        // Player survived
         return false;
     }
     
@@ -609,12 +561,10 @@ export class Player extends Entity {
     render(renderer: PixelRenderer): void {
         this.flipX = this._facing === 'left';
         
-        // Draw jump height debug marker when jumping
         if (this._isJumping && renderer.debug) {
             const screenPos = renderer.worldToScreen(this.x, this.jumpStartY);
             const currentScreenPos = renderer.worldToScreen(this.x, this.y);
             
-            // Draw vertical line showing jump trajectory
             renderer.ctx.strokeStyle = '#00FF00';
             renderer.ctx.lineWidth = 2;
             renderer.ctx.beginPath();
@@ -622,13 +572,11 @@ export class Player extends Entity {
             renderer.ctx.lineTo(currentScreenPos.x + this.width / 2, currentScreenPos.y);
             renderer.ctx.stroke();
             
-            // Draw max height marker
             const maxHeightY = this.jumpStartY - this.jumpMaxHeight;
             const maxHeightScreenPos = renderer.worldToScreen(this.x, maxHeightY);
             renderer.ctx.fillStyle = '#FFFF00';
             renderer.ctx.fillRect(maxHeightScreenPos.x - 2, maxHeightScreenPos.y - 2, this.width + 4, 4);
             
-            // Draw height text
             renderer.ctx.fillStyle = '#FFFFFF';
             renderer.ctx.font = '12px monospace';
             renderer.ctx.fillText(
@@ -638,7 +586,6 @@ export class Player extends Entity {
             );
         }
         
-        // 無敵時は点滅させる（100ms間隔で表示/非表示を切り替え）
         if (this._invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 1) {
             return;
         }
@@ -693,7 +640,6 @@ export class Player extends Entity {
             }
         }
         
-        // フォールバック: スプライトが見つからない場合は基本的な矩形を描画
         if (!renderer.pixelArtRenderer || !renderer.pixelArtRenderer.sprites.has(this.spriteKey || 'player/idle')) {
             Logger.warn('Player sprite not found, falling back to rectangle. spriteKey:', this.spriteKey);
             super.render(renderer);
@@ -709,7 +655,6 @@ export class Player extends Entity {
                 screenPos.y
             );
             
-            // Show current jump power
             renderer.ctx.fillText(
                 `JP:${this.jumpPower.toFixed(1)} VY:${this.vy.toFixed(1)}`,
                 screenPos.x,

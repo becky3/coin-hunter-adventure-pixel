@@ -199,11 +199,8 @@ function getColorPalette(paletteName: string): ColorPalette {
         },
         grassland: {
             0: null,
-            // dark brown
             1: '#654321',
-            // medium brown
             2: '#8B6914',
-            // green
             3: '#228B22'
         },
         ui: {
@@ -214,20 +211,14 @@ function getColorPalette(paletteName: string): ColorPalette {
         },
         sky: {
             0: null,
-            // sky blue
             1: '#87CEEB',
-            // light blue
             2: '#E0F6FF',
-            // white
             3: '#FFFFFF'
         },
         nature: {
             0: null,
-            // brown (trunk)
             1: '#8B4513',
-            // light brown
             2: '#A0522D',
-            // green (leaves)
             3: '#228B22'
         }
     };
