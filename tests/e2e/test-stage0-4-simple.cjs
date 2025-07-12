@@ -20,13 +20,7 @@ async function runTest() {
         
         // Ensure input focus
         await t.clickAt(100, 100);
-        
-        // Wait for stage to fully load by checking player existence
-        await t.waitForFunction(() => {
-            const state = window.game?.stateManager?.currentState;
-            return state?.player !== null && state?.player !== undefined;
-        }, { timeout: 5000, polling: 100 });
-        
+        await t.wait(2000);  // stage0-4のロードに時間がかかるため長めに待機
         await t.assertPlayerExists();
         
         console.log('✅ Stage 0-4 loaded successfully');
