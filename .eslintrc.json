@@ -19,7 +19,8 @@
     "plugins": [
         "@typescript-eslint",
         "jsdoc",
-        "@eslint-community/eslint-comments"
+        "@eslint-community/eslint-comments",
+        "local-rules"
     ],
     "rules": {
         "indent": ["error", 4],
@@ -68,7 +69,8 @@
         "@eslint-community/eslint-comments/no-unused-disable": "error",
         "@eslint-community/eslint-comments/require-description": ["error", {
             "ignore": ["eslint-enable"]
-        }]
+        }],
+        "local-rules/no-standalone-comments": "error"
     },
     "overrides": [
         {

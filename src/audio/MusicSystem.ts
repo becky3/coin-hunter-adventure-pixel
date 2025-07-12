@@ -279,8 +279,8 @@ export class MusicSystem {
         try {
             const resourceLoader = ResourceLoader.getInstance();
             jumpConfig = resourceLoader.getAudioConfig('sfx', 'jump');
-        } catch {
-            // Error handled silently
+        } catch (error) {
+            Logger.warn('Failed to load jump sound config:', error);
         }
         
         if (jumpConfig && jumpConfig.waveform && jumpConfig.frequency) {
@@ -343,8 +343,8 @@ export class MusicSystem {
         try {
             const resourceLoader = ResourceLoader.getInstance();
             damageConfig = resourceLoader.getAudioConfig('sfx', 'damage');
-        } catch {
-            // Error handled silently
+        } catch (error) {
+            Logger.warn('Failed to load damage sound config:', error);
         }
         
         const now = this.audioContext.currentTime;

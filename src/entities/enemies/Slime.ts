@@ -1,6 +1,7 @@
 import { Enemy } from '../Enemy';
 import { PixelRenderer } from '../../rendering/PixelRenderer';
 import { ResourceLoader } from '../../config/ResourceLoader';
+import { Logger } from '../../utils/Logger';
 
 /**
  * Slime enemy that moves horizontally
@@ -15,8 +16,8 @@ export class Slime extends Enemy {
         try {
             const resourceLoader = ResourceLoader.getInstance();
             slimeConfig = resourceLoader.getCharacterConfig('enemies', 'slime');
-        } catch {
-            // Error handled silently
+        } catch (error) {
+            Logger.warn('Failed to load slime config:', error);
         }
         
         const width = slimeConfig?.physics.width || 16;

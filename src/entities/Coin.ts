@@ -2,6 +2,7 @@
 import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
+import { Logger } from '../utils/Logger';
 
 const FLOAT_SPEED_MULTIPLIER = 0.1;
 const PIXELS_PER_UNIT = 16;
@@ -23,8 +24,8 @@ export class Coin extends Entity {
         try {
             const resourceLoader = ResourceLoader.getInstance();
             coinConfig = resourceLoader.getObjectConfig('items', 'coin');
-        } catch {
-            // Error handled silently
+        } catch (error) {
+            Logger.warn('Failed to load coin config:', error);
         }
         
         const width = coinConfig?.physics.width || 16;
@@ -105,7 +106,7 @@ export class Coin extends Entity {
         if (!collisionInfo || !collisionInfo.other) return;
         
         if (collisionInfo.other.constructor.name === 'Player' && !this.collected) {
-            // Error handled silently
+            void 0;
         }
     }
 

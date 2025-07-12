@@ -2,6 +2,7 @@
 import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
+import { Logger } from '../utils/Logger';
 
 const WAVE_SPEED_MULTIPLIER = 0.03;
 
@@ -20,8 +21,8 @@ export class GoalFlag extends Entity {
         try {
             const resourceLoader = ResourceLoader.getInstance();
             goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
-        } catch {
-            // Error handled silently
+        } catch (error) {
+            Logger.warn('Failed to load goal flag config:', error);
         }
         
         const width = goalConfig?.physics.width || 32;

@@ -161,7 +161,7 @@ export class LevelManager {
         const areaNum = parseInt(match[2]);
         
         if (this.levelData && this.levelData.name) {
-            // Error handled silently
+            void 0;
         }
         
         if (areaNum < LevelManager.MAX_AREAS_PER_STAGE) {
