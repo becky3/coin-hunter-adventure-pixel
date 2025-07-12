@@ -1,5 +1,6 @@
 import { bundledStageData } from '../data/bundledData';
 import { Logger } from '../utils/Logger';
+import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
 
 interface StageInfo {
     id: string;
@@ -222,7 +223,7 @@ export class LevelLoader {
     
     getBackgroundColor(levelData: StageData): string {
         if (!levelData || !levelData.backgroundColor) {
-            return '#5C94FC';
+            return getMasterColor(UI_PALETTE_INDICES.skyBlue);
         }
         return levelData.backgroundColor;
     }

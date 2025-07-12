@@ -185,6 +185,20 @@ const PALETTE_NAME_TO_MASTER_PALETTE: Record<string, number[]> = {
     nature: [0, 0x50, 0x51, 0x61]
 };
 
+const UI_PALETTE_INDICES = {
+    black: 0x00,
+    white: 0x03,
+    gold: 0x52,
+    red: 0x41,
+    lightRed: 0x32,
+    gray: 0x01,
+    darkGray: 0x01,
+    cyan: 0x12,
+    brightRed: 0x40,
+    green: 0x61,
+    skyBlue: 0x12
+} as const;
+
 /**
  * Returns color palette for the specified palette name
  */
@@ -204,5 +218,9 @@ function getColorPalette(paletteName: string): ColorPalette {
     return palette;
 }
 
-export { PaletteSystem, STAGE_PALETTES, SPRITE_DEFINITIONS, getColorPalette, paletteSystem };
+function getMasterColor(colorIndex: number): string {
+    return paletteSystem.masterPalette[colorIndex] || '#000000';
+}
+
+export { PaletteSystem, STAGE_PALETTES, SPRITE_DEFINITIONS, getColorPalette, paletteSystem, UI_PALETTE_INDICES, getMasterColor };
 export type { ColorHex, Palette, PaletteConfig, StagePalette, ColorPalette, SpriteData };

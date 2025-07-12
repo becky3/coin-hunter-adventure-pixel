@@ -3,6 +3,7 @@ import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { Logger } from '../utils/Logger';
+import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
 
 export interface LevelData {
     name?: string;
@@ -33,7 +34,7 @@ export class LevelManager {
     private tileMap: number[][] = [];
     private levelWidth: number = 0;
     private levelHeight: number = 0;
-    private backgroundColor: string = '#5C94FC';
+    private backgroundColor: string = getMasterColor(UI_PALETTE_INDICES.skyBlue);
     private timeLimit: number = 300;
     
     private static readonly MAX_AREAS_PER_STAGE = 3;
@@ -66,7 +67,7 @@ export class LevelManager {
             
             this.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
             
-            this.backgroundColor = this.levelLoader.getBackgroundColor(levelData) || '#5C94FC';
+            this.backgroundColor = this.levelLoader.getBackgroundColor(levelData) || getMasterColor(UI_PALETTE_INDICES.skyBlue);
             this.timeLimit = this.levelLoader.getTimeLimit(levelData) || 300;
             
             this.eventBus.emit('level:loaded', {

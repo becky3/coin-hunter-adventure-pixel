@@ -1,4 +1,5 @@
 
+import { UI_PALETTE_INDICES, getMasterColor } from './pixelArtPalette';
 
 export type FontData = { [key: string]: number[][] };
 
@@ -452,7 +453,7 @@ export class PixelFont {
         x: number, 
         y: number, 
         scale: number = 1, 
-        color: string = '#FFFFFF', 
+        color: string = getMasterColor(UI_PALETTE_INDICES.white), 
         spacing: number | null = null
     ): void {
 
@@ -514,7 +515,7 @@ export class PixelFont {
         centerX: number, 
         y: number, 
         scale: number = 1, 
-        color: string = '#FFFFFF', 
+        color: string = getMasterColor(UI_PALETTE_INDICES.white), 
         spacing: number | null = null
     ): void {
         const textWidth = this.getTextWidth(text, scale, spacing);
@@ -528,7 +529,7 @@ export class PixelFont {
         rightX: number, 
         y: number, 
         scale: number = 1, 
-        color: string = '#FFFFFF', 
+        color: string = getMasterColor(UI_PALETTE_INDICES.white), 
         spacing: number | null = null
     ): void {
         const textWidth = this.getTextWidth(text, scale, spacing);
@@ -546,7 +547,7 @@ export class PixelFont {
         colorIndex: number = 0, 
         spacing: number | null = null
     ): void {
-        const color = palette[colorIndex] || '#FFFFFF';
+        const color = palette[colorIndex] || getMasterColor(UI_PALETTE_INDICES.white);
         this.drawText(ctx, text, x, y, scale, color, spacing);
     }
 
@@ -556,8 +557,8 @@ export class PixelFont {
         x: number, 
         y: number, 
         scale: number = 1, 
-        color: string = '#FFFFFF', 
-        shadowColor: string = '#000000', 
+        color: string = getMasterColor(UI_PALETTE_INDICES.white), 
+        shadowColor: string = getMasterColor(UI_PALETTE_INDICES.black), 
         shadowOffset: number = 1
     ): void {
 
