@@ -12,15 +12,11 @@ async function runTest() {
         await t.injectErrorTracking();
         
         // Stage 0-4を開く
-        await t.navigateToGame('http://localhost:3000?s=0-4&skip_title=true');
+        await t.navigateToGame('http://localhost:3000?s=0-4');
         await t.waitForGameInitialization();
         
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        
-        // Ensure input focus
-        await t.clickAt(100, 100);
-        await t.wait(500);
+        // Start new game as normal
+        await t.startNewGame();
         await t.assertPlayerExists();
         
         console.log('✅ Stage 0-4 loaded successfully');
