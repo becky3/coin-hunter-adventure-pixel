@@ -94,11 +94,7 @@ async function runStageValidationTest() {
                 if (issues.coinCollisions.length > 0) {
                     console.log('\n  Coin Collision Issues:');
                     issues.coinCollisions.forEach(coin => {
-                        if (coin.embedded) {
-                            console.log(`    - Coin at (${coin.x}, ${coin.y}) is embedded inside ground blocks`);
-                        } else {
-                            console.log(`    - Coin at (${coin.x}, ${coin.y}) collides with ground tile`);
-                        }
+                        console.log(`    - ${coin.message || `Coin at (${coin.x}, ${coin.y}) collides with block`}`);
                     });
                 }
                 
@@ -257,45 +253,23 @@ function checkCoinPlacements(stageData) {
     const coins = stageData.entities.filter(e => e.type === 'coin');
     
     for (const coin of coins) {
-        // 座標を配列インデックスに変換（Y座標は反転）
-        const tileY = stageData.height - 1 - coin.y;
+        // EntityManagerと同じ間違った変換を使う
+        // これが実際にゲーム内で警告を出している方法
+        const tileY = coin.y; // 間違い: 底部基準のY座標を直接配列インデックスとして使用
         const tileX = coin.x;
         
         // 範囲チェック
         if (tileY >= 0 && tileY < stageData.height && 
             tileX >= 0 && tileX < stageData.width) {
             
-            // 地面ブロック（値1）と重なっているかチェック
+            // その座標にブロック（値1）があるかチェック
             if (tilemap[tileY][tileX] === 1) {
                 issues.push({
                     x: coin.x,
                     y: coin.y,
-                    tileValue: tilemap[tileY][tileX]
+                    tileValue: tilemap[tileY][tileX],
+                    message: `Coin at (${coin.x}, ${coin.y}) is embedded in block (using incorrect coordinate system)`
                 });
-            } else {
-                // コインの位置は空いているが、同じX座標の地面の最高点を確認
-                let highestGroundY = -1;
-                
-                // そのX座標の全ての地面をチェックして最高点を探す
-                for (let y = 0; y < stageData.height; y++) {
-                    if (tilemap[y][tileX] === 1) {
-                        const currentY = stageData.height - 1 - y;
-                        if (currentY > highestGroundY) {
-                            highestGroundY = currentY;
-                        }
-                    }
-                }
-                
-                // コインが地面の最高点より下にある場合、埋まっているとみなす
-                if (highestGroundY !== -1 && coin.y < highestGroundY) {
-                    issues.push({
-                        x: coin.x,
-                        y: coin.y,
-                        tileValue: 0,
-                        embedded: true,
-                        highestGroundY: highestGroundY
-                    });
-                }
             }
         }
     }
