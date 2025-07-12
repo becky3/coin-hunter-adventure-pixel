@@ -25,15 +25,14 @@ async function runTest() {
         });
         
         // Navigate to game
-        await t.navigateToGame('http://localhost:3000?skip_title=true');
+        await t.navigateToGame('http://localhost:3000/?skip_title=true');
         await t.waitForGameInitialization();
         
         // With skip_title=true, we should go directly to play state
         await t.assertState('play');
         
         // Ensure input focus
-        await t.clickAt(100, 100);
-        await t.wait(500);
+        await t.ensureInputFocus();
         
         // Check for sprite loading errors in console
         console.log('\n--- Console Logs ---');

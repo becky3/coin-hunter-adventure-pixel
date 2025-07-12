@@ -59,8 +59,7 @@ async function runTest() {
         await t.assertState('play');
         
         // Ensure input focus
-        await t.clickAt(100, 100);
-        await t.wait(500);
+        await t.ensureInputFocus();
         
         // Verify player exists
         const playerExists = await t.page.evaluate(() => {

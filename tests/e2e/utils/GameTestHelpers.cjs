@@ -125,6 +125,12 @@ class GameTestHelpers extends TestFramework {
         await this.pressKey('Space');
     }
 
+    async ensureInputFocus() {
+        // Common pattern for ensuring browser input focus
+        await this.clickAt(100, 100);
+        await this.wait(500);
+    }
+
     async getPlayerPosition() {
         return await this.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
