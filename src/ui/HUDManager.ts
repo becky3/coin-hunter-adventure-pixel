@@ -128,10 +128,11 @@ export class HUDManager {
 
     private renderHUD(renderer: PixelRenderer): void {
         const blackPattern = this.createSolidPattern(1);
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
         
         for (let y = 0; y < 24; y += 8) {
             for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
-                this.drawPatternTile(renderer, x, y, blackPattern, getMasterColor(UI_PALETTE_INDICES.black));
+                this.drawPatternTile(renderer, x, y, blackPattern, blackColor);
             }
         }
         
@@ -157,10 +158,11 @@ export class HUDManager {
         const menuY = (GAME_RESOLUTION.HEIGHT - menuHeight) / 2;
         
         const blackPattern = this.createSolidPattern(1);
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
         
         for (let y = menuY; y < menuY + menuHeight; y += 8) {
             for (let x = menuX; x < menuX + menuWidth; x += 8) {
-                this.drawPatternTile(renderer, x, y, blackPattern, getMasterColor(UI_PALETTE_INDICES.black));
+                this.drawPatternTile(renderer, x, y, blackPattern, blackColor);
             }
         }
         
@@ -173,29 +175,31 @@ export class HUDManager {
 
     private renderHorizontalBorder(renderer: PixelRenderer, y: number): void {
         const blackPattern = this.createSolidPattern(1);
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
         
         for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
-            this.drawPatternTile(renderer, x, y - 2, blackPattern, getMasterColor(UI_PALETTE_INDICES.black));
+            this.drawPatternTile(renderer, x, y - 2, blackPattern, blackColor);
         }
     }
 
     private renderBoxBorder(renderer: PixelRenderer, x: number, y: number, width: number, height: number): void {
         const blackPattern = this.createSolidPattern(1);
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
 
         for (let i = x; i < x + width; i += 8) {
-            this.drawPatternTile(renderer, i, y, blackPattern, getMasterColor(UI_PALETTE_INDICES.black));
+            this.drawPatternTile(renderer, i, y, blackPattern, blackColor);
         }
 
         for (let i = x; i < x + width; i += 8) {
-            this.drawPatternTile(renderer, i, y + height - 8, blackPattern, getMasterColor(UI_PALETTE_INDICES.black));
+            this.drawPatternTile(renderer, i, y + height - 8, blackPattern, blackColor);
         }
 
         for (let i = y + 8; i < y + height - 8; i += 8) {
-            this.drawPatternTile(renderer, x, i, blackPattern, getMasterColor(UI_PALETTE_INDICES.black));
+            this.drawPatternTile(renderer, x, i, blackPattern, blackColor);
         }
 
         for (let i = y + 8; i < y + height - 8; i += 8) {
-            this.drawPatternTile(renderer, x + width - 8, i, blackPattern, getMasterColor(UI_PALETTE_INDICES.black));
+            this.drawPatternTile(renderer, x + width - 8, i, blackPattern, blackColor);
         }
     }
 

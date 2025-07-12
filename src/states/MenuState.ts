@@ -196,11 +196,13 @@ export class MenuState implements GameState {
         const centerX = GAME_RESOLUTION.WIDTH / 2;
         const startY = 104;
         const lineHeight = 24;
+        const goldColor = getMasterColor(UI_PALETTE_INDICES.gold);
+        const whiteColor = getMasterColor(UI_PALETTE_INDICES.white);
         
         this.options.forEach((option, index) => {
             const y = startY + index * lineHeight;
             const isSelected = index === this.selectedOption;
-            const color = isSelected ? getMasterColor(UI_PALETTE_INDICES.gold) : getMasterColor(UI_PALETTE_INDICES.white);
+            const color = isSelected ? goldColor : whiteColor;
             const prevAlpha = renderer.ctx.globalAlpha;
             renderer.ctx.globalAlpha = this.optionsAlpha;
             
@@ -208,7 +210,7 @@ export class MenuState implements GameState {
             if (isSelected) {
                 const textWidth = option.text.length * 8;
                 const cursorX = centerX - Math.floor(textWidth / 2) - 16;
-                renderer.drawText('>', cursorX, y, getMasterColor(UI_PALETTE_INDICES.gold));
+                renderer.drawText('>', cursorX, y, goldColor);
             }
             
             renderer.ctx.globalAlpha = prevAlpha;

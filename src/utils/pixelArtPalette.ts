@@ -191,7 +191,7 @@ const UI_PALETTE_INDICES = {
     gold: 0x52,
     red: 0x41,
     lightRed: 0x32,
-    gray: 0x01,
+    gray: 0x02,
     darkGray: 0x01,
     cyan: 0x12,
     brightRed: 0x40,
