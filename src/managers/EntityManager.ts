@@ -274,4 +274,49 @@ export class EntityManager {
         
         this.eventBus.emit('entities:cleared');
     }
+    
+    /**
+     * Dynamically spawn an enemy at the specified tile coordinates
+     */
+    spawnEnemy(enemyType: string, tileX: number, tileY: number): void {
+        try {
+            const pixelX = tileX * TILE_SIZE;
+            const pixelY = tileY * TILE_SIZE;
+            
+            Logger.log('EntityManager', `Spawning ${enemyType} at tile (${tileX}, ${tileY}) -> pixel (${pixelX}, ${pixelY})`);
+            
+            let enemy: Enemy | null = null;
+            
+            switch (enemyType.toLowerCase()) {
+            case 'slime':
+                enemy = new Slime(pixelX, pixelY);
+                break;
+            case 'bat':
+            case 'spider':
+            case 'armorknight':
+            case 'flyingwizard':
+            case 'fireslime':
+            case 'lavabubble':
+                Logger.warn('EntityManager', `Enemy type '${enemyType}' not yet implemented`);
+                return;
+            default:
+                Logger.error('EntityManager', `Unknown enemy type: ${enemyType}`);
+                return;
+            }
+            
+            if (enemy) {
+                this.enemies.push(enemy);
+                this.physicsSystem.addEntity(enemy, this.physicsSystem.layers.ENEMY);
+                
+                this.eventBus.emit('enemy:spawned', {
+                    type: enemyType,
+                    position: { x: pixelX, y: pixelY }
+                });
+                
+                Logger.log('EntityManager', `Successfully spawned ${enemyType}`);
+            }
+        } catch (error) {
+            Logger.error('EntityManager', `Failed to spawn enemy: ${error}`);
+        }
+    }
 }

@@ -20,6 +20,12 @@
       "filename": "stage0-3.json"
     },
     {
+      "id": "stage0-4",
+      "name": "ENEMY DEMO",
+      "description": "Enemy character demonstration stage",
+      "filename": "stage0-4.json"
+    },
+    {
       "id": "stage1-1",
       "name": "STAGE 1-1",
       "description": "The adventure begins",

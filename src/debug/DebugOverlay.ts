@@ -6,6 +6,7 @@ import { PlayState } from '../states/PlayState';
 import { URLParams } from '../utils/urlParams';
 import { Logger } from '../utils/Logger';
 import type { StateEvent } from '../states/GameStateManager';
+import { EnemySpawnDialog } from './EnemySpawnDialog';
 
 /**
  * DebugOverlay implementation
@@ -17,7 +18,7 @@ export class DebugOverlay {
     
     private stageList: string[] = [
         'stage1-1', 'stage1-2', 'stage1-3',
-        'stage0-1', 'stage0-2', 'stage0-3',
+        'stage0-1', 'stage0-2', 'stage0-3', 'stage0-4',
         'performance-test'
     ];
     private selectedStageIndex: number = 0;
@@ -26,6 +27,8 @@ export class DebugOverlay {
     private fps: number = 0;
     private frameCount: number = 0;
     private lastFPSUpdate: number = 0;
+    
+    private enemySpawnDialog?: EnemySpawnDialog;
     
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
@@ -47,6 +50,9 @@ export class DebugOverlay {
         if (this.debugElement) {
             this.debugElement.style.display = 'block';
         }
+        
+        this.enemySpawnDialog = new EnemySpawnDialog(this.serviceLocator);
+        this.enemySpawnDialog.init();
         
         (window as Window & { debugOverlay?: DebugOverlay }).debugOverlay = this;
         
@@ -115,7 +121,7 @@ export class DebugOverlay {
         helpDiv.style.marginTop = '10px';
         helpDiv.style.fontSize = '10px';
         helpDiv.style.color = '#888';
-        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset<br>D: Toggle Stage Select | ←→: Select';
+        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset<br>D: Toggle Stage Select | ←→: Select<br>O: Spawn Enemy';
         if (this.debugElement) {
             this.debugElement.appendChild(helpDiv);
         }
@@ -154,6 +160,16 @@ export class DebugOverlay {
             if (e.key === '0') {
                 e.preventDefault();
                 this.resetSpeed();
+            }
+            
+            if (e.key === 'o' || e.key === 'O') {
+                e.preventDefault();
+                const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
+                const currentState = game?.stateManager?.currentState;
+                
+                if (currentState && currentState.name === 'play' && this.enemySpawnDialog) {
+                    this.enemySpawnDialog.toggle();
+                }
             }
             
             const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
