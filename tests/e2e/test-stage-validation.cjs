@@ -94,7 +94,11 @@ async function runStageValidationTest() {
                 if (issues.coinCollisions.length > 0) {
                     console.log('\n  Coin Collision Issues:');
                     issues.coinCollisions.forEach(coin => {
-                        console.log(`    - Coin at (${coin.x}, ${coin.y}) collides with ground tile`);
+                        if (coin.embedded) {
+                            console.log(`    - Coin at (${coin.x}, ${coin.y}) is embedded inside ground blocks`);
+                        } else {
+                            console.log(`    - Coin at (${coin.x}, ${coin.y}) collides with ground tile`);
+                        }
                     });
                 }
                 
@@ -268,6 +272,30 @@ function checkCoinPlacements(stageData) {
                     y: coin.y,
                     tileValue: tilemap[tileY][tileX]
                 });
+            } else {
+                // コインの位置は空いているが、同じX座標の地面の最高点を確認
+                let highestGroundY = -1;
+                
+                // そのX座標の全ての地面をチェックして最高点を探す
+                for (let y = 0; y < stageData.height; y++) {
+                    if (tilemap[y][tileX] === 1) {
+                        const currentY = stageData.height - 1 - y;
+                        if (currentY > highestGroundY) {
+                            highestGroundY = currentY;
+                        }
+                    }
+                }
+                
+                // コインが地面の最高点より下にある場合、埋まっているとみなす
+                if (highestGroundY !== -1 && coin.y < highestGroundY) {
+                    issues.push({
+                        x: coin.x,
+                        y: coin.y,
+                        tileValue: 0,
+                        embedded: true,
+                        highestGroundY: highestGroundY
+                    });
+                }
             }
         }
     }
