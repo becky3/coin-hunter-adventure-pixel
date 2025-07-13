@@ -158,10 +158,25 @@ npm run dev
 - エラーイベントの発行による通知
 - null/undefinedチェックの徹底
 
+### 静かな失敗の防止
+早期リターンパターンを使用する際は、必ず適切なログを出力してください：
+
+```typescript
+// ❌ 悪い例：静かに失敗
+if (!this.target) return;
+
+// ✅ 良い例：警告ログを出力
+if (!this.target) {
+    Logger.warn('[CameraController] update called but no target is set');
+    return;
+}
+```
+
 ### 実装例
 ```typescript
 // 防御的プログラミング
 if (renderer.hasSprite && !renderer.hasSprite(key)) {
+    Logger.warn(`[Renderer] Sprite not found: ${key}`);
     // フォールバック処理
 }
 
@@ -170,15 +185,35 @@ async function loadAsset() {
     try {
         await fetch(url);
     } catch (error) {
-        console.error('Asset load error:', error);
+        Logger.error('Asset load error:', error);
         eventBus.emit('asset:load-error', { error });
     }
 }
 
-// null安全性
-if (!this.player) return;
-// 非null表明(!)の使用は避ける
+// null安全性とログ出力
+if (!this.player) {
+    Logger.warn('[EntityManager] player is not set');
+    return;
+}
+
+// onCollisionの引数チェック
+onCollision(collisionInfo?: CollisionInfo): void {
+    if (!collisionInfo || !collisionInfo.other) {
+        Logger.warn('[Entity] onCollision called with invalid collisionInfo');
+        return;
+    }
+    // 処理を続行
+}
 ```
+
+### ログ出力のガイドライン
+1. **Loggerクラスを使用**（console.log/errorの直接使用は避ける）
+2. **クラス名とメソッド名を含める**（例：`[Player] onCollision`）
+3. **具体的な情報を含める**（変数の値など）
+4. **適切なログレベルを選択**：
+   - `Logger.log()`: 通常の情報
+   - `Logger.warn()`: 警告（処理は継続可能）
+   - `Logger.error()`: エラー（重大な問題）
 
 ## デバッグ機能
 

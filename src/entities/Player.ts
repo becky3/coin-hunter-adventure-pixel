@@ -684,7 +684,10 @@ export class Player extends Entity {
     }
     
     onCollision(collisionInfo?: CollisionInfo): void {
-        if (!collisionInfo || !collisionInfo.other) return;
+        if (!collisionInfo || !collisionInfo.other) {
+            Logger.warn('[Player] onCollision called with invalid collisionInfo:', collisionInfo);
+            return;
+        }
         
         if (collisionInfo.other.constructor.name === 'Enemy' || 
             collisionInfo.other.constructor.name === 'Slime') {

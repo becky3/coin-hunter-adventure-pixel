@@ -209,10 +209,16 @@ export class EntityManager {
     }
 
     checkItemCollisions(): void {
-        if (!this.player) return;
+        if (!this.player) {
+            Logger.warn('[EntityManager] checkItemCollisions called but player is not set');
+            return;
+        }
         
         this.items.forEach((item) => {
-            if (!this.player) return;
+            if (!this.player) {
+                Logger.warn('[EntityManager] player became null during item collision check');
+                return;
+            }
             
             if (item.constructor.name === 'Coin' && !(item as Coin).isCollected()) {
                 if (item.collidesWith(this.player)) {

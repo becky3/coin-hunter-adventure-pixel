@@ -1,6 +1,7 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { Entity } from '../entities/Entity';
 import { EventBus } from '../services/EventBus';
+import { Logger } from '../utils/Logger';
 
 export interface Camera {
     x: number;
@@ -74,7 +75,10 @@ export class CameraController {
     }
 
     update(_deltaTime: number): void {
-        if (!this.target) return;
+        if (!this.target) {
+            Logger.warn('[CameraController] update called but no target is set');
+            return;
+        }
 
         const targetX = this.target.x + this.target.width / 2 - this.camera.width / 2 + this.offsetX;
         const targetY = this.target.y + this.target.height / 2 - this.camera.height / 2 + this.offsetY;
