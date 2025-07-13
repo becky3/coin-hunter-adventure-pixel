@@ -366,7 +366,10 @@ export class PhysicsSystem {
     }
     
     isPointInTile(x: number, y: number): boolean {
-        if (!this.tileMap) return false;
+        if (!this.tileMap) {
+            Logger.warn('[PhysicsSystem] isPointInTile called but tileMap is not set');
+            return false;
+        }
         
         const col = Math.floor(x / this.tileSize);
         const row = Math.floor(y / this.tileSize);

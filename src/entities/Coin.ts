@@ -103,7 +103,10 @@ export class Coin extends Entity {
     }
 
     onCollision(collisionInfo?: CollisionInfo): void {
-        if (!collisionInfo || !collisionInfo.other) return;
+        if (!collisionInfo || !collisionInfo.other) {
+            Logger.warn('[Coin] onCollision called with invalid collisionInfo:', collisionInfo);
+            return;
+        }
         
         if (collisionInfo.other.constructor.name === 'Player' && !this.collected) {
             void 0;

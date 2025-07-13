@@ -121,7 +121,10 @@ export class Spring extends Entity {
     }
 
     onCollision(collisionInfo?: CollisionInfo): boolean {
-        if (!collisionInfo) return false;
+        if (!collisionInfo) {
+            Logger.warn('[Spring] onCollision called with no collisionInfo');
+            return false;
+        }
         
         const other = collisionInfo.other;
         

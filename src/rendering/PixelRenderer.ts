@@ -93,12 +93,17 @@ export class PixelRenderer {
             else if (this.assetLoader) {
                 const loadedSprite = this.assetLoader.loadedAssets.get(sprite);
                 if (!loadedSprite) {
+                    Logger.warn(`[PixelRenderer] Sprite '${sprite}' not loaded, attempting to load now`);
                     this.assetLoader.loadSprite(...sprite.split('/') as [string, string]);
                     return;
                 }
                 finalSprite = loadedSprite.imageData || loadedSprite.canvas;
-                if (!finalSprite) return;
+                if (!finalSprite) {
+                    Logger.warn(`[PixelRenderer] Loaded sprite '${sprite}' has no imageData or canvas`);
+                    return;
+                }
             } else {
+                Logger.error('[PixelRenderer] No asset loader available to load sprite');
                 return;
             }
         } else {
@@ -106,7 +111,7 @@ export class PixelRenderer {
         }
 
         if (!finalSprite) {
-            console.error(`Sprite not found: ${sprite}`);
+            Logger.error(`[PixelRenderer] Sprite not found: ${sprite}`);
             return;
         }
 
