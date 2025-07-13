@@ -101,7 +101,8 @@ GitHub Pages公開後は以下でアクセス可能になります：
 **自動チェック**: プッシュ時に以下が自動実行されます
 
 - Lintチェック（コメントルール含む）
-- E2Eテスト（開発サーバー稼働時のみ）
+- スモークテスト（開発サーバー稼働時のみ、約10秒）
+- フルE2Eテストは GitHub Actions で実行（PR・mainブランチ）
 
 
 ### GitHub Copilotレビューへの対応
@@ -214,23 +215,25 @@ gh issue comment [Issue番号] --body "作業を開始します。
 
 ### テスト実行
 
-- E2Eテストは `npm test` で実行（全てのtest-*.cjsファイルが自動実行）
-- 個別テスト: `npm run test:e2e -- tests/e2e/[テスト名].cjs`
-- テストログは `tests/logs/` に自動保存される
+#### ローカルでのテスト実行
+
+- **スモークテスト（推奨）**: `npm run test:smoke` - 基本動作の確認（約10秒）
+- **個別テスト**: `node tests/e2e/test-[名前].cjs` - 特定の機能のテスト
+- **フルテスト**: `npm test` - 全E2Eテスト実行（約4分、通常はGitHub Actionsで実行）
+
+#### GitHub Actionsでの自動テスト
+
+- **プッシュ時**: mainブランチへのプッシュで自動実行
+- **PR作成時**: 自動的にフルテストが実行され、結果がPRにコメントされる
+- **手動実行**: GitHubのActionsタブから手動で実行可能
 
 #### テスト実行のコツ
 
-- **個別実行を推奨**: 問題のあるテストを特定しやすい
-
-  ```bash
-  node tests/e2e/test-enemy-damage.cjs
-  ```
-
-- **ログ確認**: 最新のログファイルを確認
-
-  ```bash
-  ls -la tests/logs/ | tail -10
-  ```
+- **ローカルでの確認**: 開発中はスモークテストで素早く確認
+- **GitHub Actionsで詳細確認**: フルテストはGitHub Actionsに任せる
+- **ログ確認**: 
+  - ローカル: `ls -la tests/logs/ | tail -10`
+  - GitHub Actions: アーティファクトからダウンロード
 
 - **既知の問題**:
   - スプライト読み込み遅延 → バンドリングで解決済み
