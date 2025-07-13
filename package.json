@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/e2e/run-all-tests.cjs",
+    "test": "timeout --preserve-status 600 node tests/e2e/run-all-tests.cjs 2>&1",
     "test:smoke": "node tests/e2e/smoke-test.cjs",
     "test:e2e": "node tests/e2e/smoke-test.cjs",
     "test:basic": "node tests/e2e/test-basic-flow.cjs",

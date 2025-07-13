@@ -2,8 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { toJSTString } = require('./utils/dateHelper.cjs');
 
+// Ensure logs directory exists
+const logsDir = path.join(__dirname, '..', 'logs');
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+}
+
 // Create a log file for the entire test run
-const runLogPath = path.join(__dirname, 'logs', `run-all-tests-${toJSTString()}.log`);
+const runLogPath = path.join(logsDir, `run-all-tests-${toJSTString()}.log`);
 const runLogStream = fs.createWriteStream(runLogPath, { flags: 'a' });
 
 // Override console.log to also write to log file
