@@ -60,8 +60,7 @@ export class GameCore {
         const performanceMonitor = PerformanceMonitor.getInstance();
         performanceMonitor.initialize(renderer);
         
-        // Expose PerformanceMonitor to window for testing
-        (window as any).PerformanceMonitor = PerformanceMonitor;
+        (window as Window & { PerformanceMonitor?: typeof PerformanceMonitor }).PerformanceMonitor = PerformanceMonitor;
         
         this.debugOverlay = new DebugOverlay(this._serviceLocator);
         await this.debugOverlay.init();

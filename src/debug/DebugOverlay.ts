@@ -67,21 +67,18 @@ export class DebugOverlay {
             const urlParams = new URLParams();
             const urlStage = urlParams.getStageId();
             
-            // URLパラメータにステージが指定されている場合
             if (urlStage && this.stageList.includes(urlStage)) {
                 this.selectedStageIndex = this.stageList.indexOf(urlStage);
             }
-            // defaultStageが定義されている場合
             else if (stageData.defaultStage && this.stageList.includes(stageData.defaultStage)) {
                 this.selectedStageIndex = this.stageList.indexOf(stageData.defaultStage);
             }
-            // どちらもない場合は最初のステージ
             else {
                 this.selectedStageIndex = 0;
             }
             
             Logger.log('DebugOverlay', `Loaded ${this.stageList.length} stages from stages.json`);
-        } catch (error) {
+        } catch {
             Logger.error('DebugOverlay', 'Failed to load stage list, using default');
             this.stageList = ['stage1-1'];
             this.selectedStageIndex = 0;
@@ -344,20 +341,26 @@ export class DebugOverlay {
         }
     }
     
-    private updatePerformanceDetails(metrics: any): void {
+    private updatePerformanceDetails(metrics: {
+        drawCalls: { drawSprite: number; drawRect: number; drawText: number; drawLine: number; };
+        canvasOperations?: { save: number; restore: number; scale: number; setTransform: number; 
+                            globalAlpha: number; fillRect: number; clearRect: number; drawImage: number; };
+        pixelMetrics?: { totalPixelsDrawn: number; overdrawRatio: number; offscreenDrawRatio: number; 
+                        fillRectArea: number; clearRectArea: number; };
+        gpuMetrics?: { estimatedLoad: number; hardwareAcceleration: boolean; webglAvailable: boolean; gpuTier: string; };
+        memoryUsed: number;
+    }): void {
         const perfDiv = document.getElementById('performance-details');
         if (!perfDiv) return;
         
         let html = '<div style="color: #ffff00">Performance Details:</div>';
         
-        // Draw Calls
         html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">Draw Calls:</div>';
         html += `<div>Sprites: ${metrics.drawCalls.drawSprite}</div>`;
         html += `<div>Rects: ${metrics.drawCalls.drawRect}</div>`;
         html += `<div>Text: ${metrics.drawCalls.drawText}</div>`;
         html += `<div>Lines: ${metrics.drawCalls.drawLine}</div>`;
         
-        // Canvas Operations
         if (metrics.canvasOperations) {
             html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">Canvas Ops:</div>';
             html += `<div>Save/Restore: ${metrics.canvasOperations.save}/${metrics.canvasOperations.restore}</div>`;
@@ -365,7 +368,6 @@ export class DebugOverlay {
             html += `<div>Transform: ${metrics.canvasOperations.setTransform}</div>`;
         }
         
-        // Pixel Metrics
         if (metrics.pixelMetrics) {
             html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">Pixel Stats:</div>';
             html += `<div>Total: ${(metrics.pixelMetrics.totalPixelsDrawn / 1000000).toFixed(2)}M</div>`;
@@ -373,7 +375,6 @@ export class DebugOverlay {
             html += `<div>Offscreen: ${(metrics.pixelMetrics.offscreenDrawRatio * 100).toFixed(1)}%</div>`;
         }
         
-        // GPU Info
         if (metrics.gpuMetrics) {
             html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">GPU:</div>';
             html += `<div>Est.Load: ${metrics.gpuMetrics.estimatedLoad.toFixed(1)}%</div>`;

@@ -212,7 +212,7 @@ export class PerformanceMonitor {
                 this.currentCanvasOperations.save++;
                 this.globalAlphaStack.push(ctx.globalAlpha);
             }
-            return this.canvasOperationHooks!.originalSave.call(ctx);
+            return this.canvasOperationHooks.originalSave.call(ctx);
         };
         
         ctx.restore = () => {
@@ -220,49 +220,47 @@ export class PerformanceMonitor {
                 this.currentCanvasOperations.restore++;
                 this.globalAlphaStack.pop();
             }
-            return this.canvasOperationHooks!.originalRestore.call(ctx);
+            return this.canvasOperationHooks.originalRestore.call(ctx);
         };
         
         ctx.setTransform = (...args) => {
             if (this.enabled) this.currentCanvasOperations.setTransform++;
-            return this.canvasOperationHooks!.originalSetTransform.apply(ctx, args);
+            return this.canvasOperationHooks.originalSetTransform.apply(ctx, args);
         };
         
         ctx.scale = (...args) => {
             if (this.enabled) this.currentCanvasOperations.scale++;
-            return this.canvasOperationHooks!.originalScale.apply(ctx, args);
+            return this.canvasOperationHooks.originalScale.apply(ctx, args);
         };
         
         ctx.translate = (...args) => {
             if (this.enabled) this.currentCanvasOperations.translate++;
-            return this.canvasOperationHooks!.originalTranslate.apply(ctx, args);
+            return this.canvasOperationHooks.originalTranslate.apply(ctx, args);
         };
         
         ctx.fillRect = (...args) => {
             if (this.enabled) {
                 this.currentCanvasOperations.fillRect++;
-                const [x, y, width, height] = args;
+                const [_x, _y, width, height] = args;
                 this.currentPixelMetrics.fillRectArea += width * height;
             }
-            return this.canvasOperationHooks!.originalFillRect.apply(ctx, args);
+            return this.canvasOperationHooks.originalFillRect.apply(ctx, args);
         };
         
         ctx.clearRect = (...args) => {
             if (this.enabled) {
                 this.currentCanvasOperations.clearRect++;
-                const [x, y, width, height] = args;
+                const [_x, _y, width, height] = args;
                 this.currentPixelMetrics.clearRectArea += width * height;
             }
-            return this.canvasOperationHooks!.originalClearRect.apply(ctx, args);
+            return this.canvasOperationHooks.originalClearRect.apply(ctx, args);
         };
         
         ctx.drawImage = (...args) => {
             if (this.enabled) this.currentCanvasOperations.drawImage++;
-            return this.canvasOperationHooks!.originalDrawImage.apply(ctx, args);
+            return this.canvasOperationHooks.originalDrawImage.apply(ctx, args);
         };
         
-        // globalAlphaのトラッキングは一時的に無効化（実装の複雑さのため）
-        // TODO: 将来的に適切な実装を追加
     }
     
     private detectGPUCapabilities(): void {
@@ -303,9 +301,8 @@ export class PerformanceMonitor {
         return 'unknown';
     }
     
-    private detectHardwareAcceleration(ctx: CanvasRenderingContext2D): boolean {
+    private detectHardwareAcceleration(_ctx: CanvasRenderingContext2D): boolean {
         try {
-            const canvas = ctx.canvas;
             const testCanvas = document.createElement('canvas');
             testCanvas.width = 1;
             testCanvas.height = 1;
@@ -380,9 +377,6 @@ export class PerformanceMonitor {
         if (!this.enabled) return;
 
         const currentTime = performance.now();
-        const frameTime = currentTime - this.lastFrameTime;
-        
-        // 実際のフレーム間隔を計測（前回のendFrameからの時間）
         const realFrameTime = this.lastRealFrameTime > 0 ? currentTime - this.lastRealFrameTime : 16.67;
         this.lastRealFrameTime = currentTime;
 
@@ -477,7 +471,7 @@ export class PerformanceMonitor {
         let totalOverdraw = 0;
         let totalCells = 0;
         
-        for (const [key, count] of this.currentPixelMetrics.overdrawMap) {
+        for (const [_key, count] of this.currentPixelMetrics.overdrawMap) {
             if (count > 1) {
                 totalOverdraw += count - 1;
             }
