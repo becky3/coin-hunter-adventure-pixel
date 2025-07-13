@@ -2,6 +2,26 @@ const fs = require('fs');
 const path = require('path');
 const { toJSTString } = require('./utils/dateHelper.cjs');
 
+// Create a log file for the entire test run
+const runLogPath = path.join(__dirname, 'logs', `run-all-tests-${toJSTString()}.log`);
+const runLogStream = fs.createWriteStream(runLogPath, { flags: 'a' });
+
+// Override console.log to also write to log file
+const originalConsoleLog = console.log;
+console.log = function(...args) {
+    const message = args.join(' ');
+    originalConsoleLog.apply(console, args);
+    runLogStream.write(`[${new Date().toISOString()}] ${message}\n`);
+};
+
+// Override console.error to also write to log file
+const originalConsoleError = console.error;
+console.error = function(...args) {
+    const message = args.join(' ');
+    originalConsoleError.apply(console, args);
+    runLogStream.write(`[${new Date().toISOString()}] [ERROR] ${message}\n`);
+};
+
 // Automatically discover all test files
 function discoverTests() {
     const testDir = __dirname;
@@ -168,21 +188,45 @@ async function runAllTests() {
     }, null, 2));
     
     console.log(`\nTest report saved to: ${reportPath}`);
+    console.log(`\nFull test log saved to: ${runLogPath}`);
     
-    // Exit with appropriate code
-    if (failed > 0) {
-        console.log('\n❌ TEST FAILURE - BUILD SHOULD NOT PROCEED');
-        process.exit(1);
-    } else {
-        console.log('\n✅ ALL TESTS PASSED!');
-        process.exit(0);
-    }
+    // Close the log stream before exiting
+    runLogStream.end(() => {
+        // Exit with appropriate code
+        if (failed > 0) {
+            console.log('\n❌ TEST FAILURE - BUILD SHOULD NOT PROCEED');
+            process.exit(1);
+        } else {
+            console.log('\n✅ ALL TESTS PASSED!');
+            process.exit(0);
+        }
+    });
 }
 
 // Run tests
 if (require.main === module) {
+    console.log(`Starting test run at ${toJSTString()}`);
+    console.log(`Log file: ${runLogPath}`);
+    
     runAllTests().catch(error => {
         console.error('Test suite failed:', error);
-        process.exit(1);
+        runLogStream.end(() => {
+            process.exit(1);
+        });
     });
 }
+
+// Handle unexpected exits
+process.on('SIGINT', () => {
+    console.log('\nTest run interrupted by user');
+    runLogStream.end(() => {
+        process.exit(1);
+    });
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught exception:', error);
+    runLogStream.end(() => {
+        process.exit(1);
+    });
+});
