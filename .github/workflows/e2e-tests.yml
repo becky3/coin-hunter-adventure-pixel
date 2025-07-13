@@ -1,11 +1,36 @@
 name: E2E Tests
 
 on:
-  push:
-    branches: [ main ]
+  # 手動実行を主とする
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'テストタイプを選択'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - smoke
+  
+  # PRでの自動実行（ソースコード変更時のみ）
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/e2e-tests.yml'
+  
+  # mainブランチへのマージ時（ソースコード変更時のみ）
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'package-lock.json'
 
 # 同じPRに対する複数の実行をキャンセル
 concurrency:
@@ -87,9 +112,17 @@ jobs:
         CI: true
         NODE_ENV: test
       run: |
-        # タイムアウトを10分に設定してテスト実行
-        timeout --preserve-status 600 npm test 2>&1 | tee test-output.log
-        TEST_EXIT_CODE=${PIPESTATUS[0]}
+        # 手動実行時のテストタイプを判定
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.test_type }}" = "smoke" ]; then
+          echo "🎮 スモークテストを実行中..."
+          npm run test:smoke 2>&1 | tee test-output.log
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+        else
+          echo "📊 フルテストを実行中..."
+          # タイムアウトを10分に設定してテスト実行
+          timeout --preserve-status 600 npm test 2>&1 | tee test-output.log
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+        fi
         echo "TEST_EXIT_CODE=$TEST_EXIT_CODE" >> $GITHUB_ENV
         exit $TEST_EXIT_CODE
       continue-on-error: true
