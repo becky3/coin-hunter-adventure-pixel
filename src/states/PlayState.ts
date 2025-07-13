@@ -77,7 +77,7 @@ export class PlayState implements GameState {
         return this.hudManager;
     }
     
-    public getBackgroundDebugInfo() {
+    public getBackgroundDebugInfo(): { activeClouds: number; offscreenChunks: number } | null {
         return this.backgroundRenderer.getDebugInfo();
     }
 

@@ -16,7 +16,6 @@ interface OffscreenChunk {
     ctx: CanvasRenderingContext2D;
     startX: number;
     endX: number;
-    isDirty: boolean;
 }
 
 /**
@@ -24,13 +23,11 @@ interface OffscreenChunk {
  */
 export class BackgroundRenderer {
     private cloudPool: BackgroundElementPool;
-    private treePool: BackgroundElementPool;
     private cloudChunks: BackgroundChunkManager;
     private treeChunks: BackgroundChunkManager;
     private viewportMargin: number = 200;
     private lastCameraX: number = 0;
     private activeCloudElements: Map<string, BackgroundElement> = new Map();
-    private activeTreeElements: Map<string, BackgroundElement> = new Map();
     private isFirstRender: boolean = true;
     private offscreenChunks: Map<number, OffscreenChunk> = new Map();
     private chunkSize: number = 512;
@@ -38,7 +35,6 @@ export class BackgroundRenderer {
     
     constructor() {
         this.cloudPool = new BackgroundElementPool('cloud');
-        this.treePool = new BackgroundElementPool('tree');
         this.cloudChunks = new BackgroundChunkManager(this.chunkSize);
         this.treeChunks = new BackgroundChunkManager(this.chunkSize);
         
@@ -148,8 +144,7 @@ export class BackgroundRenderer {
             canvas,
             ctx,
             startX,
-            endX,
-            isDirty: false
+            endX
         };
     }
     
@@ -195,14 +190,10 @@ export class BackgroundRenderer {
     
     getDebugInfo(): { 
         activeClouds: number; 
-        activeTrees: number; 
-        totalActive: number;
         offscreenChunks: number;
         } {
         return {
             activeClouds: this.activeCloudElements.size,
-            activeTrees: this.treePool.getActiveCount(),
-            totalActive: this.activeCloudElements.size + this.treePool.getActiveCount(),
             offscreenChunks: this.offscreenChunks.size
         };
     }
