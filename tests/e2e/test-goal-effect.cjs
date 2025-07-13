@@ -28,12 +28,12 @@ async function testGoalEffect() {
         let playerPos = await t.getPlayerPosition();
         console.log(`  初期位置: ${playerPos.x}`);
         
-        // ゴール近くまで高速移動
+        // ゴール近くまで高速移動（stage0-1のゴールはx:17*16=272）
         await t.page.evaluate(() => {
             if (window.game && window.game.entityManager) {
                 const player = window.game.entityManager.getPlayer();
                 if (player) {
-                    player.x = 1500;
+                    player.x = 250;  // ゴール少し手前
                 }
             }
         });

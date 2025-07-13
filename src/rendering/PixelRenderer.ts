@@ -326,12 +326,4 @@ export class PixelRenderer {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(x, y, width, height);
     }
-    
-    strokeCircle(x: number, y: number, radius: number, color: string = '#FFFFFF', lineWidth: number = 1): void {
-        this.ctx.strokeStyle = color;
-        this.ctx.lineWidth = lineWidth;
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, radius, 0, Math.PI * 2);
-        this.ctx.stroke();
-    }
 }
