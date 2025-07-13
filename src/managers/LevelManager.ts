@@ -12,8 +12,8 @@ export interface LevelData {
     tileSize: number;
     playerSpawn: { x: number; y: number };
     entities?: Array<{ type: string; x: number; y: number }>;
-    backgroundColor?: string;
-    timeLimit?: number;
+    backgroundColor: string;
+    timeLimit: number;
 }
 
 interface GameServices {
@@ -67,8 +67,8 @@ export class LevelManager {
             
             this.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
             
-            this.backgroundColor = this.levelLoader.getBackgroundColor(levelData) || getMasterColor(UI_PALETTE_INDICES.skyBlue);
-            this.timeLimit = this.levelLoader.getTimeLimit(levelData) || 300;
+            this.backgroundColor = this.levelLoader.getBackgroundColor(levelData);
+            this.timeLimit = this.levelLoader.getTimeLimit(levelData);
             
             this.eventBus.emit('level:loaded', {
                 name: levelName,

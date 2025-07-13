@@ -4,7 +4,7 @@
   "width": 20,
   "height": 15,
   "tileSize": 16,
-  "backgroundColor": "#5C94FC",
+  "backgroundColor": 18,
   "playerSpawn": {
     "x": 1,
     "y": 11
