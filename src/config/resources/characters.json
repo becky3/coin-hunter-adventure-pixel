@@ -54,6 +54,23 @@
         "detectRange": 100,
         "attackRange": 20
       }
+    },
+    "bat": {
+      "physics": {
+        "width": 8,
+        "height": 8,
+        "moveSpeed": 0.5
+      },
+      "stats": {
+        "maxHealth": 1,
+        "damage": 1,
+        "scoreValue": 100
+      },
+      "ai": {
+        "type": "patrol",
+        "detectRange": 80,
+        "attackRange": 20
+      }
     }
   }
 }

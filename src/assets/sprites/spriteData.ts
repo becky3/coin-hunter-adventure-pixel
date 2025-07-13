@@ -30,6 +30,9 @@ import enemiesSlimeIdle1 from './enemies/slime_idle1.json';
 import enemiesSlimeIdle2 from './enemies/slime_idle2.json';
 import enemiesBirdFly1 from './enemies/bird_fly1.json';
 import enemiesBirdFly2 from './enemies/bird_fly2.json';
+import enemiesBatHang from './enemies/bat_hang.json';
+import enemiesBatFly1 from './enemies/bat_fly1.json';
+import enemiesBatFly2 from './enemies/bat_fly2.json';
 
 import uiHeart from './ui/heart.json';
 import uiHeartEmpty from './ui/heart_empty.json';
@@ -71,6 +74,9 @@ export const spriteDataMap: Record<string, unknown> = {
     'enemies/slime_idle2': enemiesSlimeIdle2,
     'enemies/bird_fly1': enemiesBirdFly1,
     'enemies/bird_fly2': enemiesBirdFly2,
+    'enemies/bat_hang': enemiesBatHang,
+    'enemies/bat_fly1': enemiesBatFly1,
+    'enemies/bat_fly2': enemiesBatFly2,
     'ui/heart': uiHeart,
     'ui/heart_empty': uiHeartEmpty,
     'environment/cloud1': environmentCloud1,
