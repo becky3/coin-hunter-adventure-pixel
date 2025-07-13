@@ -14,6 +14,7 @@ export interface LevelData {
     entities?: Array<{ type: string; x: number; y: number }>;
     backgroundColor: string;
     timeLimit: number;
+    goal: { x: number; y: number };
 }
 
 interface GameServices {
@@ -77,7 +78,8 @@ export class LevelManager {
                 backgroundColor: this.backgroundColor,
                 timeLimit: this.timeLimit,
                 playerSpawn: this.getPlayerSpawn(),
-                entities: levelData.entities || []
+                entities: levelData.entities || [],
+                goal: this.levelLoader.getGoalPosition(levelData)
             });
             
         } catch (error) {
@@ -200,7 +202,7 @@ export class LevelManager {
 
         this.levelWidth = this.tileMap[0].length * TILE_SIZE;
         this.levelHeight = this.tileMap.length * TILE_SIZE;
-        this.backgroundColor = '#5C94FC';
+        this.backgroundColor = getMasterColor(0x12);
         this.timeLimit = 300;
 
         this.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
@@ -209,7 +211,10 @@ export class LevelManager {
             width: this.tileMap[0].length,
             height: this.tileMap.length,
             tileSize: TILE_SIZE,
-            playerSpawn: { x: 2, y: 10 }
+            playerSpawn: { x: 2, y: 10 },
+            backgroundColor: this.backgroundColor,
+            timeLimit: this.timeLimit,
+            goal: { x: 14, y: 10 }
         };
 
         this.eventBus.emit('level:loaded', {
@@ -219,7 +224,8 @@ export class LevelManager {
             backgroundColor: this.backgroundColor,
             timeLimit: this.timeLimit,
             playerSpawn: this.getPlayerSpawn(),
-            entities: []
+            entities: [],
+            goal: { x: 14, y: 10 }
         });
     }
 
@@ -229,7 +235,7 @@ export class LevelManager {
         this.tileMap = [];
         this.levelWidth = 0;
         this.levelHeight = 0;
-        this.backgroundColor = '#5C94FC';
+        this.backgroundColor = getMasterColor(0x12);
         this.timeLimit = 300;
     }
     

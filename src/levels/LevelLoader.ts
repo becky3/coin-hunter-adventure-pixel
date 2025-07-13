@@ -156,6 +156,14 @@ export class LevelLoader {
         if (typeof data.backgroundColor !== 'number') {
             throw new Error('背景色はパレットインデックスで指定してください');
         }
+        
+        if (typeof data.timeLimit !== 'number') {
+            throw new Error('タイムリミットは数値で指定してください');
+        }
+        
+        if (typeof data.goal !== 'object' || typeof data.goal.x !== 'number' || typeof data.goal.y !== 'number') {
+            throw new Error('ゴール位置はオブジェクトで、xとyは数値で指定してください');
+        }
     }
     
     getCurrentStageData(): StageData | null {
