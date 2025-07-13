@@ -1,6 +1,6 @@
 import { bundledStageData } from '../data/bundledData';
 import { Logger } from '../utils/Logger';
-import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
+import { getMasterColor } from '../utils/pixelArtPalette';
 
 interface StageInfo {
     id: string;
@@ -21,9 +21,9 @@ interface StageData {
     playerSpawn: { x: number; y: number };
     tilemap: number[][];
     entities?: EntityData[];
-    goal?: { x: number; y: number };
-    timeLimit?: number;
-    backgroundColor?: string;
+    goal: { x: number; y: number };
+    timeLimit: number;
+    backgroundColor: number;
 }
 
 interface EntityData {
@@ -131,7 +131,7 @@ export class LevelLoader {
     }
     
     private validateStageData(data: StageData): void {
-        const required: (keyof StageData)[] = ['name', 'width', 'height', 'tileSize', 'playerSpawn', 'tilemap'];
+        const required: (keyof StageData)[] = ['name', 'width', 'height', 'tileSize', 'playerSpawn', 'tilemap', 'goal', 'timeLimit', 'backgroundColor'];
         
         for (const field of required) {
             if (!(field in data)) {
@@ -151,6 +151,18 @@ export class LevelLoader {
         }
         if (data.tilemap.length !== data.height) {
             throw new Error('タイルマップの高さが一致しません');
+        }
+        
+        if (typeof data.backgroundColor !== 'number') {
+            throw new Error('背景色はパレットインデックスで指定してください');
+        }
+        
+        if (typeof data.timeLimit !== 'number') {
+            throw new Error('タイムリミットは数値で指定してください');
+        }
+        
+        if (typeof data.goal !== 'object' || typeof data.goal.x !== 'number' || typeof data.goal.y !== 'number') {
+            throw new Error('ゴール位置はオブジェクトで、xとyは数値で指定してください');
         }
     }
     
@@ -201,30 +213,18 @@ export class LevelLoader {
     }
     
     getPlayerSpawn(levelData: StageData): { x: number; y: number } {
-        if (!levelData || !levelData.playerSpawn) {
-            return { x: 2, y: 10 };
-        }
         return levelData.playerSpawn;
     }
     
-    getGoalPosition(levelData: StageData): { x: number; y: number } | null {
-        if (!levelData || !levelData.goal) {
-            return null;
-        }
+    getGoalPosition(levelData: StageData): { x: number; y: number } {
         return levelData.goal;
     }
     
     getTimeLimit(levelData: StageData): number {
-        if (!levelData || !levelData.timeLimit) {
-            return 300;
-        }
         return levelData.timeLimit;
     }
     
     getBackgroundColor(levelData: StageData): string {
-        if (!levelData || !levelData.backgroundColor) {
-            return getMasterColor(UI_PALETTE_INDICES.skyBlue);
-        }
-        return levelData.backgroundColor;
+        return getMasterColor(levelData.backgroundColor);
     }
 }
