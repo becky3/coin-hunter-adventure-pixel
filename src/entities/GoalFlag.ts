@@ -61,8 +61,7 @@ export class GoalFlag extends Entity {
             renderer.drawSprite('terrain/goal_flag', this.x + wave, this.y);
             
             if (this.cleared) {
-                const screenPos = renderer.worldToScreen(this.x, this.y);
-                this.renderClearEffect(renderer, screenPos);
+                this.renderClearEffect(renderer);
             }
         } else {
             renderer.drawRect(this.x, this.y, this.width, this.height, '#FFD700');
@@ -79,7 +78,7 @@ export class GoalFlag extends Entity {
         }
     }
 
-    private renderClearEffect(renderer: PixelRenderer, _screenPos: { x: number; y: number }): void {
+    private renderClearEffect(renderer: PixelRenderer): void {
         const time = this.animationTime * 0.001;
         const baseRadius = 30;
         const radiusVariation = 10;
