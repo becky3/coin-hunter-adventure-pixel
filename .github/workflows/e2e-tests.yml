@@ -1,0 +1,212 @@
+name: E2E Tests
+
+on:
+  # 手動実行のみ
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'テストタイプを選択'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - smoke
+      branch:
+        description: '実行するブランチ（デフォルト: 現在のブランチ）'
+        required: false
+        type: string
+
+# 同じPRに対する複数の実行をキャンセル
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# ワークフローの権限設定
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Puppeteer dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libnss3 \
+          libnspr4 \
+          libatk1.0-0 \
+          libatk-bridge2.0-0 \
+          libcups2 \
+          libdrm2 \
+          libxkbcommon0 \
+          libxcomposite1 \
+          libxdamage1 \
+          libxfixes3 \
+          libxrandr2 \
+          libgbm1 \
+          libasound2t64
+
+    - name: Build project
+      run: npm run build
+
+    - name: Start development server
+      run: |
+        npm run dev &
+        SERVER_PID=$!
+        echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+        
+    - name: Wait for server to be ready
+      run: |
+        echo "Waiting for development server to start..."
+        for i in {1..30}; do
+          if curl -s http://localhost:3000 > /dev/null; then
+            echo "Server is ready!"
+            break
+          fi
+          echo "Waiting... ($i/30)"
+          sleep 2
+        done
+        
+        # 最終確認
+        if ! curl -s http://localhost:3000 > /dev/null; then
+          echo "Server failed to start!"
+          exit 1
+        fi
+
+    - name: Run E2E tests
+      id: run-tests
+      env:
+        CI: true
+        NODE_ENV: test
+      run: |
+        # 手動実行時のテストタイプを判定
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.test_type }}" = "smoke" ]; then
+          echo "🎮 スモークテストを実行中..."
+          npm run test:smoke 2>&1 | tee test-output.log
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+        else
+          echo "📊 フルテストを実行中..."
+          # タイムアウトを10分に設定してテスト実行
+          timeout --preserve-status 600 npm test 2>&1 | tee test-output.log
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+        fi
+        echo "TEST_EXIT_CODE=$TEST_EXIT_CODE" >> $GITHUB_ENV
+        exit $TEST_EXIT_CODE
+      continue-on-error: true
+
+    - name: Upload test logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-logs
+        path: |
+          tests/logs/
+          test-output.log
+        retention-days: 7
+
+    - name: Upload test screenshots
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-screenshots
+        path: tests/screenshots/
+        retention-days: 7
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports
+        path: tests/reports/
+        retention-days: 7
+
+    - name: Stop development server
+      if: always()
+      run: |
+        if [ ! -z "$SERVER_PID" ]; then
+          kill $SERVER_PID || true
+        fi
+
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const testExitCode = process.env.TEST_EXIT_CODE;
+          const success = testExitCode === '0';
+          
+          let comment = '## E2E Test Results\n\n';
+          
+          if (success) {
+            comment += '✅ **All E2E tests passed!**\n\n';
+          } else {
+            comment += '❌ **E2E tests failed**\n\n';
+            
+            // テスト出力から簡単なサマリーを抽出
+            try {
+              const output = fs.readFileSync('test-output.log', 'utf8');
+              const lines = output.split('\n');
+              
+              // 失敗したテストを探す
+              const failedTests = lines.filter(line => line.includes('❌') && line.includes('FAILED'));
+              if (failedTests.length > 0) {
+                comment += '### Failed Tests:\n';
+                failedTests.forEach(test => {
+                  comment += `- ${test.trim()}\n`;
+                });
+                comment += '\n';
+              }
+              
+              // テストサマリーを探す
+              const summaryIndex = lines.findIndex(line => line.includes('TEST SUITE SUMMARY'));
+              if (summaryIndex !== -1) {
+                comment += '### Summary:\n```\n';
+                for (let i = summaryIndex; i < Math.min(summaryIndex + 10, lines.length); i++) {
+                  if (lines[i].includes('Detailed Results:')) break;
+                  comment += lines[i] + '\n';
+                }
+                comment += '```\n';
+              }
+            } catch (e) {
+              comment += 'Could not parse test output.\n';
+            }
+          }
+          
+          comment += '\n### Artifacts\n';
+          comment += `- [Test Logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})\n`;
+          if (!success) {
+            comment += `- Check the workflow artifacts for screenshots and detailed logs\n`;
+          }
+          
+          // PRにコメント
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+    - name: Check test results
+      if: env.TEST_EXIT_CODE != '0'
+      run: |
+        echo "E2E tests failed with exit code $TEST_EXIT_CODE"
+        exit $TEST_EXIT_CODE

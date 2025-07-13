@@ -1,5 +1,7 @@
 # 🎮 Coin Hunter Adventure - Pixel Edition
 
+[![E2E Tests](https://github.com/becky3/coin-hunter-adventure-pixel/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/becky3/coin-hunter-adventure-pixel/actions/workflows/e2e-tests.yml)
+
 Canvas APIとピクセルアートグラフィックで構築されたレトロスタイルのプラットフォーマーゲームです。
 
 ## 🚀 はじめに
