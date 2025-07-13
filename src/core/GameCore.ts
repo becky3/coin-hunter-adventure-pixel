@@ -24,6 +24,7 @@ import { PhysicsSystemAdapter } from '../systems/adapters/PhysicsSystemAdapter';
 import { StateSystemAdapter } from '../systems/adapters/StateSystemAdapter';
 import { RenderSystemAdapter } from '../systems/adapters/RenderSystemAdapter';
 import { DebugSystemAdapter } from '../systems/adapters/DebugSystemAdapter';
+import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 
 /**
  * GameCore implementation
@@ -55,6 +56,12 @@ export class GameCore {
         this.registerStates();
 
         Logger.log('GameCore: Initializing debug overlay...');
+        const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
+        const performanceMonitor = PerformanceMonitor.getInstance();
+        performanceMonitor.initialize(renderer);
+        
+        (window as Window & { PerformanceMonitor?: typeof PerformanceMonitor }).PerformanceMonitor = PerformanceMonitor;
+        
         this.debugOverlay = new DebugOverlay(this._serviceLocator);
         await this.debugOverlay.init();
 
@@ -168,7 +175,10 @@ export class GameCore {
         const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
         const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
 
+        const performanceMonitor = PerformanceMonitor.getInstance();
+        
         this.gameLoop.start((deltaTime) => {
+            performanceMonitor.beginFrame();
 
             systemManager.updateSystems(deltaTime);
             
@@ -178,6 +188,8 @@ export class GameCore {
 
             const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
             systemManager.renderSystems(renderer);
+            
+            performanceMonitor.endFrame();
         });
         
         Logger.log('GameCore: Game loop started, running:', this.gameLoop.isRunning());

@@ -15,6 +15,7 @@ import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { AssetLoader, StageType } from '../assets/AssetLoader';
 import { BackgroundRenderer } from '../rendering/BackgroundRenderer';
 import { TileRenderer } from '../rendering/TileRenderer';
+import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 
 interface Game {
     renderer?: PixelRenderer;
@@ -30,6 +31,7 @@ interface Game {
 declare global {
     interface Window {
         debugWarp?: (x: number, y: number, tileCoords?: boolean) => void;
+        debugSetLives?: (lives: number) => void;
     }
 }
 
@@ -238,6 +240,14 @@ export class PlayState implements GameState {
         
         const enterEndTime = performance.now();
         Logger.log(`[PlayState] enter() completed in ${(enterEndTime - enterStartTime).toFixed(2)}ms`);
+        
+        if (typeof window !== 'undefined') {
+            window.debugSetLives = (lives: number) => {
+                this.lives = lives;
+                this.hudManager.updateLives(lives);
+                Logger.log('[PlayState] Lives set to:', lives);
+            };
+        }
     }
 
     update(deltaTime: number): void {
@@ -276,21 +286,31 @@ export class PlayState implements GameState {
     }
 
     render(renderer: PixelRenderer): void {
+        const performanceMonitor = PerformanceMonitor.getInstance();
+        
         const backgroundColor = this.levelManager.getBackgroundColor();
         renderer.clear(backgroundColor);
 
         const camera = this.cameraController.getCamera();
         renderer.setCamera(camera.x, camera.y);
         
+        performanceMonitor.startLayer('background');
         this.backgroundRenderer.render(renderer);
+        performanceMonitor.endLayer();
 
+        performanceMonitor.startLayer('tilemap');
         this.renderTileMap(renderer);
+        performanceMonitor.endLayer();
 
+        performanceMonitor.startLayer('entities');
         this.entityManager.renderAll(renderer);
+        performanceMonitor.endLayer();
 
         renderer.setCamera(0, 0);
 
+        performanceMonitor.startLayer('hud');
         this.hudManager.render(renderer);
+        performanceMonitor.endLayer();
     }
 
     exit(): void {

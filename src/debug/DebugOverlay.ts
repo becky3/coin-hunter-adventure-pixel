@@ -7,6 +7,8 @@ import { URLParams } from '../utils/urlParams';
 import { Logger } from '../utils/Logger';
 import type { StateEvent } from '../states/GameStateManager';
 import { EnemySpawnDialog } from './EnemySpawnDialog';
+import { PerformanceMonitor } from '../performance/PerformanceMonitor';
+import { LevelLoader } from '../levels/LevelLoader';
 
 /**
  * DebugOverlay implementation
@@ -16,11 +18,7 @@ export class DebugOverlay {
     private debugElement?: HTMLDivElement;
     private statsElements: Map<string, HTMLElement> = new Map();
     
-    private stageList: string[] = [
-        'stage1-1', 'stage1-2', 'stage1-3',
-        'stage0-1', 'stage0-2', 'stage0-3', 'stage0-4',
-        'performance-test'
-    ];
+    private stageList: string[] = [];
     private selectedStageIndex: number = 0;
     private stageSelectElement?: HTMLElement;
     
@@ -29,21 +27,16 @@ export class DebugOverlay {
     private lastFPSUpdate: number = 0;
     
     private enemySpawnDialog?: EnemySpawnDialog;
+    private performanceMonitor: PerformanceMonitor;
+    private showPerformanceDetails: boolean = false;
     
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
-        
-        const urlParams = new URLParams();
-        const urlStage = urlParams.getStageId();
-        if (urlStage) {
-            const stageIndex = this.stageList.indexOf(urlStage);
-            if (stageIndex !== -1) {
-                this.selectedStageIndex = stageIndex;
-            }
-        }
+        this.performanceMonitor = PerformanceMonitor.getInstance();
     }
 
     async init(): Promise<void> {
+        await this.loadStageList();
         this.createDebugUI();
         this.setupEventListeners();
         
@@ -63,6 +56,33 @@ export class DebugOverlay {
     
     getFPS(): number {
         return this.fps;
+    }
+    
+    private async loadStageList(): Promise<void> {
+        try {
+            const levelLoader = new LevelLoader();
+            const stageData = await levelLoader.loadStageList();
+            this.stageList = stageData.stages.map(stage => stage.id);
+            
+            const urlParams = new URLParams();
+            const urlStage = urlParams.getStageId();
+            
+            if (urlStage && this.stageList.includes(urlStage)) {
+                this.selectedStageIndex = this.stageList.indexOf(urlStage);
+            }
+            else if (stageData.defaultStage && this.stageList.includes(stageData.defaultStage)) {
+                this.selectedStageIndex = this.stageList.indexOf(stageData.defaultStage);
+            }
+            else {
+                this.selectedStageIndex = 0;
+            }
+            
+            Logger.log('DebugOverlay', `Loaded ${this.stageList.length} stages from stages.json`);
+        } catch {
+            Logger.error('DebugOverlay', 'Failed to load stage list, using default');
+            this.stageList = ['stage1-1'];
+            this.selectedStageIndex = 0;
+        }
     }
 
     private createDebugUI(): void {
@@ -88,7 +108,7 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['FPS', 'Speed', 'State', 'Player X', 'Player Y'];
+        const stats = ['FPS', 'Speed', 'State', 'Player X', 'Player Y', 'Frame Time', 'Draw Calls'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
@@ -117,11 +137,21 @@ export class DebugOverlay {
             this.stageSelectElement = spanElement;
         }
         
+        const performanceDiv = document.createElement('div');
+        performanceDiv.id = 'performance-details';
+        performanceDiv.style.marginTop = '10px';
+        performanceDiv.style.paddingTop = '10px';
+        performanceDiv.style.borderTop = '1px solid #444';
+        performanceDiv.style.display = 'none';
+        if (this.debugElement) {
+            this.debugElement.appendChild(performanceDiv);
+        }
+        
         const helpDiv = document.createElement('div');
         helpDiv.style.marginTop = '10px';
         helpDiv.style.fontSize = '10px';
         helpDiv.style.color = '#888';
-        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset<br>D: Toggle Stage Select | ←→: Select<br>O: Spawn Enemy';
+        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset<br>D: Toggle Stage Select | ←→: Select<br>O: Spawn Enemy | P: Performance Details';
         if (this.debugElement) {
             this.debugElement.appendChild(helpDiv);
         }
@@ -172,6 +202,11 @@ export class DebugOverlay {
                 }
             }
             
+            if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                this.togglePerformanceDetails();
+            }
+            
             const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
             const currentState = game?.stateManager?.currentState;
             
@@ -213,6 +248,16 @@ export class DebugOverlay {
             this.frameCount = 0;
             this.lastFPSUpdate = currentTime;
             this.updateStat('fps', this.fps.toString());
+        }
+        
+        const perfMetrics = this.performanceMonitor.getLatestMetrics();
+        if (perfMetrics) {
+            this.updateStat('frame_time', `${perfMetrics.frameTime.toFixed(2)}ms`);
+            this.updateStat('draw_calls', perfMetrics.drawCalls.total.toString());
+            
+            if (this.showPerformanceDetails) {
+                this.updatePerformanceDetails(perfMetrics);
+            }
         }
         
         const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: Event & { data?: { to?: string } }) => void) => void; currentState?: { name: string } } } }).game;
@@ -286,6 +331,62 @@ export class DebugOverlay {
         }
         
         return null;
+    }
+    
+    private togglePerformanceDetails(): void {
+        this.showPerformanceDetails = !this.showPerformanceDetails;
+        const perfDiv = document.getElementById('performance-details');
+        if (perfDiv) {
+            perfDiv.style.display = this.showPerformanceDetails ? 'block' : 'none';
+        }
+    }
+    
+    private updatePerformanceDetails(metrics: {
+        drawCalls: { drawSprite: number; drawRect: number; drawText: number; drawLine: number; };
+        canvasOperations?: { save: number; restore: number; scale: number; setTransform: number; 
+                            globalAlpha: number; fillRect: number; clearRect: number; drawImage: number; };
+        pixelMetrics?: { totalPixelsDrawn: number; overdrawRatio: number; offscreenDrawRatio: number; 
+                        fillRectArea: number; clearRectArea: number; };
+        gpuMetrics?: { estimatedLoad: number; hardwareAcceleration: boolean; webglAvailable: boolean; gpuTier: string; };
+        memoryUsed: number;
+    }): void {
+        const perfDiv = document.getElementById('performance-details');
+        if (!perfDiv) return;
+        
+        let html = '<div style="color: #ffff00">Performance Details:</div>';
+        
+        html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">Draw Calls:</div>';
+        html += `<div>Sprites: ${metrics.drawCalls.drawSprite}</div>`;
+        html += `<div>Rects: ${metrics.drawCalls.drawRect}</div>`;
+        html += `<div>Text: ${metrics.drawCalls.drawText}</div>`;
+        html += `<div>Lines: ${metrics.drawCalls.drawLine}</div>`;
+        
+        if (metrics.canvasOperations) {
+            html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">Canvas Ops:</div>';
+            html += `<div>Save/Restore: ${metrics.canvasOperations.save}/${metrics.canvasOperations.restore}</div>`;
+            html += `<div>Scale: ${metrics.canvasOperations.scale}</div>`;
+            html += `<div>Transform: ${metrics.canvasOperations.setTransform}</div>`;
+        }
+        
+        if (metrics.pixelMetrics) {
+            html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">Pixel Stats:</div>';
+            html += `<div>Total: ${(metrics.pixelMetrics.totalPixelsDrawn / 1000000).toFixed(2)}M</div>`;
+            html += `<div>Overdraw: ${metrics.pixelMetrics.overdrawRatio.toFixed(2)}</div>`;
+            html += `<div>Offscreen: ${(metrics.pixelMetrics.offscreenDrawRatio * 100).toFixed(1)}%</div>`;
+        }
+        
+        if (metrics.gpuMetrics) {
+            html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">GPU:</div>';
+            html += `<div>Est.Load: ${metrics.gpuMetrics.estimatedLoad.toFixed(1)}%</div>`;
+            html += `<div>HW Accel: ${metrics.gpuMetrics.hardwareAcceleration ? 'Yes' : 'No'}</div>`;
+            html += `<div>Tier: ${metrics.gpuMetrics.gpuTier}</div>`;
+        }
+        
+        if (metrics.memoryUsed > 0) {
+            html += `<div style="margin-top: 5px;">Memory: ${metrics.memoryUsed.toFixed(1)}MB</div>`;
+        }
+        
+        perfDiv.innerHTML = html;
     }
 
     destroy(): void {

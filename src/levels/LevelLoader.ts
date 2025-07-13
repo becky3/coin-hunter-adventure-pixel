@@ -10,6 +10,7 @@ interface StageInfo {
 }
 
 interface StageList {
+    defaultStage?: string;
     stages: StageInfo[];
 }
 
