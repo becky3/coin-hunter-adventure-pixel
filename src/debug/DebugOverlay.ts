@@ -334,30 +334,48 @@ export class DebugOverlay {
         }
     }
     
-    private updatePerformanceDetails(metrics: {
-        fps: number;
-        frameTime: number;
-        memoryUsed: number;
-        drawCalls: {
-            drawSprite: number;
-            drawRect: number;
-            drawText: number;
-            drawLine: number;
-            total: number;
-        };
-        timestamp: number;
-    }): void {
+    private updatePerformanceDetails(metrics: any): void {
         const perfDiv = document.getElementById('performance-details');
         if (!perfDiv) return;
         
-        perfDiv.innerHTML = `
-            <div style="color: #ffff00">Performance Details:</div>
-            <div>Sprites: ${metrics.drawCalls.drawSprite}</div>
-            <div>Rects: ${metrics.drawCalls.drawRect}</div>
-            <div>Text: ${metrics.drawCalls.drawText}</div>
-            <div>Lines: ${metrics.drawCalls.drawLine}</div>
-            ${metrics.memoryUsed > 0 ? `<div>Memory: ${metrics.memoryUsed.toFixed(1)}MB</div>` : ''}
-        `;
+        let html = '<div style="color: #ffff00">Performance Details:</div>';
+        
+        // Draw Calls
+        html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">Draw Calls:</div>';
+        html += `<div>Sprites: ${metrics.drawCalls.drawSprite}</div>`;
+        html += `<div>Rects: ${metrics.drawCalls.drawRect}</div>`;
+        html += `<div>Text: ${metrics.drawCalls.drawText}</div>`;
+        html += `<div>Lines: ${metrics.drawCalls.drawLine}</div>`;
+        
+        // Canvas Operations
+        if (metrics.canvasOperations) {
+            html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">Canvas Ops:</div>';
+            html += `<div>Save/Restore: ${metrics.canvasOperations.save}/${metrics.canvasOperations.restore}</div>`;
+            html += `<div>Scale: ${metrics.canvasOperations.scale}</div>`;
+            html += `<div>Transform: ${metrics.canvasOperations.setTransform}</div>`;
+        }
+        
+        // Pixel Metrics
+        if (metrics.pixelMetrics) {
+            html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">Pixel Stats:</div>';
+            html += `<div>Total: ${(metrics.pixelMetrics.totalPixelsDrawn / 1000000).toFixed(2)}M</div>`;
+            html += `<div>Overdraw: ${metrics.pixelMetrics.overdrawRatio.toFixed(2)}</div>`;
+            html += `<div>Offscreen: ${(metrics.pixelMetrics.offscreenDrawRatio * 100).toFixed(1)}%</div>`;
+        }
+        
+        // GPU Info
+        if (metrics.gpuMetrics) {
+            html += '<div style="margin-top: 5px; border-top: 1px solid #444; padding-top: 5px;">GPU:</div>';
+            html += `<div>Est.Load: ${metrics.gpuMetrics.estimatedLoad.toFixed(1)}%</div>`;
+            html += `<div>HW Accel: ${metrics.gpuMetrics.hardwareAcceleration ? 'Yes' : 'No'}</div>`;
+            html += `<div>Tier: ${metrics.gpuMetrics.gpuTier}</div>`;
+        }
+        
+        if (metrics.memoryUsed > 0) {
+            html += `<div style="margin-top: 5px;">Memory: ${metrics.memoryUsed.toFixed(1)}MB</div>`;
+        }
+        
+        perfDiv.innerHTML = html;
     }
 
     destroy(): void {

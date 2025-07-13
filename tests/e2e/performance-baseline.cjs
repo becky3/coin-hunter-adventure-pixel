@@ -199,6 +199,31 @@ async function measurePerformanceBaseline() {
         
         console.log('\n========================================');
         
+        // 詳細メトリクスをログ出力
+        await t.page.evaluate(() => {
+            const performanceMonitor = window.PerformanceMonitor?.getInstance();
+            if (performanceMonitor && performanceMonitor.logDetailedMetrics) {
+                performanceMonitor.logDetailedMetrics();
+            }
+        });
+        
+        // CSVデータをエクスポート
+        const csvData = await t.page.evaluate(() => {
+            const performanceMonitor = window.PerformanceMonitor?.getInstance();
+            if (performanceMonitor && performanceMonitor.exportMetrics) {
+                return performanceMonitor.exportMetrics();
+            }
+            return null;
+        });
+        
+        if (csvData) {
+            const fs = require('fs');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `tests/logs/performance-baseline-${timestamp}.csv`;
+            fs.writeFileSync(filename, csvData);
+            console.log(`\n📄 詳細データを保存: ${filename}`);
+        }
+        
         console.log('\n✅ 計測完了');
         
         await t.checkForErrors();
