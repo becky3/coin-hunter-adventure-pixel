@@ -76,6 +76,10 @@ export class PlayState implements GameState {
     public getHudManager() {
         return this.hudManager;
     }
+    
+    public getBackgroundDebugInfo() {
+        return this.backgroundRenderer.getDebugInfo();
+    }
 
     constructor(game: Game) {
         this.game = game;
@@ -109,6 +113,7 @@ export class PlayState implements GameState {
         });
         
         this.backgroundRenderer = new BackgroundRenderer();
+        Logger.log('[PlayState] Using optimized background renderer');
         this.tileRenderer = new TileRenderer();
 
         if (typeof window !== 'undefined') {
