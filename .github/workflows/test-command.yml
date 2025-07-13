@@ -73,7 +73,8 @@ jobs:
             ref: prData.ref,
             inputs: {
               test_type: testType,
-              branch: prData.ref
+              branch: prData.ref,
+              pr_number: context.issue.number.toString()
             }
           });
           

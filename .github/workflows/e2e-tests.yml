@@ -16,6 +16,10 @@ on:
         description: '実行するブランチ（デフォルト: 現在のブランチ）'
         required: false
         type: string
+      pr_number:
+        description: 'PR番号（/testコマンド経由の場合）'
+        required: false
+        type: string
 
 # 同じPRに対する複数の実行をキャンセル
 concurrency:
@@ -146,7 +150,7 @@ jobs:
         fi
 
     - name: Comment PR with results
-      if: github.event_name == 'pull_request' && always()
+      if: (github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.pr_number)) && always()
       uses: actions/github-script@v7
       with:
         script: |
@@ -198,8 +202,14 @@ jobs:
           }
           
           // PRにコメント
+          const prNumber = context.issue?.number || ${{ inputs.pr_number || 'null' }};
+          if (!prNumber) {
+            console.log('No PR number available, skipping comment');
+            return;
+          }
+          
           github.rest.issues.createComment({
-            issue_number: context.issue.number,
+            issue_number: prNumber,
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: comment
