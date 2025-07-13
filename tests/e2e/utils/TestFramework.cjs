@@ -46,8 +46,11 @@ class TestFramework {
         console.log(`${'='.repeat(50)}\n`);
 
         // Launch browser
+        // CI環境の検出
+        const isCI = process.env.CI === 'true';
+        
         this.browser = await puppeteer.launch({
-            headless: this.options.headless,
+            headless: isCI ? 'new' : this.options.headless, // CI環境では新しいヘッドレスモードを強制
             devtools: this.options.devtools,
             args: [
                 '--no-sandbox', 
