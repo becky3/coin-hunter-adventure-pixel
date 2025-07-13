@@ -1,7 +1,7 @@
 name: E2E Tests
 
 on:
-  # 手動実行を主とする
+  # 手動実行のみ
   workflow_dispatch:
     inputs:
       test_type:
@@ -12,25 +12,10 @@ on:
         options:
           - full
           - smoke
-  
-  # PRでの自動実行（ソースコード変更時のみ）
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/e2e-tests.yml'
-  
-  # mainブランチへのマージ時（ソースコード変更時のみ）
-  push:
-    branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'package.json'
-      - 'package-lock.json'
+      branch:
+        description: '実行するブランチ（デフォルト: 現在のブランチ）'
+        required: false
+        type: string
 
 # 同じPRに対する複数の実行をキャンセル
 concurrency:
