@@ -173,7 +173,10 @@ export class GameCore {
         const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
         const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
 
+        const performanceMonitor = PerformanceMonitor.getInstance();
+        
         this.gameLoop.start((deltaTime) => {
+            performanceMonitor.beginFrame();
 
             systemManager.updateSystems(deltaTime);
             
@@ -183,6 +186,8 @@ export class GameCore {
 
             const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
             systemManager.renderSystems(renderer);
+            
+            performanceMonitor.endFrame();
         });
         
         Logger.log('GameCore: Game loop started, running:', this.gameLoop.isRunning());

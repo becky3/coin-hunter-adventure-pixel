@@ -26,6 +26,12 @@
       "filename": "stage0-4.json"
     },
     {
+      "id": "stage0-5",
+      "name": "PERFORMANCE TEST",
+      "description": "Performance measurement stage without gaps",
+      "filename": "stage0-5.json"
+    },
+    {
       "id": "stage1-1",
       "name": "STAGE 1-1",
       "description": "The adventure begins",

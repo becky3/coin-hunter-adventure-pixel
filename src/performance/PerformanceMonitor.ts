@@ -30,6 +30,7 @@ export class PerformanceMonitor {
     private metrics: PerformanceMetrics[] = [];
     private maxMetricsHistory = 60;
     private lastFrameTime = 0;
+    private lastRealFrameTime = 0;
     private frameCount = 0;
     private fpsUpdateInterval = 1000;
     private lastFpsUpdate = 0;
@@ -81,7 +82,12 @@ export class PerformanceMonitor {
         };
 
         this.renderer.drawRect = (...args: Parameters<typeof PixelRenderer.prototype.drawRect>) => {
-            if (this.enabled) this.currentDrawCalls.drawRect++;
+            if (this.enabled) {
+                this.currentDrawCalls.drawRect++;
+                if (this.currentDrawCalls.drawRect === 1) {
+                    Logger.log('[PerformanceMonitor] First drawRect call detected');
+                }
+            }
             if (this.drawCallHooks) {
                 return this.drawCallHooks.originalDrawRect.apply(this.renderer, args);
             }
@@ -104,8 +110,8 @@ export class PerformanceMonitor {
 
     beginFrame(): void {
         if (!this.enabled) return;
-        this.lastFrameTime = performance.now();
         this.resetDrawCalls();
+        this.lastFrameTime = performance.now();
     }
 
     endFrame(): void {
@@ -113,6 +119,10 @@ export class PerformanceMonitor {
 
         const currentTime = performance.now();
         const frameTime = currentTime - this.lastFrameTime;
+        
+        // 実際のフレーム間隔を計測（前回のendFrameからの時間）
+        const realFrameTime = this.lastRealFrameTime > 0 ? currentTime - this.lastRealFrameTime : 16.67;
+        this.lastRealFrameTime = currentTime;
 
         this.frameCount++;
         if (currentTime - this.lastFpsUpdate >= this.fpsUpdateInterval) {
@@ -129,7 +139,7 @@ export class PerformanceMonitor {
 
         const metrics: PerformanceMetrics = {
             fps: this.currentFps,
-            frameTime: frameTime,
+            frameTime: realFrameTime,
             memoryUsed: this.getMemoryUsage(),
             drawCalls: { ...this.currentDrawCalls },
             timestamp: currentTime

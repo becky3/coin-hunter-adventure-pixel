@@ -8,6 +8,7 @@ import { Logger } from '../utils/Logger';
 import type { StateEvent } from '../states/GameStateManager';
 import { EnemySpawnDialog } from './EnemySpawnDialog';
 import { PerformanceMonitor } from '../performance/PerformanceMonitor';
+import { LevelLoader } from '../levels/LevelLoader';
 
 /**
  * DebugOverlay implementation
@@ -17,11 +18,7 @@ export class DebugOverlay {
     private debugElement?: HTMLDivElement;
     private statsElements: Map<string, HTMLElement> = new Map();
     
-    private stageList: string[] = [
-        'stage1-1', 'stage1-2', 'stage1-3',
-        'stage0-1', 'stage0-2', 'stage0-3', 'stage0-4',
-        'performance-test'
-    ];
+    private stageList: string[] = [];
     private selectedStageIndex: number = 0;
     private stageSelectElement?: HTMLElement;
     
@@ -36,18 +33,10 @@ export class DebugOverlay {
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
         this.performanceMonitor = PerformanceMonitor.getInstance();
-        
-        const urlParams = new URLParams();
-        const urlStage = urlParams.getStageId();
-        if (urlStage) {
-            const stageIndex = this.stageList.indexOf(urlStage);
-            if (stageIndex !== -1) {
-                this.selectedStageIndex = stageIndex;
-            }
-        }
     }
 
     async init(): Promise<void> {
+        await this.loadStageList();
         this.createDebugUI();
         this.setupEventListeners();
         
@@ -67,6 +56,26 @@ export class DebugOverlay {
     
     getFPS(): number {
         return this.fps;
+    }
+    
+    private async loadStageList(): Promise<void> {
+        try {
+            const levelLoader = new LevelLoader();
+            const stageData = await levelLoader.loadStageList();
+            this.stageList = stageData.stages.map(stage => stage.id);
+            
+            const urlParams = new URLParams();
+            const urlStage = urlParams.getStageId();
+            if (urlStage && this.stageList.includes(urlStage)) {
+                this.selectedStageIndex = this.stageList.indexOf(urlStage);
+            }
+            
+            Logger.log('DebugOverlay', `Loaded ${this.stageList.length} stages from stages.json`);
+        } catch (error) {
+            Logger.error('DebugOverlay', 'Failed to load stage list, using default');
+            this.stageList = ['stage1-1'];
+            this.selectedStageIndex = 0;
+        }
     }
 
     private createDebugUI(): void {

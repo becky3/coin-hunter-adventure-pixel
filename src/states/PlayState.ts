@@ -30,6 +30,7 @@ interface Game {
 declare global {
     interface Window {
         debugWarp?: (x: number, y: number, tileCoords?: boolean) => void;
+        debugSetLives?: (lives: number) => void;
     }
 }
 
@@ -238,6 +239,14 @@ export class PlayState implements GameState {
         
         const enterEndTime = performance.now();
         Logger.log(`[PlayState] enter() completed in ${(enterEndTime - enterStartTime).toFixed(2)}ms`);
+        
+        if (typeof window !== 'undefined') {
+            window.debugSetLives = (lives: number) => {
+                this.lives = lives;
+                this.hudManager.updateLives(lives);
+                Logger.log('[PlayState] Lives set to:', lives);
+            };
+        }
     }
 
     update(deltaTime: number): void {

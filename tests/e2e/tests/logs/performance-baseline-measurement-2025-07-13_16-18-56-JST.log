@@ -1,0 +1,279 @@
+[LOG] Log file created: /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/tests/logs/performance-baseline-measurement-2025-07-13_16-18-56-JST.log
+[LOG] 
+==================================================
+[LOG] Starting test: Performance Baseline Measurement
+[LOG] Time: 2025-07-13_16-18-56-JST (JST)
+[LOG] ==================================================
+
+[LOG] Test timeout set to: 60000ms
+[LOG] 💉 Error tracking injected
+[LOG] Navigating to: http://localhost:3000?s=0-5&skip_title=true
+[LOG] [Browser Console debug] [vite] connecting...
+[LOG] [Browser Console debug] [vite] connected.
+[LOG] [Browser Console log] [16:19:00.045] Starting game initialization...
+[LOG] [Browser Console log] [16:19:00.048] Initializing GameCore...
+[LOG] [Browser Console log] [16:19:00.049] GameCore: init() started
+[LOG] [Browser Console log] [16:19:00.049] GameCore: Initializing ResourceLoader...
+[LOG] [Browser Console log] [16:19:00.049] [ResourceLoader] Using bundled data for: /src/config/resources/index.json
+[LOG] [Browser Console log] [16:19:00.049] [ResourceLoader] Using bundled data for: /src/config/resources/sprites.json
+[LOG] [Browser Console log] [16:19:00.049] [ResourceLoader] Using bundled data for: /src/config/resources/characters.json
+[LOG] [Browser Console log] [16:19:00.049] [ResourceLoader] Using bundled data for: /src/config/resources/audio.json
+[LOG] [Browser Console log] [16:19:00.049] [ResourceLoader] Using bundled data for: /src/config/resources/objects.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/title.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/physics.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/game.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/victory.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/gameover.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/se/coin.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/se/jump.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/se/damage.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/se/button.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/se/gameStart.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/se/goal.json
+[LOG] [Browser Console log] [16:19:00.050] [ResourceLoader] Using bundled data for: /src/config/resources/se/enemyDefeat.json
+[LOG] [Browser Console log] [16:19:00.051] GameCore: Registering core services...
+[LOG] [Browser Console log] [16:19:00.054] [PhysicsSystem] Initialized with:
+[LOG] [Browser Console log] [16:19:00.054]   - Gravity: 0.65
+[LOG] [Browser Console log] [16:19:00.054]   - Max fall speed: 15
+[LOG] [Browser Console log] [16:19:00.054]   - Friction: 0.8
+[LOG] [Browser Console log] [16:19:00.054] GameCore: Registering systems...
+[LOG] [Browser Console log] [16:19:00.056] GameCore: Initializing MusicSystem...
+[LOG] [Browser Console log] [16:19:00.056] MusicSystem: init() called
+[LOG] [Browser Console log] [16:19:00.126] MusicSystem: AudioContext created
+[LOG] [Browser Console log] [16:19:00.126] MusicSystem: AudioContext is suspended, attempting to resume...
+[LOG] [Browser Console warn] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio
+[LOG] ✅ Page loaded
+[LOG] Waiting for game initialization...
+[LOG] Game object exists: true
+[LOG] [Browser Console warn] [16:19:05.127] GameCore: MusicSystem initialization failed, continuing without audio: JSHandle@error
+[LOG] [Browser Console log] [16:19:05.128] GameCore: Registering states...
+[LOG] [Browser Console log] [16:19:05.129] GameCore: Initializing debug overlay...
+[LOG] [Browser Console log] [16:19:05.130] [PerformanceMonitor] Initialized
+[LOG] [Browser Console log] [16:19:05.130] [LevelLoader] Using bundled data for: /src/levels/data/stages.json
+[LOG] [Browser Console log] [16:19:05.130] DebugOverlay Loaded 9 stages from stages.json
+[LOG] [Browser Console log] [16:19:05.133] EnemySpawnDialog Initialized
+[LOG] [Browser Console log] [16:19:05.133] DebugOverlay Initialized with stage: stage0-5 (index: 4)
+[LOG] [Browser Console log] [16:19:05.134] GameCore: Hiding loading screen...
+[LOG] [Browser Console log] [16:19:05.134] GameCore: init() completed
+[LOG] [Browser Console log] [16:19:05.134] Starting game loop...
+[LOG] [Browser Console log] [16:19:05.134] GameCore: Starting game loop...
+[LOG] [Browser Console log] [16:19:05.134] GameCore: Game loop started, running: true
+[LOG] [Browser Console log] [16:19:05.134] GameCore: Skipping title, starting directly with stage: stage0-5
+[LOG] [Browser Console log] [16:19:05.134] [PlayState] enter() called with params: JSHandle@object
+[LOG] [Browser Console log] [16:19:05.135] [PlayState] Starting initialization...
+[LOG] [Browser Console log] [16:19:05.135] [PlayState] Checking/loading sprites...
+[LOG] [Browser Console log] [16:19:05.135] [SpriteLoader] Using bundled data for: player/idle
+[LOG] [Browser Console log] [16:19:05.135] [SpriteLoader] Using bundled data for: player/walk1
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: player/jump1
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: player/idle_small
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: player/walk_small1
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: player/jump_small1
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: terrain/spring
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: terrain/goal_flag
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: items/coin_spin1
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: enemies/slime_idle1
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: enemies/bird_fly1
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: environment/cloud1
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: environment/cloud2
+[LOG] [Browser Console log] [16:19:05.136] [SpriteLoader] Using bundled data for: environment/tree1
+[LOG] [Browser Console log] [16:19:05.137] [SpriteLoader] Using bundled data for: tiles/ground
+[LOG] [Browser Console log] [16:19:05.137] [SpriteLoader] Using bundled data for: tiles/grass_ground
+[LOG] [Browser Console log] [16:19:05.137] Game started successfully
+[LOG] [Browser Console log] [16:19:05.139] [AssetLoader] Loaded sprite player/idle in 3.60ms
+[LOG] [Browser Console log] [16:19:05.139] [SpriteLoader] Using bundled data for: player/walk2
+[LOG] [Browser Console log] [16:19:05.139] [SpriteLoader] Using bundled data for: player/jump2
+[LOG] [Browser Console log] [16:19:05.139] [AssetLoader] Loaded sprite player/idle_small in 3.30ms
+[LOG] [Browser Console log] [16:19:05.139] [SpriteLoader] Using bundled data for: player/walk_small2
+[LOG] [Browser Console log] [16:19:05.139] [SpriteLoader] Using bundled data for: player/jump_small2
+[LOG] [Browser Console log] [16:19:05.139] [AssetLoader] Loaded sprite terrain/spring in 3.50ms
+[LOG] [Browser Console log] [16:19:05.140] [AssetLoader] Loaded sprite terrain/goal_flag in 3.60ms
+[LOG] [Browser Console log] [16:19:05.140] [SpriteLoader] Using bundled data for: items/coin_spin2
+[LOG] [Browser Console log] [16:19:05.140] [SpriteLoader] Using bundled data for: enemies/slime_idle2
+[LOG] [Browser Console log] [16:19:05.140] [SpriteLoader] Using bundled data for: enemies/bird_fly2
+[LOG] [Browser Console log] [16:19:05.140] [AssetLoader] Loaded sprite environment/cloud1 in 4.00ms
+[LOG] [Browser Console log] [16:19:05.141] [AssetLoader] Loaded sprite environment/cloud2 in 4.60ms
+[LOG] [Browser Console log] [16:19:05.142] [AssetLoader] Loaded sprite environment/tree1 in 5.10ms
+[LOG] [Browser Console log] [16:19:05.142] [AssetLoader] Loaded sprite tiles/ground in 5.40ms
+[LOG] [Browser Console log] [16:19:05.142] [AssetLoader] Loaded sprite tiles/grass_ground in 5.70ms
+[LOG] [Browser Console log] [16:19:05.142] [SpriteLoader] Using bundled data for: player/walk3
+[LOG] [Browser Console log] [16:19:05.143] [AssetLoader] Loaded animation player/jump (2 frames) in 7.50ms
+[LOG] [Browser Console log] [16:19:05.143] [SpriteLoader] Using bundled data for: player/walk_small3
+[LOG] [Browser Console log] [16:19:05.144] [AssetLoader] Loaded animation player/jump_small (2 frames) in 7.70ms
+[LOG] [Browser Console log] [16:19:05.144] [SpriteLoader] Using bundled data for: items/coin_spin3
+[LOG] [Browser Console log] [16:19:05.144] [AssetLoader] Loaded animation enemies/slime_idle (2 frames) in 7.90ms
+[LOG] [Browser Console log] [16:19:05.145] [AssetLoader] Loaded animation enemies/bird_fly (2 frames) in 8.40ms
+[LOG] [Browser Console log] [16:19:05.145] [SpriteLoader] Using bundled data for: player/walk4
+[LOG] [Browser Console log] [16:19:05.145] [SpriteLoader] Using bundled data for: player/walk_small4
+[LOG] [Browser Console log] [16:19:05.145] [SpriteLoader] Using bundled data for: items/coin_spin4
+[LOG] [Browser Console log] [16:19:05.146] [AssetLoader] Loaded animation player/walk (4 frames) in 10.30ms
+[LOG] [Browser Console log] [16:19:05.146] [AssetLoader] Loaded animation player/walk_small (4 frames) in 10.40ms
+[LOG] [Browser Console log] [16:19:05.147] [AssetLoader] Loaded animation items/coin_spin (4 frames) in 10.60ms
+[LOG] [Browser Console log] [16:19:05.147] [PlayState] Sprites loaded successfully in 12.10ms
+[LOG] [Browser Console log] [16:19:05.147] [AssetLoader] Stage type set to: grassland
+[LOG] [Browser Console log] [16:19:05.147] [LevelLoader] Using bundled data for: /src/levels/data/stages.json
+[LOG] [Browser Console log] [16:19:05.148] [LevelLoader] Using bundled data for: /src/levels/data/stage0-5.json
+[LOG] [Browser Console warn] [16:19:05.148] [GameController] 警告: プレイヤーのスポーン位置(2, 11)の下に地面がありません
+[LOG] [Browser Console log] [16:19:05.148] [EntityManager] Creating player at (32, 176)
+[LOG] [Browser Console log] [16:19:05.148] [Player] Jump Configuration Debug:
+[LOG] [Browser Console log] [16:19:05.149]   - Config source: physics.json
+[LOG] [Browser Console log] [16:19:05.149]   - jumpPower: 10
+[LOG] [Browser Console log] [16:19:05.149]   - variableJumpBoost: 
+[LOG] [Browser Console log] [16:19:05.149]   - variableJumpBoostMultiplier: 
+[LOG] [Browser Console log] [16:19:05.149]   - minJumpTime: 0
+[LOG] [Browser Console log] [16:19:05.149]   - maxJumpTime: 400
+[LOG] [Browser Console log] [16:19:05.149]   - airResistance: 0
+[LOG] [Browser Console log] [16:19:05.149]   - gravityScale: 1
+[LOG] [Browser Console log] [16:19:05.149]   - maxFallSpeed: 10
+[LOG] [Browser Console log] [16:19:05.149] [EntityManager] Player created: success
+[LOG] [Browser Console log] [16:19:05.150] Enemy Created at x=192, y=192
+[LOG] [Browser Console log] [16:19:05.150] [EntityManager] Creating slime at (192, 192)
+[LOG] [Browser Console log] [16:19:05.150] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.150] Enemy Created at x=480, y=192
+[LOG] [Browser Console log] [16:19:05.150] [EntityManager] Creating slime at (480, 192)
+[LOG] [Browser Console log] [16:19:05.150] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.150] Enemy Created at x=640, y=192
+[LOG] [Browser Console log] [16:19:05.150] [EntityManager] Creating slime at (640, 192)
+[LOG] [Browser Console log] [16:19:05.151] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.151] Enemy Created at x=880, y=192
+[LOG] [Browser Console log] [16:19:05.151] [EntityManager] Creating slime at (880, 192)
+[LOG] [Browser Console log] [16:19:05.151] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.151] Enemy Created at x=1040, y=192
+[LOG] [Browser Console log] [16:19:05.151] [EntityManager] Creating slime at (1040, 192)
+[LOG] [Browser Console log] [16:19:05.151] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.151] Enemy Created at x=1360, y=192
+[LOG] [Browser Console log] [16:19:05.151] [EntityManager] Creating slime at (1360, 192)
+[LOG] [Browser Console log] [16:19:05.151] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.151] Enemy Created at x=1520, y=192
+[LOG] [Browser Console log] [16:19:05.151] [EntityManager] Creating slime at (1520, 192)
+[LOG] [Browser Console log] [16:19:05.151] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.152] Enemy Created at x=1760, y=192
+[LOG] [Browser Console log] [16:19:05.152] [EntityManager] Creating slime at (1760, 192)
+[LOG] [Browser Console log] [16:19:05.152] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.152] Enemy Created at x=2080, y=192
+[LOG] [Browser Console log] [16:19:05.152] [EntityManager] Creating slime at (2080, 192)
+[LOG] [Browser Console log] [16:19:05.152] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.152] Enemy Created at x=2240, y=192
+[LOG] [Browser Console log] [16:19:05.152] [EntityManager] Creating slime at (2240, 192)
+[LOG] [Browser Console log] [16:19:05.152] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.152] Enemy Created at x=2480, y=192
+[LOG] [Browser Console log] [16:19:05.152] [EntityManager] Creating slime at (2480, 192)
+[LOG] [Browser Console log] [16:19:05.152] [EntityManager] Physics system has tilemap: true
+[LOG] [Browser Console log] [16:19:05.153] [PlayState] levelData: JSHandle@object
+[LOG] [Browser Console log] [16:19:05.153] [PlayState] levelData.name: PERFORMANCE TEST
+[LOG] [Browser Console log] [16:19:05.153] [PlayState] Stage name set to: PERFORMANCE TEST
+[LOG] [Browser Console log] [16:19:05.153] [PlayState] MusicSystem status: JSHandle@object
+[LOG] [Browser Console log] [16:19:05.154] [PlayState] Player created successfully
+[LOG] [Browser Console log] [16:19:05.154] [PlayState] enter() completed in 19.90ms
+[LOG] ✅ Game initialized
+[LOG] ✅ Assert: Current state is 'play'
+[LOG] Clicking at: (100, 100)
+[LOG] [Browser Console log] [16:19:05.165] InputSystemAdapter: update called
+[LOG] ✅ Assert: Player exists
+[LOG] [Browser Console log] [16:19:06.190] [PlayState] Lives set to: 10
+[LOG] 🎮 パフォーマンスベースライン計測開始...
+
+[LOG] 📊 計測中... (15秒間、プレイヤーを動かしながら)
+[LOG] Moving player left for 800ms
+[LOG] Holding key: ArrowLeft for 800ms
+[LOG] Player jumping...
+[LOG] Pressing key: Space
+[LOG] Moving player left for 800ms
+[LOG] Holding key: ArrowLeft for 800ms
+[LOG] Moving player left for 800ms
+[LOG] Holding key: ArrowLeft for 800ms
+[LOG] Player jumping...
+[LOG] Pressing key: Space
+[LOG] Moving player right for 800ms
+[LOG] Holding key: ArrowRight for 800ms
+[LOG] [Browser Console warn] [16:19:10.567] [MusicSystem] Cannot play SE 'damage' - system not initialized
+[LOG] Moving player right for 800ms
+[LOG] Holding key: ArrowRight for 800ms
+[LOG] Player jumping...
+[LOG] Pressing key: Space
+[LOG] [Browser Console log] [16:19:12.116] InputSystem: Space key pressed, actions: JSHandle@array
+[LOG] [Browser Console log] [16:19:12.117] [Player] Jump initiated:
+[LOG] [Browser Console log] [16:19:12.117]   - Initial Y position: 192
+[LOG] [Browser Console log] [16:19:12.118]   - Jump power applied: 12.1
+[LOG] [Browser Console log] [16:19:12.118]   - Initial velocity (vy): -12.1
+[LOG] [Browser Console log] [16:19:12.118]   - Air resistance: 0.13
+[LOG] [Browser Console log] [16:19:12.118]   - Gravity scale: 1
+[LOG] [Browser Console log] [16:19:12.134] [Player] Jump button released at time: 33.333333333333336 ms, velocity reduced from -10.761899999999999 to -5.3809499999999995
+[LOG] [Browser Console log] [16:19:12.301] [Player] Jump completed:
+[LOG] [Browser Console log] [16:19:12.301]   - Final max height reached: 34.5655842598737 pixels
+[LOG] [Browser Console log] [16:19:12.301]   - Jump duration: 199.99999999999997 ms
+[LOG] Moving player right for 800ms
+[LOG] Holding key: ArrowRight for 800ms
+[LOG] [Browser Console log] [16:19:12.450] Coin collected! Score: 10
+[LOG] [Browser Console log] [16:19:12.584] Coin collected! Score: 10
+[LOG] [Browser Console log] [16:19:12.701] Coin collected! Score: 10
+[LOG] [Browser Console log] [16:19:12.735] [PlayState] handlePlayerDeath: lives after decrement: 9
+[LOG] [Browser Console log] [16:19:12.735] [PlayState] Respawning player at: 2, 11
+[LOG] [Browser Console log] [16:19:12.735] [Player] respawn called at (32, 176)
+[LOG] [Browser Console log] [16:19:12.735] [Player] Dispatching window player:respawned event
+[LOG] Moving player left for 800ms
+[LOG] Holding key: ArrowLeft for 800ms
+[LOG] Player jumping...
+[LOG] Pressing key: Space
+[LOG] Moving player left for 800ms
+[LOG] Holding key: ArrowLeft for 800ms
+[LOG] Moving player left for 800ms
+[LOG] Holding key: ArrowLeft for 800ms
+[LOG] Player jumping...
+[LOG] Pressing key: Space
+[LOG] Moving player right for 800ms
+[LOG] Holding key: ArrowRight for 800ms
+[LOG] Moving player right for 800ms
+[LOG] Holding key: ArrowRight for 800ms
+[LOG] [Browser Console warn] [16:19:17.554] [MusicSystem] Cannot play SE 'damage' - system not initialized
+[LOG] Player jumping...
+[LOG] Pressing key: Space
+[LOG] Moving player right for 800ms
+[LOG] Holding key: ArrowRight for 800ms
+[LOG] Moving player left for 800ms
+[LOG] Holding key: ArrowLeft for 800ms
+[LOG] [Browser Console log] [16:19:19.705] [PlayState] handlePlayerDeath: lives after decrement: 8
+[LOG] [Browser Console log] [16:19:19.706] [PlayState] Respawning player at: 2, 11
+[LOG] [Browser Console log] [16:19:19.706] [Player] respawn called at (32, 176)
+[LOG] [Browser Console log] [16:19:19.706] [Player] Dispatching window player:respawned event
+[LOG] Player jumping...
+[LOG] Pressing key: Space
+[LOG] Moving player left for 800ms
+[LOG] Holding key: ArrowLeft for 800ms
+[LOG] Moving player left for 800ms
+[LOG] Holding key: ArrowLeft for 800ms
+[LOG] Player jumping...
+[LOG] Pressing key: Space
+[LOG] 
+
+========================================
+[LOG] 📊 パフォーマンスベースライン計測結果
+[LOG] ========================================
+
+[LOG] FPS:
+[LOG]   平均: 60.1 fps
+[LOG]   最小: 60.0 fps
+[LOG]   最大: 61.0 fps
+[LOG] 
+フレーム時間:
+[LOG]   平均: 0.41 ms
+[LOG]   最小: 0.30 ms
+[LOG]   最大: 0.70 ms
+[LOG] 
+描画呼び出し回数 (平均):
+[LOG]   合計: 43 回/フレーム
+[LOG]   Sprites: 39 回
+[LOG]   Rects: 0 回
+[LOG]   Text: 4 回
+[LOG] 
+========================================
+[LOG] 
+✅ 計測完了
+[LOG] ✅ No errors detected
+[LOG] 
+✅ TEST PASSED
+
+[LOG] 
+==================================================
+[LOG] Test completed in: 26.41s
+[LOG] ==================================================
+

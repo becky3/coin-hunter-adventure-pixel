@@ -36,9 +36,7 @@ export class GameLoop {
             }
             
             while (elapsed >= this.frameTime && this._running) {
-                this.performanceMonitor.beginFrame();
                 updateCallback(this.frameTime / 1000);
-                this.performanceMonitor.endFrame();
                 elapsed -= this.frameTime;
                 this._lastTime += this.frameTime;
                 
