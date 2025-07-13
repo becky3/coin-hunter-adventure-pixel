@@ -12,6 +12,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# ワークフローの権限設定
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
@@ -46,7 +52,7 @@ jobs:
           libxfixes3 \
           libxrandr2 \
           libgbm1 \
-          libasound2
+          libasound2t64
 
     - name: Build project
       run: npm run build
