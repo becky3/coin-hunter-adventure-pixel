@@ -1,5 +1,6 @@
 
 import { Logger } from '../utils/Logger';
+import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 
 /**
  * GameLoop implementation
@@ -10,6 +11,11 @@ export class GameLoop {
     private readonly targetFPS: number = 60;
     private readonly frameTime: number = 1000 / this.targetFPS;
     private animationFrameId?: number;
+    private performanceMonitor: PerformanceMonitor;
+
+    constructor() {
+        this.performanceMonitor = PerformanceMonitor.getInstance();
+    }
 
     start(updateCallback: (deltaTime: number) => void): void {
         if (this._running) {
@@ -30,7 +36,9 @@ export class GameLoop {
             }
             
             while (elapsed >= this.frameTime && this._running) {
+                this.performanceMonitor.beginFrame();
                 updateCallback(this.frameTime / 1000);
+                this.performanceMonitor.endFrame();
                 elapsed -= this.frameTime;
                 this._lastTime += this.frameTime;
                 

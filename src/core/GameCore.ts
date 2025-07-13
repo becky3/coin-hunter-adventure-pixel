@@ -24,6 +24,7 @@ import { PhysicsSystemAdapter } from '../systems/adapters/PhysicsSystemAdapter';
 import { StateSystemAdapter } from '../systems/adapters/StateSystemAdapter';
 import { RenderSystemAdapter } from '../systems/adapters/RenderSystemAdapter';
 import { DebugSystemAdapter } from '../systems/adapters/DebugSystemAdapter';
+import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 
 /**
  * GameCore implementation
@@ -55,6 +56,10 @@ export class GameCore {
         this.registerStates();
 
         Logger.log('GameCore: Initializing debug overlay...');
+        const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
+        const performanceMonitor = PerformanceMonitor.getInstance();
+        performanceMonitor.initialize(renderer);
+        
         this.debugOverlay = new DebugOverlay(this._serviceLocator);
         await this.debugOverlay.init();
 

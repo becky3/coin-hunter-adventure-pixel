@@ -7,6 +7,7 @@ import { URLParams } from '../utils/urlParams';
 import { Logger } from '../utils/Logger';
 import type { StateEvent } from '../states/GameStateManager';
 import { EnemySpawnDialog } from './EnemySpawnDialog';
+import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 
 /**
  * DebugOverlay implementation
@@ -29,9 +30,12 @@ export class DebugOverlay {
     private lastFPSUpdate: number = 0;
     
     private enemySpawnDialog?: EnemySpawnDialog;
+    private performanceMonitor: PerformanceMonitor;
+    private showPerformanceDetails: boolean = false;
     
     constructor(serviceLocator: ServiceLocator) {
         this.serviceLocator = serviceLocator;
+        this.performanceMonitor = PerformanceMonitor.getInstance();
         
         const urlParams = new URLParams();
         const urlStage = urlParams.getStageId();
@@ -88,7 +92,7 @@ export class DebugOverlay {
             pointer-events: none;
         `;
 
-        const stats = ['FPS', 'Speed', 'State', 'Player X', 'Player Y'];
+        const stats = ['FPS', 'Speed', 'State', 'Player X', 'Player Y', 'Frame Time', 'Draw Calls'];
         stats.forEach(stat => {
             const statElement = document.createElement('div');
             statElement.innerHTML = `${stat}: <span>-</span>`;
@@ -117,11 +121,21 @@ export class DebugOverlay {
             this.stageSelectElement = spanElement;
         }
         
+        const performanceDiv = document.createElement('div');
+        performanceDiv.id = 'performance-details';
+        performanceDiv.style.marginTop = '10px';
+        performanceDiv.style.paddingTop = '10px';
+        performanceDiv.style.borderTop = '1px solid #444';
+        performanceDiv.style.display = 'none';
+        if (this.debugElement) {
+            this.debugElement.appendChild(performanceDiv);
+        }
+        
         const helpDiv = document.createElement('div');
         helpDiv.style.marginTop = '10px';
         helpDiv.style.fontSize = '10px';
         helpDiv.style.color = '#888';
-        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset<br>D: Toggle Stage Select | ←→: Select<br>O: Spawn Enemy';
+        helpDiv.innerHTML = 'F3: Toggle | +/-: Speed | 0: Reset<br>D: Toggle Stage Select | ←→: Select<br>O: Spawn Enemy | P: Performance Details';
         if (this.debugElement) {
             this.debugElement.appendChild(helpDiv);
         }
@@ -172,6 +186,11 @@ export class DebugOverlay {
                 }
             }
             
+            if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                this.togglePerformanceDetails();
+            }
+            
             const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
             const currentState = game?.stateManager?.currentState;
             
@@ -213,6 +232,16 @@ export class DebugOverlay {
             this.frameCount = 0;
             this.lastFPSUpdate = currentTime;
             this.updateStat('fps', this.fps.toString());
+        }
+        
+        const perfMetrics = this.performanceMonitor.getLatestMetrics();
+        if (perfMetrics) {
+            this.updateStat('frame_time', `${perfMetrics.frameTime.toFixed(2)}ms`);
+            this.updateStat('draw_calls', perfMetrics.drawCalls.total.toString());
+            
+            if (this.showPerformanceDetails) {
+                this.updatePerformanceDetails(perfMetrics);
+            }
         }
         
         const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: Event & { data?: { to?: string } }) => void) => void; currentState?: { name: string } } } }).game;
@@ -286,6 +315,40 @@ export class DebugOverlay {
         }
         
         return null;
+    }
+    
+    private togglePerformanceDetails(): void {
+        this.showPerformanceDetails = !this.showPerformanceDetails;
+        const perfDiv = document.getElementById('performance-details');
+        if (perfDiv) {
+            perfDiv.style.display = this.showPerformanceDetails ? 'block' : 'none';
+        }
+    }
+    
+    private updatePerformanceDetails(metrics: {
+        fps: number;
+        frameTime: number;
+        memoryUsed: number;
+        drawCalls: {
+            drawSprite: number;
+            drawRect: number;
+            drawText: number;
+            drawLine: number;
+            total: number;
+        };
+        timestamp: number;
+    }): void {
+        const perfDiv = document.getElementById('performance-details');
+        if (!perfDiv) return;
+        
+        perfDiv.innerHTML = `
+            <div style="color: #ffff00">Performance Details:</div>
+            <div>Sprites: ${metrics.drawCalls.drawSprite}</div>
+            <div>Rects: ${metrics.drawCalls.drawRect}</div>
+            <div>Text: ${metrics.drawCalls.drawText}</div>
+            <div>Lines: ${metrics.drawCalls.drawLine}</div>
+            ${metrics.memoryUsed > 0 ? `<div>Memory: ${metrics.memoryUsed.toFixed(1)}MB</div>` : ''}
+        `;
     }
 
     destroy(): void {
