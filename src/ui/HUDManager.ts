@@ -3,6 +3,9 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../services/EventBus';
 import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
 
+const HUD_BACKGROUND_HEIGHT = 24;
+const HUD_BORDER_HEIGHT = 2;
+
 export interface HUDData {
     score: number;
     lives: number;
@@ -114,8 +117,8 @@ export class HUDManager {
         ctx.imageSmoothingEnabled = false;
         const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
         ctx.fillStyle = blackColor;
-        ctx.fillRect(0, 0, GAME_RESOLUTION.WIDTH, 24);
-        ctx.fillRect(0, 24, GAME_RESOLUTION.WIDTH, 2);
+        ctx.fillRect(0, 0, GAME_RESOLUTION.WIDTH, HUD_BACKGROUND_HEIGHT);
+        ctx.fillRect(0, HUD_BACKGROUND_HEIGHT, GAME_RESOLUTION.WIDTH, HUD_BORDER_HEIGHT);
     }
     
     private generatePauseBackground(): void {
