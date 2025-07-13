@@ -15,7 +15,6 @@ export class GoalFlag extends Entity {
     private waveOffset: number;
     private waveSpeed: number;
     private waveAmplitude: number;
-    private pixelCircleCache: Map<number, { x: number; y: number }[]>;
 
     constructor(x: number, y: number) {
         let goalConfig = null;
@@ -41,7 +40,6 @@ export class GoalFlag extends Entity {
         this.waveOffset = 0;
         this.waveSpeed = goalConfig?.properties.waveSpeed || 0.1;
         this.waveAmplitude = goalConfig?.properties.waveAmplitude || 5;
-        this.pixelCircleCache = new Map();
     }
 
     onUpdate(deltaTime: number): void {
@@ -59,10 +57,6 @@ export class GoalFlag extends Entity {
             const wave = !this.cleared ? Math.sin(this.waveOffset) * this.waveAmplitude : 0;
             
             renderer.drawSprite('terrain/goal_flag', this.x + wave, this.y);
-            
-            if (this.cleared) {
-                this.renderClearEffect(renderer);
-            }
         } else {
             renderer.drawRect(this.x, this.y, this.width, this.height, '#FFD700');
             
@@ -76,77 +70,6 @@ export class GoalFlag extends Entity {
         if (renderer.debug) {
             this.renderDebug(renderer);
         }
-    }
-
-    private renderClearEffect(renderer: PixelRenderer): void {
-        const time = this.animationTime * 0.001;
-        const baseRadius = 30;
-        const radiusVariation = 10;
-        const radius = Math.floor(baseRadius + Math.sin(time * 2) * radiusVariation);
-        
-        const pattern = this.getPixelCircle(radius);
-        const centerX = this.x + this.width / 2;
-        const centerY = this.y + this.height / 2;
-        
-        const color = this.animationTime % 200 < 100 ? '#FFFF00' : '#FFD700';
-        
-        pattern.forEach(pixel => {
-            renderer.drawRect(
-                centerX + pixel.x - 0.5,
-                centerY + pixel.y - 0.5,
-                1,
-                1,
-                color
-            );
-        });
-    }
-    
-    private getPixelCircle(radius: number): { x: number; y: number }[] {
-        const roundedRadius = Math.floor(radius);
-        
-        if (this.pixelCircleCache.has(roundedRadius)) {
-            return this.pixelCircleCache.get(roundedRadius) || [];
-        }
-        
-        const points: { x: number; y: number }[] = [];
-        
-        let x = 0;
-        let y = roundedRadius;
-        let d = 3 - 2 * roundedRadius;
-        
-        const addPoints = (cx: number, cy: number) => {
-            points.push({ x: cx, y: cy });
-            points.push({ x: -cx, y: cy });
-            points.push({ x: cx, y: -cy });
-            points.push({ x: -cx, y: -cy });
-            points.push({ x: cy, y: cx });
-            points.push({ x: -cy, y: cx });
-            points.push({ x: cy, y: -cx });
-            points.push({ x: -cy, y: -cx });
-        };
-        
-        addPoints(x, y);
-        
-        while (y >= x) {
-            x++;
-            
-            if (d > 0) {
-                y--;
-                d = d + 4 * (x - y) + 10;
-            } else {
-                d = d + 4 * x + 6;
-            }
-            
-            addPoints(x, y);
-        }
-        
-        const uniquePoints = Array.from(
-            new Map(points.map(p => [`${p.x},${p.y}`, p])).values()
-        );
-        
-        this.pixelCircleCache.set(roundedRadius, uniquePoints);
-        
-        return uniquePoints;
     }
 
     onCollision(collisionInfo?: CollisionInfo): boolean {
@@ -171,6 +94,5 @@ export class GoalFlag extends Entity {
         this.cleared = false;
         this.waveOffset = 0;
         this.animationTime = 0;
-        this.pixelCircleCache.clear();
     }
 }
