@@ -66,8 +66,18 @@ export class DebugOverlay {
             
             const urlParams = new URLParams();
             const urlStage = urlParams.getStageId();
+            
+            // URLパラメータにステージが指定されている場合
             if (urlStage && this.stageList.includes(urlStage)) {
                 this.selectedStageIndex = this.stageList.indexOf(urlStage);
+            }
+            // defaultStageが定義されている場合
+            else if (stageData.defaultStage && this.stageList.includes(stageData.defaultStage)) {
+                this.selectedStageIndex = this.stageList.indexOf(stageData.defaultStage);
+            }
+            // どちらもない場合は最初のステージ
+            else {
+                this.selectedStageIndex = 0;
             }
             
             Logger.log('DebugOverlay', `Loaded ${this.stageList.length} stages from stages.json`);
