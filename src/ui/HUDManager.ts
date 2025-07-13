@@ -26,6 +26,9 @@ export class HUDManager {
     private isPaused: boolean = false;
     private _message: string | null = null;
     private _messageTimer: number = 0;
+    private patternTileCache: Map<string, HTMLCanvasElement> = new Map();
+    private hudBackgroundCanvas?: HTMLCanvasElement;
+    private pauseBackgroundCanvas?: HTMLCanvasElement;
 
     constructor(_game: GameServices) {
         this.eventBus = _game.eventBus || new EventBus();
@@ -91,9 +94,44 @@ export class HUDManager {
     }
     
     initialize(): void {
+        this.generateHUDBackground();
+        this.generatePauseBackground();
     }
     
     cleanup(): void {
+        this.patternTileCache.clear();
+        this.hudBackgroundCanvas = undefined;
+        this.pauseBackgroundCanvas = undefined;
+    }
+    
+    private generateHUDBackground(): void {
+        this.hudBackgroundCanvas = document.createElement('canvas');
+        this.hudBackgroundCanvas.width = GAME_RESOLUTION.WIDTH;
+        this.hudBackgroundCanvas.height = 26;
+        const ctx = this.hudBackgroundCanvas.getContext('2d');
+        if (!ctx) return;
+        
+        ctx.imageSmoothingEnabled = false;
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
+        ctx.fillStyle = blackColor;
+        ctx.fillRect(0, 0, GAME_RESOLUTION.WIDTH, 24);
+        ctx.fillRect(0, 24, GAME_RESOLUTION.WIDTH, 2);
+    }
+    
+    private generatePauseBackground(): void {
+        const menuWidth = 200;
+        const menuHeight = 100;
+        
+        this.pauseBackgroundCanvas = document.createElement('canvas');
+        this.pauseBackgroundCanvas.width = menuWidth;
+        this.pauseBackgroundCanvas.height = menuHeight;
+        const ctx = this.pauseBackgroundCanvas.getContext('2d');
+        if (!ctx) return;
+        
+        ctx.imageSmoothingEnabled = false;
+        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
+        ctx.fillStyle = blackColor;
+        ctx.fillRect(0, 0, menuWidth, menuHeight);
     }
     
     showPauseOverlay(): void {
@@ -127,16 +165,20 @@ export class HUDManager {
     }
 
     private renderHUD(renderer: PixelRenderer): void {
-        const blackPattern = this.createSolidPattern(1);
-        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
-        
-        for (let y = 0; y < 24; y += 8) {
-            for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
-                this.drawPatternTile(renderer, x, y, blackPattern, blackColor);
+        if (this.hudBackgroundCanvas) {
+            renderer.drawSprite(this.hudBackgroundCanvas, 0, 0, false);
+        } else {
+            const blackPattern = this.createSolidPattern(1);
+            const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
+            
+            for (let y = 0; y < 24; y += 8) {
+                for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
+                    this.drawPatternTile(renderer, x, y, blackPattern, blackColor);
+                }
             }
+            
+            this.renderHorizontalBorder(renderer, 24);
         }
-        
-        this.renderHorizontalBorder(renderer, 24);
 
         renderer.drawText(`SCORE: ${this.hudData.score}`, 8, 8, getMasterColor(UI_PALETTE_INDICES.white));
         renderer.drawText(`LIVES: ${this.hudData.lives}`, 88, 8, getMasterColor(UI_PALETTE_INDICES.white));
@@ -157,12 +199,16 @@ export class HUDManager {
         const menuX = (GAME_RESOLUTION.WIDTH - menuWidth) / 2;
         const menuY = (GAME_RESOLUTION.HEIGHT - menuHeight) / 2;
         
-        const blackPattern = this.createSolidPattern(1);
-        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
-        
-        for (let y = menuY; y < menuY + menuHeight; y += 8) {
-            for (let x = menuX; x < menuX + menuWidth; x += 8) {
-                this.drawPatternTile(renderer, x, y, blackPattern, blackColor);
+        if (this.pauseBackgroundCanvas) {
+            renderer.drawSprite(this.pauseBackgroundCanvas, menuX, menuY, false);
+        } else {
+            const blackPattern = this.createSolidPattern(1);
+            const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
+            
+            for (let y = menuY; y < menuY + menuHeight; y += 8) {
+                for (let x = menuX; x < menuX + menuWidth; x += 8) {
+                    this.drawPatternTile(renderer, x, y, blackPattern, blackColor);
+                }
             }
         }
         
@@ -212,33 +258,47 @@ export class HUDManager {
     }
 
     private drawPatternTile(renderer: PixelRenderer, x: number, y: number, pattern: number[][], color: string): void {
-        const tileSize = 8;
-        const imageData = new ImageData(tileSize, tileSize);
-        const data = imageData.data;
-
-        let r = 255, g = 255, b = 255;
-        if (color && color.startsWith('#')) {
-            const hex = color.slice(1);
-            r = parseInt(hex.substr(0, 2), 16);
-            g = parseInt(hex.substr(2, 2), 16);
-            b = parseInt(hex.substr(4, 2), 16);
-        }
+        const cacheKey = `${JSON.stringify(pattern)}_${color}`;
+        let tileCanvas = this.patternTileCache.get(cacheKey);
         
-        for (let py = 0; py < tileSize; py++) {
-            for (let px = 0; px < tileSize; px++) {
-                const idx = (py * tileSize + px) * 4;
-                if (pattern[py][px] === 1) {
-                    data[idx] = r;
-                    data[idx + 1] = g;
-                    data[idx + 2] = b;
-                    data[idx + 3] = 255;
-                } else {
-                    data[idx + 3] = 0;
+        if (!tileCanvas) {
+            const tileSize = 8;
+            tileCanvas = document.createElement('canvas');
+            tileCanvas.width = tileSize;
+            tileCanvas.height = tileSize;
+            const ctx = tileCanvas.getContext('2d');
+            if (!ctx) return;
+            
+            const imageData = new ImageData(tileSize, tileSize);
+            const data = imageData.data;
+
+            let r = 255, g = 255, b = 255;
+            if (color && color.startsWith('#')) {
+                const hex = color.slice(1);
+                r = parseInt(hex.substr(0, 2), 16);
+                g = parseInt(hex.substr(2, 2), 16);
+                b = parseInt(hex.substr(4, 2), 16);
+            }
+            
+            for (let py = 0; py < tileSize; py++) {
+                for (let px = 0; px < tileSize; px++) {
+                    const idx = (py * tileSize + px) * 4;
+                    if (pattern[py][px] === 1) {
+                        data[idx] = r;
+                        data[idx + 1] = g;
+                        data[idx + 2] = b;
+                        data[idx + 3] = 255;
+                    } else {
+                        data[idx + 3] = 0;
+                    }
                 }
             }
+            
+            ctx.putImageData(imageData, 0, 0);
+            this.patternTileCache.set(cacheKey, tileCanvas);
         }
         
-        renderer.drawSprite(imageData, x, y, false);
+        renderer.drawSprite(tileCanvas, x, y, false);
     }
 
     setPaused(paused: boolean): void {
