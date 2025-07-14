@@ -128,12 +128,12 @@ export class Bat extends Enemy {
             // Stronger vertical movement to ensure visible parabolic path
             this.vy = Math.max(-480, Math.min(480, yDiff * 30)); // Pixels per second
             
-            // Direct position update for bats since physics is disabled
-            const dt = deltaTime / 1000; // Convert to seconds
+            // 物理システムに登録されていないので、ここで直接位置更新
+            const dt = deltaTime / 1000;
             this.x += this.vx * dt;
             this.y += this.vy * dt;
             
-            // Keep within bounds
+            // 境界チェック
             this.x = Math.max(0, Math.min(this.x, 3000 - this.width));
             this.y = Math.max(0, Math.min(this.y, 300 - this.height));
             
@@ -178,19 +178,10 @@ export class Bat extends Enemy {
     }
 
     update(deltaTime: number): void {
-        // Store velocities before parent update
-        const savedVx = this.vx;
-        const savedVy = this.vy;
-        
         // Call parent update first
         super.update(deltaTime);
-        
-        // For flying bats, restore velocities and update position manually
-        if (this.batState === 'flying' && this.active) {
-            this.vx = savedVx;
-            this.vy = savedVy;
-        }
     }
+    
     
     render(renderer: PixelRenderer): void {
         if (!this.active) return;
