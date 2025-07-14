@@ -103,7 +103,7 @@ export class Bat extends Enemy {
                 }
             }
         } else if (this.batState === 'flying') {
-            this.flyTime += deltaTime / 1000; // Convert to seconds
+            this.flyTime += deltaTime; // deltaTime is already in seconds
             
             // Fly to the left
             this.vx = this.baseSpeed * this.direction;
@@ -124,14 +124,17 @@ export class Bat extends Enemy {
                 targetY = 160 - (144 * t); // From y=160 back to y=16
             }
             
+            // 目標位置に向かって直接移動（スムーズな補間）
             const yDiff = targetY - this.y;
-            // Stronger vertical movement to ensure visible parabolic path
-            this.vy = Math.max(-480, Math.min(480, yDiff * 30)); // Pixels per second
+            // より強い垂直移動を確保（1フレームで大きく動くように）
+            this.vy = yDiff * 5; // フレームベースの移動
             
             // 物理システムに登録されていないので、ここで直接位置更新
-            const dt = deltaTime / 1000;
-            this.x += this.vx * dt;
-            this.y += this.vy * dt;
+            const moveX = this.vx * deltaTime;
+            const moveY = this.vy * deltaTime;
+            
+            this.x += moveX;
+            this.y += moveY;
             
             // 境界チェック
             this.x = Math.max(0, Math.min(this.x, 3000 - this.width));
@@ -139,7 +142,7 @@ export class Bat extends Enemy {
             
             // Debug log every 0.5 seconds
             if (!this.lastLogTime || this.flyTime - this.lastLogTime > 0.5) {
-                Logger.log(`[Bat] Flying: flyTime=${this.flyTime.toFixed(2)}, progress=${progress.toFixed(2)}, y=${this.y.toFixed(1)}, targetY=${targetY.toFixed(1)}, vy=${this.vy.toFixed(2)}`);
+                Logger.log(`[Bat] Flying: flyTime=${this.flyTime.toFixed(2)}, progress=${progress.toFixed(2)}, y=${this.y.toFixed(1)}, targetY=${targetY.toFixed(1)}, vy=${this.vy.toFixed(2)}, vx=${this.vx}`);
                 this.lastLogTime = this.flyTime;
             }
             
@@ -178,8 +181,26 @@ export class Bat extends Enemy {
     }
 
     update(deltaTime: number): void {
-        // Call parent update first
-        super.update(deltaTime);
+        if (!this.active) return;
+        
+        // Handle invincibility timer
+        if (this.invincibleTime > 0) {
+            this.invincibleTime -= deltaTime * 1000;
+        }
+        
+        // Handle state timer
+        if (this.stateTimer > 0) {
+            this.stateTimer -= deltaTime * 1000;
+        }
+        
+        // Update AI (which handles movement)
+        this.updateAI(deltaTime);
+        
+        // Update animation
+        this.updateAnimation(deltaTime);
+        this.onUpdate(deltaTime);
+        
+        // Do NOT call super.update() to avoid physics being applied
     }
     
     
