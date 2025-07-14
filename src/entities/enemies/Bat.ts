@@ -25,6 +25,9 @@ export class Bat extends Enemy {
     private originalPhysicsEnabled: boolean = true;
     private initialX: number;
     private patrolRange: number;
+    public readonly oneCycleDuration: number;
+    public readonly ceilingY: number;
+    public readonly groundY: number;
 
     constructor(x: number, y: number) {
         let batConfig = null;
@@ -57,6 +60,9 @@ export class Bat extends Enemy {
         this.flyTime = 0;
         this.baseSpeed = 60;
         this.patrolRange = 120;
+        this.oneCycleDuration = 2;
+        this.ceilingY = 16;
+        this.groundY = 160;
         
         this.friction = 1.0;
         this.gravityScale = 0;
@@ -106,18 +112,17 @@ export class Bat extends Enemy {
             
             this.vx = this.baseSpeed * this.direction;
             
-            const oneCycleDuration = 2;
-            const cycleProgress = (this.flyTime % oneCycleDuration) / oneCycleDuration;
+            const cycleProgress = (this.flyTime % this.oneCycleDuration) / this.oneCycleDuration;
             
             let targetY;
             if (cycleProgress < 0.5) {
                 const t = cycleProgress * 2;
                 const easedT = t * t;
-                targetY = 16 + (144 * easedT);
+                targetY = this.ceilingY + ((this.groundY - this.ceilingY) * easedT);
             } else {
                 const t = (cycleProgress - 0.5) * 2;
                 const easedT = 1 - ((1 - t) * (1 - t));
-                targetY = 160 - (144 * easedT);
+                targetY = this.groundY - ((this.groundY - this.ceilingY) * easedT);
             }
             
             const yDiff = targetY - this.y;

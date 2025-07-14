@@ -110,15 +110,19 @@ async function runTest() {
                 
                 if (flyingBats.length > 0) {
                     const bat = flyingBats[0];
-                    const flightDuration = 4;
+                    const flightDuration = bat.oneCycleDuration || 2;
+                    const ceilingY = bat.ceilingY || 16;
+                    const groundY = bat.groundY || 160;
                     const progress = (bat.flyTime % flightDuration) / flightDuration;
                     let targetY;
                     if (progress < 0.5) {
                         const t = progress * 2;
-                        targetY = 16 + (144 * t);
+                        const easedT = t * t;
+                        targetY = ceilingY + ((groundY - ceilingY) * easedT);
                     } else {
                         const t = (progress - 0.5) * 2;
-                        targetY = 160 - (144 * t);
+                        const easedT = 1 - ((1 - t) * (1 - t));
+                        targetY = groundY - ((groundY - ceilingY) * easedT);
                     }
                     
                     return {
@@ -143,8 +147,21 @@ async function runTest() {
             }
         }
         
+        // 最初のコウモリから期待値を取得
+        const expectedRange = await t.page.evaluate(() => {
+            const bats = window.game?.stateManager?.currentState?.entityManager?.enemies?.filter(e => e.constructor.name === 'Bat') || [];
+            if (bats.length > 0) {
+                const bat = bats[0];
+                return {
+                    ceilingY: bat.ceilingY || 16,
+                    groundY: bat.groundY || 160
+                };
+            }
+            return { ceilingY: 16, groundY: 160 };
+        });
+        
         console.log(`\nY座標の移動範囲: ${minY} ～ ${maxY} (移動距離: ${maxY - minY}ピクセル)`);
-        console.log(`期待される範囲: 16 ～ 160 (移動距離: 144ピクセル)`);
+        console.log(`期待される範囲: ${expectedRange.ceilingY} ～ ${expectedRange.groundY} (移動距離: ${expectedRange.groundY - expectedRange.ceilingY}ピクセル)`);
         
         // 5. 最終スクリーンショット
         await t.screenshot('bat-comprehensive-test');
@@ -186,4 +203,12 @@ async function runTest() {
     });
 }
 
-runTest().catch(console.error);
+// Run the test if called directly
+if (require.main === module) {
+    runTest().catch(error => {
+        console.error('Test failed:', error);
+        process.exit(1);
+    });
+}
+
+module.exports = runTest;
