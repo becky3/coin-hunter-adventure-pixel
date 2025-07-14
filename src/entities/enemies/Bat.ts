@@ -23,6 +23,8 @@ export class Bat extends Enemy {
     private lastUpdateCheck?: boolean;
     declare friction: number;
     private originalPhysicsEnabled: boolean = true;
+    private initialX: number;
+    private patrolRange: number;
 
     constructor(x: number, y: number) {
         let batConfig = null;
@@ -51,8 +53,10 @@ export class Bat extends Enemy {
         this.waveSpeed = 2;
         this.waveAmplitude = 20;
         this.initialY = y;
+        this.initialX = x;
         this.flyTime = 0;
-        this.baseSpeed = 90;
+        this.baseSpeed = 60;
+        this.patrolRange = 120;
         
         this.friction = 1.0;
         this.gravityScale = 0;
@@ -102,20 +106,22 @@ export class Bat extends Enemy {
             
             this.vx = this.baseSpeed * this.direction;
             
-            const flightDuration = 4;
-            const progress = (this.flyTime % flightDuration) / flightDuration;
+            const oneCycleDuration = 2;
+            const cycleProgress = (this.flyTime % oneCycleDuration) / oneCycleDuration;
             
             let targetY;
-            if (progress < 0.5) {
-                const t = progress * 2;
-                targetY = 16 + (144 * t);
+            if (cycleProgress < 0.5) {
+                const t = cycleProgress * 2;
+                const easedT = t * t;
+                targetY = 16 + (144 * easedT);
             } else {
-                const t = (progress - 0.5) * 2;
-                targetY = 160 - (144 * t);
+                const t = (cycleProgress - 0.5) * 2;
+                const easedT = 1 - ((1 - t) * (1 - t));
+                targetY = 160 - (144 * easedT);
             }
             
             const yDiff = targetY - this.y;
-            this.vy = yDiff * 5;
+            this.vy = yDiff * 8;
             
             const moveX = this.vx * deltaTime;
             const moveY = this.vy * deltaTime;
@@ -123,21 +129,22 @@ export class Bat extends Enemy {
             this.x += moveX;
             this.y += moveY;
             
+            if (this.direction === -1 && this.x <= this.initialX - this.patrolRange) {
+                this.direction = 1;
+                this.facingRight = true;
+                Logger.log('[Bat] Reached left boundary, turning right');
+            } else if (this.direction === 1 && this.x >= this.initialX + this.patrolRange) {
+                this.direction = -1;
+                this.facingRight = false;
+                Logger.log('[Bat] Reached right boundary, turning left');
+            }
+            
             this.x = Math.max(0, Math.min(this.x, 3000 - this.width));
             this.y = Math.max(0, Math.min(this.y, 300 - this.height));
             
             if (!this.lastLogTime || this.flyTime - this.lastLogTime > 0.5) {
-                Logger.log(`[Bat] Flying: flyTime=${this.flyTime.toFixed(2)}, progress=${progress.toFixed(2)}, y=${this.y.toFixed(1)}, targetY=${targetY.toFixed(1)}, vy=${this.vy.toFixed(2)}, vx=${this.vx}`);
+                Logger.log(`[Bat] Flying: flyTime=${this.flyTime.toFixed(2)}, x=${this.x.toFixed(1)}, y=${this.y.toFixed(1)}, targetY=${targetY.toFixed(1)}, direction=${this.direction}`);
                 this.lastLogTime = this.flyTime;
-            }
-            
-            if (progress > 0.95 && this.y < 20) {
-                this.batState = 'hanging';
-                this.y = 16;
-                this.vx = 0;
-                this.vy = 0;
-                this.flyTime = 0;
-                Logger.log('[Bat] Returned to hanging position');
             }
             
             this.animState = 'fly';
