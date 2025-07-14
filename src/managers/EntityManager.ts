@@ -171,8 +171,6 @@ export class EntityManager {
             
             Logger.log(`[EntityManager] Creating bat at (${config.x * TILE_SIZE}, ${config.y * TILE_SIZE})`);
             
-            // コウモリは物理システムに登録しない（physicsEnabled = false）
-            // this.physicsSystem.addEntity(bat, this.physicsSystem.layers.ENEMY);
             entity = bat;
             break;
         }
@@ -337,7 +335,6 @@ export class EntityManager {
             
             if (enemy) {
                 this.enemies.push(enemy);
-                // バット以外は物理システムに登録
                 if (enemyType.toLowerCase() !== 'bat') {
                     this.physicsSystem.addEntity(enemy, this.physicsSystem.layers.ENEMY);
                 }

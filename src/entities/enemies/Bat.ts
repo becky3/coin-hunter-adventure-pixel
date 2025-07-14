@@ -52,12 +52,11 @@ export class Bat extends Enemy {
         this.waveAmplitude = 20;
         this.initialY = y;
         this.flyTime = 0;
-        this.baseSpeed = 90;  // Pixels per second (1.5 * 60)
+        this.baseSpeed = 90;
         
         this.friction = 1.0;
         this.gravityScale = 0;
         this.gravity = false;
-        // Disable physics completely for bats
         this.physicsEnabled = false;
         
         if (batConfig?.ai) {
@@ -71,7 +70,6 @@ export class Bat extends Enemy {
             return;
         }
         
-        // Debug: Check if update is being called
         if (!this.lastUpdateCheck) {
             Logger.log(`[Bat] updateAI called, deltaTime=${deltaTime}`);
             this.lastUpdateCheck = true;
@@ -85,71 +83,57 @@ export class Bat extends Enemy {
             
             const player = this.findPlayer();
             if (player) {
-                // Check only X-axis distance for detection
                 const xDistance = Math.abs(player.x - this.x);
                 if (xDistance < this.detectionRange) {
                     this.batState = 'flying';
                     this.flyTime = 0;
-                    // Always fly to the left
                     this.direction = -1;
                     this.facingRight = false;
                     Logger.log(`[Bat] Player detected at X distance ${xDistance}, starting flight to the left`);
                 }
             } else {
-                // Only log once to avoid spam
                 if (!this.loggedNoPlayer) {
                     Logger.log('[Bat] No player found in findPlayer()');
                     this.loggedNoPlayer = true;
                 }
             }
         } else if (this.batState === 'flying') {
-            this.flyTime += deltaTime; // deltaTime is already in seconds
+            this.flyTime += deltaTime;
             
-            // Fly to the left
             this.vx = this.baseSpeed * this.direction;
             
-            // Create a parabolic path that goes down then back up
-            // Start at ceiling (y=16), go down to near ground (y=160), then back to ceiling
-            const flightDuration = 4; // seconds for complete flight
+            const flightDuration = 4;
             const progress = (this.flyTime % flightDuration) / flightDuration;
             
             let targetY;
             if (progress < 0.5) {
-                // Descending phase: from ceiling to near ground
-                const t = progress * 2; // 0 to 1
-                targetY = 16 + (144 * t); // From y=16 to y=160
+                const t = progress * 2;
+                targetY = 16 + (144 * t);
             } else {
-                // Ascending phase: from near ground back to ceiling
-                const t = (progress - 0.5) * 2; // 0 to 1
-                targetY = 160 - (144 * t); // From y=160 back to y=16
+                const t = (progress - 0.5) * 2;
+                targetY = 160 - (144 * t);
             }
             
-            // 目標位置に向かって直接移動（スムーズな補間）
             const yDiff = targetY - this.y;
-            // より強い垂直移動を確保（1フレームで大きく動くように）
-            this.vy = yDiff * 5; // フレームベースの移動
+            this.vy = yDiff * 5;
             
-            // 物理システムに登録されていないので、ここで直接位置更新
             const moveX = this.vx * deltaTime;
             const moveY = this.vy * deltaTime;
             
             this.x += moveX;
             this.y += moveY;
             
-            // 境界チェック
             this.x = Math.max(0, Math.min(this.x, 3000 - this.width));
             this.y = Math.max(0, Math.min(this.y, 300 - this.height));
             
-            // Debug log every 0.5 seconds
             if (!this.lastLogTime || this.flyTime - this.lastLogTime > 0.5) {
                 Logger.log(`[Bat] Flying: flyTime=${this.flyTime.toFixed(2)}, progress=${progress.toFixed(2)}, y=${this.y.toFixed(1)}, targetY=${targetY.toFixed(1)}, vy=${this.vy.toFixed(2)}, vx=${this.vx}`);
                 this.lastLogTime = this.flyTime;
             }
             
-            // If reached back to ceiling height and near a wall, return to hanging
             if (progress > 0.95 && this.y < 20) {
                 this.batState = 'hanging';
-                this.y = 16; // Snap to ceiling
+                this.y = 16;
                 this.vx = 0;
                 this.vy = 0;
                 this.flyTime = 0;
@@ -183,24 +167,18 @@ export class Bat extends Enemy {
     update(deltaTime: number): void {
         if (!this.active) return;
         
-        // Handle invincibility timer
         if (this.invincibleTime > 0) {
             this.invincibleTime -= deltaTime * 1000;
         }
         
-        // Handle state timer
         if (this.stateTimer > 0) {
             this.stateTimer -= deltaTime * 1000;
         }
         
-        // Update AI (which handles movement)
         this.updateAI(deltaTime);
         
-        // Update animation
         this.updateAnimation(deltaTime);
         this.onUpdate(deltaTime);
-        
-        // Do NOT call super.update() to avoid physics being applied
     }
     
     
@@ -215,7 +193,6 @@ export class Bat extends Enemy {
             const screenPos = renderer.worldToScreen(this.x, this.y);
             
             if (this.batState === 'hanging') {
-                // Use sprite for hanging state (single frame)
                 const sprite = renderer.pixelArtRenderer.sprites.get('enemies/bat_hang');
                 if (sprite) {
                     sprite.draw(
@@ -228,8 +205,7 @@ export class Bat extends Enemy {
                     return;
                 }
             } else {
-                // Use sprites for flying animation with faster flapping
-                const frameIndex = Math.floor(Date.now() / 80) % 2;  // 80ms per frame for faster flapping
+                const frameIndex = Math.floor(Date.now() / 80) % 2;
                 const spriteKey = `enemies/bat_fly${frameIndex + 1}`;
                 const sprite = renderer.pixelArtRenderer.sprites.get(spriteKey);
                 if (sprite) {
