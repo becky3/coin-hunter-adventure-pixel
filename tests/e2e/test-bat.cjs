@@ -33,7 +33,6 @@ async function runTest() {
                         y: bat.y,
                         width: bat.width,
                         height: bat.height,
-                        sprite: bat.sprite,
                         visible: bat.visible,
                         animState: bat.animState
                     },
@@ -46,7 +45,7 @@ async function runTest() {
         console.log(`コウモリの数: ${displayInfo.count}`);
         if (displayInfo.count > 0) {
             console.log(`最初のコウモリ: x=${displayInfo.firstBat.x}, y=${displayInfo.firstBat.y}`);
-            console.log(`スプライト: ${displayInfo.firstBat.sprite}, animState: ${displayInfo.firstBat.animState}`);
+            console.log(`animState: ${displayInfo.firstBat.animState}`);
             console.log(`bat_hangスプライト読み込み: ${displayInfo.hasHangSprite ? '成功' : '失敗'}`);
         }
         
