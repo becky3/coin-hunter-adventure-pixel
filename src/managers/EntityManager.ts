@@ -171,6 +171,7 @@ export class EntityManager {
             
             Logger.log(`[EntityManager] Creating bat at (${config.x * TILE_SIZE}, ${config.y * TILE_SIZE})`);
             
+            this.physicsSystem.addEntity(bat, this.physicsSystem.layers.ENEMY);
             entity = bat;
             break;
         }
@@ -335,9 +336,7 @@ export class EntityManager {
             
             if (enemy) {
                 this.enemies.push(enemy);
-                if (enemyType.toLowerCase() !== 'bat') {
-                    this.physicsSystem.addEntity(enemy, this.physicsSystem.layers.ENEMY);
-                }
+                this.physicsSystem.addEntity(enemy, this.physicsSystem.layers.ENEMY);
                 
                 this.eventBus.emit('enemy:spawned', {
                     type: enemyType,
