@@ -34,6 +34,18 @@
         {
           "name": "slime_idle2",
           "type": "sprite"
+        },
+        {
+          "name": "bat_hang",
+          "type": "sprite"
+        },
+        {
+          "name": "bat_fly1",
+          "type": "sprite"
+        },
+        {
+          "name": "bat_fly2",
+          "type": "sprite"
         }
       ],
       "animations": [

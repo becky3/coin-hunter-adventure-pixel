@@ -18,6 +18,7 @@ export class Bat extends Enemy {
     private initialY: number;
     private flyTime: number;
     private baseSpeed: number;
+    private loggedNoPlayer?: boolean;
     declare friction: number;
 
     constructor(x: number, y: number) {
@@ -45,10 +46,10 @@ export class Bat extends Enemy {
         
         this.detectionRange = batConfig?.ai?.detectRange || 80;
         this.waveSpeed = 2;
-        this.waveAmplitude = 30;
+        this.waveAmplitude = 20;
         this.initialY = y;
         this.flyTime = 0;
-        this.baseSpeed = 40;
+        this.baseSpeed = 1.0;  // Slower horizontal speed for more natural movement
         
         this.friction = 1.0;
         this.gravityScale = 0;
@@ -77,24 +78,61 @@ export class Bat extends Enemy {
                 if (distance < this.detectionRange) {
                     this.batState = 'flying';
                     this.flyTime = 0;
-                    Logger.log('[Bat] Player detected, starting flight');
+                    // Always fly to the left
+                    this.direction = -1;
+                    this.facingRight = false;
+                    Logger.log(`[Bat] Player detected at distance ${distance}, starting flight to the left`);
+                }
+            } else {
+                // Only log once to avoid spam
+                if (!this.loggedNoPlayer) {
+                    Logger.log('[Bat] No player found in findPlayer()');
+                    this.loggedNoPlayer = true;
                 }
             }
         } else if (this.batState === 'flying') {
-            this.flyTime += deltaTime;
+            this.flyTime += deltaTime / 1000; // Convert to seconds
             
+            // Fly to the left
             this.vx = this.baseSpeed * this.direction;
             
-            const waveOffset = Math.sin(this.flyTime * this.waveSpeed) * this.waveAmplitude;
-            const targetY = this.initialY + waveOffset;
-            this.vy = (targetY - this.y) * 2;
+            // Create a parabolic path that goes down then back up
+            // Start at ceiling (y=16), go down to near ground (y=160), then back to ceiling
+            const flightDuration = 4; // seconds for complete flight
+            const progress = (this.flyTime % flightDuration) / flightDuration;
+            
+            let targetY;
+            if (progress < 0.5) {
+                // Descending phase: from ceiling to near ground
+                const t = progress * 2; // 0 to 1
+                targetY = 16 + (144 * t); // From y=16 to y=160
+            } else {
+                // Ascending phase: from near ground back to ceiling
+                const t = (progress - 0.5) * 2; // 0 to 1
+                targetY = 160 - (144 * t); // From y=160 back to y=16
+            }
+            
+            const yDiff = targetY - this.y;
+            this.vy = Math.max(-5, Math.min(5, yDiff * 0.2));
+            
+            // If reached back to ceiling height and near a wall, return to hanging
+            if (progress > 0.95 && this.y < 20) {
+                this.batState = 'hanging';
+                this.y = 16; // Snap to ceiling
+                this.vx = 0;
+                this.vy = 0;
+                Logger.log('[Bat] Returned to hanging position');
+            }
             
             this.animState = 'fly';
         }
     }
     
     private findPlayer(): Entity | null {
-        if (!this.eventBus) return null;
+        if (!this.eventBus) {
+            Logger.warn('[Bat] No eventBus available');
+            return null;
+        }
         
         const result = this.eventBus.emit('entity:findPlayer', {});
         if (result && Array.isArray(result) && result.length > 0) {
@@ -120,26 +158,34 @@ export class Bat extends Enemy {
         if (renderer.pixelArtRenderer) {
             const screenPos = renderer.worldToScreen(this.x, this.y);
             
-            let animationKey = '';
             if (this.batState === 'hanging') {
-                animationKey = 'enemies/bat_hang';
+                // Use sprite for hanging state (single frame)
+                const sprite = renderer.pixelArtRenderer.sprites.get('enemies/bat_hang');
+                if (sprite) {
+                    sprite.draw(
+                        renderer.ctx,
+                        screenPos.x,
+                        screenPos.y,
+                        this.direction === -1,
+                        renderer.scale
+                    );
+                    return;
+                }
             } else {
-                const frameIndex = Math.floor(Date.now() / 150) % 2;
-                animationKey = `enemies/bat_fly${frameIndex + 1}`;
-            }
-            
-            const animation = renderer.pixelArtRenderer.animations.get(animationKey);
-            
-            if (animation) {
-                animation.update(Date.now());
-                animation.draw(
-                    renderer.ctx,
-                    screenPos.x,
-                    screenPos.y,
-                    this.direction === -1,
-                    renderer.scale
-                );
-                return;
+                // Use sprites for flying animation with faster flapping
+                const frameIndex = Math.floor(Date.now() / 80) % 2;  // 80ms per frame for faster flapping
+                const spriteKey = `enemies/bat_fly${frameIndex + 1}`;
+                const sprite = renderer.pixelArtRenderer.sprites.get(spriteKey);
+                if (sprite) {
+                    sprite.draw(
+                        renderer.ctx,
+                        screenPos.x,
+                        screenPos.y,
+                        this.direction === -1,
+                        renderer.scale
+                    );
+                    return;
+                }
             }
         }
         
