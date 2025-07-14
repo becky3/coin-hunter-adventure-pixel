@@ -156,6 +156,12 @@ export class PhysicsSystem {
         }
         for (const entity of this.entities) {
             if (!entity.active) continue;
+            
+            // Skip physics for entities with physicsEnabled = false
+            if ('physicsEnabled' in entity && entity.physicsEnabled === false) {
+                continue;
+            }
+            
             this.applyGravity(entity, clampedDeltaTime);
 
             entity.x += entity.vx * clampedDeltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;

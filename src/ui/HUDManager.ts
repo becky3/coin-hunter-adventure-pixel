@@ -3,8 +3,6 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../services/EventBus';
 import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
 
-const HUD_BACKGROUND_HEIGHT = 24;
-const HUD_BORDER_HEIGHT = 2;
 
 export interface HUDData {
     score: number;
@@ -30,7 +28,6 @@ export class HUDManager {
     private _message: string | null = null;
     private _messageTimer: number = 0;
     private patternTileCache: Map<string, HTMLCanvasElement> = new Map();
-    private hudBackgroundCanvas?: HTMLCanvasElement;
     private pauseBackgroundCanvas?: HTMLCanvasElement;
 
     constructor(_game: GameServices) {
@@ -97,29 +94,14 @@ export class HUDManager {
     }
     
     initialize(): void {
-        this.generateHUDBackground();
         this.generatePauseBackground();
     }
     
     cleanup(): void {
         this.patternTileCache.clear();
-        this.hudBackgroundCanvas = undefined;
         this.pauseBackgroundCanvas = undefined;
     }
     
-    private generateHUDBackground(): void {
-        this.hudBackgroundCanvas = document.createElement('canvas');
-        this.hudBackgroundCanvas.width = GAME_RESOLUTION.WIDTH;
-        this.hudBackgroundCanvas.height = 26;
-        const ctx = this.hudBackgroundCanvas.getContext('2d');
-        if (!ctx) return;
-        
-        ctx.imageSmoothingEnabled = false;
-        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
-        ctx.fillStyle = blackColor;
-        ctx.fillRect(0, 0, GAME_RESOLUTION.WIDTH, HUD_BACKGROUND_HEIGHT);
-        ctx.fillRect(0, HUD_BACKGROUND_HEIGHT, GAME_RESOLUTION.WIDTH, HUD_BORDER_HEIGHT);
-    }
     
     private generatePauseBackground(): void {
         const menuWidth = 200;
@@ -168,20 +150,6 @@ export class HUDManager {
     }
 
     private renderHUD(renderer: PixelRenderer): void {
-        if (this.hudBackgroundCanvas) {
-            renderer.drawSprite(this.hudBackgroundCanvas, 0, 0, false);
-        } else {
-            const blackPattern = this.createSolidPattern(1);
-            const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
-            
-            for (let y = 0; y < 24; y += 8) {
-                for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
-                    this.drawPatternTile(renderer, x, y, blackPattern, blackColor);
-                }
-            }
-            
-            this.renderHorizontalBorder(renderer, 24);
-        }
 
         renderer.drawText(`SCORE: ${this.hudData.score}`, 8, 8, getMasterColor(UI_PALETTE_INDICES.white));
         renderer.drawText(`LIVES: ${this.hudData.lives}`, 88, 8, getMasterColor(UI_PALETTE_INDICES.white));

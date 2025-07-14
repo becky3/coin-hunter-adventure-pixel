@@ -19,7 +19,10 @@ export class Bat extends Enemy {
     private flyTime: number;
     private baseSpeed: number;
     private loggedNoPlayer?: boolean;
+    private lastLogTime?: number;
+    private lastUpdateCheck?: boolean;
     declare friction: number;
+    private originalPhysicsEnabled: boolean = true;
 
     constructor(x: number, y: number) {
         let batConfig = null;
@@ -49,11 +52,13 @@ export class Bat extends Enemy {
         this.waveAmplitude = 20;
         this.initialY = y;
         this.flyTime = 0;
-        this.baseSpeed = 1.0;  // Slower horizontal speed for more natural movement
+        this.baseSpeed = 90;  // Pixels per second (1.5 * 60)
         
         this.friction = 1.0;
         this.gravityScale = 0;
         this.gravity = false;
+        // Disable physics completely for bats
+        this.physicsEnabled = false;
         
         if (batConfig?.ai) {
             this.aiType = (batConfig.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
@@ -65,6 +70,12 @@ export class Bat extends Enemy {
         if (this.state === 'dead' || this.state === 'hurt') {
             return;
         }
+        
+        // Debug: Check if update is being called
+        if (!this.lastUpdateCheck) {
+            Logger.log(`[Bat] updateAI called, deltaTime=${deltaTime}`);
+            this.lastUpdateCheck = true;
+        }
 
         if (this.batState === 'hanging') {
             this.vx = 0;
@@ -74,14 +85,15 @@ export class Bat extends Enemy {
             
             const player = this.findPlayer();
             if (player) {
-                const distance = this.distanceTo(player);
-                if (distance < this.detectionRange) {
+                // Check only X-axis distance for detection
+                const xDistance = Math.abs(player.x - this.x);
+                if (xDistance < this.detectionRange) {
                     this.batState = 'flying';
                     this.flyTime = 0;
                     // Always fly to the left
                     this.direction = -1;
                     this.facingRight = false;
-                    Logger.log(`[Bat] Player detected at distance ${distance}, starting flight to the left`);
+                    Logger.log(`[Bat] Player detected at X distance ${xDistance}, starting flight to the left`);
                 }
             } else {
                 // Only log once to avoid spam
@@ -113,7 +125,23 @@ export class Bat extends Enemy {
             }
             
             const yDiff = targetY - this.y;
-            this.vy = Math.max(-5, Math.min(5, yDiff * 0.2));
+            // Stronger vertical movement to ensure visible parabolic path
+            this.vy = Math.max(-480, Math.min(480, yDiff * 30)); // Pixels per second
+            
+            // Direct position update for bats since physics is disabled
+            const dt = deltaTime / 1000; // Convert to seconds
+            this.x += this.vx * dt;
+            this.y += this.vy * dt;
+            
+            // Keep within bounds
+            this.x = Math.max(0, Math.min(this.x, 3000 - this.width));
+            this.y = Math.max(0, Math.min(this.y, 300 - this.height));
+            
+            // Debug log every 0.5 seconds
+            if (!this.lastLogTime || this.flyTime - this.lastLogTime > 0.5) {
+                Logger.log(`[Bat] Flying: flyTime=${this.flyTime.toFixed(2)}, progress=${progress.toFixed(2)}, y=${this.y.toFixed(1)}, targetY=${targetY.toFixed(1)}, vy=${this.vy.toFixed(2)}`);
+                this.lastLogTime = this.flyTime;
+            }
             
             // If reached back to ceiling height and near a wall, return to hanging
             if (progress > 0.95 && this.y < 20) {
@@ -121,6 +149,7 @@ export class Bat extends Enemy {
                 this.y = 16; // Snap to ceiling
                 this.vx = 0;
                 this.vy = 0;
+                this.flyTime = 0;
                 Logger.log('[Bat] Returned to hanging position');
             }
             
@@ -148,6 +177,21 @@ export class Bat extends Enemy {
         }
     }
 
+    update(deltaTime: number): void {
+        // Store velocities before parent update
+        const savedVx = this.vx;
+        const savedVy = this.vy;
+        
+        // Call parent update first
+        super.update(deltaTime);
+        
+        // For flying bats, restore velocities and update position manually
+        if (this.batState === 'flying' && this.active) {
+            this.vx = savedVx;
+            this.vy = savedVy;
+        }
+    }
+    
     render(renderer: PixelRenderer): void {
         if (!this.active) return;
         

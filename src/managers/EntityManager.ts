@@ -319,6 +319,8 @@ export class EntityManager {
                 enemy = new Slime(pixelX, pixelY);
                 break;
             case 'bat':
+                enemy = new Bat(pixelX, pixelY);
+                break;
             case 'spider':
             case 'armorknight':
             case 'flyingwizard':
