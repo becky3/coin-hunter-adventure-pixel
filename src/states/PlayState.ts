@@ -159,6 +159,10 @@ export class PlayState implements GameState {
                 this.game.assetLoader.loadAnimation('enemies', 'slime_idle', 2, 500),
                 this.game.assetLoader.loadAnimation('enemies', 'bird_fly', 2, 200),
                 
+                this.game.assetLoader.loadSprite('enemies', 'bat_hang'),
+                this.game.assetLoader.loadSprite('enemies', 'bat_fly1'),
+                this.game.assetLoader.loadSprite('enemies', 'bat_fly2'),
+                
                 this.game.assetLoader.loadSprite('environment', 'cloud1'),
                 this.game.assetLoader.loadSprite('environment', 'cloud2'),
                 this.game.assetLoader.loadSprite('environment', 'tree1'),

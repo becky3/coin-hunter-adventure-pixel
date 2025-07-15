@@ -123,7 +123,7 @@ export class Enemy extends Entity {
             const hasHorizontalOverlap = playerRight > enemyLeft && playerLeft < enemyRight;
             
             if (!hasHorizontalOverlap) return;
-            this.takeDamage(1, player);
+            this.takeDamage(1);
             player.vy = -5;
             const scoreGained = 100;
             player.addScore(scoreGained);

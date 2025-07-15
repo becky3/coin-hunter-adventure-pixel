@@ -51,6 +51,12 @@
       "filename": "stage1-3.json"
     },
     {
+      "id": "stage2-1",
+      "name": "STAGE 2-1",
+      "description": "Enter the whispering cave",
+      "filename": "stage2-1.json"
+    },
+    {
       "id": "performance-test",
       "name": "PERFORMANCE TEST",
       "description": "Test with many coins",

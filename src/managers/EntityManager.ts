@@ -5,6 +5,7 @@ import { Coin } from '../entities/Coin';
 import { Spring } from '../entities/Spring';
 import { GoalFlag } from '../entities/GoalFlag';
 import { Slime } from '../entities/enemies/Slime';
+import { Bat } from '../entities/enemies/Bat';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { EventBus } from '../services/EventBus';
 import { PixelRenderer } from '../rendering/PixelRenderer';
@@ -57,6 +58,10 @@ export class EntityManager {
             if (this.musicSystem?.isInitialized) {
                 this.musicSystem.playSEFromPattern('enemyDefeat');
             }
+        });
+        
+        this.eventBus.on('entity:findPlayer', () => {
+            return this.player;
         });
     }
 
@@ -152,6 +157,22 @@ export class EntityManager {
             
             this.physicsSystem.addEntity(slime, this.physicsSystem.layers.ENEMY);
             entity = slime;
+            break;
+        }
+        
+        case 'bat': {
+            const bat = new Bat(
+                config.x * TILE_SIZE,
+                config.y * TILE_SIZE
+            );
+            bat.direction = -1;
+            bat.setEventBus(this.eventBus);
+            this.enemies.push(bat);
+            
+            Logger.log(`[EntityManager] Creating bat at (${config.x * TILE_SIZE}, ${config.y * TILE_SIZE})`);
+            
+            this.physicsSystem.addEntity(bat, this.physicsSystem.layers.ENEMY);
+            entity = bat;
             break;
         }
         }
@@ -298,6 +319,9 @@ export class EntityManager {
                 enemy = new Slime(pixelX, pixelY);
                 break;
             case 'bat':
+                enemy = new Bat(pixelX, pixelY);
+                enemy.setEventBus(this.eventBus);
+                break;
             case 'spider':
             case 'armorknight':
             case 'flyingwizard':

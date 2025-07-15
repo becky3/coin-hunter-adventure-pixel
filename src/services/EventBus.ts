@@ -1,13 +1,13 @@
 
 import { Logger } from '../utils/Logger';
 
-export type EventHandler<T = unknown> = (data: T) => void;
+export type EventHandler<T = unknown> = (data: T) => void | unknown;
 
 export type Unsubscribe = () => void;
 
 export interface IEventBus {
     
-    emit<T = unknown>(event: string, data?: T): void;
+    emit<T = unknown>(event: string, data?: T): unknown[];
 
     on<T = unknown>(event: string, handler: EventHandler<T>): Unsubscribe;
 
@@ -24,17 +24,22 @@ export interface IEventBus {
 export class EventBus implements IEventBus {
     private events: Map<string, Set<EventHandler<unknown>>> = new Map();
     
-    emit<T = unknown>(event: string, data?: T): void {
+    emit<T = unknown>(event: string, data?: T): unknown[] {
+        const results: unknown[] = [];
         const handlers = this.events.get(event);
         if (handlers) {
             handlers.forEach(handler => {
                 try {
-                    handler(data);
+                    const result = handler(data);
+                    if (result !== undefined) {
+                        results.push(result);
+                    }
                 } catch (error) {
                     Logger.error(`Error in event handler for '${event}':`, error);
                 }
             });
         }
+        return results;
     }
     
     on<T = unknown>(event: string, handler: EventHandler<T>): Unsubscribe {

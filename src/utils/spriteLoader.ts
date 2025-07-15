@@ -100,7 +100,7 @@ class SpriteLoader {
 
 const SPRITE_DEFINITIONS = {
     player: ['idle', 'jump', 'walk1'],
-    enemies: ['slime_idle1', 'slime_idle2', 'bird_fly1', 'bird_fly2'],
+    enemies: ['slime_idle1', 'slime_idle2', 'bird_fly1', 'bird_fly2', 'bat_hang', 'bat_fly1', 'bat_fly2'],
     items: ['coin_spin1', 'coin_spin2', 'coin_spin3', 'coin_spin4'],
     terrain: ['ground_tile', 'cloud_small', 'cloud_large', 'spring', 'goal_flag'],
     ui: ['heart', 'heart_empty']
