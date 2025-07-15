@@ -5,11 +5,13 @@ import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import { InputSystem } from '../core/InputSystem';
+import { EntityInitializer } from '../interfaces/EntityInitializer';
+import { EntityManager } from '../managers/EntityManager';
 
 /**
  * Spring platform that bounces the player
  */
-export class Spring extends Entity {
+export class Spring extends Entity implements EntityInitializer {
     private baseBounceMultiplier: number;
     private compression: number;
     public triggered: boolean;
@@ -158,5 +160,14 @@ export class Spring extends Entity {
         this.triggered = false;
         this.animationTime = 0;
         this.cooldownFrames = 0;
+    }
+    
+    /**
+     * Initialize this spring in the EntityManager
+     */
+    initializeInManager(manager: EntityManager): void {
+        this.physicsSystem = manager.getPhysicsSystem();
+        manager.addItem(this);
+        manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ITEM);
     }
 }

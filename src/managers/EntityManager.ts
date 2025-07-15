@@ -2,9 +2,9 @@ import { Entity } from '../entities/Entity';
 import { Enemy } from '../entities/Enemy';
 import { Player } from '../entities/Player';
 import { Coin } from '../entities/Coin';
-import { Spring } from '../entities/Spring';
 import { GoalFlag } from '../entities/GoalFlag';
 import { EntityFactory } from '../factories/EntityFactory';
+import { hasEntityInitializer } from '../interfaces/EntityInitializer';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { EventBus } from '../services/EventBus';
 import { PixelRenderer } from '../rendering/PixelRenderer';
@@ -79,6 +79,22 @@ export class EntityManager {
     getPlatforms(): Entity[] {
         return this.platforms;
     }
+    
+    getEventBus(): EventBus {
+        return this.eventBus;
+    }
+    
+    getPhysicsSystem(): PhysicsSystem {
+        return this.physicsSystem;
+    }
+    
+    addEnemy(enemy: Enemy): void {
+        this.enemies.push(enemy);
+    }
+    
+    addItem(item: Entity): void {
+        this.items.push(item);
+    }
 
     createPlayer(spawnX: number, spawnY: number): Player {
         Logger.log(`[EntityManager] Creating player at (${spawnX}, ${spawnY})`);
@@ -122,19 +138,10 @@ export class EntityManager {
     }
     
     private postProcessEntity(entity: Entity, type: string): void {
-        if (entity instanceof Enemy) {
-            entity.setEventBus(this.eventBus);
-            this.enemies.push(entity);
-            this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ENEMY);
-        } else if (entity instanceof Spring) {
-            entity.physicsSystem = this.physicsSystem;
-            this.items.push(entity);
-            this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ITEM);
-        } else if (type === 'goal' || type === 'coin') {
-            this.items.push(entity);
-            if (type === 'goal') {
-                this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ITEM);
-            }
+        if (hasEntityInitializer(entity)) {
+            entity.initializeInManager(this);
+        } else {
+            Logger.warn(`[EntityManager] Entity type '${type}' does not implement EntityInitializer`);
         }
         
         this.eventBus.emit('entity:created', { entity, type });
@@ -274,9 +281,13 @@ export class EntityManager {
             }
             
             if (entity instanceof Enemy) {
-                entity.setEventBus(this.eventBus);
-                this.enemies.push(entity);
-                this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ENEMY);
+                if (hasEntityInitializer(entity)) {
+                    entity.initializeInManager(this);
+                } else {
+                    entity.setEventBus(this.eventBus);
+                    this.enemies.push(entity);
+                    this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ENEMY);
+                }
                 
                 this.eventBus.emit('enemy:spawned', {
                     type: enemyType,

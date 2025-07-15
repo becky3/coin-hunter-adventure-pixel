@@ -3,6 +3,8 @@ import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
+import { EntityInitializer } from '../interfaces/EntityInitializer';
+import { EntityManager } from '../managers/EntityManager';
 
 const FLOAT_SPEED_MULTIPLIER = 0.1;
 const PIXELS_PER_UNIT = 16;
@@ -10,7 +12,7 @@ const PIXELS_PER_UNIT = 16;
 /**
  * Collectible coin item
  */
-export class Coin extends Entity {
+export class Coin extends Entity implements EntityInitializer {
     private collected: boolean;
     declare animationTime: number;
     private floatOffset: number;
@@ -126,5 +128,12 @@ export class Coin extends Entity {
         this.baseY = y;
         this.floatOffset = 0;
         this.animationTime = 0;
+    }
+    
+    /**
+     * Initialize this coin in the EntityManager
+     */
+    initializeInManager(manager: EntityManager): void {
+        manager.addItem(this);
     }
 }
