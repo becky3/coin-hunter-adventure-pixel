@@ -267,6 +267,8 @@ async function runTest() {
     });
 }
 
+module.exports = runTest;
+
 // テスト実行
 runTest().catch(error => {
     console.error('テストエラー:', error);
