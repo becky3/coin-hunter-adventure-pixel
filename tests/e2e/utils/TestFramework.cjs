@@ -430,6 +430,33 @@ class TestFramework {
         console.log(`✅ Assert: Entity count is ${expectedCount}`);
     }
 
+    // Generic assertion method
+    assert(condition, message) {
+        // Get caller information from stack trace
+        const stack = new Error().stack;
+        const lines = stack.split('\n');
+        let location = 'unknown';
+        
+        // Find the first line that's not from TestFramework or GameTestHelpers
+        for (let i = 2; i < lines.length; i++) {
+            const line = lines[i];
+            if (!line.includes('TestFramework.cjs') && !line.includes('GameTestHelpers.cjs')) {
+                const match = line.match(/\((.+):(\d+):(\d+)\)/) || line.match(/at (.+):(\d+):(\d+)/);
+                if (match) {
+                    location = `${match[1].split('/').pop()}:${match[2]}`;
+                    break;
+                }
+            }
+        }
+        
+        if (!condition) {
+            const errorMsg = `❌ Assertion failed: ${message}`;
+            console.error(`${errorMsg} (${location})`);
+            throw new Error(`${message} (${location})`);
+        }
+        console.log(`✅ Assert: ${message} (${location})`);
+    }
+
     // Advanced helpers
     async waitForCondition(conditionFunction, timeout = 5000, description = 'condition') {
         console.log(`Waiting for ${description}...`);
