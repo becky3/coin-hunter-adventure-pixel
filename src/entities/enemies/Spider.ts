@@ -70,13 +70,13 @@ export class Spider extends Enemy implements EntityInitializer {
         this.detectionRange = spiderConfig?.ai?.detectRange || 100;
         this.threadLength = 80;
         this.threadSpeed = 3.0;
-        this.crawlSpeed = this.moveSpeed * 120;
+        this.crawlSpeed = this.moveSpeed * 240;
         this.initialX = x;
         this.initialY = y;
         this.threadY = y;
         this.waitTime = 2000;
         this.stateTimer = 0;
-        this.patrolRange = 60;
+        this.patrolRange = 120;
         this.lastPlayerCheck = 0;
         this.playerDetectedTime = 0;
         this.crawlDelayAfterDetection = 1500;
