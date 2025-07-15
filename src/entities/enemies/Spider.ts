@@ -35,6 +35,7 @@ export class Spider extends Enemy implements EntityInitializer {
     static create(x: number, y: number): Spider {
         const spider = new Spider(x, y);
         spider.direction = -1;
+        spider.facingRight = false;
         return spider;
     }
 
@@ -64,8 +65,8 @@ export class Spider extends Enemy implements EntityInitializer {
         
         this.detectionRange = spiderConfig?.ai?.detectRange || 100;
         this.threadLength = 80;
-        this.threadSpeed = 0.5;
-        this.crawlSpeed = this.moveSpeed * 60;
+        this.threadSpeed = 1.0;
+        this.crawlSpeed = this.moveSpeed * 120;
         this.initialX = x;
         this.initialY = y;
         this.threadY = y;
@@ -124,8 +125,10 @@ export class Spider extends Enemy implements EntityInitializer {
             
             if (this.direction === -1 && this.x <= this.initialX - this.patrolRange) {
                 this.direction = 1;
+                this.facingRight = true;
             } else if (this.direction === 1 && this.x >= this.initialX + this.patrolRange) {
                 this.direction = -1;
+                this.facingRight = false;
             }
             break;
             
@@ -148,12 +151,17 @@ export class Spider extends Enemy implements EntityInitializer {
     
     private updateDescending(deltaTime: number): void {
         const moveAmount = this.threadSpeed * deltaTime * 60;
-        this.threadY += moveAmount;
+        const nextY = this.threadY + moveAmount;
         
-        if (this.threadY >= this.initialY + this.threadLength) {
-            this.threadY = this.initialY + this.threadLength;
+        const groundY = this.findGroundBelow();
+        const maxDescendY = groundY !== null ? groundY - this.height - 16 : this.initialY + this.threadLength;
+        
+        if (nextY >= maxDescendY) {
+            this.threadY = maxDescendY;
             this.spiderState = 'waiting';
             this.stateTimer = 0;
+        } else {
+            this.threadY = nextY;
         }
         
         this.y = this.threadY;
@@ -213,6 +221,22 @@ export class Spider extends Enemy implements EntityInitializer {
         if (result && Array.isArray(result) && result.length > 0) {
             return result[0] as Entity;
         }
+        return null;
+    }
+    
+    private findGroundBelow(): number | null {
+        const checkInterval = 16;
+        const maxCheckDistance = 200;
+        
+        const testY = this.y + this.height;
+        const stageFloorY = 13 * 16;
+        
+        for (let checkY = testY; checkY < testY + maxCheckDistance; checkY += checkInterval) {
+            if (checkY >= stageFloorY - 16) {
+                return stageFloorY;
+            }
+        }
+        
         return null;
     }
     
