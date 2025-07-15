@@ -60,21 +60,11 @@ async function runTest() {
         });
         
         console.log('生成結果:', spawnResult);
-        if (!spawnResult.success) {
-            console.error('❌ スパイダーの生成に失敗しました:', spawnResult.error);
-        }
-        if (!spawnResult.spiderFound) {
-            console.error('❌ スパイダーが見つかりません');
-        }
-        if (spawnResult.enemiesAfter <= spawnResult.enemiesBefore) {
-            console.error('❌ 敵の数が増えていません');
-        }
-        if (spawnResult.spiderData && spawnResult.spiderData.width !== 16) {
-            console.error('❌ スパイダーの幅が16ピクセルではありません:', spawnResult.spiderData.width);
-        }
-        if (spawnResult.spiderData && spawnResult.spiderData.height !== 16) {
-            console.error('❌ スパイダーの高さが16ピクセルではありません:', spawnResult.spiderData.height);
-        }
+        t.assert(spawnResult.success, `❌ スパイダーの生成に失敗しました: ${spawnResult.error}`);
+        t.assert(spawnResult.spiderFound, '❌ スパイダーが見つかりません');
+        t.assert(spawnResult.enemiesAfter > spawnResult.enemiesBefore, '❌ 敵の数が増えていません');
+        t.assert(spawnResult.spiderData && spawnResult.spiderData.width === 16, `❌ スパイダーの幅が16ピクセルではありません: ${spawnResult.spiderData?.width}`);
+        t.assert(spawnResult.spiderData && spawnResult.spiderData.height === 16, `❌ スパイダーの高さが16ピクセルではありません: ${spawnResult.spiderData?.height}`);
         
         // 2. 天井這い移動テスト
         console.log('\n2. 天井這い移動テスト');
@@ -107,12 +97,8 @@ async function runTest() {
         });
         
         console.log('移動テスト結果:', crawlingTest);
-        if (!crawlingTest.moved) {
-            console.error('❌ スパイダーが移動していません');
-        }
-        if (crawlingTest.surface !== 'ceiling') {
-            console.error('❌ スパイダーが天井にいません:', crawlingTest.surface);
-        }
+        t.assert(crawlingTest.moved, '❌ スパイダーが移動していません');
+        t.assert(crawlingTest.surface === 'ceiling', `❌ スパイダーが天井にいません: ${crawlingTest.surface}`);
         
         // 3. プレイヤー検知テスト
         console.log('\n3. プレイヤー検知テスト');
@@ -152,9 +138,7 @@ async function runTest() {
         });
         
         console.log('検知テスト結果:', detectionTest);
-        if (!detectionTest.detected) {
-            console.error('❌ プレイヤーを検知して降下状態になりませんでした');
-        }
+        t.assert(detectionTest.detected, '❌ プレイヤーを検知して降下状態になりませんでした');
         
         // 4. 糸降下テスト
         console.log('\n4. 糸降下テスト');
@@ -184,9 +168,7 @@ async function runTest() {
         });
         
         console.log('降下テスト結果:', descendTest);
-        if (!descendTest.descended) {
-            console.error('❌ スパイダーが降下しませんでした');
-        }
+        t.assert(descendTest.descended, '❌ スパイダーが降下しませんでした');
         
         // 5. ダメージテスト
         console.log('\n5. ダメージテスト');
@@ -211,9 +193,7 @@ async function runTest() {
         });
         
         console.log('ダメージテスト結果:', damageTest);
-        if (!damageTest.damaged) {
-            console.error('❌ スパイダーがダメージを受けませんでした');
-        }
+        t.assert(damageTest.damaged, '❌ スパイダーがダメージを受けませんでした');
         
         // 6. 踏みつけテスト
         console.log('\n6. 踏みつけテスト');
