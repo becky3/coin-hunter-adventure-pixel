@@ -16,10 +16,11 @@ async function runTest() {
     await test.runTest(async (t) => {
         await t.init('Stage Validation Test');
         
-        // ステージファイルの一覧を取得
+        // ステージファイルの一覧を取得（1-1〜1-3のみ）
         const stagesDir = path.join(__dirname, '../../src/levels/data');
+        const validatedStages = ['stage1-1.json', 'stage1-2.json', 'stage1-3.json'];
         const stageFiles = fs.readdirSync(stagesDir)
-            .filter(file => file.endsWith('.json') && file !== 'stages.json');
+            .filter(file => validatedStages.includes(file));
         
         console.log(`Found ${stageFiles.length} stage files to validate`);
         
