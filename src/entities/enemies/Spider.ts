@@ -5,6 +5,7 @@ import { Logger } from '../../utils/Logger';
 import { Entity } from '../Entity';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
+import { PhysicsSystem } from '../../physics/PhysicsSystem';
 
 type SpiderState = 'crawling' | 'descending' | 'ascending' | 'waiting';
 type SpiderSurface = 'ceiling' | 'wall_left' | 'wall_right' | 'floor';
@@ -27,6 +28,9 @@ export class Spider extends Enemy implements EntityInitializer {
     private stateTimer: number;
     private patrolRange: number;
     private lastPlayerCheck: number;
+    private playerDetectedTime: number;
+    private crawlDelayAfterDetection: number;
+    private physicsSystem: PhysicsSystem | null = null;
     declare friction: number;
 
     /**
@@ -65,7 +69,7 @@ export class Spider extends Enemy implements EntityInitializer {
         
         this.detectionRange = spiderConfig?.ai?.detectRange || 100;
         this.threadLength = 80;
-        this.threadSpeed = 1.0;
+        this.threadSpeed = 3.0;
         this.crawlSpeed = this.moveSpeed * 120;
         this.initialX = x;
         this.initialY = y;
@@ -74,6 +78,8 @@ export class Spider extends Enemy implements EntityInitializer {
         this.stateTimer = 0;
         this.patrolRange = 60;
         this.lastPlayerCheck = 0;
+        this.playerDetectedTime = 0;
+        this.crawlDelayAfterDetection = 1500;
         
         this.friction = 1.0;
         this.gravityScale = 0;
@@ -206,9 +212,17 @@ export class Spider extends Enemy implements EntityInitializer {
         const xDistance = Math.abs(player.x + player.width / 2 - (this.x + this.width / 2));
         
         if (xDistance < this.detectionRange && player.y > this.y) {
-            this.spiderState = 'descending';
-            this.threadY = this.y;
-            Logger.log(`[Spider] Player detected at X distance ${xDistance}, starting descent`);
+            if (this.playerDetectedTime === 0) {
+                this.playerDetectedTime = Date.now();
+                Logger.log(`[Spider] Player detected at X distance ${xDistance}, will descend after crawling`);
+            } else if (Date.now() - this.playerDetectedTime >= this.crawlDelayAfterDetection) {
+                this.spiderState = 'descending';
+                this.threadY = this.y;
+                this.playerDetectedTime = 0;
+                Logger.log('[Spider] Starting descent after crawl delay');
+            }
+        } else {
+            this.playerDetectedTime = 0;
         }
     }
     
@@ -225,19 +239,30 @@ export class Spider extends Enemy implements EntityInitializer {
     }
     
     private findGroundBelow(): number | null {
-        const checkInterval = 16;
-        const maxCheckDistance = 200;
+        const checkInterval = 8;
+        const maxCheckDistance = 240;
         
-        const testY = this.y + this.height;
-        const stageFloorY = 13 * 16;
+        const testX = this.x + this.width / 2;
+        const startY = this.y + this.height;
         
-        for (let checkY = testY; checkY < testY + maxCheckDistance; checkY += checkInterval) {
-            if (checkY >= stageFloorY - 16) {
-                return stageFloorY;
+        for (let checkY = startY; checkY < startY + maxCheckDistance; checkY += checkInterval) {
+            const tileX = Math.floor(testX / 16);
+            const tileY = Math.floor(checkY / 16);
+            
+            if (this.checkTileAt(tileX, tileY)) {
+                return tileY * 16;
             }
         }
         
         return null;
+    }
+    
+    private checkTileAt(tileX: number, tileY: number): boolean {
+        if (!this.physicsSystem) {
+            return false;
+        }
+        
+        return this.physicsSystem.isPointInTile(tileX * 16, tileY * 16);
     }
     
     onCollisionWithWall(): void {
@@ -303,6 +328,7 @@ export class Spider extends Enemy implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         this.setEventBus(manager.getEventBus());
         manager.addEnemy(this);
-        manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ENEMY);
+        this.physicsSystem = manager.getPhysicsSystem();
+        this.physicsSystem.addEntity(this, this.physicsSystem.layers.ENEMY);
     }
 }
