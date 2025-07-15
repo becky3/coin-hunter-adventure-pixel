@@ -4,6 +4,7 @@ import { Spring } from '../entities/Spring';
 import { GoalFlag } from '../entities/GoalFlag';
 import { Slime } from '../entities/enemies/Slime';
 import { Bat } from '../entities/enemies/Bat';
+import { Spider } from '../entities/enemies/Spider';
 import { Logger } from '../utils/Logger';
 
 type EntityFactoryFunction = (x: number, y: number) => Entity;
@@ -20,6 +21,7 @@ export class EntityFactory {
         EntityFactory.register('goal', (x, y) => GoalFlag.create(x, y));
         EntityFactory.register('slime', (x, y) => Slime.create(x, y));
         EntityFactory.register('bat', (x, y) => Bat.create(x, y));
+        EntityFactory.register('spider', (x, y) => Spider.create(x, y));
     }
     
     /**

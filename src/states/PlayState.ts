@@ -138,37 +138,61 @@ export class PlayState implements GameState {
         }
         
         const startTime = performance.now();
+        const failedSprites: string[] = [];
         
         try {
             Logger.log('[PlayState] Checking/loading sprites...');
             
+            const spriteList = [
+                { category: 'player', name: 'idle' },
+                { category: 'player', name: 'idle_small' },
+                { category: 'terrain', name: 'spring' },
+                { category: 'terrain', name: 'goal_flag' },
+                { category: 'enemies', name: 'bat_hang' },
+                { category: 'enemies', name: 'bat_fly1' },
+                { category: 'enemies', name: 'bat_fly2' },
+                { category: 'enemies', name: 'spider_idle' },
+                { category: 'enemies', name: 'spider_walk1' },
+                { category: 'enemies', name: 'spider_walk2' },
+                { category: 'enemies', name: 'spider_thread' },
+                { category: 'environment', name: 'cloud1' },
+                { category: 'environment', name: 'cloud2' },
+                { category: 'environment', name: 'tree1' },
+                { category: 'tiles', name: 'ground' },
+                { category: 'tiles', name: 'grass_ground' }
+            ];
+            
+            const animationList = [
+                { category: 'player', baseName: 'walk', frameCount: 4, frameDuration: 100 },
+                { category: 'player', baseName: 'jump', frameCount: 2, frameDuration: 100 },
+                { category: 'player', baseName: 'walk_small', frameCount: 4, frameDuration: 100 },
+                { category: 'player', baseName: 'jump_small', frameCount: 2, frameDuration: 100 },
+                { category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 100 },
+                { category: 'enemies', baseName: 'slime_idle', frameCount: 2, frameDuration: 500 },
+                { category: 'enemies', baseName: 'bird_fly', frameCount: 2, frameDuration: 200 }
+            ];
+            
             const loadPromises = [
-                this.game.assetLoader.loadSprite('player', 'idle'),
-                this.game.assetLoader.loadAnimation('player', 'walk', 4, 100),
-                this.game.assetLoader.loadAnimation('player', 'jump', 2, 100),
-                
-                this.game.assetLoader.loadSprite('player', 'idle_small'),
-                this.game.assetLoader.loadAnimation('player', 'walk_small', 4, 100),
-                this.game.assetLoader.loadAnimation('player', 'jump_small', 2, 100),
-
-                this.game.assetLoader.loadSprite('terrain', 'spring'),
-                this.game.assetLoader.loadSprite('terrain', 'goal_flag'),
-
-                this.game.assetLoader.loadAnimation('items', 'coin_spin', 4, 100),
-
-                this.game.assetLoader.loadAnimation('enemies', 'slime_idle', 2, 500),
-                this.game.assetLoader.loadAnimation('enemies', 'bird_fly', 2, 200),
-                
-                this.game.assetLoader.loadSprite('enemies', 'bat_hang'),
-                this.game.assetLoader.loadSprite('enemies', 'bat_fly1'),
-                this.game.assetLoader.loadSprite('enemies', 'bat_fly2'),
-                
-                this.game.assetLoader.loadSprite('environment', 'cloud1'),
-                this.game.assetLoader.loadSprite('environment', 'cloud2'),
-                this.game.assetLoader.loadSprite('environment', 'tree1'),
-                
-                this.game.assetLoader.loadSprite('tiles', 'ground'),
-                this.game.assetLoader.loadSprite('tiles', 'grass_ground')
+                ...spriteList.map(sprite => {
+                    if (!this.game.assetLoader) {
+                        throw new Error('AssetLoader not available');
+                    }
+                    return this.game.assetLoader.loadSprite(sprite.category, sprite.name)
+                        .catch(error => {
+                            failedSprites.push(`${sprite.category}/${sprite.name}`);
+                            throw error;
+                        });
+                }),
+                ...animationList.map(anim => {
+                    if (!this.game.assetLoader) {
+                        throw new Error('AssetLoader not available');
+                    }
+                    return this.game.assetLoader.loadAnimation(anim.category, anim.baseName, anim.frameCount, anim.frameDuration)
+                        .catch(error => {
+                            failedSprites.push(`${anim.category}/${anim.baseName} (animation)`);
+                            throw error;
+                        });
+                })
             ];
             
             await Promise.all(loadPromises);
@@ -177,6 +201,13 @@ export class PlayState implements GameState {
             Logger.log(`[PlayState] Sprites loaded successfully in ${(endTime - startTime).toFixed(2)}ms`);
         } catch (error) {
             Logger.error('Failed to load sprites:', error);
+            if (failedSprites.length > 0) {
+                Logger.error('Failed sprites:', failedSprites);
+            }
+            const errorMessage = failedSprites.length > 0 
+                ? `Critical error: Failed to load game sprites: ${failedSprites.join(', ')}`
+                : `Critical error: Failed to load game sprites. ${error instanceof Error ? error.message : 'Unknown error'}`;
+            throw new Error(errorMessage);
         }
     }
 

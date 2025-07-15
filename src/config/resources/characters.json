@@ -71,6 +71,23 @@
         "detectRange": 80,
         "attackRange": 20
       }
+    },
+    "spider": {
+      "physics": {
+        "width": 16,
+        "height": 16,
+        "moveSpeed": 0.3
+      },
+      "stats": {
+        "maxHealth": 1,
+        "damage": 1,
+        "scoreValue": 150
+      },
+      "ai": {
+        "type": "patrol",
+        "detectRange": 100,
+        "attackRange": 20
+      }
     }
   }
 }

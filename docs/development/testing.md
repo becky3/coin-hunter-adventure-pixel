@@ -37,6 +37,7 @@ node tests/e2e/test-enemy-damage.cjs
 | **test-stage-validation.cjs** | ステージデータ検証 | ステージ1-1〜1-3のコイン配置、エンティティ配置の妥当性チェック | ~2秒 |
 | **test-stage0-4-simple.cjs** | デモステージ・敵生成 | stage0-4ロード、Oキーで敵生成ダイアログ、敵の動作確認 | ~25秒 |
 | **test-bat.cjs** | Bat敵キャラクター | コウモリの表示、プレイヤー検知、放物線飛行、左右パトロール | ~15秒 |
+| **test-spider.cjs** | Spider敵キャラクター | スパイダーの天井這い移動、プレイヤー検知、糸降下、待機状態 | ~15秒 |
 
 ### テストログ
 - テスト実行時のログは `tests/logs/` に自動保存

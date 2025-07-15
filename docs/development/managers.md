@@ -28,6 +28,24 @@ constructor(game: GameServices)
   - `assetLoader?`: AssetLoader
   - `inputSystem`: InputSystem
 
+### EntityInitializerインターフェース
+
+エンティティの自己初期化を可能にするインターフェースです。
+
+```typescript
+interface EntityInitializer {
+    initializeInManager(manager: EntityManager): void;
+}
+```
+
+このインターフェースを実装することで、エンティティは自身の初期化ロジックを持つことができます。
+EntityManagerは`postProcessEntity`メソッドでこのインターフェースの有無を確認し、
+実装されている場合は`initializeInManager`メソッドを呼び出します。
+
+**実装例:**
+- Spider、Bat などの敵キャラクターで実装
+- 各エンティティが自身の初期化ロジックを持つことで、EntityManagerの肥大化を防止
+
 ### メソッド
 
 #### getPlayer()

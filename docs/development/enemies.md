@@ -49,66 +49,40 @@ export class Enemy extends Entity {
   - 左右120pxの範囲をパトロール
   - **物理エンジンを使わない独自の移動実装**
 
+### Spider（スパイダー）
+- **ファイル**: `src/entities/enemies/Spider.ts`
+- **特徴**:
+  - 天井を左右に這い回る（`crawling`状態）
+  - プレイヤーをX軸100px以内で検知
+  - 糸で垂直降下・上昇（`descending`/`ascending`状態）
+  - 動的な地面検知システム
+  - **EntityInitializerインターフェースを実装**
+
 #### Batの実装詳細
+- **物理エンジン無効化**: 独自の移動ロジックを実装
+- **放物線飛行**: quadratic easingを使用した自然な上下運動
+- **移動パラメータ**: 水平速度60px/s、パトロール範囲120px、上下サイクル2秒
 
-```typescript
-// 主要なプロパティ
-this.physicsEnabled = false;  // 物理エンジンを無効化
-this.gravity = false;         // 重力なし
-this.collidable = true;       // 衝突判定は有効
-
-// 移動パラメータ
-this.baseSpeed = 60;          // 水平移動速度
-this.patrolRange = 120;       // パトロール範囲
-this.oneCycleDuration = 2;    // 上下1サイクルの時間（秒）
-this.ceilingY = 16;          // 天井のY座標
-this.groundY = 160;          // 地面のY座標
-```
-
-#### 放物線飛行の実装
-
-```typescript
-// quadratic easing を使用した垂直移動
-const cycleProgress = (this.flyTime % this.oneCycleDuration) / this.oneCycleDuration;
-let targetY;
-if (cycleProgress < 0.5) {
-    // 下降時：加速
-    const t = cycleProgress * 2;
-    const easedT = t * t;
-    targetY = this.ceilingY + ((this.groundY - this.ceilingY) * easedT);
-} else {
-    // 上昇時：減速
-    const t = (cycleProgress - 0.5) * 2;
-    const easedT = 1 - ((1 - t) * (1 - t));
-    targetY = this.groundY - ((this.groundY - this.ceilingY) * easedT);
-}
-```
+#### Spiderの実装詳細
+- **状態管理**: crawling（這い回り）、descending（降下）、ascending（上昇）、waiting（待機）の4状態
+- **動的地面検知**: PhysicsSystem.isPointInTileを使用してリアルタイムに地面位置を検出
+- **検知クールダウン**: 上昇完了後3秒間は新たな検知を行わない
+- **EntityInitializer実装**: 自己初期化により EntityManagerの責務を軽減
 
 ## 新しい敵の追加方法
 
 1. **クラスの作成**
-   ```typescript
-   // src/entities/enemies/NewEnemy.ts
-   export class NewEnemy extends Enemy {
-       constructor(x: number, y: number) {
-           super(x, y, width, height);
-           // 初期化処理
-       }
-       
-       protected updateAI(deltaTime: number): void {
-           // AI処理
-       }
-   }
-   ```
+   - `src/entities/enemies/`ディレクトリに新しいクラスファイルを作成
+   - `Enemy`基本クラスを継承
+   - `updateAI`メソッドでAIロジックを実装
 
-2. **EntityManagerへの登録**
-   ```typescript
-   // src/managers/EntityManager.ts
-   case 'newenemy':
-       entity = new NewEnemy(config.x * TILE_SIZE, config.y * TILE_SIZE);
-       this.enemies.push(entity);
-       break;
-   ```
+2. **EntityFactoryへの登録**
+   - `src/factories/EntityFactory.ts`でファクトリ関数を登録
+   - 敵タイプ名（小文字）とファクトリ関数を関連付け
+
+3. **EntityInitializerの実装（推奨）**
+   - 初期化ロジックを敵クラス自身に持たせる
+   - EventBusの設定、物理システムへの登録などを自己完結的に実装
 
 3. **リソース設定の追加**
    - `src/config/resources/characters.json`に設定を追加
