@@ -31,18 +31,14 @@ async function runTest() {
             return !!document.getElementById('gameFrame');
         });
         
-        if (!frameExists) {
-            throw new Error('gameFrame not found on page');
-        }
+        t.assert(frameExists, 'gameFrame should exist on page');
         
         // Wait for game frame to load
         console.log('Waiting for game to initialize...');
-        try {
-            await t.page.waitForFunction(() => {
-                const iframe = document.getElementById('gameFrame');
-                return iframe && iframe.contentWindow && iframe.contentWindow.game;
-            }, { timeout: 30000 });
-        } catch (error) {
+        const gameInitialized = await t.page.waitForFunction(() => {
+            const iframe = document.getElementById('gameFrame');
+            return iframe && iframe.contentWindow && iframe.contentWindow.game;
+        }, { timeout: 30000 }).then(() => true).catch(async () => {
             // Get more details about the error
             const debugInfo = await t.page.evaluate(() => {
                 const iframe = document.getElementById('gameFrame');
@@ -54,8 +50,10 @@ async function runTest() {
                 };
             });
             console.error('Failed to initialize game. Debug info:', debugInfo);
-            throw error;
-        }
+            return false;
+        });
+        
+        t.assert(gameInitialized, 'Game should be initialized within timeout');
         
         // Additional wait for game to fully initialize
         await t.wait(2000);
@@ -187,9 +185,8 @@ async function runTest() {
             console.log(`✅ Air resistance changed: ${airResistanceChanged ? 'YES' : 'NO'}`);
             console.log(`✅ Jump power unchanged: ${jumpPowerUnchanged ? 'YES' : 'NO'}`);
             
-            if (!airResistanceChanged || !jumpPowerUnchanged) {
-                throw new Error('Air resistance test failed');
-            }
+            t.assert(airResistanceChanged, 'Air resistance should have changed to 0.3');
+            t.assert(jumpPowerUnchanged, 'Jump power should remain unchanged');
         }
         
         // Test 2: Reset to Default Button
@@ -230,9 +227,7 @@ async function runTest() {
             
         console.log(`✅ Reset button functionality: ${resetWorked ? 'PASSED' : 'FAILED'}`);
         
-        if (!resetWorked) {
-            throw new Error('Reset to default button did not work');
-        }
+        t.assert(resetWorked, 'Reset to default button should change values back from modified values');
         
         // Test 3: Gravity Scale
         console.log('\n--- Test 3: Gravity Scale ---');

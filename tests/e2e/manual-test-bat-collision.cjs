@@ -153,17 +153,15 @@ async function runTest() {
         await t.screenshot('bat-collision-test');
         
         // 結果の検証
-        if (initialInfo.playerHealth > afterContactInfo.playerHealth || afterContactInfo.playerInvulnerable) {
-            console.log('\n✅ プレイヤーへのダメージ判定: 成功');
-        } else {
-            console.error('\n❌ プレイヤーへのダメージ判定: 失敗');
-        }
+        t.assert(
+            initialInfo.playerHealth > afterContactInfo.playerHealth || afterContactInfo.playerInvulnerable,
+            'プレイヤーへのダメージ判定が成功する'
+        );
         
-        if (afterStompInfo.playerScore > initialInfo.playerScore || afterStompInfo.defeatedBat) {
-            console.log('✅ 踏みつけ判定: 成功');
-        } else {
-            console.error('❌ 踏みつけ判定: 失敗');
-        }
+        t.assert(
+            afterStompInfo.playerScore > initialInfo.playerScore || afterStompInfo.defeatedBat,
+            '踏みつけ判定が成功する'
+        );
     });
 }
 

@@ -80,9 +80,7 @@ async function runTest() {
         const afterRightPos = await t.getPlayerPosition();
         console.log(`After moving right: (${afterRightPos.x.toFixed(2)}, ${afterRightPos.y.toFixed(2)})`);
         
-        if (afterRightPos.x <= startPos.x) {
-            throw new Error('Player did not move right');
-        }
+        t.assert(afterRightPos.x > startPos.x, 'Player should move right');
         
         // Check debug display after movement
         const afterMoveDebugDisplay = await t.page.evaluate(() => {
@@ -109,17 +107,11 @@ async function runTest() {
         console.log(`Debug display - After move X: ${afterMoveDebugDisplay?.playerX}, Y: ${afterMoveDebugDisplay?.playerY}`);
         
         // Verify debug display is updating
-        if (!initialDebugDisplay || initialDebugDisplay.playerX === 'NOT FOUND') {
-            throw new Error('Debug display not found or player X coordinate not displayed');
-        }
+        t.assert(initialDebugDisplay && initialDebugDisplay.playerX !== 'NOT FOUND', 'Debug display should be found and player X coordinate should be displayed');
         
-        if (!afterMoveDebugDisplay || afterMoveDebugDisplay.playerX === 'NOT FOUND') {
-            throw new Error('Debug display not found after movement or player X coordinate not displayed');
-        }
+        t.assert(afterMoveDebugDisplay && afterMoveDebugDisplay.playerX !== 'NOT FOUND', 'Debug display should be found after movement and player X coordinate should be displayed');
         
-        if (initialDebugDisplay.playerX === afterMoveDebugDisplay.playerX) {
-            throw new Error(`Debug display X coordinate did not update. Initial: ${initialDebugDisplay.playerX}, After move: ${afterMoveDebugDisplay.playerX}`);
-        }
+        t.assert(initialDebugDisplay.playerX !== afterMoveDebugDisplay.playerX, `Debug display X coordinate should update. Initial: ${initialDebugDisplay.playerX}, After move: ${afterMoveDebugDisplay.playerX}`);
         
         console.log('✅ Debug display is updating correctly');
         
@@ -138,11 +130,8 @@ async function runTest() {
         
         // For now, just check that the game is still running
         const state = await t.getGameState();
-        if (state.running && state.currentState === 'play') {
-            console.log('✅ Jump input test passed (game still running)');
-        } else {
-            throw new Error('Game state changed unexpectedly');
-        }
+        t.assert(state.running && state.currentState === 'play', 'Game should still be running in play state after jump');
+        console.log('✅ Jump input test passed (game still running)');
         
         // Test pause/resume
         console.log('\n--- Testing Pause/Resume ---');
