@@ -28,8 +28,8 @@ export class Spider extends Enemy implements EntityInitializer {
     private stateTimer: number;
     private patrolRange: number;
     private lastPlayerCheck: number;
-    private playerDetectedTime: number;
-    private crawlDelayAfterDetection: number;
+    private detectionCooldown: number;
+    private lastAscentTime: number;
     private physicsSystem: PhysicsSystem | null = null;
     declare friction: number;
 
@@ -78,8 +78,8 @@ export class Spider extends Enemy implements EntityInitializer {
         this.stateTimer = 0;
         this.patrolRange = 90;
         this.lastPlayerCheck = 0;
-        this.playerDetectedTime = 0;
-        this.crawlDelayAfterDetection = 1500;
+        this.detectionCooldown = 3000;
+        this.lastAscentTime = 0;
         
         this.friction = 1.0;
         this.gravityScale = 0;
@@ -182,6 +182,7 @@ export class Spider extends Enemy implements EntityInitializer {
         if (this.threadY <= this.initialY) {
             this.threadY = this.initialY;
             this.spiderState = 'crawling';
+            this.lastAscentTime = Date.now();
         }
         
         this.y = this.threadY;
@@ -206,23 +207,20 @@ export class Spider extends Enemy implements EntityInitializer {
             return;
         }
         
+        const now = Date.now();
+        if (this.lastAscentTime > 0 && now - this.lastAscentTime < this.detectionCooldown) {
+            return;
+        }
+        
         const player = this.findPlayer();
         if (!player) return;
         
         const xDistance = Math.abs(player.x + player.width / 2 - (this.x + this.width / 2));
         
         if (xDistance < this.detectionRange && player.y > this.y) {
-            if (this.playerDetectedTime === 0) {
-                this.playerDetectedTime = Date.now();
-                Logger.log(`[Spider] Player detected at X distance ${xDistance}, will descend after crawling`);
-            } else if (Date.now() - this.playerDetectedTime >= this.crawlDelayAfterDetection) {
-                this.spiderState = 'descending';
-                this.threadY = this.y;
-                this.playerDetectedTime = 0;
-                Logger.log('[Spider] Starting descent after crawl delay');
-            }
-        } else {
-            this.playerDetectedTime = 0;
+            this.spiderState = 'descending';
+            this.threadY = this.y;
+            Logger.log(`[Spider] Player detected at X distance ${xDistance}, descending immediately`);
         }
     }
     
