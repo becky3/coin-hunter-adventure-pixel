@@ -12,6 +12,8 @@ test-report.html
 test-reports/
 tests/reports/
 tests/logs/
+tests/e2e/tests/logs/
+tests/e2e/tests/screenshots/
 
 # Production
 build/

@@ -2,14 +2,25 @@ import { Enemy } from '../Enemy';
 import { PixelRenderer } from '../../rendering/PixelRenderer';
 import { ResourceLoader } from '../../config/ResourceLoader';
 import { Logger } from '../../utils/Logger';
+import { EntityInitializer } from '../../interfaces/EntityInitializer';
+import { EntityManager } from '../../managers/EntityManager';
 
 /**
  * Slime enemy that moves horizontally
  */
-export class Slime extends Enemy {
+export class Slime extends Enemy implements EntityInitializer {
     public spriteKey: string;
     private bounceHeight: number;
     declare friction: number;
+
+    /**
+     * Factory method to create a Slime instance
+     */
+    static create(x: number, y: number): Slime {
+        const slime = new Slime(x, y);
+        slime.direction = -1;
+        return slime;
+    }
 
     constructor(x: number, y: number) {
         let slimeConfig = null;
@@ -84,5 +95,14 @@ export class Slime extends Enemy {
         }
         
         super.render(renderer);
+    }
+    
+    /**
+     * Initialize this slime in the EntityManager
+     */
+    initializeInManager(manager: EntityManager): void {
+        this.setEventBus(manager.getEventBus());
+        manager.addEnemy(this);
+        manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ENEMY);
     }
 }

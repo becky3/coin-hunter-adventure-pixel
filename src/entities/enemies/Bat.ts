@@ -3,13 +3,15 @@ import { PixelRenderer } from '../../rendering/PixelRenderer';
 import { ResourceLoader } from '../../config/ResourceLoader';
 import { Logger } from '../../utils/Logger';
 import { Entity } from '../Entity';
+import { EntityInitializer } from '../../interfaces/EntityInitializer';
+import { EntityManager } from '../../managers/EntityManager';
 
 type BatState = 'hanging' | 'flying';
 
 /**
  * Bat enemy that hangs from ceiling and flies in sine wave pattern
  */
-export class Bat extends Enemy {
+export class Bat extends Enemy implements EntityInitializer {
     public spriteKey: string;
     private batState: BatState;
     private detectionRange: number;
@@ -28,6 +30,15 @@ export class Bat extends Enemy {
     public readonly oneCycleDuration: number;
     public readonly ceilingY: number;
     public readonly groundY: number;
+
+    /**
+     * Factory method to create a Bat instance
+     */
+    static create(x: number, y: number): Bat {
+        const bat = new Bat(x, y);
+        bat.direction = -1;
+        return bat;
+    }
 
     constructor(x: number, y: number) {
         let batConfig = null;
@@ -234,5 +245,14 @@ export class Bat extends Enemy {
         }
         
         super.render(renderer);
+    }
+    
+    /**
+     * Initialize this bat in the EntityManager
+     */
+    initializeInManager(manager: EntityManager): void {
+        this.setEventBus(manager.getEventBus());
+        manager.addEnemy(this);
+        manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ENEMY);
     }
 }

@@ -3,12 +3,21 @@ import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
+import { EntityInitializer } from '../interfaces/EntityInitializer';
+import { EntityManager } from '../managers/EntityManager';
 
 /**
  * GoalFlag implementation
  */
-export class GoalFlag extends Entity {
+export class GoalFlag extends Entity implements EntityInitializer {
     private cleared: boolean;
+
+    /**
+     * Factory method to create a GoalFlag instance
+     */
+    static create(x: number, y: number): GoalFlag {
+        return new GoalFlag(x, y);
+    }
 
     constructor(x: number, y: number) {
         let goalConfig = null;
@@ -74,5 +83,13 @@ export class GoalFlag extends Entity {
     reset(x: number, y: number): void {
         super.reset(x, y);
         this.cleared = false;
+    }
+    
+    /**
+     * Initialize this goal flag in the EntityManager
+     */
+    initializeInManager(manager: EntityManager): void {
+        manager.addItem(this);
+        manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ITEM);
     }
 }
