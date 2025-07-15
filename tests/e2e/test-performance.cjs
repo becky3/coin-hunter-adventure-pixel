@@ -49,13 +49,9 @@ async function runTest() {
         
         // Skip FPS assertions if FPS data is not available
         if (avgFps > 0) {
-            if (avgFps < 55) {
-                throw new Error(`Average FPS (${avgFps}) is below 55 FPS requirement`);
-            }
+            t.assert(avgFps >= 55, `Average FPS (${avgFps}) is below 55 FPS requirement`);
             
-            if (minFps < 30) {
-                throw new Error(`Minimum FPS (${minFps}) is below 30 FPS threshold`);
-            }
+            t.assert(minFps >= 30, `Minimum FPS (${minFps}) is below 30 FPS threshold`);
         } else {
             console.log('⚠️  FPS data not available, skipping FPS assertions');
         }

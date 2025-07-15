@@ -111,9 +111,7 @@ async function runTest() {
                 });
             });
             
-            if (fallResult.result === 'timeout') {
-                throw new Error('Timeout waiting for fall death');
-            }
+            t.assert(fallResult.result !== 'timeout', 'Timeout waiting for fall death');
             
             console.log(`Fall ${fallCount} result: ${fallResult.result}`);
             
@@ -125,9 +123,8 @@ async function runTest() {
             console.log(`Lives after fall ${fallCount}: ${currentLives}`);
             
             // 最初の落下では1ライフ減ることを確認
-            if (fallCount === 1 && currentLives >= initialLives) {
-                throw new Error(`Lives did not decrease after first fall. Initial: ${initialLives}, Current: ${currentLives}`);
-            }
+            t.assert(!(fallCount === 1 && currentLives >= initialLives), 
+                `Lives did not decrease after first fall. Initial: ${initialLives}, Current: ${currentLives}`);
             
             if (fallResult.result === 'gameover') {
                 console.log('✅ Game over triggered correctly after losing all lives');
@@ -156,9 +153,8 @@ async function runTest() {
         console.log('Final lives (internal):', finalLives);
         console.log('HUD data:', hudData);
         
-        if (hudData && hudData.lives !== finalLives) {
-            throw new Error(`HUD shows incorrect lives. Internal: ${finalLives}, HUD: ${hudData.lives}`);
-        }
+        t.assert(!hudData || hudData.lives === finalLives, 
+            `HUD shows incorrect lives. Internal: ${finalLives}, HUD: ${hudData.lives}`);
         
         // Final screenshot
         // await t.screenshot('test-complete');

@@ -166,18 +166,10 @@ async function runTest() {
         await t.screenshot('bat-comprehensive-test');
         
         // テスト結果の検証
-        if (displayInfo.count === 0) {
-            console.error('❌ コウモリが存在しません');
-        }
-        if (!physicsInfo || physicsInfo.physicsEnabled !== false) {
-            console.error('❌ 物理が無効化されていません');
-        }
-        if (detectionInfo.flyingBats === 0) {
-            console.error('❌ プレイヤー検知で飛行を開始していません');
-        }
-        if (maxY - minY < 50) {
-            console.error('❌ 十分な垂直移動がありません');
-        }
+        t.assert(displayInfo.count > 0, 'コウモリが存在する');
+        t.assert(physicsInfo && physicsInfo.physicsEnabled === false, '物理が無効化されている');
+        t.assert(detectionInfo.flyingBats > 0, 'プレイヤー検知で飛行を開始している');
+        t.assert(maxY - minY >= 50, '十分な垂直移動がある');
         
         // 追加デバッグ情報
         console.log('\n--- 追加デバッグ情報 ---');

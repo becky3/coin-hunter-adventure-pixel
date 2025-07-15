@@ -86,9 +86,7 @@ async function runTest() {
             }
         }
         
-        if (!damageReceived) {
-            throw new Error('Failed to receive damage from enemy');
-        }
+        t.assert(damageReceived, 'Failed to receive damage from enemy');
         
         // await t.screenshot('player-small');
         
@@ -135,9 +133,7 @@ async function runTest() {
             await t.wait(200);
         }
         
-        if (!playerDied) {
-            throw new Error('Player did not die from second collision while small');
-        }
+        t.assert(playerDied, 'Player did not die from second collision while small');
         
         // Wait for respawn animation
         await t.wait(1000);
@@ -169,13 +165,10 @@ async function runTest() {
         }
         
         // Verify player is large after respawn
-        if (afterRespawn.player.isSmall) {
-            throw new Error('❌ BUG: Player is still small after respawn! Issue 106 not fixed.');
-        }
+        t.assert(!afterRespawn.player.isSmall, '❌ BUG: Player is still small after respawn! Issue 106 not fixed.');
         
-        if (afterRespawn.player.width !== initialSize.width || afterRespawn.player.height !== initialSize.height) {
-            throw new Error(`❌ Player size incorrect after respawn. Expected: ${initialSize.width}x${initialSize.height}, Got: ${afterRespawn.player.width}x${afterRespawn.player.height}`);
-        }
+        t.assert(afterRespawn.player.width === initialSize.width && afterRespawn.player.height === initialSize.height, 
+            `❌ Player size incorrect after respawn. Expected: ${initialSize.width}x${initialSize.height}, Got: ${afterRespawn.player.width}x${afterRespawn.player.height}`);
         
         console.log('✅ Player respawned with correct large size');
         
@@ -274,9 +267,8 @@ async function runTest() {
             console.log('After horizontal collision:', afterCollision);
             
             // Verify correct behavior
-            if (afterCollision.enemyDied && afterCollision.lives === beforeCollision.lives) {
-                throw new Error('❌ BUG: Enemy was defeated by horizontal collision while player was small! Player should have taken damage instead.');
-            }
+            t.assert(!(afterCollision.enemyDied && afterCollision.lives === beforeCollision.lives), 
+                '❌ BUG: Enemy was defeated by horizontal collision while player was small! Player should have taken damage instead.');
             
             if (afterCollision.lives < beforeCollision.lives && !afterCollision.enemyDied) {
                 console.log('✅ Correct: Player took damage from horizontal collision while small, enemy survived');

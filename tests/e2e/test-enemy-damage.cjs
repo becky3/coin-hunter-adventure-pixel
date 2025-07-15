@@ -68,9 +68,7 @@ async function runTest() {
         });
         console.log('Entity info:', enemyInfo);
         
-        if (enemyInfo.enemies === 0) {
-            throw new Error('No enemies found in level! Stage may not have loaded correctly.');
-        }
+        t.assert(enemyInfo.enemies > 0, 'Enemies should be found in level - stage should load correctly');
         
         // Check enemy positions
         console.log('Enemy positions:');
@@ -179,11 +177,8 @@ async function runTest() {
         
         // Verify player became small
         if (afterFirstDamage && beforeDamageSize) {
-            if (afterFirstDamage.isSmall === true && !beforeDamageSize.isSmall) {
-                console.log('✅ Player became small after first damage');
-            } else {
-                throw new Error('Player did not become small after first damage');
-            }
+            t.assert(afterFirstDamage.isSmall === true && !beforeDamageSize.isSmall, 'Player should become small after first damage');
+            console.log('✅ Player became small after first damage');
         }
         
         // Check lives didn't change
@@ -193,9 +188,7 @@ async function runTest() {
         });
         console.log('Lives after first damage:', livesAfterFirstDamage);
         
-        if (livesAfterFirstDamage !== initialLives) {
-            throw new Error(`Lives changed after first damage. Expected: ${initialLives}, Got: ${livesAfterFirstDamage}`);
-        }
+        t.assert(livesAfterFirstDamage === initialLives, `Lives should not change after first damage. Expected: ${initialLives}, Got: ${livesAfterFirstDamage}`);
         
         // await t.screenshot('after-first-damage');
         
@@ -233,9 +226,7 @@ async function runTest() {
         });
         console.log('Lives after second damage:', livesAfterSecondDamage);
         
-        if (livesAfterSecondDamage !== initialLives - 1) {
-            throw new Error(`Lives did not decrease correctly. Expected: ${initialLives - 1}, Got: ${livesAfterSecondDamage}`);
-        }
+        t.assert(livesAfterSecondDamage === initialLives - 1, `Lives should decrease correctly. Expected: ${initialLives - 1}, Got: ${livesAfterSecondDamage}`);
         
         // Check HUD display
         const hudText = await t.page.evaluate(() => {
@@ -305,9 +296,7 @@ async function runTest() {
         }
         
         // Check if game over was achieved
-        if (currentLives > 0) {
-            throw new Error(`Test failed: Game over was not triggered after ${attemptCount} attempts. Lives remaining: ${currentLives}`);
-        }
+        t.assert(currentLives === 0, `Game over should be triggered. Lives remaining: ${currentLives} after ${attemptCount} attempts`);
         
         // Check for any errors
         await t.checkForErrors();

@@ -149,9 +149,8 @@ async function runTest() {
         
         console.log('Canvas data:', canvasData);
         
-        if (canvasData.nonBackgroundPixels < 1000) {
-            throw new Error(`Very few non-background pixels rendered: ${canvasData.nonBackgroundPixels}`);
-        }
+        t.assert(canvasData.nonBackgroundPixels >= 1000, 
+            `Very few non-background pixels rendered: ${canvasData.nonBackgroundPixels}`);
         
         // Take final screenshot
         // await t.screenshot('rendering-test-complete');

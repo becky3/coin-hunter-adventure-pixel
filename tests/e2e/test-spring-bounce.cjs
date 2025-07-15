@@ -66,9 +66,7 @@ async function runTest() {
             const state = window.game?.stateManager?.currentState;
             return !!state?.player;
         });
-        if (!playerExists) {
-            throw new Error('Player not found');
-        }
+        t.assert(playerExists, 'Player not found');
         
         // Teleport player directly on top of spring (spring is at x=80, y=160)
         console.log('Teleporting player on top of spring...');
@@ -241,9 +239,7 @@ async function runTest() {
         });
         console.log('Spring info:', springInfo);
         
-        if (!springInfo.exists) {
-            throw new Error('Spring not found in stage. Debug: ' + JSON.stringify(debugInfo));
-        }
+        t.assert(springInfo.exists, 'Spring not found in stage. Debug: ' + JSON.stringify(debugInfo));
         
         // Wait a moment then jump on the spring
         await t.wait(200);
@@ -309,17 +305,11 @@ async function runTest() {
         console.log(`Spring bounce max height: ${springMaxHeight.toFixed(2)} pixels`);
         
         // Verify spring was triggered
-        if (!springBounceResult?.springTriggered) {
-            throw new Error('Spring was not triggered!');
-        }
+        t.assert(springBounceResult?.springTriggered, 'Spring was not triggered!');
         
         // Verify heights are valid
-        if (normalMaxHeight <= 0) {
-            throw new Error(`Invalid normal jump height: ${normalMaxHeight}`);
-        }
-        if (springMaxHeight <= 0) {
-            throw new Error(`Invalid spring bounce height: ${springMaxHeight}`);
-        }
+        t.assert(normalMaxHeight > 0, `Invalid normal jump height: ${normalMaxHeight}`);
+        t.assert(springMaxHeight > 0, `Invalid spring bounce height: ${springMaxHeight}`);
         
         // Verify spring bounce is approximately 2.5x normal jump
         const bounceRatio = springMaxHeight / normalMaxHeight;
@@ -328,9 +318,7 @@ async function runTest() {
         
         // Allow some tolerance due to physics simulation
         // Spring should bounce significantly higher than normal jump (at least 1.5x)
-        if (bounceRatio < 1.5) {
-            throw new Error(`Spring bounce ratio ${bounceRatio.toFixed(2)} is too low (should be at least 1.5x)`);
-        }
+        t.assert(bounceRatio >= 1.5, `Spring bounce ratio ${bounceRatio.toFixed(2)} is too low (should be at least 1.5x)`);
         
         // await t.screenshot('spring-bounce-test');
         

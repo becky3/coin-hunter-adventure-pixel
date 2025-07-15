@@ -143,9 +143,8 @@ async function runTest() {
         
         // Variable Jumpが機能しているか確認
         const heightIncrease = longJumpMaxHeight / shortJumpMaxHeight;
-        if (heightIncrease < 1.2) { // 少なくとも20%は高くなるべき
-            throw new Error(`Variable jump not working! Long jump (${longJumpMaxHeight.toFixed(1)}px) should be at least 20% higher than short jump (${shortJumpMaxHeight.toFixed(1)}px). Actual increase: ${((heightIncrease - 1) * 100).toFixed(1)}%`);
-        }
+        t.assert(heightIncrease >= 1.2, // 少なくとも20%は高くなるべき
+            `Variable jump not working! Long jump (${longJumpMaxHeight.toFixed(1)}px) should be at least 20% higher than short jump (${shortJumpMaxHeight.toFixed(1)}px). Actual increase: ${((heightIncrease - 1) * 100).toFixed(1)}%`);
         
         console.log('\n✅ Variable jump is working correctly!');
         
