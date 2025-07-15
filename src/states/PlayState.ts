@@ -16,6 +16,8 @@ import { AssetLoader, StageType } from '../assets/AssetLoader';
 import { BackgroundRenderer } from '../rendering/BackgroundRenderer';
 import { TileRenderer } from '../rendering/TileRenderer';
 import { PerformanceMonitor } from '../performance/PerformanceMonitor';
+import { ShieldEffect } from '../powerups/ShieldEffect';
+import { PowerUpType } from '../types/PowerUpTypes';
 
 interface Game {
     renderer?: PixelRenderer;
@@ -126,6 +128,16 @@ export class PlayState implements GameState {
         this.gameState = 'playing';
         this.lives = 3;
         this.isHandlingDeath = false;
+    }
+    
+    private initializePowerUpEffects(): void {
+        const player = this.entityManager.getPlayer();
+        if (!player) return;
+        
+        const powerUpManager = player.getPowerUpManager();
+        powerUpManager.registerEffect(PowerUpType.SHIELD_STONE, new ShieldEffect());
+        
+        Logger.log('[PlayState] Power-up effects initialized');
     }
 
     private setupEventListeners(): void {
@@ -241,6 +253,8 @@ export class PlayState implements GameState {
                 this.handlePlayerDeath();
             }
         });
+        
+        this.initializePowerUpEffects();
         
         Logger.log('[PlayState] levelData:', levelData);
         Logger.log('[PlayState] levelData.name:', levelData?.name);
