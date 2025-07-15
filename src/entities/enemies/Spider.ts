@@ -74,9 +74,9 @@ export class Spider extends Enemy implements EntityInitializer {
         this.initialX = x;
         this.initialY = y;
         this.threadY = y;
-        this.waitTime = 2000;
+        this.waitTime = 1000;
         this.stateTimer = 0;
-        this.patrolRange = 120;
+        this.patrolRange = 90;
         this.lastPlayerCheck = 0;
         this.playerDetectedTime = 0;
         this.crawlDelayAfterDetection = 1500;
