@@ -33,6 +33,10 @@ import enemiesBirdFly2 from './enemies/bird_fly2.json';
 import enemiesBatHang from './enemies/bat_hang.json';
 import enemiesBatFly1 from './enemies/bat_fly1.json';
 import enemiesBatFly2 from './enemies/bat_fly2.json';
+import enemiesSpiderIdle from './enemies/spider/spider_idle.json';
+import enemiesSpiderWalk1 from './enemies/spider/spider_walk1.json';
+import enemiesSpiderWalk2 from './enemies/spider/spider_walk2.json';
+import enemiesSpiderThread from './enemies/spider/spider_thread.json';
 
 import uiHeart from './ui/heart.json';
 import uiHeartEmpty from './ui/heart_empty.json';
@@ -77,6 +81,10 @@ export const spriteDataMap: Record<string, unknown> = {
     'enemies/bat_hang': enemiesBatHang,
     'enemies/bat_fly1': enemiesBatFly1,
     'enemies/bat_fly2': enemiesBatFly2,
+    'enemies/spider_idle': enemiesSpiderIdle,
+    'enemies/spider_walk1': enemiesSpiderWalk1,
+    'enemies/spider_walk2': enemiesSpiderWalk2,
+    'enemies/spider_thread': enemiesSpiderThread,
     'ui/heart': uiHeart,
     'ui/heart_empty': uiHeartEmpty,
     'environment/cloud1': environmentCloud1,
