@@ -11,6 +11,15 @@ export class Slime extends Enemy {
     private bounceHeight: number;
     declare friction: number;
 
+    /**
+     * Factory method to create a Slime instance
+     */
+    static create(x: number, y: number): Slime {
+        const slime = new Slime(x, y);
+        slime.direction = -1;
+        return slime;
+    }
+
     constructor(x: number, y: number) {
         let slimeConfig = null;
         try {

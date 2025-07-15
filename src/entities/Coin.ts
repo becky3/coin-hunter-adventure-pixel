@@ -19,6 +19,13 @@ export class Coin extends Entity {
     private baseY: number;
     public scoreValue: number;
 
+    /**
+     * Factory method to create a Coin instance
+     */
+    static create(x: number, y: number): Coin {
+        return new Coin(x, y);
+    }
+
     constructor(x: number, y: number) {
         let coinConfig = null;
         try {

@@ -29,6 +29,15 @@ export class Bat extends Enemy {
     public readonly ceilingY: number;
     public readonly groundY: number;
 
+    /**
+     * Factory method to create a Bat instance
+     */
+    static create(x: number, y: number): Bat {
+        const bat = new Bat(x, y);
+        bat.direction = -1;
+        return bat;
+    }
+
     constructor(x: number, y: number) {
         let batConfig = null;
         try {

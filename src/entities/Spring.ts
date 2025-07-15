@@ -19,6 +19,13 @@ export class Spring extends Entity {
     private cooldownFrames: number;
     private readonly COOLDOWN_DURATION = 20;
 
+    /**
+     * Factory method to create a Spring instance
+     */
+    static create(x: number, y: number): Spring {
+        return new Spring(x, y);
+    }
+
     constructor(x: number, y: number) {
         let springConfig = null;
         try {

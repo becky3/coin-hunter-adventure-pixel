@@ -4,8 +4,7 @@ import { Player } from '../entities/Player';
 import { Coin } from '../entities/Coin';
 import { Spring } from '../entities/Spring';
 import { GoalFlag } from '../entities/GoalFlag';
-import { Slime } from '../entities/enemies/Slime';
-import { Bat } from '../entities/enemies/Bat';
+import { EntityFactory } from '../factories/EntityFactory';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { EventBus } from '../services/EventBus';
 import { PixelRenderer } from '../rendering/PixelRenderer';
@@ -106,104 +105,55 @@ export class EntityManager {
     }
 
     createEntity(config: EntityConfig): Entity | null {
-        let entity: Entity | null = null;
-        
         const tileMap = this.physicsSystem.tileMap;
         if (tileMap && tileMap[config.y] && tileMap[config.y][config.x] === 1) {
             Logger.warn(`[EntityManager] 警告: エンティティ(${config.type})のスポーン位置(${config.x}, ${config.y})が地面の中です！`);
         }
         
-        switch (config.type) {
-        case 'coin':
-            entity = new Coin(
-                config.x * TILE_SIZE,
-                config.y * TILE_SIZE
-            );
-            this.items.push(entity);
-            break;
-                
-        case 'spring': {
-            const spring = new Spring(
-                config.x * TILE_SIZE,
-                config.y * TILE_SIZE
-            );
-            spring.physicsSystem = this.physicsSystem;
-            this.items.push(spring);
-            this.physicsSystem.addEntity(spring, this.physicsSystem.layers.ITEM);
-            entity = spring;
-            break;
-        }
-                
-        case 'goal':
-            entity = new GoalFlag(
-                config.x * TILE_SIZE,
-                config.y * TILE_SIZE
-            );
-            this.items.push(entity);
-            this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ITEM);
-            break;
-                
-        case 'slime': {
-            const slime = new Slime(
-                config.x * TILE_SIZE,
-                config.y * TILE_SIZE
-            );
-            slime.direction = -1;
-            slime.setEventBus(this.eventBus);
-            this.enemies.push(slime);
-            
-            Logger.log(`[EntityManager] Creating slime at (${config.x * TILE_SIZE}, ${config.y * TILE_SIZE})`);
-            Logger.log(`[EntityManager] Physics system has tilemap: ${this.physicsSystem.tileMap !== null}`);
-            
-            this.physicsSystem.addEntity(slime, this.physicsSystem.layers.ENEMY);
-            entity = slime;
-            break;
-        }
+        const pixelX = config.x * TILE_SIZE;
+        const pixelY = config.y * TILE_SIZE;
         
-        case 'bat': {
-            const bat = new Bat(
-                config.x * TILE_SIZE,
-                config.y * TILE_SIZE
-            );
-            bat.direction = -1;
-            bat.setEventBus(this.eventBus);
-            this.enemies.push(bat);
-            
-            Logger.log(`[EntityManager] Creating bat at (${config.x * TILE_SIZE}, ${config.y * TILE_SIZE})`);
-            
-            this.physicsSystem.addEntity(bat, this.physicsSystem.layers.ENEMY);
-            entity = bat;
-            break;
-        }
-        }
+        const entity = EntityFactory.create(config.type, pixelX, pixelY);
+        if (!entity) return null;
         
-        if (entity) {
-            this.eventBus.emit('entity:created', { entity, type: config.type });
-        }
+        this.postProcessEntity(entity, config.type);
         
         return entity;
     }
+    
+    private postProcessEntity(entity: Entity, type: string): void {
+        if (entity instanceof Enemy) {
+            entity.setEventBus(this.eventBus);
+            this.enemies.push(entity);
+            this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ENEMY);
+        } else if (entity instanceof Spring) {
+            entity.physicsSystem = this.physicsSystem;
+            this.items.push(entity);
+            this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ITEM);
+        } else if (type === 'goal' || type === 'coin') {
+            this.items.push(entity);
+            if (type === 'goal') {
+                this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ITEM);
+            }
+        }
+        
+        this.eventBus.emit('entity:created', { entity, type });
+    }
 
     createTestEntities(): void {
-        const slime1 = new Slime(150, 180);
-        slime1.direction = -1;
-        slime1.setEventBus(this.eventBus);
-        this.enemies.push(slime1);
-        this.physicsSystem.addEntity(slime1, this.physicsSystem.layers.ENEMY);
+        const testEntities = [
+            { type: 'slime', x: 150, y: 180 },
+            { type: 'slime', x: 200, y: 100 },
+            { type: 'spring', x: 5 * TILE_SIZE, y: 10 * TILE_SIZE },
+            { type: 'goal', x: 17 * TILE_SIZE, y: 12 * TILE_SIZE }
+        ];
         
-        const slime2 = new Slime(200, 100);
-        slime2.direction = -1;
-        slime2.setEventBus(this.eventBus);
-        this.enemies.push(slime2);
-        this.physicsSystem.addEntity(slime2, this.physicsSystem.layers.ENEMY);
-        
-        const spring = new Spring(5 * TILE_SIZE, 10 * TILE_SIZE);
-        this.items.push(spring);
-        this.physicsSystem.addEntity(spring, this.physicsSystem.layers.ITEM);
-        
-        const goal = new GoalFlag(17 * TILE_SIZE, 12 * TILE_SIZE);
-        this.items.push(goal);
-        this.physicsSystem.addEntity(goal, this.physicsSystem.layers.ITEM);
+        testEntities.forEach(config => {
+            const entity = EntityFactory.create(config.type, config.x, config.y);
+            if (entity) {
+                this.postProcessEntity(entity, config.type);
+            }
+        });
     }
 
     updateAll(deltaTime: number): void {
@@ -312,31 +262,21 @@ export class EntityManager {
             
             Logger.log('EntityManager', `Spawning ${enemyType} at tile (${tileX}, ${tileY}) -> pixel (${pixelX}, ${pixelY})`);
             
-            let enemy: Enemy | null = null;
+            const entity = EntityFactory.create(enemyType.toLowerCase(), pixelX, pixelY);
             
-            switch (enemyType.toLowerCase()) {
-            case 'slime':
-                enemy = new Slime(pixelX, pixelY);
-                break;
-            case 'bat':
-                enemy = new Bat(pixelX, pixelY);
-                enemy.setEventBus(this.eventBus);
-                break;
-            case 'spider':
-            case 'armorknight':
-            case 'flyingwizard':
-            case 'fireslime':
-            case 'lavabubble':
-                Logger.warn('EntityManager', `Enemy type '${enemyType}' not yet implemented`);
-                return;
-            default:
-                Logger.error('EntityManager', `Unknown enemy type: ${enemyType}`);
+            if (!entity) {
+                if (!EntityFactory.hasFactory(enemyType.toLowerCase())) {
+                    Logger.warn('EntityManager', `Enemy type '${enemyType}' not yet implemented`);
+                } else {
+                    Logger.error('EntityManager', `Failed to create enemy type: ${enemyType}`);
+                }
                 return;
             }
             
-            if (enemy) {
-                this.enemies.push(enemy);
-                this.physicsSystem.addEntity(enemy, this.physicsSystem.layers.ENEMY);
+            if (entity instanceof Enemy) {
+                entity.setEventBus(this.eventBus);
+                this.enemies.push(entity);
+                this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ENEMY);
                 
                 this.eventBus.emit('enemy:spawned', {
                     type: enemyType,
@@ -344,6 +284,8 @@ export class EntityManager {
                 });
                 
                 Logger.log('EntityManager', `Successfully spawned ${enemyType}`);
+            } else {
+                Logger.error('EntityManager', `Entity type '${enemyType}' is not an Enemy`);
             }
         } catch (error) {
             Logger.error('EntityManager', `Failed to spawn enemy: ${error}`);

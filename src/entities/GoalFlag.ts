@@ -10,6 +10,13 @@ import { Logger } from '../utils/Logger';
 export class GoalFlag extends Entity {
     private cleared: boolean;
 
+    /**
+     * Factory method to create a GoalFlag instance
+     */
+    static create(x: number, y: number): GoalFlag {
+        return new GoalFlag(x, y);
+    }
+
     constructor(x: number, y: number) {
         let goalConfig = null;
         try {
