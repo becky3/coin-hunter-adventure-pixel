@@ -73,16 +73,14 @@ async function runTest() {
             
             console.log('Enemy info:', enemyInfo);
             
+            t.assert(enemyInfo.enemyCount > 0, 'Enemy spawned successfully');
             if (enemyInfo.enemyCount > 0) {
-                console.log('✅ Enemy spawned successfully!');
                 console.log('  Enemies:', enemyInfo.enemies);
-            } else {
-                console.log('❌ No enemy spawned');
             }
             
             
         } else {
-            console.log('❌ Enemy spawn dialog not visible');
+            t.assert(false, 'Enemy spawn dialog is visible');
         }
         
         // スライムの動きを監視
