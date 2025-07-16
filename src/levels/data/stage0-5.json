@@ -4,7 +4,7 @@
   "width": 40,
   "height": 15,
   "tileSize": 16,
-  "backgroundColor": "#5C94FC",
+  "backgroundColor": 0,
   "playerSpawn": { "x": 2, "y": 11 },
   "goal": { "x": 37, "y": 11 },
   "timeLimit": 300,

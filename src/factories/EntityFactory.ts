@@ -38,9 +38,13 @@ export class EntityFactory {
      * Create an entity of the specified type
      */
     static create(type: string, x: number, y: number): Entity | null {
+        Logger.log(`[EntityFactory] Attempting to create entity: ${type} at (${x}, ${y})`);
+        Logger.log('[EntityFactory] Registered types:', EntityFactory.getRegisteredTypes());
+        
         const factory = EntityFactory.factories.get(type);
         if (!factory) {
             Logger.warn(`[EntityFactory] Unknown entity type: ${type}`);
+            Logger.warn(`[EntityFactory] Available types: ${Array.from(EntityFactory.factories.keys()).join(', ')}`);
             return null;
         }
         
