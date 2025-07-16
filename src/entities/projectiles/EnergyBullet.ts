@@ -24,7 +24,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         this.solid = false;
         
         this.lifeTime = 0;
-        this.maxLifeTime = 2000;
+        this.maxLifeTime = 5000; // 5 seconds
         this.damage = 1;
         this.animationTime = 0;
         
@@ -32,11 +32,21 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     }
 
     onUpdate(deltaTime: number): void {
-        this.lifeTime += deltaTime;
+        this.lifeTime += deltaTime * 1000; // Convert to milliseconds
         this.animationTime += deltaTime * 1000;
         
+        // Destroy if lifetime exceeded
         if (this.lifeTime >= this.maxLifeTime) {
+            Logger.log('[EnergyBullet] Destroyed by timeout at', this.x, this.y);
             this.destroy();
+            return;
+        }
+        
+        // Destroy if too far off screen (1000 pixels from origin)
+        if (Math.abs(this.x) > 1000 || Math.abs(this.y) > 1000) {
+            Logger.log('[EnergyBullet] Destroyed by distance at', this.x, this.y);
+            this.destroy();
+            return;
         }
     }
 
@@ -67,6 +77,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         }
         
         const otherClassName = collisionInfo.other.constructor.name;
+        Logger.log('[EnergyBullet] Collision with', otherClassName, 'at', this.x, this.y);
         
         if (otherClassName === 'Enemy' || otherClassName === 'Slime' || 
             otherClassName === 'Bird' || otherClassName === 'Bat' || 
@@ -87,7 +98,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     destroy(): void {
         this.active = false;
         this.visible = false;
-        Logger.log('[EnergyBullet] Destroyed');
+        Logger.log('[EnergyBullet] Destroyed at position:', this.x, this.y, 'lifetime:', this.lifeTime);
     }
 
     /**

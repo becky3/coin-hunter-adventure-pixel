@@ -42,9 +42,13 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
             if (this.originalTakeDamage) {
                 const result = this.originalTakeDamage();
                 
-                if (result && playerWithSize.isSmall) {
+                // If damage was taken (result is true), remove power glove
+                if (result) {
                     Logger.log('[PowerGloveEffect] Player damaged, removing power glove');
-                    target.getPowerUpManager().removePowerUp(PowerUpType.POWER_GLOVE);
+                    // Schedule removal for next frame to avoid issues during damage processing
+                    setTimeout(() => {
+                        target.getPowerUpManager().removePowerUp(PowerUpType.POWER_GLOVE);
+                    }, 0);
                 }
                 
                 return result;

@@ -229,7 +229,7 @@ export class PlayState implements GameState {
         }
     }
 
-    async enter(params: { level?: string; enableProgression?: boolean } = {}): Promise<void> {
+    async enter(params: { level?: string; enableProgression?: boolean; playerState?: any } = {}): Promise<void> {
         const enterStartTime = performance.now();
         Logger.log('[PlayState] enter() called with params:', params);
         Logger.log('[PlayState] Starting initialization...');
@@ -252,6 +252,23 @@ export class PlayState implements GameState {
         
 
         this.hudManager.updateTime(this.levelManager.getTimeLimit());
+        
+        // Restore player state if provided
+        if (params.playerState) {
+            const { score, lives, powerUps, isSmall } = params.playerState;
+            
+            // Restore score and lives
+            if (score !== undefined) {
+                this.hudManager.updateScore(score);
+            }
+            if (lives !== undefined) {
+                this.lives = lives;
+                this.hudManager.updateLives(lives);
+            }
+            
+            // Restore power-ups after player is created
+            // This will be done after initializeLevel
+        }
         this.hudManager.updateLives(this.lives);
         
         this.eventBus.on('player:died', () => {
@@ -291,6 +308,23 @@ export class PlayState implements GameState {
         if (player) {
             Logger.log('[PlayState] Player created successfully');
             Logger.log(`[PlayState] Player position: (${player.x}, ${player.y})`);
+            
+            // Restore power-ups if provided
+            if (params.playerState && params.playerState.powerUps) {
+                const powerUpManager = player.getPowerUpManager();
+                params.playerState.powerUps.forEach((powerUpType: string) => {
+                    Logger.log(`[PlayState] Restoring power-up: ${powerUpType}`);
+                    // Apply the power-up based on type
+                    if (powerUpType === 'POWER_GLOVE') {
+                        powerUpManager.applyPowerUp({
+                            type: PowerUpType.POWER_GLOVE,
+                            permanent: true
+                        });
+                    }
+                    // Add other power-up types here as needed
+                });
+            }
+            
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('playstate:ready', { 
                     detail: { player: true } 
@@ -522,7 +556,19 @@ export class PlayState implements GameState {
             this.stageClearTimer = null;
             
             if (nextLevel) {
-                this.game.stateManager.setState('play', { level: nextLevel });
+                // Preserve player state for next level
+                const player = this.entityManager.getPlayer();
+                const playerState = player ? {
+                    score: this.hudManager.getHUDData().score,
+                    lives: this.lives,
+                    powerUps: player.getPowerUpManager().getActivePowerUps(),
+                    isSmall: (player as any).isSmall
+                } : null;
+                
+                this.game.stateManager.setState('play', { 
+                    level: nextLevel,
+                    playerState 
+                });
             } else {
                 this.showEnding();
             }
