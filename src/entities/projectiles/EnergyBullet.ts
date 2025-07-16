@@ -12,6 +12,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     private maxLifeTime: number;
     private damage: number;
     private animationTime: number;
+    private destroyed: boolean = false;
 
     constructor(x: number, y: number, direction: number, speed: number) {
         super(x, y, 8, 8);
@@ -103,9 +104,21 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     }
 
     destroy(): void {
-        this.active = false;
+        if (this.destroyed) return; // Prevent multiple destroy calls
+        
+        this.destroyed = true;
         this.visible = false;
+        
+        // Remove from physics system
+        if (this.physicsSystem) {
+            this.physicsSystem.removeEntity(this);
+        }
+        
         Logger.log('[EnergyBullet] Destroyed at position:', this.x, this.y, 'lifetime:', this.lifeTime);
+    }
+    
+    isDestroyed(): boolean {
+        return this.destroyed;
     }
 
     /**

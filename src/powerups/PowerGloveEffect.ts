@@ -14,6 +14,7 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
     private fireRate: number = 500;
     private bulletSpeed: number = 5;
     private entityManager: EntityManager;
+    private powerUpManager: any = null; // Store reference to PowerUpManager
 
     constructor(entityManager: EntityManager) {
         this.entityManager = entityManager;
@@ -36,6 +37,8 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
             playerWithSize.y -= 16;
         }
         
+        // Store reference to PowerUpManager
+        this.powerUpManager = target.getPowerUpManager();
         this.originalTakeDamage = target.takeDamage.bind(target);
         
         target.takeDamage = (): boolean => {
@@ -43,12 +46,10 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
                 const result = this.originalTakeDamage();
                 
                 // If damage was taken (result is true), remove power glove
-                if (result) {
+                if (result && this.powerUpManager) {
                     Logger.log('[PowerGloveEffect] Player damaged, removing power glove');
-                    // Schedule removal for next frame to avoid issues during damage processing
-                    setTimeout(() => {
-                        target.getPowerUpManager().removePowerUp(PowerUpType.POWER_GLOVE);
-                    }, 0);
+                    // Remove immediately
+                    this.powerUpManager.removePowerUp(PowerUpType.POWER_GLOVE);
                 }
                 
                 return result;
@@ -82,6 +83,8 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
             target.takeDamage = this.originalTakeDamage.bind(target);
             this.originalTakeDamage = null;
         }
+        
+        this.powerUpManager = null;
     }
 
     private fireBullet(player: Player): void {

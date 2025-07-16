@@ -201,11 +201,13 @@ export class EntityManager {
                 }
             });
             
+            // Update projectiles and remove destroyed ones
             this.projectiles = this.projectiles.filter(projectile => {
                 if (projectile.update) {
                     projectile.update(deltaTime);
                 }
-                return (projectile as { active?: boolean }).active !== false;
+                // Remove destroyed projectiles
+                return !(projectile as any).isDestroyed || !(projectile as any).isDestroyed();
             });
         } catch (error) {
             Logger.error('Error during entity update:', error);
@@ -215,7 +217,8 @@ export class EntityManager {
 
     checkProjectileCollisions(): void {
         this.projectiles = this.projectiles.filter(projectile => {
-            if ((projectile as { active?: boolean }).active === false) {
+            // Skip destroyed projectiles
+            if ((projectile as any).isDestroyed && (projectile as any).isDestroyed()) {
                 return false;
             }
             
