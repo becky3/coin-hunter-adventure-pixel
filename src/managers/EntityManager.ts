@@ -230,11 +230,25 @@ export class EntityManager {
                     
                 }
             }
+            else if (item.collidesWith && item.collidesWith(this.player)) {
+                // Generic collision handling for other items
+                if (item.onCollision) {
+                    item.onCollision({
+                        other: this.player,
+                        normal: { x: 0, y: 0 },
+                        depth: 0
+                    });
+                }
+            }
         });
         
         this.items = this.items.filter(item => {
             if (item.constructor.name === 'Coin') {
                 return !(item as Coin).isCollected();
+            }
+            // Check if item has been collected (for power-ups)
+            if ('collected' in item) {
+                return !(item as any).collected;
             }
             return true;
         });

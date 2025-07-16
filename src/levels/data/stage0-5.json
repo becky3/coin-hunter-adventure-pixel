@@ -28,6 +28,11 @@
   "entities": [
     {
       "type": "shield_stone",
+      "x": 5,
+      "y": 11
+    },
+    {
+      "type": "slime",
       "x": 10,
       "y": 11
     },
@@ -37,7 +42,7 @@
       "y": 11
     },
     {
-      "type": "slime",
+      "type": "shield_stone",
       "x": 20,
       "y": 11
     },
@@ -54,11 +59,6 @@
     {
       "type": "coin",
       "x": 32,
-      "y": 11
-    },
-    {
-      "type": "coin",
-      "x": 34,
       "y": 11
     }
   ]

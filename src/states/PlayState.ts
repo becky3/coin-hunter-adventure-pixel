@@ -171,7 +171,8 @@ export class PlayState implements GameState {
                 { category: 'environment', name: 'cloud2' },
                 { category: 'environment', name: 'tree1' },
                 { category: 'tiles', name: 'ground' },
-                { category: 'tiles', name: 'grass_ground' }
+                { category: 'tiles', name: 'grass_ground' },
+                { category: 'powerups', name: 'shield_stone' }
             ];
             
             const animationList = [
