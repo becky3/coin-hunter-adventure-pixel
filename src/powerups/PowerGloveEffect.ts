@@ -1,9 +1,8 @@
-import { PowerUpEffect, PowerUpType } from '../types/PowerUpTypes';
+import { PowerUpEffect } from '../types/PowerUpTypes';
 import { Player } from '../entities/Player';
 import { Logger } from '../utils/Logger';
 import { EnergyBullet } from '../entities/projectiles/EnergyBullet';
 import { EntityManager } from '../managers/EntityManager';
-import { InputSystem } from '../core/InputSystem';
 import { PowerGloveConfig } from '../config/PowerGloveConfig';
 
 /**
@@ -43,17 +42,11 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
             return;
         }
         
-        // Debug: Check attack key state
         const attackPressed = inputManager.isActionPressed('attack');
-        if (attackPressed) {
-            Logger.log('[PowerGloveEffect] Attack key pressed!');
-        }
         
-        // Simple check like jump
         if (attackPressed) {
             const currentTime = Date.now();
             
-            // Check bullet count on screen
             const currentBullets = this.countPlayerBullets();
             if (currentBullets >= PowerGloveConfig.maxBulletsOnScreen) {
                 Logger.log('[PowerGloveEffect] Max bullets on screen:', currentBullets, '/', PowerGloveConfig.maxBulletsOnScreen);
@@ -84,7 +77,6 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
         
         const direction = player.facing === 'right' ? 1 : -1;
         
-        // Position bullet slightly away from player to avoid immediate collision
         const bulletX = player.x + (direction > 0 ? player.width + 2 : -10);
         const bulletY = player.y + player.height / 2 - 4;
         

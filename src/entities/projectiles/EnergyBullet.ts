@@ -14,6 +14,8 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     private damage: number;
     private animationTime: number;
     private destroyed: boolean = false;
+    private originX: number;
+    private originY: number;
 
     constructor(x: number, y: number, direction: number, speed: number) {
         super(x, y, PowerGloveConfig.bulletWidth, PowerGloveConfig.bulletHeight);
@@ -31,28 +33,33 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         this.damage = PowerGloveConfig.bulletDamage;
         this.animationTime = 0;
         
+        this.originX = x;
+        this.originY = y;
+        
         Logger.log('[EnergyBullet] Created at', x, y, 'direction:', direction);
     }
 
     onUpdate(deltaTime: number): void {
-        this.lifeTime += deltaTime * 1000; // Convert to milliseconds
+        this.lifeTime += deltaTime * 1000;
         this.animationTime += deltaTime * 1000;
         
-        // Log position every 500ms
         if (Math.floor(this.lifeTime / 500) > Math.floor((this.lifeTime - deltaTime * 1000) / 500)) {
             Logger.log('[EnergyBullet] Position:', this.x, this.y, 'velocity:', this.vx, this.vy);
         }
         
-        // Destroy if lifetime exceeded
         if (this.lifeTime >= this.maxLifeTime) {
             Logger.log('[EnergyBullet] Destroyed by timeout at', this.x, this.y);
             this.destroy();
             return;
         }
         
-        // Destroy if too far off screen (1000 pixels from origin)
-        if (Math.abs(this.x) > 1000 || Math.abs(this.y) > 1000) {
-            Logger.log('[EnergyBullet] Destroyed by distance at', this.x, this.y);
+        const distanceFromOrigin = Math.sqrt(
+            Math.pow(this.x - this.originX, 2) + 
+            Math.pow(this.y - this.originY, 2)
+        );
+        
+        if (distanceFromOrigin > 300) {
+            Logger.log('[EnergyBullet] Destroyed by distance from origin:', distanceFromOrigin);
             this.destroy();
             return;
         }
@@ -84,7 +91,6 @@ export class EnergyBullet extends Entity implements EntityInitializer {
             return;
         }
         
-        // Handle tile collision (no 'other' entity)
         if (!collisionInfo.other) {
             Logger.log('[EnergyBullet] Collision with tile at', this.x, this.y);
             this.destroy();
@@ -111,12 +117,11 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     }
 
     destroy(): void {
-        if (this.destroyed) return; // Prevent multiple destroy calls
+        if (this.destroyed) return;
         
         this.destroyed = true;
         this.visible = false;
         
-        // Remove from physics system
         if (this.physicsSystem) {
             this.physicsSystem.removeEntity(this);
         }

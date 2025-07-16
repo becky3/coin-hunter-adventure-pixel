@@ -246,9 +246,8 @@ export class PhysicsSystem {
     }
     
     resolveTileCollision(entity: PhysicsEntity, tileBounds: Bounds, axis: 'horizontal' | 'vertical'): void {
-        // Call onCollision for entities that have it (like projectiles)
         if (entity.onCollision) {
-            entity.onCollision({ other: null }); // null indicates tile collision
+            entity.onCollision({ other: null });
         }
         
         if (axis === 'horizontal') {
@@ -256,8 +255,7 @@ export class PhysicsSystem {
                 entity.x = tileBounds.left - entity.width;
                 entity.vx = 0;
             } else if (entity.vx < 0) {
-                // Log projectile collision
-                if ((entity as any).constructor.name === 'EnergyBullet') {
+                if (entity.constructor.name === 'EnergyBullet') {
                     Logger.log('[PhysicsSystem] Bullet collision: moving from', entity.x, 'to', tileBounds.right);
                 }
                 entity.x = tileBounds.right;
