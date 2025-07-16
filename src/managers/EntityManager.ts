@@ -231,7 +231,6 @@ export class EntityManager {
                 }
             }
             else if (item.collidesWith && item.collidesWith(this.player)) {
-                // Generic collision handling for other items
                 if (item.onCollision) {
                     item.onCollision({
                         other: this.player,
@@ -246,9 +245,8 @@ export class EntityManager {
             if (item.constructor.name === 'Coin') {
                 return !(item as Coin).isCollected();
             }
-            // Check if item has been collected (for power-ups)
             if ('collected' in item) {
-                return !(item as any).collected;
+                return !(item as { collected: boolean }).collected;
             }
             return true;
         });

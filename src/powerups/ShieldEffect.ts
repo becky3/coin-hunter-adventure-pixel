@@ -20,14 +20,14 @@ export class ShieldEffect implements PowerUpEffect<Player> {
                 Logger.log('[ShieldEffect] Shield absorbed damage!');
                 this.shieldActive = false;
                 
-                // Make player temporarily invulnerable to prevent double damage
-                (target as any)._invulnerable = true;
-                (target as any).invulnerabilityTime = 1000; // 1 second of invulnerability
+                const playerWithInvulnerable = target as Player & { 
+                    _invulnerable: boolean; 
+                    invulnerabilityTime: number; 
+                };
+                playerWithInvulnerable._invulnerable = true;
+                playerWithInvulnerable.invulnerabilityTime = 1000;
                 
                 target.getPowerUpManager().removePowerUp(PowerUpType.SHIELD_STONE);
-                
-                // TODO: Play shield break sound effect
-                // TODO: Visual effect for shield breaking
                 
                 return false;
             }
