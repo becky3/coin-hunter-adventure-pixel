@@ -64,39 +64,21 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
         
         const spriteName = this.getSpriteName();
         
-        if (renderer.assetLoader && renderer.assetLoader.hasSprite(spriteName)) {
-            renderer.drawSprite(spriteName, this.x, this.y);
-        } else {
-            this.renderDefault(renderer);
+        if (!renderer.assetLoader) {
+            throw new Error('[PowerUpItem] AssetLoader is not available');
         }
+        
+        if (!renderer.assetLoader.hasSprite(spriteName)) {
+            throw new Error(`[PowerUpItem] Sprite not found: ${spriteName}`);
+        }
+        
+        renderer.drawSprite(spriteName, this.x, this.y);
         
         if (renderer.debug) {
             this.renderDebug(renderer);
         }
     }
 
-    renderDefault(renderer: PixelRenderer): void {
-        const hue = this.animationTime * 0.1 % 360;
-        const color = `hsl(${hue}, 100%, 50%)`;
-        
-        // 虹色に光る矩形として表現
-        renderer.drawRect(
-            this.x,
-            this.y,
-            this.width,
-            this.height,
-            color
-        );
-        
-        renderer.drawRect(
-            this.x - 1,
-            this.y - 1,
-            this.width + 2,
-            this.height + 2,
-            color,
-            false
-        );
-    }
 
     /**
      * Collect this power-up item
