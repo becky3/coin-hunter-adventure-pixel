@@ -238,7 +238,10 @@ export class PlayState implements GameState {
 
         await this.preloadSprites();
 
-        const levelName = params.level || 'stage1-1';
+        const levelName = params.level;
+        if (!levelName) {
+            throw new Error('No level specified in PlayState parameters');
+        }
         
         const stageType = this.determineStageType(levelName);
         if (this.game.assetLoader) {

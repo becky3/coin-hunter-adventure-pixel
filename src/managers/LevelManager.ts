@@ -90,7 +90,8 @@ export class LevelManager {
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
             
-            this.createTestLevel();
+            // エラーをそのまま投げる（フォールバックしない）
+            throw new Error(`Failed to load stage: ${levelName}. ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -128,7 +129,8 @@ export class LevelManager {
                 y: this.levelData.playerSpawn.y
             };
         }
-        return { x: 2, y: 10 };
+        // フォールバックなし - レベルデータが必須
+        throw new Error('No player spawn position found in level data');
     }
 
     getEntities(): Array<{ type: string; x: number; y: number }> {
@@ -181,53 +183,6 @@ export class LevelManager {
         return nextLevel === null;
     }
 
-    private createTestLevel(): void {
-        this.tileMap = [
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,1,1,0,0,0,0,0,1,1,1,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ];
-
-        this.levelWidth = this.tileMap[0].length * TILE_SIZE;
-        this.levelHeight = this.tileMap.length * TILE_SIZE;
-        this.backgroundColor = getMasterColor(0x12);
-        this.timeLimit = 300;
-
-        this.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
-
-        this.levelData = {
-            width: this.tileMap[0].length,
-            height: this.tileMap.length,
-            tileSize: TILE_SIZE,
-            playerSpawn: { x: 2, y: 10 },
-            backgroundColor: this.backgroundColor,
-            timeLimit: this.timeLimit,
-            goal: { x: 14, y: 10 }
-        };
-
-        this.eventBus.emit('level:loaded', {
-            name: 'test',
-            width: this.levelWidth,
-            height: this.levelHeight,
-            backgroundColor: this.backgroundColor,
-            timeLimit: this.timeLimit,
-            playerSpawn: this.getPlayerSpawn(),
-            entities: [],
-            goal: { x: 14, y: 10 }
-        });
-    }
 
     reset(): void {
         this.currentLevel = null;

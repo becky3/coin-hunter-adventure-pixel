@@ -61,6 +61,12 @@
       "name": "PERFORMANCE TEST",
       "description": "Test with many coins",
       "filename": "performance-test.json"
+    },
+    {
+      "id": "stage-bullet-test",
+      "name": "BULLET WALL TEST",
+      "description": "Test stage for bullet wall collision",
+      "filename": "stage-bullet-test.json"
     }
   ]
 }

@@ -78,9 +78,10 @@ export class DebugOverlay {
             }
             
             Logger.log('DebugOverlay', `Loaded ${this.stageList.length} stages from stages.json`);
-        } catch {
-            Logger.error('DebugOverlay', 'Failed to load stage list, using default');
-            this.stageList = ['stage1-1'];
+        } catch (error) {
+            Logger.error('DebugOverlay', 'Failed to load stage list:', error);
+            // フォールバックなし - ステージリストが必須
+            this.stageList = [];
             this.selectedStageIndex = 0;
         }
     }

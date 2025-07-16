@@ -102,7 +102,9 @@ export class EntityManager {
     }
     
     addProjectile(projectile: Entity): void {
+        Logger.log('[EntityManager] Adding projectile:', projectile.constructor.name, 'Total before:', this.projectiles.length);
         this.projectiles.push(projectile);
+        Logger.log('[EntityManager] Total projectiles after:', this.projectiles.length);
     }
 
     createPlayer(spawnX: number, spawnY: number): Player {
@@ -207,7 +209,11 @@ export class EntityManager {
                     projectile.update(deltaTime);
                 }
                 // Remove destroyed projectiles
-                return !(projectile as any).isDestroyed || !(projectile as any).isDestroyed();
+                const isDestroyedMethod = (projectile as any).isDestroyed;
+                if (isDestroyedMethod && typeof isDestroyedMethod === 'function') {
+                    return !isDestroyedMethod.call(projectile);
+                }
+                return true; // Keep projectiles without isDestroyed method
             });
         } catch (error) {
             Logger.error('Error during entity update:', error);

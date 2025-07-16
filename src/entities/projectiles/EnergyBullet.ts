@@ -3,6 +3,7 @@ import { PixelRenderer } from '../../rendering/PixelRenderer';
 import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
+import { PowerGloveConfig } from '../../config/PowerGloveConfig';
 
 /**
  * Energy bullet projectile for ranged attacks
@@ -15,18 +16,19 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     private destroyed: boolean = false;
 
     constructor(x: number, y: number, direction: number, speed: number) {
-        super(x, y, 8, 8);
+        super(x, y, PowerGloveConfig.bulletWidth, PowerGloveConfig.bulletHeight);
         
         this.vx = direction * speed;
         this.vy = 0;
+        Logger.log('[EnergyBullet] Initial velocity set:', this.vx, this.vy);
         
         this.gravity = false;
         this.physicsEnabled = true;
         this.solid = false;
         
         this.lifeTime = 0;
-        this.maxLifeTime = 5000; // 5 seconds
-        this.damage = 1;
+        this.maxLifeTime = PowerGloveConfig.bulletLifetime;
+        this.damage = PowerGloveConfig.bulletDamage;
         this.animationTime = 0;
         
         Logger.log('[EnergyBullet] Created at', x, y, 'direction:', direction);
@@ -35,6 +37,11 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     onUpdate(deltaTime: number): void {
         this.lifeTime += deltaTime * 1000; // Convert to milliseconds
         this.animationTime += deltaTime * 1000;
+        
+        // Log position every 500ms
+        if (Math.floor(this.lifeTime / 500) > Math.floor((this.lifeTime - deltaTime * 1000) / 500)) {
+            Logger.log('[EnergyBullet] Position:', this.x, this.y, 'velocity:', this.vx, this.vy);
+        }
         
         // Destroy if lifetime exceeded
         if (this.lifeTime >= this.maxLifeTime) {
@@ -125,10 +132,14 @@ export class EnergyBullet extends Entity implements EntityInitializer {
      * Initialize this bullet in the EntityManager
      */
     initializeInManager(manager: EntityManager): void {
+        Logger.log('[EnergyBullet] Initializing in EntityManager');
         manager.addProjectile(this);
         const physicsSystem = manager.getPhysicsSystem();
         if (physicsSystem) {
+            Logger.log('[EnergyBullet] Adding to physics system');
             physicsSystem.addEntity(this, physicsSystem.layers.PROJECTILE || physicsSystem.layers.DEFAULT);
+        } else {
+            Logger.warn('[EnergyBullet] No physics system available');
         }
     }
 }

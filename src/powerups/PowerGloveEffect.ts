@@ -4,17 +4,14 @@ import { Logger } from '../utils/Logger';
 import { EnergyBullet } from '../entities/projectiles/EnergyBullet';
 import { EntityManager } from '../managers/EntityManager';
 import { InputSystem } from '../core/InputSystem';
+import { PowerGloveConfig } from '../config/PowerGloveConfig';
 
 /**
  * Power Glove effect that grants ranged attack ability and makes player large
  */
 export class PowerGloveEffect implements PowerUpEffect<Player> {
-    private originalTakeDamage: (() => boolean) | null = null;
     private lastFireTime: number = 0;
-    private fireRate: number = 500;
-    private bulletSpeed: number = 5;
     private entityManager: EntityManager;
-    private powerUpManager: any = null; // Store reference to PowerUpManager
 
     constructor(entityManager: EntityManager) {
         this.entityManager = entityManager;
@@ -36,65 +33,62 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
             playerWithSize.height = 32;
             playerWithSize.y -= 16;
         }
-        
-        // Store reference to PowerUpManager
-        this.powerUpManager = target.getPowerUpManager();
-        this.originalTakeDamage = target.takeDamage.bind(target);
-        
-        target.takeDamage = (): boolean => {
-            if (this.originalTakeDamage) {
-                const result = this.originalTakeDamage();
-                
-                // If damage was taken (result is true), remove power glove
-                if (result && this.powerUpManager) {
-                    Logger.log('[PowerGloveEffect] Player damaged, removing power glove');
-                    // Remove immediately
-                    this.powerUpManager.removePowerUp(PowerUpType.POWER_GLOVE);
-                }
-                
-                return result;
-            }
-            return false;
-        };
     }
 
     onUpdate(target: Player, _deltaTime: number): void {
+        Logger.log('[PowerGloveEffect] onUpdate called');
         const inputManager = target.getInputManager();
         if (!inputManager) {
+            Logger.log('[PowerGloveEffect] No input manager');
             return;
         }
         
+        // Debug: Check attack key state
+        const attackPressed = inputManager.isActionPressed('attack');
+        if (attackPressed) {
+            Logger.log('[PowerGloveEffect] Attack key pressed!');
+        }
+        
         // Simple check like jump
-        if (inputManager.isActionPressed('attack')) {
+        if (attackPressed) {
             const currentTime = Date.now();
             
-            if (currentTime - this.lastFireTime >= this.fireRate) {
+            // Check bullet count on screen
+            const currentBullets = this.countPlayerBullets();
+            if (currentBullets >= PowerGloveConfig.maxBulletsOnScreen) {
+                Logger.log('[PowerGloveEffect] Max bullets on screen:', currentBullets, '/', PowerGloveConfig.maxBulletsOnScreen);
+                return;
+            }
+            
+            if (currentTime - this.lastFireTime >= PowerGloveConfig.fireRate) {
                 this.lastFireTime = currentTime;
                 this.fireBullet(target);
-                Logger.log('[PowerGloveEffect] Fired bullet');
+                Logger.log('[PowerGloveEffect] Fired bullet. Bullets on screen:', currentBullets + 1);
+            } else {
+                Logger.log('[PowerGloveEffect] Fire rate cooldown:', currentTime - this.lastFireTime, 'ms remaining');
             }
         }
     }
 
-    onRemove(target: Player): void {
+    onRemove(_target: Player): void {
         Logger.log('[PowerGloveEffect] Removing power glove from player');
-        
-        if (this.originalTakeDamage) {
-            target.takeDamage = this.originalTakeDamage.bind(target);
-            this.originalTakeDamage = null;
-        }
-        
-        this.powerUpManager = null;
+    }
+
+    private countPlayerBullets(): number {
+        const projectiles = this.entityManager.getProjectiles();
+        const energyBullets = projectiles.filter(p => p.constructor.name === 'EnergyBullet');
+        return energyBullets.length;
     }
 
     private fireBullet(player: Player): void {
         
         const direction = player.facing === 'right' ? 1 : -1;
         
-        const bulletX = player.x + (direction > 0 ? player.width : 0);
+        // Position bullet slightly away from player to avoid immediate collision
+        const bulletX = player.x + (direction > 0 ? player.width + 2 : -10);
         const bulletY = player.y + player.height / 2 - 4;
         
-        const bullet = new EnergyBullet(bulletX, bulletY, direction, this.bulletSpeed);
+        const bullet = new EnergyBullet(bulletX, bulletY, direction, PowerGloveConfig.bulletSpeed);
         bullet.initializeInManager(this.entityManager);
         
         Logger.log('[PowerGloveEffect] Fired bullet at', bulletX, bulletY);
