@@ -79,13 +79,23 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
         const hue = this.animationTime * 0.1 % 360;
         const color = `hsl(${hue}, 100%, 50%)`;
         
-        const centerX = this.x + this.width / 2;
-        const centerY = this.y + this.height / 2;
-        const radius = Math.min(this.width, this.height) / 2.5;
+        // 虹色に光る矩形として表現
+        renderer.drawRect(
+            this.x,
+            this.y,
+            this.width,
+            this.height,
+            color
+        );
         
-        renderer.drawCircle(centerX, centerY, radius, color);
-        
-        renderer.drawCircle(centerX, centerY, radius + 2, color, false);
+        renderer.drawRect(
+            this.x - 1,
+            this.y - 1,
+            this.width + 2,
+            this.height + 2,
+            color,
+            false
+        );
     }
 
     /**
