@@ -186,10 +186,13 @@ export class EntityManager {
                 this.player.update(deltaTime);
             }
             
-            this.enemies.forEach(enemy => {
+            // Update enemies and remove dead ones
+            this.enemies = this.enemies.filter(enemy => {
                 if (enemy.update) {
                     enemy.update(deltaTime);
                 }
+                // Remove dead enemies
+                return (enemy as any).state !== 'dead';
             });
             
             this.items.forEach(item => {

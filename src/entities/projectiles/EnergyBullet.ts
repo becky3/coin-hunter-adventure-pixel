@@ -71,8 +71,15 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     }
 
     onCollision(collisionInfo?: CollisionInfo): void {
-        if (!collisionInfo || !collisionInfo.other) {
-            Logger.warn('[EnergyBullet] onCollision called with invalid collisionInfo');
+        if (!collisionInfo) {
+            Logger.warn('[EnergyBullet] onCollision called with no collisionInfo');
+            return;
+        }
+        
+        // Handle tile collision (no 'other' entity)
+        if (!collisionInfo.other) {
+            Logger.log('[EnergyBullet] Collision with tile at', this.x, this.y);
+            this.destroy();
             return;
         }
         

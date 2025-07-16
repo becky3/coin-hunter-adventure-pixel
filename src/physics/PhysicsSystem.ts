@@ -11,6 +11,7 @@ export interface PhysicsLayers {
     ENEMY: PhysicsLayer;
     ITEM: PhysicsLayer;
     PLATFORM: PhysicsLayer;
+    PROJECTILE: PhysicsLayer;
 }
 
 export interface RaycastResult {
@@ -70,13 +71,15 @@ export class PhysicsSystem {
             PLAYER: 'player',
             ENEMY: 'enemy',
             ITEM: 'item',
-            PLATFORM: 'platform'
+            PLATFORM: 'platform',
+            PROJECTILE: 'projectile'
         };
         this.collisionMatrix = {
             [this.layers.PLAYER]: [this.layers.TILE, this.layers.ENEMY, this.layers.ITEM, this.layers.PLATFORM],
             [this.layers.ENEMY]: [this.layers.TILE, this.layers.PLAYER, this.layers.PLATFORM],
             [this.layers.ITEM]: [this.layers.PLAYER],
-            [this.layers.PLATFORM]: [this.layers.PLAYER, this.layers.ENEMY]
+            [this.layers.PLATFORM]: [this.layers.PLAYER, this.layers.ENEMY],
+            [this.layers.PROJECTILE]: [this.layers.TILE]
         };
         this.entities = new Set();
         this.tileMap = null;

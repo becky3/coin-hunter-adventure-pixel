@@ -97,7 +97,12 @@ export class Enemy extends Entity {
 
     die(): void {
         this.state = 'dead';
-        this.active = false;
+        // Don't set active = false, entity will be removed from array
+        
+        // Remove from physics system
+        if (this.physicsSystem) {
+            this.physicsSystem.removeEntity(this);
+        }
         
         this.onDeath();
     }
@@ -107,7 +112,7 @@ export class Enemy extends Entity {
     }
 
     onCollisionWithPlayer(player: Player): void {
-        if (this.state === 'dead' || !this.active || player.invulnerable) return;
+        if (this.state === 'dead' || player.invulnerable) return;
         
         const enemyCenter = this.y + this.height / 2;
         
