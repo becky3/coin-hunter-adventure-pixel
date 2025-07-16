@@ -7,6 +7,8 @@ import { EventBus } from '../services/EventBus';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import type { CharacterConfig, CharacterAnimationConfig } from '../config/ResourceConfig';
+import { PowerUpManager } from '../managers/PowerUpManager';
+import { PowerUpConfig } from '../types/PowerUpTypes';
 
 
 const DEFAULT_PLAYER_CONFIG = {
@@ -99,6 +101,7 @@ export class Player extends Entity {
     public variableJumpBoost: number;
     private variableJumpBoostMultiplier: number;
     private frameCount: number;
+    private powerUpManager: PowerUpManager;
 
     constructor(x?: number, y?: number) {
         let playerConfig = null;
@@ -229,6 +232,8 @@ export class Player extends Entity {
         
         this.gravityStrength = 1.0;
         this.frameCount = 0;
+        
+        this.powerUpManager = new PowerUpManager(this);
     }
     
     setInputManager(inputManager: InputSystem): void {
@@ -325,6 +330,8 @@ export class Player extends Entity {
                 this.invulnerabilityTime = 0;
             }
         }
+        
+        this.powerUpManager.update(deltaTime);
     }
     
     private handleMovement(input: { left: boolean; right: boolean; jump: boolean; action: boolean }): void {
@@ -696,5 +703,19 @@ export class Player extends Entity {
                 (collisionInfo.other as unknown as EntityWithPlayerCollision).onCollisionWithPlayer(this);
             }
         }
+    }
+    
+    /**
+     * Apply a power-up to the player
+     */
+    applyPowerUp(config: PowerUpConfig): boolean {
+        return this.powerUpManager.applyPowerUp(config);
+    }
+    
+    /**
+     * Get the PowerUpManager instance
+     */
+    getPowerUpManager(): PowerUpManager {
+        return this.powerUpManager;
     }
 }

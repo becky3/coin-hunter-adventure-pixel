@@ -28,8 +28,8 @@
     },
     {
       "id": "stage0-5",
-      "name": "PERFORMANCE TEST",
-      "description": "Performance measurement stage without gaps",
+      "name": "POWERUP TEST",
+      "description": "Power-up item test stage",
       "filename": "stage0-5.json"
     },
     {

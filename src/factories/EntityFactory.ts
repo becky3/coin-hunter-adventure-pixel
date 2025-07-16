@@ -6,6 +6,7 @@ import { Slime } from '../entities/enemies/Slime';
 import { Bat } from '../entities/enemies/Bat';
 import { Spider } from '../entities/enemies/Spider';
 import { Logger } from '../utils/Logger';
+import { ShieldStone } from '../entities/powerups/ShieldStone';
 
 type EntityFactoryFunction = (x: number, y: number) => Entity;
 
@@ -22,6 +23,7 @@ export class EntityFactory {
         EntityFactory.register('slime', (x, y) => Slime.create(x, y));
         EntityFactory.register('bat', (x, y) => Bat.create(x, y));
         EntityFactory.register('spider', (x, y) => Spider.create(x, y));
+        EntityFactory.register('shield_stone', (x, y) => ShieldStone.create(x, y));
     }
     
     /**
@@ -36,9 +38,13 @@ export class EntityFactory {
      * Create an entity of the specified type
      */
     static create(type: string, x: number, y: number): Entity | null {
+        Logger.log(`[EntityFactory] Attempting to create entity: ${type} at (${x}, ${y})`);
+        Logger.log('[EntityFactory] Registered types:', EntityFactory.getRegisteredTypes());
+        
         const factory = EntityFactory.factories.get(type);
         if (!factory) {
             Logger.warn(`[EntityFactory] Unknown entity type: ${type}`);
+            Logger.warn(`[EntityFactory] Available types: ${Array.from(EntityFactory.factories.keys()).join(', ')}`);
             return null;
         }
         

@@ -121,6 +121,8 @@ export class EntityManager {
     }
 
     createEntity(config: EntityConfig): Entity | null {
+        Logger.log(`[EntityManager] Creating entity: type=${config.type}, tile=(${config.x}, ${config.y})`);
+        
         const tileMap = this.physicsSystem.tileMap;
         if (tileMap && tileMap[config.y] && tileMap[config.y][config.x] === 1) {
             Logger.warn(`[EntityManager] 警告: エンティティ(${config.type})のスポーン位置(${config.x}, ${config.y})が地面の中です！`);
@@ -129,9 +131,15 @@ export class EntityManager {
         const pixelX = config.x * TILE_SIZE;
         const pixelY = config.y * TILE_SIZE;
         
-        const entity = EntityFactory.create(config.type, pixelX, pixelY);
-        if (!entity) return null;
+        Logger.log(`[EntityManager] Entity pixel position: (${pixelX}, ${pixelY})`);
         
+        const entity = EntityFactory.create(config.type, pixelX, pixelY);
+        if (!entity) {
+            Logger.error(`[EntityManager] Failed to create entity: ${config.type}`);
+            return null;
+        }
+        
+        Logger.log(`[EntityManager] Entity created successfully: ${config.type}`);
         this.postProcessEntity(entity, config.type);
         
         return entity;
@@ -222,11 +230,23 @@ export class EntityManager {
                     
                 }
             }
+            else if (item.collidesWith && item.collidesWith(this.player)) {
+                if (item.onCollision) {
+                    item.onCollision({
+                        other: this.player,
+                        normal: { x: 0, y: 0 },
+                        depth: 0
+                    });
+                }
+            }
         });
         
         this.items = this.items.filter(item => {
             if (item.constructor.name === 'Coin') {
                 return !(item as Coin).isCollected();
+            }
+            if ('collected' in item) {
+                return !(item as { collected: boolean }).collected;
             }
             return true;
         });
