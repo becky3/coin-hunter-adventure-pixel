@@ -50,6 +50,8 @@ import tilesGrassGround from './tiles/grass_ground.json';
 import tilesSpike from './tiles/spike.json';
 
 import powerupsShieldStone from './powerups/shield_stone.json';
+import powerupsPowerGlove from './powerups/power_glove.json';
+import projectilesEnergyBullet from './projectiles/energy_bullet.json';
 
 export const spriteDataMap: Record<string, unknown> = {
     'player/idle': playerIdle,
@@ -96,4 +98,6 @@ export const spriteDataMap: Record<string, unknown> = {
     'tiles/grass_ground': tilesGrassGround,
     'tiles/spike': tilesSpike,
     'powerups/shield_stone': powerupsShieldStone,
+    'powerups/power_glove': powerupsPowerGlove,
+    'projectiles/energy_bullet': projectilesEnergyBullet,
 };

@@ -36,6 +36,7 @@ export class EntityManager {
     private enemies: Enemy[] = [];
     private items: Entity[] = [];
     private platforms: Entity[] = [];
+    private projectiles: Entity[] = [];
     private eventBus: EventBus;
     private physicsSystem: PhysicsSystem;
     private musicSystem: MusicSystem | undefined;
@@ -80,6 +81,10 @@ export class EntityManager {
         return this.platforms;
     }
     
+    getProjectiles(): Entity[] {
+        return this.projectiles;
+    }
+    
     getEventBus(): EventBus {
         return this.eventBus;
     }
@@ -94,6 +99,10 @@ export class EntityManager {
     
     addItem(item: Entity): void {
         this.items.push(item);
+    }
+    
+    addProjectile(projectile: Entity): void {
+        this.projectiles.push(projectile);
     }
 
     createPlayer(spawnX: number, spawnY: number): Player {
@@ -188,10 +197,43 @@ export class EntityManager {
                     item.update(deltaTime);
                 }
             });
+            
+            this.projectiles = this.projectiles.filter(projectile => {
+                if (projectile.update) {
+                    projectile.update(deltaTime);
+                }
+                return (projectile as { active?: boolean }).active !== false;
+            });
         } catch (error) {
             Logger.error('Error during entity update:', error);
             this.eventBus.emit('entity:update-error', { error });
         }
+    }
+
+    checkProjectileCollisions(): void {
+        this.projectiles = this.projectiles.filter(projectile => {
+            if ((projectile as { active?: boolean }).active === false) {
+                return false;
+            }
+            
+            for (const enemy of this.enemies) {
+                if (projectile.collidesWith && projectile.collidesWith(enemy)) {
+                    if (projectile.onCollision) {
+                        projectile.onCollision({
+                            other: enemy,
+                            normal: { x: 0, y: 0 },
+                            depth: 0
+                        });
+                    }
+                    if (enemy.takeDamage) {
+                        enemy.takeDamage(1);
+                    }
+                    return false;
+                }
+            }
+            
+            return true;
+        });
     }
 
     checkItemCollisions(): void {
@@ -265,6 +307,12 @@ export class EntityManager {
             }
         });
         
+        this.projectiles.forEach(projectile => {
+            if (projectile.render) {
+                projectile.render(renderer);
+            }
+        });
+        
         if (this.player && this.player.render) {
             this.player.render(renderer);
         }
@@ -275,6 +323,7 @@ export class EntityManager {
         this.enemies = [];
         this.items = [];
         this.platforms = [];
+        this.projectiles = [];
         
         this.eventBus.emit('entities:cleared');
     }

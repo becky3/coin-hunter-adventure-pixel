@@ -7,6 +7,7 @@ import { Bat } from '../entities/enemies/Bat';
 import { Spider } from '../entities/enemies/Spider';
 import { Logger } from '../utils/Logger';
 import { ShieldStone } from '../entities/powerups/ShieldStone';
+import { PowerGlove } from '../entities/powerups/PowerGlove';
 
 type EntityFactoryFunction = (x: number, y: number) => Entity;
 
@@ -24,6 +25,7 @@ export class EntityFactory {
         EntityFactory.register('bat', (x, y) => Bat.create(x, y));
         EntityFactory.register('spider', (x, y) => Spider.create(x, y));
         EntityFactory.register('shield_stone', (x, y) => ShieldStone.create(x, y));
+        EntityFactory.register('power_glove', (x, y) => PowerGlove.create(x, y));
     }
     
     /**

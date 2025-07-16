@@ -240,6 +240,10 @@ export class Player extends Entity {
         this.inputManager = inputManager;
     }
     
+    getInputManager(): InputSystem | null {
+        return this.inputManager;
+    }
+    
     setMusicSystem(musicSystem: MusicSystem): void {
         this.musicSystem = musicSystem;
     }

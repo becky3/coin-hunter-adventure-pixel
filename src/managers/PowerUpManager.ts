@@ -98,17 +98,20 @@ export class PowerUpManager<T = unknown> {
         const toRemove: PowerUpType[] = [];
 
         this.activePowerUps.forEach((powerUp, type) => {
+            const effect = this.effectHandlers.get(type);
+            
             if (powerUp.remainingTime !== undefined && !powerUp.config.permanent) {
                 powerUp.remainingTime -= deltaTime * 1000;
 
                 if (powerUp.remainingTime <= 0) {
                     toRemove.push(type);
-                } else {
-                    const effect = this.effectHandlers.get(type);
-                    if (effect?.onUpdate) {
-                        effect.onUpdate(this.target, deltaTime);
-                    }
+                    return;
                 }
+            }
+            
+            if (effect?.onUpdate) {
+                Logger.log(`[PowerUpManager] Calling onUpdate for ${type}`);
+                effect.onUpdate(this.target, deltaTime);
             }
         });
 

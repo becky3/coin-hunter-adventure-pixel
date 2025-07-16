@@ -17,6 +17,7 @@ import { BackgroundRenderer } from '../rendering/BackgroundRenderer';
 import { TileRenderer } from '../rendering/TileRenderer';
 import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 import { ShieldEffect } from '../powerups/ShieldEffect';
+import { PowerGloveEffect } from '../powerups/PowerGloveEffect';
 import { PowerUpType } from '../types/PowerUpTypes';
 
 interface Game {
@@ -136,6 +137,7 @@ export class PlayState implements GameState {
         
         const powerUpManager = player.getPowerUpManager();
         powerUpManager.registerEffect(PowerUpType.SHIELD_STONE, new ShieldEffect());
+        powerUpManager.registerEffect(PowerUpType.POWER_GLOVE, new PowerGloveEffect(this.entityManager));
         
         Logger.log('[PlayState] Power-up effects initialized');
     }
@@ -172,7 +174,9 @@ export class PlayState implements GameState {
                 { category: 'environment', name: 'tree1' },
                 { category: 'tiles', name: 'ground' },
                 { category: 'tiles', name: 'grass_ground' },
-                { category: 'powerups', name: 'shield_stone' }
+                { category: 'powerups', name: 'shield_stone' },
+                { category: 'powerups', name: 'power_glove' },
+                { category: 'projectiles', name: 'energy_bullet' }
             ];
             
             const animationList = [
@@ -193,6 +197,7 @@ export class PlayState implements GameState {
                     return this.game.assetLoader.loadSprite(sprite.category, sprite.name)
                         .catch(error => {
                             failedSprites.push(`${sprite.category}/${sprite.name}`);
+                            Logger.error(`[PlayState] Failed to load sprite ${sprite.category}/${sprite.name}:`, error);
                             throw error;
                         });
                 }),
@@ -282,8 +287,10 @@ export class PlayState implements GameState {
         }
         
         const player = this.entityManager.getPlayer();
+        Logger.log(`[PlayState] After initializeLevel, player = ${player ? 'exists' : 'null'}`);
         if (player) {
             Logger.log('[PlayState] Player created successfully');
+            Logger.log(`[PlayState] Player position: (${player.x}, ${player.y})`);
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('playstate:ready', { 
                     detail: { player: true } 
@@ -291,6 +298,9 @@ export class PlayState implements GameState {
             }
         } else {
             Logger.error('[PlayState] Player creation failed!');
+            Logger.error('[PlayState] Checking EntityManager state...');
+            const entities = this.entityManager.getItems();
+            Logger.error(`[PlayState] Items count: ${entities.length}`);
         }
         
         const enterEndTime = performance.now();
@@ -331,6 +341,7 @@ export class PlayState implements GameState {
         }
 
         this.entityManager.checkItemCollisions();
+        this.entityManager.checkProjectileCollisions();
 
         this.cameraController.update(deltaTime);
 

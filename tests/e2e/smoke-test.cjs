@@ -70,16 +70,26 @@ async function runAutomatedTests() {
             testsPassed++;
             
             // PlayStateの初期化が完了するまで待つ
-            await page.waitForFunction(
+            // 注意: state.playerは存在しないので、EntityManagerから取得する必要がある
+            const playerReady = await page.waitForFunction(
                 () => {
                     const state = window.game?.stateManager?.currentState;
-                    return state?.name === 'play' && state?.player !== undefined;
+                    if (state?.name !== 'play') return false;
+                    
+                    // EntityManagerからプレイヤーを取得
+                    const entityManager = state?.getEntityManager?.();
+                    const player = entityManager?.getPlayer?.();
+                    return !!player;
                 },
                 { timeout: 5000 }
-            );
+            ).then(() => true).catch(() => false);
+            
+            if (!playerReady) {
+                console.log('  警告: プレイヤー初期化がタイムアウトしました');
+            }
             
             // さらに待機して初期化を確実に完了させる
-            await new Promise(resolve => setTimeout(resolve, 3000)); // 待機時間を延長
+            await new Promise(resolve => setTimeout(resolve, 2000));
         } else {
             console.log('  ✗ ゲーム開始失敗');
             testsFailed++;
@@ -87,11 +97,25 @@ async function runAutomatedTests() {
         
         // テスト4: プレイヤー存在確認
         console.log('\nテスト4: プレイヤー存在確認');
-        const playerExists = await page.evaluate(() => {
+        const playerInfo = await page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
             const player = state?.player;
-            return !!player && player.x !== undefined && player.y !== undefined;
+            const entityManager = state?.getEntityManager?.();
+            const managerPlayer = entityManager?.getPlayer?.();
+            
+            return {
+                statePlayer: !!player,
+                statePlayerCoords: player ? {x: player.x, y: player.y} : null,
+                hasGetEntityManager: !!state?.getEntityManager,
+                entityManager: !!entityManager,
+                managerPlayer: !!managerPlayer,
+                managerPlayerCoords: managerPlayer ? {x: managerPlayer.x, y: managerPlayer.y} : null,
+                stateName: state?.name
+            };
         });
+        
+        console.log('  プレイヤー情報:', playerInfo);
+        const playerExists = playerInfo.statePlayer && playerInfo.statePlayerCoords;
         
         if (playerExists) {
             console.log('  ✓ プレイヤー存在確認成功');
@@ -106,12 +130,18 @@ async function runAutomatedTests() {
         
         // プレイヤーの初期位置を確実に取得
         await new Promise(resolve => setTimeout(resolve, 500));
-        const initialX = await page.evaluate(() => {
+        const initialData = await page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
-            return state?.player?.x;
+            const entityManager = state?.getEntityManager?.();
+            const player = entityManager?.getPlayer?.() || state?.player;
+            return {
+                x: player?.x,
+                source: entityManager?.getPlayer?.() ? 'entityManager' : 'state'
+            };
         });
         
-        console.log(`  初期位置: ${initialX}`);
+        console.log(`  初期位置: ${initialData.x} (source: ${initialData.source})`);
+        const initialX = initialData.x;
         
         // 右キーを押して移動
         await page.keyboard.down('ArrowRight');
@@ -120,12 +150,18 @@ async function runAutomatedTests() {
         
         // 移動後の位置を取得
         await new Promise(resolve => setTimeout(resolve, 500));
-        const finalX = await page.evaluate(() => {
+        const finalData = await page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
-            return state?.player?.x;
+            const entityManager = state?.getEntityManager?.();
+            const player = entityManager?.getPlayer?.() || state?.player;
+            return {
+                x: player?.x,
+                source: entityManager?.getPlayer?.() ? 'entityManager' : 'state'
+            };
         });
         
-        console.log(`  移動後位置: ${finalX}`);
+        console.log(`  移動後位置: ${finalData.x} (source: ${finalData.source})`);
+        const finalX = finalData.x;
         
         if (finalX > initialX && initialX !== undefined && finalX !== undefined) {
             console.log('  ✓ プレイヤー移動成功');
