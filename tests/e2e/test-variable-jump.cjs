@@ -16,7 +16,7 @@ async function runTest() {
         await t.injectErrorTracking();
         
         // Navigate to game with test stage
-        await t.navigateToGame('http://localhost:3000/?skip_title=true');
+        await t.navigateToGame('http://localhost:3000/?skip_title=true&s=1-1');
         await t.waitForGameInitialization();
         
         // With skip_title=true, we should go directly to play state
