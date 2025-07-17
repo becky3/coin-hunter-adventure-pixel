@@ -188,13 +188,12 @@ export class EntityManager {
                 this.player.update(deltaTime);
             }
             
-            // Update enemies and remove dead ones
             this.enemies = this.enemies.filter(enemy => {
                 if (enemy.update) {
                     enemy.update(deltaTime);
                 }
-                // Remove dead enemies
-                return (enemy as any).state !== 'dead';
+                const enemyWithState = enemy as Enemy & { state?: string };
+                return enemyWithState.state !== 'dead';
             });
             
             this.items.forEach(item => {
@@ -203,17 +202,15 @@ export class EntityManager {
                 }
             });
             
-            // Update projectiles and remove destroyed ones
             this.projectiles = this.projectiles.filter(projectile => {
                 if (projectile.update) {
                     projectile.update(deltaTime);
                 }
-                // Remove destroyed projectiles
-                const isDestroyedMethod = (projectile as any).isDestroyed;
-                if (isDestroyedMethod && typeof isDestroyedMethod === 'function') {
-                    return !isDestroyedMethod.call(projectile);
+                const projectileWithDestroyed = projectile as Entity & { isDestroyed?: () => boolean };
+                if (projectileWithDestroyed.isDestroyed && typeof projectileWithDestroyed.isDestroyed === 'function') {
+                    return !projectileWithDestroyed.isDestroyed();
                 }
-                return true; // Keep projectiles without isDestroyed method
+                return true;
             });
         } catch (error) {
             Logger.error('Error during entity update:', error);
@@ -223,8 +220,8 @@ export class EntityManager {
 
     checkProjectileCollisions(): void {
         this.projectiles = this.projectiles.filter(projectile => {
-            // Skip destroyed projectiles
-            if ((projectile as any).isDestroyed && (projectile as any).isDestroyed()) {
+            const projectileWithDestroyed = projectile as Entity & { isDestroyed?: () => boolean };
+            if (projectileWithDestroyed.isDestroyed && projectileWithDestroyed.isDestroyed()) {
                 return false;
             }
             

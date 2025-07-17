@@ -80,7 +80,6 @@ export class DebugOverlay {
             Logger.log('DebugOverlay', `Loaded ${this.stageList.length} stages from stages.json`);
         } catch (error) {
             Logger.error('DebugOverlay', 'Failed to load stage list:', error);
-            // フォールバックなし - ステージリストが必須
             this.stageList = [];
             this.selectedStageIndex = 0;
         }

@@ -14,7 +14,6 @@ export class URLParams {
     getStageId(): string | null {
         const shortForm = this.params.get('s');
         if (shortForm) {
-            // すでに "stage" で始まっている場合はそのまま返す
             if (shortForm.startsWith('stage')) {
                 return shortForm;
             }

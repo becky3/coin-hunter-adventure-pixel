@@ -525,7 +525,6 @@ export class Player extends Entity {
         this.y += DEFAULT_PLAYER_CONFIG.height - DEFAULT_PLAYER_CONFIG.smallHeight;
         this.updateSprite();
         
-        // Remove power glove when taking damage
         if (this.powerUpManager.hasPowerUp(PowerUpType.POWER_GLOVE)) {
             this.powerUpManager.removePowerUp(PowerUpType.POWER_GLOVE);
         }

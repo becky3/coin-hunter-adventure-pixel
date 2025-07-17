@@ -90,7 +90,6 @@ export class LevelManager {
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
             
-            // エラーをそのまま投げる（フォールバックしない）
             throw new Error(`Failed to load stage: ${levelName}. ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -129,7 +128,6 @@ export class LevelManager {
                 y: this.levelData.playerSpawn.y
             };
         }
-        // フォールバックなし - レベルデータが必須
         throw new Error('No player spawn position found in level data');
     }
 
