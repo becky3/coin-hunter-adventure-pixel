@@ -92,13 +92,13 @@
     },
     "powerup": {
       "type": "generated",
-      "waveform": "square",
+      "waveform": "sine",
       "frequency": {
-        "start": 400,
-        "end": 800
+        "start": 600,
+        "end": 600
       },
-      "duration": 0.4,
-      "volume": 0.3
+      "duration": 0.1,
+      "volume": 0.15
     },
     "shoot": {
       "type": "generated",
