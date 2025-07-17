@@ -193,7 +193,11 @@ async function runTest() {
     });
 }
 
-runTest().catch(err => {
-    console.error('Test failed:', err);
-    process.exit(1);
-});
+if (require.main === module) {
+    runTest().catch(err => {
+        console.error('Test failed:', err);
+        process.exit(1);
+    });
+}
+
+module.exports = runTest;
