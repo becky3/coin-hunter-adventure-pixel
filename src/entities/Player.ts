@@ -751,6 +751,7 @@ export class Player extends Entity {
     }
     
     setShieldVisual(visual: ShieldEffectVisual | null): void {
+        Logger.log('[Player] setShieldVisual called with:', visual ? 'ShieldEffectVisual' : 'null');
         this.shieldVisual = visual;
     }
     
