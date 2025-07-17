@@ -43,30 +43,31 @@ export class ShieldEffectVisual {
         const centerY = this.player.y + this.player.height / 2;
 
         for (const particle of this.particles) {
-            const x = centerX + Math.cos(particle.angle + particle.offset) * this.ORBIT_RADIUS;
-            const y = centerY + Math.sin(particle.angle + particle.offset) * this.ORBIT_RADIUS * 0.7;
+            const worldX = centerX + Math.cos(particle.angle + particle.offset) * this.ORBIT_RADIUS;
+            const worldY = centerY + Math.sin(particle.angle + particle.offset) * this.ORBIT_RADIUS * 0.7;
+            
+            const screenPos = renderer.worldToScreen(worldX, worldY);
             
             const pulse = Math.sin(this.animationTime * 0.003 + particle.offset) * 0.3 + 0.7;
             const size = particle.size * pulse;
             
-            renderer.setColor('#80FFFF');
-            renderer.drawRect(
-                Math.floor(x - size / 2),
-                Math.floor(y - size / 2),
+            renderer.ctx.fillStyle = '#80FFFF';
+            renderer.ctx.fillRect(
+                Math.floor(screenPos.x - size / 2),
+                Math.floor(screenPos.y - size / 2),
                 Math.ceil(size),
                 Math.ceil(size)
             );
             
-            renderer.setColor('#FFFFFF');
-            renderer.drawRect(
-                Math.floor(x - 1),
-                Math.floor(y - 1),
+            renderer.ctx.fillStyle = '#FFFFFF';
+            renderer.ctx.fillRect(
+                Math.floor(screenPos.x - 1),
+                Math.floor(screenPos.y - 1),
                 2,
                 2
             );
         }
         
-        renderer.resetColor();
     }
 
     /**
@@ -142,17 +143,16 @@ export class ShieldBreakEffect {
 
     render(renderer: PixelRenderer): void {
         for (const particle of this.particles) {
+            const screenPos = renderer.worldToScreen(particle.x, particle.y);
             const color = `rgba(128, 255, 255, ${particle.life})`;
             
-            renderer.setColor(color);
-            renderer.drawRect(
-                Math.floor(particle.x - particle.size / 2),
-                Math.floor(particle.y - particle.size / 2),
+            renderer.ctx.fillStyle = color;
+            renderer.ctx.fillRect(
+                Math.floor(screenPos.x - particle.size / 2),
+                Math.floor(screenPos.y - particle.size / 2),
                 Math.ceil(particle.size),
                 Math.ceil(particle.size)
             );
         }
-        
-        renderer.resetColor();
     }
 }
