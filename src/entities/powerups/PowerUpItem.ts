@@ -5,6 +5,7 @@ import { Player } from '../Player';
 import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
+import { MusicSystem } from '../../audio/MusicSystem';
 
 /**
  * Base class for all power-up items
@@ -18,6 +19,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     protected floatAmplitude: number;
     protected baseY: number;
     declare animationTime: number;
+    protected musicSystem?: MusicSystem;
 
     constructor(x: number, y: number, width: number, height: number, powerUpType: PowerUpType) {
         super(x, y, width, height);
@@ -102,7 +104,9 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
      * Can be overridden by subclasses
      */
     protected onCollected(_player: Player): void {
-        // TODO: Play sound effect
+        if (this.musicSystem) {
+            this.musicSystem.playSEFromPattern('powerup');
+        }
     }
 
     onCollision(collisionInfo?: CollisionInfo): void {
@@ -137,5 +141,6 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
      */
     initializeInManager(manager: EntityManager): void {
         manager.addItem(this);
+        this.musicSystem = manager.getMusicSystem();
     }
 }

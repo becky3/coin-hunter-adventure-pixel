@@ -82,6 +82,11 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
         const bullet = new EnergyBullet(bulletX, bulletY, direction, PowerGloveConfig.bulletSpeed);
         bullet.initializeInManager(this.entityManager);
         
+        const musicSystem = this.entityManager.getMusicSystem();
+        if (musicSystem) {
+            musicSystem.playSEFromPattern('shoot');
+        }
+        
         Logger.log('[PowerGloveEffect] Fired bullet at', bulletX, bulletY);
     }
 }

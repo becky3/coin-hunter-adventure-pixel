@@ -9,6 +9,7 @@ import { Logger } from '../utils/Logger';
 import type { CharacterConfig, CharacterAnimationConfig } from '../config/ResourceConfig';
 import { PowerUpManager } from '../managers/PowerUpManager';
 import { PowerUpConfig, PowerUpType } from '../types/PowerUpTypes';
+import { ShieldEffectVisual, ShieldBreakEffect } from '../effects/ShieldEffectVisual';
 
 
 const DEFAULT_PLAYER_CONFIG = {
@@ -102,6 +103,9 @@ export class Player extends Entity {
     private variableJumpBoostMultiplier: number;
     private frameCount: number;
     private powerUpManager: PowerUpManager;
+    private shieldVisual: ShieldEffectVisual | null = null;
+    private shieldBreakEffect: ShieldBreakEffect | null = null;
+    private skipBlinkEffect?: boolean;
 
     constructor(x?: number, y?: number) {
         let playerConfig = null;
@@ -332,10 +336,22 @@ export class Player extends Entity {
             if (this.invulnerabilityTime <= 0) {
                 this._invulnerable = false;
                 this.invulnerabilityTime = 0;
+                this.skipBlinkEffect = false;
             }
         }
         
         this.powerUpManager.update(deltaTime);
+        
+        if (this.shieldVisual) {
+            this.shieldVisual.update(deltaTime);
+        }
+        
+        if (this.shieldBreakEffect) {
+            const stillActive = this.shieldBreakEffect.update(deltaTime);
+            if (!stillActive) {
+                this.shieldBreakEffect = null;
+            }
+        }
     }
     
     private handleMovement(input: { left: boolean; right: boolean; jump: boolean; action: boolean }): void {
@@ -600,7 +616,7 @@ export class Player extends Entity {
             );
         }
         
-        if (this._invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 1) {
+        if (this._invulnerable && !this.skipBlinkEffect && Math.floor(this.invulnerabilityTime / 100) % 2 === 1) {
             return;
         }
         
@@ -675,6 +691,14 @@ export class Player extends Entity {
                 screenPos.y + 12
             );
         }
+        
+        if (this.shieldVisual) {
+            this.shieldVisual.render(renderer);
+        }
+        
+        if (this.shieldBreakEffect) {
+            this.shieldBreakEffect.render(renderer);
+        }
     }
     
     getState(): PlayerState {
@@ -724,5 +748,13 @@ export class Player extends Entity {
      */
     getPowerUpManager(): PowerUpManager {
         return this.powerUpManager;
+    }
+    
+    setShieldVisual(visual: ShieldEffectVisual | null): void {
+        this.shieldVisual = visual;
+    }
+    
+    setShieldBreakEffect(effect: ShieldBreakEffect | null): void {
+        this.shieldBreakEffect = effect;
     }
 }

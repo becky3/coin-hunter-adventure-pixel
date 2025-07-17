@@ -136,7 +136,7 @@ export class PlayState implements GameState {
         if (!player) return;
         
         const powerUpManager = player.getPowerUpManager();
-        powerUpManager.registerEffect(PowerUpType.SHIELD_STONE, new ShieldEffect());
+        powerUpManager.registerEffect(PowerUpType.SHIELD_STONE, new ShieldEffect(this.entityManager));
         powerUpManager.registerEffect(PowerUpType.POWER_GLOVE, new PowerGloveEffect(this.entityManager));
         
         Logger.log('[PlayState] Power-up effects initialized');

@@ -89,6 +89,36 @@
       },
       "duration": 0.1,
       "volume": 0.15
+    },
+    "powerup": {
+      "type": "generated",
+      "waveform": "square",
+      "frequency": {
+        "start": 400,
+        "end": 800
+      },
+      "duration": 0.4,
+      "volume": 0.3
+    },
+    "shoot": {
+      "type": "generated",
+      "waveform": "triangle",
+      "frequency": {
+        "start": 600,
+        "end": 300
+      },
+      "duration": 0.15,
+      "volume": 0.25
+    },
+    "shieldBreak": {
+      "type": "generated",
+      "waveform": "noise",
+      "frequency": {
+        "start": 1000,
+        "end": 100
+      },
+      "duration": 0.3,
+      "volume": 0.4
     }
   }
 }
