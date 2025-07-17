@@ -97,9 +97,7 @@ export class Enemy extends Entity {
 
     die(): void {
         this.state = 'dead';
-        // Don't set active = false, entity will be removed from array
         
-        // Remove from physics system
         if (this.physicsSystem) {
             this.physicsSystem.removeEntity(this);
         }
