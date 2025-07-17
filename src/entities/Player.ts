@@ -635,6 +635,7 @@ export class Player extends Entity {
                         this.flipX,
                         renderer.scale
                     );
+                    this.renderEffects(renderer);
                     return;
                 }
             }
@@ -651,6 +652,7 @@ export class Player extends Entity {
                         this.flipX,
                         renderer.scale
                     );
+                    this.renderEffects(renderer);
                     return;
                 }
             }
@@ -664,6 +666,7 @@ export class Player extends Entity {
                     this.flipX,
                     renderer.scale
                 );
+                this.renderEffects(renderer);
                 return;
             } else if ((window as Window & { game?: { debug?: boolean } }).game?.debug) {
                 Logger.warn('Sprite not found:', this.spriteKey);
@@ -691,7 +694,9 @@ export class Player extends Entity {
                 screenPos.y + 12
             );
         }
-        
+    }
+    
+    renderEffects(renderer: PixelRenderer): void {
         if (this.shieldVisual) {
             this.shieldVisual.render(renderer);
         }
