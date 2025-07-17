@@ -66,6 +66,18 @@ getItems(): Entity[]
 ```
 すべてのアイテムエンティティの配列を取得します。
 
+#### getProjectiles()
+```typescript
+getProjectiles(): Entity[]
+```
+すべての弾丸エンティティの配列を取得します。
+
+#### addProjectile(projectile: Entity)
+```typescript
+addProjectile(projectile: Entity): void
+```
+弾丸エンティティを追加します。
+
 #### createPlayer(x: number, y: number)
 ```typescript
 createPlayer(x: number, y: number): Player
@@ -95,6 +107,12 @@ updateAll(deltaTime: number): void
 checkItemCollisions(): void
 ```
 プレイヤーとアイテムの衝突判定を行います。
+
+#### checkProjectileCollisions()
+```typescript
+checkProjectileCollisions(): void
+```
+弾丸と敵の衝突判定を行います。破壊された弾丸は自動的に削除されます。
 
 #### renderAll(renderer: PixelRenderer)
 ```typescript

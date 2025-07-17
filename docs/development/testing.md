@@ -39,6 +39,7 @@ node tests/e2e/test-enemy-damage.cjs
 | **test-bat.cjs** | Bat敵キャラクター | コウモリの表示、プレイヤー検知、放物線飛行、左右パトロール | ~15秒 |
 | **test-spider.cjs** | Spider敵キャラクター | スパイダーの天井這い移動、プレイヤー検知、糸降下、待機状態 | ~15秒 |
 | **test-powerup-system.cjs** | パワーアップシステム | シールドストーン収集、ダメージ吸収効果確認、PowerUpManager統合 | ~20秒 |
+| **test-bullet-wall-collision.cjs** | パワーグローブ弾丸 | エネルギー弾の壁衝突判定、弾丸破壊確認、発射制限確認 | ~20秒 |
 
 ### テストログ
 - テスト実行時のログは `tests/logs/` に自動保存
