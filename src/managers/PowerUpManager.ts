@@ -110,7 +110,6 @@ export class PowerUpManager<T = unknown> {
             }
             
             if (effect?.onUpdate) {
-                Logger.log(`[PowerUpManager] Calling onUpdate for ${type}`);
                 effect.onUpdate(this.target, deltaTime);
             }
         });

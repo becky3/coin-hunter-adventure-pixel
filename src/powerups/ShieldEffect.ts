@@ -64,6 +64,9 @@ export class ShieldEffect implements PowerUpEffect<Player> {
         };
     }
 
+    onUpdate(_target: Player, _deltaTime: number): void {
+    }
+
     onRemove(target: Player): void {
         Logger.log('[ShieldEffect] Removing shield from player');
         
