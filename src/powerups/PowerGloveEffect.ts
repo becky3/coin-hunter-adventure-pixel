@@ -35,7 +35,6 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
     }
 
     onUpdate(target: Player, _deltaTime: number): void {
-        Logger.log('[PowerGloveEffect] onUpdate called');
         const inputManager = target.getInputManager();
         if (!inputManager) {
             Logger.log('[PowerGloveEffect] No input manager');

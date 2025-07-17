@@ -43,9 +43,6 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         this.lifeTime += deltaTime * 1000;
         this.animationTime += deltaTime * 1000;
         
-        if (Math.floor(this.lifeTime / 500) > Math.floor((this.lifeTime - deltaTime * 1000) / 500)) {
-            Logger.log('[EnergyBullet] Position:', this.x, this.y, 'velocity:', this.vx, this.vy);
-        }
         
         if (this.lifeTime >= this.maxLifeTime) {
             Logger.log('[EnergyBullet] Destroyed by timeout at', this.x, this.y);
