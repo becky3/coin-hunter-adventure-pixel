@@ -11,6 +11,7 @@ export interface PhysicsLayers {
     ENEMY: PhysicsLayer;
     ITEM: PhysicsLayer;
     PLATFORM: PhysicsLayer;
+    PROJECTILE: PhysicsLayer;
 }
 
 export interface RaycastResult {
@@ -70,13 +71,15 @@ export class PhysicsSystem {
             PLAYER: 'player',
             ENEMY: 'enemy',
             ITEM: 'item',
-            PLATFORM: 'platform'
+            PLATFORM: 'platform',
+            PROJECTILE: 'projectile'
         };
         this.collisionMatrix = {
             [this.layers.PLAYER]: [this.layers.TILE, this.layers.ENEMY, this.layers.ITEM, this.layers.PLATFORM],
             [this.layers.ENEMY]: [this.layers.TILE, this.layers.PLAYER, this.layers.PLATFORM],
             [this.layers.ITEM]: [this.layers.PLAYER],
-            [this.layers.PLATFORM]: [this.layers.PLAYER, this.layers.ENEMY]
+            [this.layers.PLATFORM]: [this.layers.PLAYER, this.layers.ENEMY],
+            [this.layers.PROJECTILE]: [this.layers.TILE]
         };
         this.entities = new Set();
         this.tileMap = null;
@@ -243,11 +246,18 @@ export class PhysicsSystem {
     }
     
     resolveTileCollision(entity: PhysicsEntity, tileBounds: Bounds, axis: 'horizontal' | 'vertical'): void {
+        if (entity.onCollision) {
+            entity.onCollision({ other: null });
+        }
+        
         if (axis === 'horizontal') {
             if (entity.vx > 0) {
                 entity.x = tileBounds.left - entity.width;
                 entity.vx = 0;
             } else if (entity.vx < 0) {
+                if (entity.constructor.name === 'EnergyBullet') {
+                    Logger.log('[PhysicsSystem] Bullet collision: moving from', entity.x, 'to', tileBounds.right);
+                }
                 entity.x = tileBounds.right;
                 entity.vx = 0;
             }

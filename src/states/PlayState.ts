@@ -17,6 +17,7 @@ import { BackgroundRenderer } from '../rendering/BackgroundRenderer';
 import { TileRenderer } from '../rendering/TileRenderer';
 import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 import { ShieldEffect } from '../powerups/ShieldEffect';
+import { PowerGloveEffect } from '../powerups/PowerGloveEffect';
 import { PowerUpType } from '../types/PowerUpTypes';
 
 interface Game {
@@ -136,6 +137,7 @@ export class PlayState implements GameState {
         
         const powerUpManager = player.getPowerUpManager();
         powerUpManager.registerEffect(PowerUpType.SHIELD_STONE, new ShieldEffect());
+        powerUpManager.registerEffect(PowerUpType.POWER_GLOVE, new PowerGloveEffect(this.entityManager));
         
         Logger.log('[PlayState] Power-up effects initialized');
     }
@@ -172,7 +174,9 @@ export class PlayState implements GameState {
                 { category: 'environment', name: 'tree1' },
                 { category: 'tiles', name: 'ground' },
                 { category: 'tiles', name: 'grass_ground' },
-                { category: 'powerups', name: 'shield_stone' }
+                { category: 'powerups', name: 'shield_stone' },
+                { category: 'powerups', name: 'power_glove' },
+                { category: 'projectiles', name: 'energy_bullet' }
             ];
             
             const animationList = [
@@ -193,6 +197,7 @@ export class PlayState implements GameState {
                     return this.game.assetLoader.loadSprite(sprite.category, sprite.name)
                         .catch(error => {
                             failedSprites.push(`${sprite.category}/${sprite.name}`);
+                            Logger.error(`[PlayState] Failed to load sprite ${sprite.category}/${sprite.name}:`, error);
                             throw error;
                         });
                 }),
@@ -224,7 +229,7 @@ export class PlayState implements GameState {
         }
     }
 
-    async enter(params: { level?: string; enableProgression?: boolean } = {}): Promise<void> {
+    async enter(params: { level?: string; enableProgression?: boolean; playerState?: { score?: number; lives?: number; powerUps?: string[]; isSmall?: boolean } } = {}): Promise<void> {
         const enterStartTime = performance.now();
         Logger.log('[PlayState] enter() called with params:', params);
         Logger.log('[PlayState] Starting initialization...');
@@ -233,7 +238,10 @@ export class PlayState implements GameState {
 
         await this.preloadSprites();
 
-        const levelName = params.level || 'stage1-1';
+        const levelName = params.level;
+        if (!levelName) {
+            throw new Error('No level specified in PlayState parameters');
+        }
         
         const stageType = this.determineStageType(levelName);
         if (this.game.assetLoader) {
@@ -247,6 +255,18 @@ export class PlayState implements GameState {
         
 
         this.hudManager.updateTime(this.levelManager.getTimeLimit());
+        
+        if (params.playerState) {
+            const { score, lives } = params.playerState;
+            
+            if (score !== undefined) {
+                this.hudManager.updateScore(score);
+            }
+            if (lives !== undefined) {
+                this.lives = lives;
+                this.hudManager.updateLives(lives);
+            }
+        }
         this.hudManager.updateLives(this.lives);
         
         this.eventBus.on('player:died', () => {
@@ -282,8 +302,24 @@ export class PlayState implements GameState {
         }
         
         const player = this.entityManager.getPlayer();
+        Logger.log(`[PlayState] After initializeLevel, player = ${player ? 'exists' : 'null'}`);
         if (player) {
             Logger.log('[PlayState] Player created successfully');
+            Logger.log(`[PlayState] Player position: (${player.x}, ${player.y})`);
+            
+            if (params.playerState && params.playerState.powerUps) {
+                const powerUpManager = player.getPowerUpManager();
+                params.playerState.powerUps.forEach((powerUpType: string) => {
+                    Logger.log(`[PlayState] Restoring power-up: ${powerUpType}`);
+                    if (powerUpType === 'POWER_GLOVE') {
+                        powerUpManager.applyPowerUp({
+                            type: PowerUpType.POWER_GLOVE,
+                            permanent: true
+                        });
+                    }
+                });
+            }
+            
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('playstate:ready', { 
                     detail: { player: true } 
@@ -291,6 +327,9 @@ export class PlayState implements GameState {
             }
         } else {
             Logger.error('[PlayState] Player creation failed!');
+            Logger.error('[PlayState] Checking EntityManager state...');
+            const entities = this.entityManager.getItems();
+            Logger.error(`[PlayState] Items count: ${entities.length}`);
         }
         
         const enterEndTime = performance.now();
@@ -331,6 +370,7 @@ export class PlayState implements GameState {
         }
 
         this.entityManager.checkItemCollisions();
+        this.entityManager.checkProjectileCollisions();
 
         this.cameraController.update(deltaTime);
 
@@ -511,7 +551,18 @@ export class PlayState implements GameState {
             this.stageClearTimer = null;
             
             if (nextLevel) {
-                this.game.stateManager.setState('play', { level: nextLevel });
+                const player = this.entityManager.getPlayer();
+                const playerState = player ? {
+                    score: this.hudManager.getHUDData().score,
+                    lives: this.lives,
+                    powerUps: player.getPowerUpManager().getActivePowerUps(),
+                    isSmall: (player as Player & { isSmall: boolean }).isSmall
+                } : null;
+                
+                this.game.stateManager.setState('play', { 
+                    level: nextLevel,
+                    playerState 
+                });
             } else {
                 this.showEnding();
             }

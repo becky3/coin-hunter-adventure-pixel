@@ -24,8 +24,8 @@ async function runTest() {
             }
         });
         
-        // Navigate to game
-        await t.navigateToGame('http://localhost:3000/?skip_title=true');
+        // Navigate to game with a default stage
+        await t.navigateToGame('http://localhost:3000/?skip_title=true&s=1-1');
         await t.waitForGameInitialization();
         
         // With skip_title=true, we should go directly to play state

@@ -1,6 +1,6 @@
 {
-  "id": "stage0-5",
-  "name": "POWERUP TEST",
+  "id": "stage-bullet-test",
+  "name": "BULLET WALL TEST",
   "width": 40,
   "height": 15,
   "tileSize": 16,
@@ -27,43 +27,8 @@
   ],
   "entities": [
     {
-      "type": "shield_stone",
-      "x": 5,
-      "y": 11
-    },
-    {
-      "type": "slime",
-      "x": 10,
-      "y": 11
-    },
-    {
-      "type": "slime",
-      "x": 15,
-      "y": 11
-    },
-    {
-      "type": "shield_stone",
-      "x": 20,
-      "y": 11
-    },
-    {
-      "type": "slime",
-      "x": 25,
-      "y": 11
-    },
-    {
       "type": "power_glove",
-      "x": 8,
-      "y": 11
-    },
-    {
-      "type": "coin",
-      "x": 30,
-      "y": 11
-    },
-    {
-      "type": "coin",
-      "x": 32,
+      "x": 5,
       "y": 11
     }
   ]

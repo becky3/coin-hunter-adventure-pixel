@@ -196,7 +196,10 @@ export class GameCore {
         
         const urlParams = new URLParams();
         if (urlParams.shouldSkipTitle()) {
-            const stageId = urlParams.getStageId() || 'stage1-1';
+            const stageId = urlParams.getStageId();
+            if (!stageId) {
+                throw new Error('No stage ID specified in URL parameters (use ?s=stage-name)');
+            }
             Logger.log('GameCore: Skipping title, starting directly with stage:', stageId);
             stateManager.setState('play', { level: stageId });
         } else {

@@ -2,7 +2,7 @@
 import { Logger } from '../utils/Logger';
 
 export type InputEventType = 'keyPress' | 'keyRelease' | 'keyHold';
-export type ActionName = 'left' | 'right' | 'up' | 'down' | 'jump' | 'action' | 'escape' | 'mute' | 'debug';
+export type ActionName = 'left' | 'right' | 'up' | 'down' | 'jump' | 'action' | 'escape' | 'mute' | 'debug' | 'attack';
 
 export interface InputEvent {
     type: InputEventType;
@@ -73,7 +73,8 @@ export class InputSystem {
             'action': ['Enter', 'KeyE'],
             'escape': ['Escape'],
             'mute': ['KeyM'],
-            'debug': ['Digit2', 'BracketLeft']
+            'debug': ['Digit2', 'BracketLeft'],
+            'attack': ['Period']
         };
         
         this.reverseKeyMap = new Map();

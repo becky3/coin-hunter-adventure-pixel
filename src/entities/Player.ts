@@ -8,7 +8,7 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import type { CharacterConfig, CharacterAnimationConfig } from '../config/ResourceConfig';
 import { PowerUpManager } from '../managers/PowerUpManager';
-import { PowerUpConfig } from '../types/PowerUpTypes';
+import { PowerUpConfig, PowerUpType } from '../types/PowerUpTypes';
 
 
 const DEFAULT_PLAYER_CONFIG = {
@@ -238,6 +238,10 @@ export class Player extends Entity {
     
     setInputManager(inputManager: InputSystem): void {
         this.inputManager = inputManager;
+    }
+    
+    getInputManager(): InputSystem | null {
+        return this.inputManager;
     }
     
     setMusicSystem(musicSystem: MusicSystem): void {
@@ -521,6 +525,9 @@ export class Player extends Entity {
         this.y += DEFAULT_PLAYER_CONFIG.height - DEFAULT_PLAYER_CONFIG.smallHeight;
         this.updateSprite();
         
+        if (this.powerUpManager.hasPowerUp(PowerUpType.POWER_GLOVE)) {
+            this.powerUpManager.removePowerUp(PowerUpType.POWER_GLOVE);
+        }
         
         this._invulnerable = true;
         this.invulnerabilityTime = DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
