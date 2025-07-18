@@ -60,6 +60,12 @@ export class EntityManager {
             }
         });
         
+        this.eventBus.on('enemy:damaged', (_data: unknown) => {
+            if (this.musicSystem?.isInitialized) {
+                this.musicSystem.playSEFromPattern('damage');
+            }
+        });
+        
         this.eventBus.on('entity:findPlayer', () => {
             return this.player;
         });

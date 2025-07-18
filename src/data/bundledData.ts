@@ -19,6 +19,7 @@ import seGameStart from '../config/resources/se/gameStart.json';
 import seGoal from '../config/resources/se/goal.json';
 import seJump from '../config/resources/se/jump.json';
 import sePowerup from '../config/resources/se/powerup.json';
+import seProjectile from '../config/resources/se/projectile.json';
 
 import stageList from '../levels/data/stages.json';
 import stage0_1 from '../levels/data/stage0-1.json';
@@ -55,6 +56,7 @@ export const bundledMusicData: Record<string, unknown> = {
     '/src/config/resources/se/goal.json': seGoal,
     '/src/config/resources/se/jump.json': seJump,
     '/src/config/resources/se/powerup.json': sePowerup,
+    '/src/config/resources/se/projectile.json': seProjectile,
 };
 
 export const bundledStageData: Record<string, unknown> = {
