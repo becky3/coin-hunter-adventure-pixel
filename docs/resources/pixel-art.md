@@ -41,13 +41,15 @@ parent: リソース
 
 | カテゴリ | パレット名 | 用途 |
 |----------|-----------|------|
-| player | character | プレイヤーキャラクター |
+| player | character | プレイヤーキャラクター（通常） |
+| player | characterPowerGlove | パワーグローブ取得時のプレイヤー |
 | enemies | enemy | 敵キャラクター |
 | items | items | コイン等のアイテム |
 | tiles | grassland | 地形タイル |
 | environment（雲） | sky | 空・雲の要素 |
 | environment（木） | nature | 自然要素 |
 | ui | ui | UI要素 |
+| effects | shield | シールドエフェクト |
 
 **注意**: 将来的にマスターパレットを活用した本格的なパレットシステムへの移行を予定（Issue #124）
 
