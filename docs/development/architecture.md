@@ -30,7 +30,7 @@ Coin Hunter Adventure Pixelは、HTML5 Canvas APIを使用したブラウザベ�
 
 #### コアシステム
 - **GameCore**: ゲーム全体の制御とシステム管理
-- **GameStateManager**: ゲーム状態の管理（メニュー、プレイ、ゲームオーバー）
+- **GameStateManager**: ゲーム状態の管理（メニュー、プレイ、サウンドテスト、ゲームオーバー）
 - **PixelRenderer**: 8ビットスタイルの描画システム
 - **PhysicsSystem**: 物理演算（重力、衝突判定）
 - **MusicSystem**: Web Audio APIによる音声管理（統一インターフェース実装）

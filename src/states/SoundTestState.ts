@@ -30,6 +30,35 @@ export class SoundTestState implements GameState {
     private inputListeners: Array<() => void>;
     private currentPlayingBGM: string | null;
     
+    private static readonly SE_MAP: { [key: string]: string } = {
+        'coin': 'coin',
+        'jump': 'jump',
+        'damage': 'damage',
+        'button': 'button',
+        'powerup': 'powerup',
+        'gamestart': 'gameStart',
+        'goal': 'goal',
+        'enemydefeat': 'enemyDefeat'
+    };
+    
+    private static readonly UI_LAYOUT = {
+        TITLE_Y: 32,
+        MENU_START_Y: 80,
+        MENU_LINE_HEIGHT: 24,
+        SELECTOR_X: 40,
+        BGM_LABEL_X: 56,
+        BGM_VALUE_X: 96,
+        SE_LABEL_X: 56,
+        SE_VALUE_X: 88,
+        QUIT_X: 56,
+        INSTRUCTIONS_Y1: 184,
+        INSTRUCTIONS_Y2: 200,
+        MUTE_BUTTON_RIGHT_MARGIN: 80,
+        MUTE_BUTTON_Y: 8,
+        MUTE_KEY_OFFSET_X: 16,
+        MUTE_KEY_OFFSET_Y: 8
+    };
+    
     constructor(game: Game) {
         this.game = game;
         this.selectedRow = 0;
@@ -170,18 +199,7 @@ export class SoundTestState implements GameState {
                 this.currentPlayingBGM = selectedName;
             }
         } else if (currentItem.type === 'se') {
-            const seMap: { [key: string]: string } = {
-                'coin': 'coin',
-                'jump': 'jump',
-                'damage': 'damage',
-                'button': 'button',
-                'powerup': 'powerup',
-                'gamestart': 'gameStart',
-                'goal': 'goal',
-                'enemydefeat': 'enemyDefeat'
-            };
-            
-            const seName = seMap[selectedName] || selectedName;
+            const seName = SoundTestState.SE_MAP[selectedName] || selectedName;
             this.game.musicSystem.playSEFromPattern(seName);
         }
     }
@@ -198,34 +216,34 @@ export class SoundTestState implements GameState {
         renderer.clear(getMasterColor(UI_PALETTE_INDICES.black));
         
         const centerX = GAME_RESOLUTION.WIDTH / 2;
-        renderer.drawTextCentered('SOUND TEST', centerX, 32, getMasterColor(UI_PALETTE_INDICES.gold));
+        renderer.drawTextCentered('SOUND TEST', centerX, SoundTestState.UI_LAYOUT.TITLE_Y, getMasterColor(UI_PALETTE_INDICES.gold));
         
-        let y = 80;
+        let y = SoundTestState.UI_LAYOUT.MENU_START_Y;
         this.menuItems.forEach((item, index) => {
             const isSelected = index === this.selectedRow;
             const color = isSelected ? getMasterColor(UI_PALETTE_INDICES.gold) : getMasterColor(UI_PALETTE_INDICES.white);
             
             if (isSelected) {
-                renderer.drawText('>', 40, y, color);
+                renderer.drawText('>', SoundTestState.UI_LAYOUT.SELECTOR_X, y, color);
             }
             
             if (item.type === 'bgm' && item.items && item.currentIndex !== undefined) {
-                renderer.drawText('BGM:', 56, y, color);
+                renderer.drawText('BGM:', SoundTestState.UI_LAYOUT.BGM_LABEL_X, y, color);
                 const bgmName = item.items[item.currentIndex];
-                renderer.drawText(bgmName, 96, y, color);
+                renderer.drawText(bgmName, SoundTestState.UI_LAYOUT.BGM_VALUE_X, y, color);
             } else if (item.type === 'se' && item.items && item.currentIndex !== undefined) {
-                renderer.drawText('SE:', 56, y, color);
+                renderer.drawText('SE:', SoundTestState.UI_LAYOUT.SE_LABEL_X, y, color);
                 const seName = item.items[item.currentIndex];
-                renderer.drawText(seName, 88, y, color);
+                renderer.drawText(seName, SoundTestState.UI_LAYOUT.SE_VALUE_X, y, color);
             } else if (item.type === 'quit') {
-                renderer.drawText('QUIT', 56, y, color);
+                renderer.drawText('QUIT', SoundTestState.UI_LAYOUT.QUIT_X, y, color);
             }
             
-            y += 24;
+            y += SoundTestState.UI_LAYOUT.MENU_LINE_HEIGHT;
         });
         
-        renderer.drawTextCentered('[UP/DN] SELECT [LT/RT] CHANGE', centerX, 184, getMasterColor(UI_PALETTE_INDICES.gray));
-        renderer.drawTextCentered('[SPACE] PLAY/STOP', centerX, 200, getMasterColor(UI_PALETTE_INDICES.gray));
+        renderer.drawTextCentered('[UP/DN] SELECT [LT/RT] CHANGE', centerX, SoundTestState.UI_LAYOUT.INSTRUCTIONS_Y1, getMasterColor(UI_PALETTE_INDICES.gray));
+        renderer.drawTextCentered('[SPACE] PLAY/STOP', centerX, SoundTestState.UI_LAYOUT.INSTRUCTIONS_Y2, getMasterColor(UI_PALETTE_INDICES.gray));
         
         this.drawMuteButton(renderer);
     }
@@ -235,11 +253,11 @@ export class SoundTestState implements GameState {
         const buttonText = muteState ? 'SOUND:OFF' : 'SOUND:ON';
         const buttonColor = muteState ? getMasterColor(UI_PALETTE_INDICES.brightRed) : getMasterColor(UI_PALETTE_INDICES.green);
         
-        const x = GAME_RESOLUTION.WIDTH - 80;
-        const y = 8;
+        const x = GAME_RESOLUTION.WIDTH - SoundTestState.UI_LAYOUT.MUTE_BUTTON_RIGHT_MARGIN;
+        const y = SoundTestState.UI_LAYOUT.MUTE_BUTTON_Y;
         
         renderer.drawText(buttonText, x, y, buttonColor);
-        renderer.drawText('(M)', x + 16, y + 8, getMasterColor(UI_PALETTE_INDICES.darkGray));
+        renderer.drawText('(M)', x + SoundTestState.UI_LAYOUT.MUTE_KEY_OFFSET_X, y + SoundTestState.UI_LAYOUT.MUTE_KEY_OFFSET_Y, getMasterColor(UI_PALETTE_INDICES.darkGray));
     }
     
     exit(): void {

@@ -151,6 +151,10 @@ Coin Hunter Adventure Pixelは、レトロゲーム風の2D横スクロールア
 ## ゲームフロー
 
 1. タイトル画面
+   - START GAME: ゲーム開始
+   - HOW TO PLAY: 操作説明
+   - CREDITS: クレジット表示
+   - SOUND TEST: サウンドテスト（BGM/SE確認）
 2. ゲームプレイ
 3. リザルト画面（クリア/ゲームオーバー）
 
