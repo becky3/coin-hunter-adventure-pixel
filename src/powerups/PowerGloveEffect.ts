@@ -43,28 +43,22 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
     onUpdate(target: Player, _deltaTime: number): void {
         const inputManager = target.getInputManager();
         if (!inputManager) {
-            Logger.log('[PowerGloveEffect] No input manager');
             return;
         }
         
         const attackPressed = inputManager.isActionPressed('attack');
-        Logger.log('[PowerGloveEffect] Attack key pressed:', attackPressed);
         
         if (attackPressed) {
             const currentTime = Date.now();
             
             const currentBullets = this.countPlayerBullets();
             if (currentBullets >= PowerGloveConfig.maxBulletsOnScreen) {
-                Logger.log('[PowerGloveEffect] Max bullets on screen:', currentBullets, '/', PowerGloveConfig.maxBulletsOnScreen);
                 return;
             }
             
             if (currentTime - this.lastFireTime >= PowerGloveConfig.fireRate) {
                 this.lastFireTime = currentTime;
                 this.fireBullet(target);
-                Logger.log('[PowerGloveEffect] Fired bullet. Bullets on screen:', currentBullets + 1);
-            } else {
-                Logger.log('[PowerGloveEffect] Fire rate cooldown:', currentTime - this.lastFireTime, 'ms remaining');
             }
         }
     }
@@ -98,7 +92,6 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
             musicSystem.playSEFromPattern('shoot');
         }
         
-        Logger.log('[PowerGloveEffect] Fired bullet at', bulletX, bulletY);
     }
     
     private updatePlayerPalettes(paletteName: string): void {
