@@ -136,7 +136,7 @@ export class PlayState implements GameState {
         if (!player) return;
         
         const powerUpManager = player.getPowerUpManager();
-        powerUpManager.registerEffect(PowerUpType.SHIELD_STONE, new ShieldEffect());
+        powerUpManager.registerEffect(PowerUpType.SHIELD_STONE, new ShieldEffect(this.entityManager));
         powerUpManager.registerEffect(PowerUpType.POWER_GLOVE, new PowerGloveEffect(this.entityManager));
         
         Logger.log('[PlayState] Power-up effects initialized');
@@ -176,7 +176,9 @@ export class PlayState implements GameState {
                 { category: 'tiles', name: 'grass_ground' },
                 { category: 'powerups', name: 'shield_stone' },
                 { category: 'powerups', name: 'power_glove' },
-                { category: 'projectiles', name: 'energy_bullet' }
+                { category: 'projectiles', name: 'energy_bullet' },
+                { category: 'effects', name: 'shield_left' },
+                { category: 'effects', name: 'shield_right' }
             ];
             
             const animationList = [

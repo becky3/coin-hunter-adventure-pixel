@@ -125,6 +125,19 @@
         }
       ],
       "animations": []
+    },
+    "effects": {
+      "sprites": [
+        {
+          "name": "shield_left",
+          "type": "sprite"
+        },
+        {
+          "name": "shield_right",
+          "type": "sprite"
+        }
+      ],
+      "animations": []
     }
   }
 }

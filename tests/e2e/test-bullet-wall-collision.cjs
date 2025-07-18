@@ -37,14 +37,19 @@ async function runTest() {
         await t.holdKey('ArrowRight', 1200);
         await t.wait(500);
         
-        // Check if player has power glove
-        const hasPowerGlove = await t.page.evaluate(() => {
+        // Check if player has power glove and palette changed
+        const powerGloveInfo = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
             const player = state?.player || state?.entityManager?.getPlayer?.();
-            return player && player.getPowerUpManager().hasPowerUp('POWER_GLOVE');
+            return {
+                hasPowerGlove: player && player.getPowerUpManager().hasPowerUp('POWER_GLOVE'),
+                hasPaletteState: player && player.getHasPowerGlove()
+            };
         });
         
-        t.assert(hasPowerGlove, 'Player should have power glove');
+        t.assert(powerGloveInfo.hasPowerGlove, 'Player should have power glove');
+        t.assert(powerGloveInfo.hasPaletteState, 'Player should have power glove palette');
+        console.log('✅ Power glove collected and palette changed');
         
         // Move back to the wall  
         console.log('Moving back to the wall...');

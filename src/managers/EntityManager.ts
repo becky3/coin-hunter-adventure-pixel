@@ -68,6 +68,10 @@ export class EntityManager {
     getPlayer(): Player | null {
         return this.player;
     }
+    
+    getMusicSystem(): MusicSystem | undefined {
+        return this.musicSystem;
+    }
 
     getEnemies(): Enemy[] {
         return this.enemies;

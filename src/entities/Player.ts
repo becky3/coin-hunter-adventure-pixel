@@ -9,6 +9,7 @@ import { Logger } from '../utils/Logger';
 import type { CharacterConfig, CharacterAnimationConfig } from '../config/ResourceConfig';
 import { PowerUpManager } from '../managers/PowerUpManager';
 import { PowerUpConfig, PowerUpType } from '../types/PowerUpTypes';
+import { ShieldEffectVisual } from '../effects/ShieldEffect';
 
 
 const DEFAULT_PLAYER_CONFIG = {
@@ -102,6 +103,9 @@ export class Player extends Entity {
     private variableJumpBoostMultiplier: number;
     private frameCount: number;
     private powerUpManager: PowerUpManager;
+    private shieldVisual: ShieldEffectVisual | null = null;
+    private hasPowerGlove: boolean = false;
+    private skipBlinkEffect?: boolean;
 
     constructor(x?: number, y?: number) {
         let playerConfig = null;
@@ -332,10 +336,16 @@ export class Player extends Entity {
             if (this.invulnerabilityTime <= 0) {
                 this._invulnerable = false;
                 this.invulnerabilityTime = 0;
+                this.skipBlinkEffect = false;
             }
         }
         
         this.powerUpManager.update(deltaTime);
+        
+        if (this.shieldVisual) {
+            this.shieldVisual.update(deltaTime);
+        }
+        
     }
     
     private handleMovement(input: { left: boolean; right: boolean; jump: boolean; action: boolean }): void {
@@ -600,7 +610,7 @@ export class Player extends Entity {
             );
         }
         
-        if (this._invulnerable && Math.floor(this.invulnerabilityTime / 100) % 2 === 1) {
+        if (this._invulnerable && !this.skipBlinkEffect && Math.floor(this.invulnerabilityTime / 100) % 2 === 1) {
             return;
         }
         
@@ -619,6 +629,7 @@ export class Player extends Entity {
                         this.flipX,
                         renderer.scale
                     );
+                    this.renderEffects(renderer);
                     return;
                 }
             }
@@ -635,6 +646,7 @@ export class Player extends Entity {
                         this.flipX,
                         renderer.scale
                     );
+                    this.renderEffects(renderer);
                     return;
                 }
             }
@@ -648,6 +660,7 @@ export class Player extends Entity {
                     this.flipX,
                     renderer.scale
                 );
+                this.renderEffects(renderer);
                 return;
             } else if ((window as Window & { game?: { debug?: boolean } }).game?.debug) {
                 Logger.warn('Sprite not found:', this.spriteKey);
@@ -674,6 +687,12 @@ export class Player extends Entity {
                 screenPos.x,
                 screenPos.y + 12
             );
+        }
+    }
+    
+    renderEffects(renderer: PixelRenderer): void {
+        if (this.shieldVisual) {
+            this.shieldVisual.render(renderer);
         }
     }
     
@@ -725,4 +744,20 @@ export class Player extends Entity {
     getPowerUpManager(): PowerUpManager {
         return this.powerUpManager;
     }
+    
+    setShieldVisual(visual: ShieldEffectVisual | null): void {
+        Logger.log('[Player] setShieldVisual called with:', visual ? 'ShieldEffectVisual' : 'null');
+        this.shieldVisual = visual;
+    }
+    
+    setHasPowerGlove(hasGlove: boolean): void {
+        Logger.log('[Player] setHasPowerGlove called with:', hasGlove);
+        this.hasPowerGlove = hasGlove;
+        this.updateAnimationState();
+    }
+    
+    getHasPowerGlove(): boolean {
+        return this.hasPowerGlove;
+    }
+    
 }
