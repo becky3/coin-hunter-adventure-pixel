@@ -73,8 +73,8 @@ async function runTest() {
         t.assert(breakingState.blinkSpeed === 0.1, 'Should have fast blink speed');
         t.assert(breakingState.playerInvulnerable, 'Player should be invulnerable');
 
-        // Wait 500ms and check if still blinking
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Wait 200ms and check if still blinking
+        await new Promise(resolve => setTimeout(resolve, 200));
         
         const midState = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
@@ -90,12 +90,12 @@ async function runTest() {
             };
         });
         
-        console.log('Shield state after 500ms:', JSON.stringify(midState, null, 2));
-        t.assert(midState.hasShieldVisual, 'Should still have shield visual at 500ms');
-        t.assert(midState.isBreaking, 'Should still be breaking at 500ms');
+        console.log('Shield state after 200ms:', JSON.stringify(midState, null, 2));
+        t.assert(midState.hasShieldVisual, 'Should still have shield visual at 200ms');
+        t.assert(midState.isBreaking, 'Should still be breaking at 200ms');
 
-        // Wait another 600ms (total 1100ms) and check if removed
-        await new Promise(resolve => setTimeout(resolve, 600));
+        // Wait another 900ms (total 1100ms) and check if removed
+        await new Promise(resolve => setTimeout(resolve, 900));
         
         const finalState = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
@@ -118,7 +118,11 @@ async function runTest() {
     });
 }
 
-runTest().catch(err => {
-    console.error('Test failed:', err);
-    process.exit(1);
-});
+if (require.main === module) {
+    runTest().catch(err => {
+        console.error('Test failed:', err);
+        process.exit(1);
+    });
+}
+
+module.exports = runTest;

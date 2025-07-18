@@ -14,6 +14,7 @@ export class ShieldEffect implements PowerUpEffect<Player> {
     private shieldVisual: ShieldEffectVisual | null = null;
     private breakingTime: number = 0;
     private isBreaking: boolean = false;
+    private hasReceivedDamage: boolean = false;
 
     constructor(entityManager: EntityManager) {
         this.entityManager = entityManager;
@@ -55,6 +56,7 @@ export class ShieldEffect implements PowerUpEffect<Player> {
                 
                 this.isBreaking = true;
                 this.breakingTime = 1.0;
+                this.hasReceivedDamage = true;
                 
                 return false;
             }
@@ -71,7 +73,7 @@ export class ShieldEffect implements PowerUpEffect<Player> {
             this.shieldVisual.update(deltaTime);
         }
         
-        if (this.isBreaking) {
+        if (this.isBreaking && this.hasReceivedDamage) {
             this.breakingTime -= deltaTime;
             Logger.log(`[ShieldEffect] Breaking countdown: ${this.breakingTime.toFixed(3)}s remaining (deltaTime: ${deltaTime})`);
             if (this.breakingTime <= 0) {
