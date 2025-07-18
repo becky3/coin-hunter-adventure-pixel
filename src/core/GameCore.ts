@@ -15,6 +15,7 @@ import { MusicSystem } from '../audio/MusicSystem';
 import { GameStateManager } from '../states/GameStateManager';
 import { MenuState } from '../states/MenuState';
 import { PlayState } from '../states/PlayState';
+import { SoundTestState } from '../states/SoundTestState';
 import { Logger } from '../utils/Logger';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { URLParams } from '../utils/urlParams';
@@ -149,6 +150,7 @@ export class GameCore {
 
         stateManager.registerState(new MenuState(gameProxy));
         stateManager.registerState(new PlayState(gameProxy));
+        stateManager.registerState(new SoundTestState(gameProxy));
     }
 
     private createGameProxy(): {

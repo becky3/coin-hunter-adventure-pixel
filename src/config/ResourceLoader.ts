@@ -105,7 +105,7 @@ export class ResourceLoader {
         if (!this.resourceIndex) return;
         
         const bgmFiles = ['title', 'game', 'victory', 'gameover'];
-        const seFiles = ['coin', 'jump', 'damage', 'button', 'gameStart', 'goal', 'enemyDefeat'];
+        const seFiles = ['coin', 'jump', 'damage', 'button', 'powerup', 'gameStart', 'goal', 'enemyDefeat'];
         
         this.musicPatterns = {
             bgm: {},

@@ -309,6 +309,7 @@ tests/
 
 2. **State遷移**
    - MenuState → PlayState
+   - MenuState → SoundTestState
    - PlayState → GameOver/Clear
 
 3. **ゲームプレイ**
@@ -320,6 +321,11 @@ tests/
 4. **システム統合**
    - 各Adapterの動作確認
    - EventBusによる通信
+
+5. **音響システム**
+   - サウンドテスト機能での音源確認
+   - BGM/SEの正常再生
+   - 音量調整とミュート機能
 
 ## テストフレームワーク
 

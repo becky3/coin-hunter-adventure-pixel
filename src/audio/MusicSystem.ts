@@ -1,5 +1,5 @@
 import { ResourceLoader } from '../config/ResourceLoader';
-import { MusicConfig, TrackConfig, FrequencyRamp } from '../config/MusicPatternConfig';
+import { MusicConfig, TrackConfig } from '../config/MusicPatternConfig';
 import { Logger } from '../utils/Logger';
 
 const MS_PER_SEC = 1000;
@@ -737,52 +737,6 @@ export class MusicSystem {
         } else {
             this.playNote(frequency, duration, startTime, type, volume);
         }
-    }
-    
-    private playFrequencyRamp(
-        freq: FrequencyRamp,
-        duration: number,
-        startTime: number,
-        type: OscillatorType,
-        volume: number,
-        envelope?: EnvelopeSettings
-    ): void {
-        if (!this.audioContext || !this.masterGain) return;
-        
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        
-        oscillator.type = type;
-        oscillator.frequency.setValueAtTime(freq.start, startTime);
-        if (freq.end !== freq.start) {
-            oscillator.frequency.exponentialRampToValueAtTime(freq.end, startTime + duration);
-        }
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(this.masterGain);
-        
-        if (envelope) {
-            gainNode.gain.setValueAtTime(0, startTime);
-            gainNode.gain.linearRampToValueAtTime(volume, startTime + envelope.attack);
-            gainNode.gain.exponentialRampToValueAtTime(volume * envelope.decay, startTime + envelope.attack + envelope.decayTime);
-            gainNode.gain.setValueAtTime(volume * envelope.sustain, startTime + duration - envelope.release);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-        } else {
-            gainNode.gain.setValueAtTime(volume, startTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-        }
-        
-        oscillator.start(startTime);
-        oscillator.stop(startTime + duration);
-        
-        this.activeNodes.push({ oscillator, gainNode });
-        
-        oscillator.addEventListener('ended', () => {
-            const index = this.activeNodes.findIndex(node => node.oscillator === oscillator);
-            if (index !== -1) {
-                this.activeNodes.splice(index, 1);
-            }
-        });
     }
     
     private stopPatternPlayback(): void {

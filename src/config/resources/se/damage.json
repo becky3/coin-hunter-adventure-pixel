@@ -7,9 +7,9 @@
         "volume": 0.3
       },
       "pattern": {
-        "frequencies": [{ "start": 400, "end": 80 }],
-        "durations": [0.5],
-        "times": [0]
+        "notes": ["G4", "E4", "C4", "A3", "F3", "D3"],
+        "durations": [0.08, 0.08, 0.08, 0.08, 0.08, 0.1],
+        "times": [0, 0.08, 0.16, 0.24, 0.32, 0.4]
       }
     }
   ]
