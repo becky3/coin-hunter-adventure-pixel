@@ -18,7 +18,7 @@ import { TileRenderer } from '../rendering/TileRenderer';
 import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 import { ShieldEffect } from '../powerups/ShieldEffect';
 import { PowerGloveEffect } from '../powerups/PowerGloveEffect';
-import { PowerUpType } from '../types/PowerUpTypes';
+import { PowerUpType, PowerUpConfig } from '../types/PowerUpTypes';
 
 interface Game {
     renderer?: PixelRenderer;
@@ -313,11 +313,11 @@ export class PlayState implements GameState {
                 const powerUpManager = player.getPowerUpManager();
                 params.playerState.powerUps.forEach((powerUpType: string) => {
                     Logger.log(`[PlayState] Restoring power-up: ${powerUpType}`);
-                    if (powerUpType === 'POWER_GLOVE') {
-                        powerUpManager.applyPowerUp({
-                            type: PowerUpType.POWER_GLOVE,
-                            permanent: true
-                        });
+                    const config = this.getPowerUpRestoreConfig(powerUpType);
+                    if (config) {
+                        powerUpManager.applyPowerUp(config);
+                    } else {
+                        Logger.warn(`[PlayState] Unknown power-up type: ${powerUpType}`);
                     }
                 });
             }
@@ -582,6 +582,55 @@ export class PlayState implements GameState {
         setTimeout(() => {
             this.game.stateManager.setState('menu');
         }, 5000);
+    }
+
+    private getPowerUpRestoreConfig(powerUpType: string): PowerUpConfig | null {
+        switch (powerUpType) {
+        case 'POWER_GLOVE':
+            return {
+                type: PowerUpType.POWER_GLOVE,
+                permanent: true,
+                stackable: false,
+                effectProperties: {
+                    bulletSpeed: 5,
+                    fireRate: 500
+                }
+            };
+                
+        case 'SHIELD_STONE':
+            return {
+                type: PowerUpType.SHIELD_STONE,
+                permanent: true,
+                stackable: false,
+                effectProperties: {
+                    charges: 1
+                }
+            };
+                
+        case 'WING_BOOTS':
+            return {
+                type: PowerUpType.WING_BOOTS,
+                permanent: true,
+                stackable: false
+            };
+                
+        case 'HEAVY_BOOTS':
+            return {
+                type: PowerUpType.HEAVY_BOOTS,
+                permanent: true,
+                stackable: false
+            };
+                
+        case 'RAINBOW_STAR':
+            return {
+                type: PowerUpType.RAINBOW_STAR,
+                duration: 10000,
+                stackable: false
+            };
+                
+        default:
+            return null;
+        }
     }
 
     private handlePlayerDeath(): void {

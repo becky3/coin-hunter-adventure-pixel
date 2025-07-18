@@ -234,12 +234,30 @@ const activePowerUps = powerUpManager.getActivePowerUps();
 powerUpManager.removePowerUp(PowerUpType.POWER_GLOVE);
 ```
 
+### ステージ遷移時の持ち越し
+
+パワーアップはステージ遷移時に自動的に持ち越されます。`PlayState`が以下の処理を行います：
+
+1. **ステージクリア時**: `getActivePowerUps()`で現在のパワーアップを取得
+2. **次ステージ開始時**: `getPowerUpRestoreConfig()`で各パワーアップの設定を復元
+
+```typescript
+// PlayState.ts内の処理
+const playerState = {
+    score: this.hudManager.getHUDData().score,
+    lives: this.lives,
+    powerUps: player.getPowerUpManager().getActivePowerUps(),
+    isSmall: player.isSmall
+};
+```
+
 ## 注意事項
 
 1. **エフェクトの登録タイミング**: PlayStateの`initializePowerUpEffects`で必ず登録する
 2. **EntityManagerへの依存**: 弾丸などを生成する場合はEntityManagerを渡す必要がある
 3. **入力処理**: パワーアップ独自の入力は`onUpdate`内でInputManagerを使用
 4. **状態の保存**: ステージ遷移時はPlayerのpowerUpManagerから`getActivePowerUps()`で取得
+5. **死亡時のリセット**: プレイヤーが死亡（リスポーン）した際は、全てのパワーアップがクリアされます
 
 ## デバッグ
 

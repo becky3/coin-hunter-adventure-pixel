@@ -500,6 +500,9 @@ export class Player extends Entity {
         this.grounded = false;
         this._health = this._maxHealth;
         
+        this.powerUpManager.clearAll();
+        Logger.log('[Player] All power-ups cleared on respawn');
+        
         this.updateSprite();
         
         if (this.eventBus) {
