@@ -7,7 +7,7 @@
         "volume": 0.4
       },
       "pattern": {
-        "notes": ["G5", "E5", "C5"],
+        "notes": ["G3", "E3", "C3"],
         "durations": [0.05, 0.05, 0.1],
         "times": [0, 0.05, 0.1]
       }
@@ -18,7 +18,7 @@
         "volume": 0.3
       },
       "pattern": {
-        "notes": ["C6", "G5"],
+        "notes": ["C4", "G3"],
         "durations": [0.08, 0.12],
         "times": [0, 0.08]
       }
