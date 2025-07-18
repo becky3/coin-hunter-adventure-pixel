@@ -313,11 +313,54 @@ export class PlayState implements GameState {
                 const powerUpManager = player.getPowerUpManager();
                 params.playerState.powerUps.forEach((powerUpType: string) => {
                     Logger.log(`[PlayState] Restoring power-up: ${powerUpType}`);
-                    if (powerUpType === 'POWER_GLOVE') {
+                    
+                    switch (powerUpType) {
+                    case 'POWER_GLOVE':
                         powerUpManager.applyPowerUp({
                             type: PowerUpType.POWER_GLOVE,
+                            permanent: true,
+                            stackable: false,
+                            effectProperties: {
+                                bulletSpeed: 5,
+                                fireRate: 500
+                            }
+                        });
+                        break;
+                            
+                    case 'SHIELD_STONE':
+                        powerUpManager.applyPowerUp({
+                            type: PowerUpType.SHIELD_STONE,
+                            permanent: true,
+                            stackable: false,
+                            effectProperties: {
+                                charges: 1
+                            }
+                        });
+                        break;
+                            
+                    case 'WING_BOOTS':
+                        powerUpManager.applyPowerUp({
+                            type: PowerUpType.WING_BOOTS,
                             permanent: true
                         });
+                        break;
+                            
+                    case 'HEAVY_BOOTS':
+                        powerUpManager.applyPowerUp({
+                            type: PowerUpType.HEAVY_BOOTS,
+                            permanent: true
+                        });
+                        break;
+                            
+                    case 'RAINBOW_STAR':
+                        powerUpManager.applyPowerUp({
+                            type: PowerUpType.RAINBOW_STAR,
+                            duration: 10000
+                        });
+                        break;
+                            
+                    default:
+                        Logger.warn(`[PlayState] Unknown power-up type: ${powerUpType}`);
                     }
                 });
             }
