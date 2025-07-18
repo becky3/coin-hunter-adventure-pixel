@@ -30,6 +30,9 @@ async function runTest() {
         t.assert(initialized, 'Game should be initialized and running');
         console.log('  ✓ Game initialization successful');
         
+        // Wait for initial rendering
+        await t.wait(1000); // Give the game time to render initial frame
+        
         // Smoke Test 2: Basic Rendering Check
         console.log('\nSmoke Test 2: Basic Rendering Check');
         const hasContent = await t.page.evaluate(() => {
