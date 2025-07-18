@@ -38,7 +38,8 @@ export class SoundTestState implements GameState {
         'powerup': 'powerup',
         'gamestart': 'gameStart',
         'goal': 'goal',
-        'enemydefeat': 'enemyDefeat'
+        'enemydefeat': 'enemyDefeat',
+        'projectile': 'projectile'
     };
     
     private static readonly UI_LAYOUT = {
@@ -70,7 +71,7 @@ export class SoundTestState implements GameState {
             },
             {
                 type: 'se',
-                items: ['COIN', 'JUMP', 'DAMAGE', 'BUTTON', 'POWERUP', 'GAMESTART', 'GOAL', 'ENEMYDEFEAT'],
+                items: ['COIN', 'JUMP', 'DAMAGE', 'BUTTON', 'POWERUP', 'GAMESTART', 'GOAL', 'ENEMYDEFEAT', 'PROJECTILE'],
                 currentIndex: 0
             },
             {

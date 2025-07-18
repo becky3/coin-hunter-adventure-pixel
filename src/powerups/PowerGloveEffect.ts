@@ -89,7 +89,7 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
         
         const musicSystem = this.entityManager.getMusicSystem();
         if (musicSystem) {
-            musicSystem.playSEFromPattern('shoot');
+            musicSystem.playSEFromPattern('projectile');
         }
         
     }

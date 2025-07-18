@@ -92,6 +92,14 @@ export class Enemy extends Entity {
         } else {
             this.state = 'hurt';
             this.stateTimer = 300;
+            
+            if (this.eventBus) {
+                this.eventBus.emit('enemy:damaged', {
+                    enemy: this,
+                    damage: amount,
+                    position: { x: this.x, y: this.y }
+                });
+            }
         }
     }
 
