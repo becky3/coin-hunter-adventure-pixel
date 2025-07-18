@@ -28,6 +28,12 @@ interface GameServices {
     inputSystem: InputSystem;
 }
 
+interface EnemyDamagedEventData {
+    enemy: Enemy;
+    damage: number;
+    position: { x: number; y: number };
+}
+
 /**
  * Manages entity functionality
  */
@@ -60,7 +66,7 @@ export class EntityManager {
             }
         });
         
-        this.eventBus.on('enemy:damaged', (_data: unknown) => {
+        this.eventBus.on('enemy:damaged', (_data: EnemyDamagedEventData) => {
             if (this.musicSystem?.isInitialized) {
                 this.musicSystem.playSEFromPattern('damage');
             }
