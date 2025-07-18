@@ -14,7 +14,7 @@
         }
       },
       "pattern": {
-        "frequencies": [{ "start": 800, "end": 800 }],
+        "notes": ["G5"],
         "durations": [0.05],
         "times": [0]
       }

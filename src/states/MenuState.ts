@@ -43,7 +43,8 @@ export class MenuState implements GameState {
         this.options = [
             { text: 'START GAME', action: 'start' },
             { text: 'HOW TO PLAY', action: 'howto' },
-            { text: 'CREDITS', action: 'credits' }
+            { text: 'CREDITS', action: 'credits' },
+            { text: 'SOUND TEST', action: 'soundtest' }
         ];
         this.logoY = -100;
         this.logoTargetY = 40;
@@ -218,8 +219,8 @@ export class MenuState implements GameState {
         const prevAlpha = renderer.ctx.globalAlpha;
         renderer.ctx.globalAlpha = this.optionsAlpha;
         
-        renderer.drawTextCentered('ARROWS:SELECT', centerX, 184, getMasterColor(UI_PALETTE_INDICES.gray));
-        renderer.drawTextCentered('ENTER/SPACE:OK', centerX, 192, getMasterColor(UI_PALETTE_INDICES.gray));
+        renderer.drawTextCentered('ARROWS:SELECT', centerX, 200, getMasterColor(UI_PALETTE_INDICES.gray));
+        renderer.drawTextCentered('ENTER/SPACE:OK', centerX, 208, getMasterColor(UI_PALETTE_INDICES.gray));
         
         renderer.ctx.globalAlpha = prevAlpha;
     }
@@ -320,6 +321,13 @@ export class MenuState implements GameState {
                 this.game.musicSystem.playSEFromPattern('button');
             }
             this.showCredits = true;
+            break;
+            
+        case 'soundtest':
+            if (this.game.musicSystem) {
+                this.game.musicSystem.playSEFromPattern('button');
+            }
+            this.game.stateManager.setState('soundtest');
             break;
         }
     }

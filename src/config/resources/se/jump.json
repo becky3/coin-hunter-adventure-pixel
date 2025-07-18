@@ -14,7 +14,7 @@
         }
       },
       "pattern": {
-        "frequencies": [{ "start": 440, "end": 440 }],
+        "notes": ["A4"],
         "durations": [0.1],
         "times": [0]
       }
@@ -25,7 +25,7 @@
         "volume": 0.15
       },
       "pattern": {
-        "frequencies": [{ "start": 880, "end": 880 }],
+        "notes": ["A5"],
         "durations": [0.08],
         "times": [0.02]
       }
