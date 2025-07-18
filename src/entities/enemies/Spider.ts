@@ -15,7 +15,7 @@ type SpiderSurface = 'ceiling' | 'wall_left' | 'wall_right' | 'floor';
  */
 export class Spider extends Enemy implements EntityInitializer {
     public spriteKey: string;
-    private spiderState: SpiderState;
+    private _spiderState: SpiderState;
     private currentSurface: SpiderSurface;
     private detectionRange: number;
     private threadLength: number;
@@ -64,7 +64,7 @@ export class Spider extends Enemy implements EntityInitializer {
         
         this.spriteKey = 'enemies/spider';
         this.animState = 'idle';
-        this.spiderState = 'crawling';
+        this._spiderState = 'crawling';
         this.currentSurface = 'ceiling';
         
         this.detectionRange = spiderConfig?.ai?.detectRange || 100;
@@ -103,7 +103,7 @@ export class Spider extends Enemy implements EntityInitializer {
             this.checkPlayerProximity();
         }
         
-        switch (this.spiderState) {
+        switch (this._spiderState) {
         case 'crawling':
             this.updateCrawling(deltaTime);
             break;
@@ -118,7 +118,7 @@ export class Spider extends Enemy implements EntityInitializer {
             break;
         }
         
-        this.animState = this.spiderState === 'waiting' ? 'idle' : 'walk';
+        this.animState = this._spiderState === 'waiting' ? 'idle' : 'walk';
     }
     
     private updateCrawling(deltaTime: number): void {
@@ -164,7 +164,7 @@ export class Spider extends Enemy implements EntityInitializer {
         
         if (nextY >= maxDescendY) {
             this.threadY = maxDescendY;
-            this.spiderState = 'waiting';
+            this._spiderState = 'waiting';
             this.stateTimer = 0;
         } else {
             this.threadY = nextY;
@@ -181,7 +181,7 @@ export class Spider extends Enemy implements EntityInitializer {
         
         if (this.threadY <= this.initialY) {
             this.threadY = this.initialY;
-            this.spiderState = 'crawling';
+            this._spiderState = 'crawling';
             this.lastAscentTime = Date.now();
         }
         
@@ -194,7 +194,7 @@ export class Spider extends Enemy implements EntityInitializer {
         this.stateTimer += deltaTime * 1000;
         
         if (this.stateTimer >= this.waitTime) {
-            this.spiderState = 'ascending';
+            this._spiderState = 'ascending';
             this.stateTimer = 0;
         }
         
@@ -203,7 +203,7 @@ export class Spider extends Enemy implements EntityInitializer {
     }
     
     private checkPlayerProximity(): void {
-        if (this.spiderState !== 'crawling' || this.currentSurface !== 'ceiling') {
+        if (this._spiderState !== 'crawling' || this.currentSurface !== 'ceiling') {
             return;
         }
         
@@ -218,7 +218,7 @@ export class Spider extends Enemy implements EntityInitializer {
         const xDistance = Math.abs(player.x + player.width / 2 - (this.x + this.width / 2));
         
         if (xDistance < this.detectionRange && player.y > this.y) {
-            this.spiderState = 'descending';
+            this._spiderState = 'descending';
             this.threadY = this.y;
             Logger.log(`[Spider] Player detected at X distance ${xDistance}, descending immediately`);
         }
@@ -264,7 +264,7 @@ export class Spider extends Enemy implements EntityInitializer {
     }
     
     onCollisionWithWall(): void {
-        if (this.spiderState === 'crawling') {
+        if (this._spiderState === 'crawling') {
             this.direction *= -1;
             this.facingRight = !this.facingRight;
         }
@@ -277,7 +277,7 @@ export class Spider extends Enemy implements EntityInitializer {
             this.invincibleTime -= deltaTime * 1000;
         }
         
-        if (this.stateTimer > 0 && this.spiderState !== 'waiting') {
+        if (this.stateTimer > 0 && this._spiderState !== 'waiting') {
             this.stateTimer -= deltaTime * 1000;
         }
         
@@ -300,7 +300,7 @@ export class Spider extends Enemy implements EntityInitializer {
             if (this.animState === 'walk') {
                 const frameIndex = Math.floor(Date.now() / 150) % 2;
                 spriteKey = `enemies/spider_walk${frameIndex + 1}`;
-            } else if (this.spiderState === 'descending' || this.spiderState === 'ascending') {
+            } else if (this._spiderState === 'descending' || this._spiderState === 'ascending') {
                 spriteKey = 'enemies/spider_thread';
             }
             
@@ -320,6 +320,27 @@ export class Spider extends Enemy implements EntityInitializer {
         super.render(renderer);
     }
     
+    /**
+     * Check if spider is on ceiling
+     */
+    get onCeiling(): boolean {
+        return this.currentSurface === 'ceiling';
+    }
+
+    /**
+     * Get web Y position
+     */
+    get webY(): number {
+        return this.threadY;
+    }
+
+    /**
+     * Get current spider state
+     */
+    get spiderState(): SpiderState {
+        return this._spiderState;
+    }
+
     /**
      * Initialize this spider in the EntityManager
      */

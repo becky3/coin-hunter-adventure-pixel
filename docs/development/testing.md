@@ -34,7 +34,7 @@ node tests/e2e/test-enemy-damage.cjs
 | **test-basic-flow.cjs** | 基本フロー検証＋スモークテスト | 旧smoke-test.cjsの機能を統合、ゲーム初期化、メニュー遷移、基本操作 | ~25秒 |
 | **test-jump-mechanics.cjs** | ジャンプメカニクス統合テスト | jump-physics、variable-jump、spring-bounceを統合 | ~30秒 |
 | **test-powerup-features.cjs** | パワーアップ機能統合テスト | powerup-system、shield-visual、bullet-wall-collisionを統合 | ~25秒 |
-| **test-enemy-types.cjs** | 敵タイプ統合テスト | bat、spiderの動作確認を統合 | ~25秒 |
+| **test-enemy-types.cjs** | 敵タイプ統合テスト | bat、spiderの動作確認を統合（衝突ダメージはtest-enemy-damage.cjsでテスト） | ~25秒 |
 
 #### 個別テストファイル
 

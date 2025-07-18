@@ -27,6 +27,7 @@ import stage0_2 from '../levels/data/stage0-2.json';
 import stage0_3 from '../levels/data/stage0-3.json';
 import stage0_4 from '../levels/data/stage0-4.json';
 import stage0_5 from '../levels/data/stage0-5.json';
+import stage0_6 from '../levels/data/stage0-6.json';
 import stage1_1 from '../levels/data/stage1-1.json';
 import stage1_2 from '../levels/data/stage1-2.json';
 import stage1_3 from '../levels/data/stage1-3.json';
@@ -66,6 +67,7 @@ export const bundledStageData: Record<string, unknown> = {
     '/src/levels/data/stage0-3.json': stage0_3,
     '/src/levels/data/stage0-4.json': stage0_4,
     '/src/levels/data/stage0-5.json': stage0_5,
+    '/src/levels/data/stage0-6.json': stage0_6,
     '/src/levels/data/stage1-1.json': stage1_1,
     '/src/levels/data/stage1-2.json': stage1_2,
     '/src/levels/data/stage1-3.json': stage1_3,

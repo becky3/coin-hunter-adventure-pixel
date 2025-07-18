@@ -36,8 +36,8 @@ async function runTest() {
             const state = window.game.stateManager.currentState;
             const player = state.player;
             return {
-                hasShield: player.hasShield,
-                canShoot: player.canShoot,
+                hasShield: player.powerUpManager?.hasPowerUp('SHIELD_STONE'),
+                canShoot: player.powerUpManager?.hasPowerUp('POWER_GLOVE'),
                 lives: state.lives
             };
         });
@@ -54,14 +54,19 @@ async function runTest() {
         if (shieldStoneInfo) {
             console.log('Shield stone found at:', shieldStoneInfo);
             
-            // Move player to shield stone
+            // Move player to shield stone (ensure proper collision)
             await t.page.evaluate((pos) => {
                 const state = window.game.stateManager.currentState;
                 const player = state.player;
-                player.x = pos.x;
+                // Move player near the shield stone, not exactly on it
+                player.x = pos.x - 10;
                 player.y = pos.y;
             }, shieldStoneInfo);
             
+            await t.wait(100);
+            
+            // Move player into the shield stone to trigger collision
+            await t.movePlayer('right', 300);
             await t.wait(500);
             
             // Check if shield was collected
@@ -69,10 +74,16 @@ async function runTest() {
                 const state = window.game.stateManager.currentState;
                 const player = state.player;
                 return {
-                    hasShield: player.hasShield,
-                    shieldActive: !!player.shield
+                    hasShield: player.powerUpManager?.hasPowerUp('SHIELD_STONE'),
+                    shieldActive: !!player.shieldVisual,
+                    shieldClassName: player.shieldVisual?.constructor?.name,
+                    powerUpManager: {
+                        activePowerUps: player.powerUpManager?.getActivePowerUps()
+                    }
                 };
             });
+            
+            console.log('Shield state after collection:', afterShieldState);
             
             t.assert(afterShieldState.hasShield, 'Player should have shield after collecting shield stone');
             t.assert(afterShieldState.shieldActive, 'Shield should be active');
@@ -114,8 +125,8 @@ async function runTest() {
                 const state = window.game.stateManager.currentState;
                 const player = state.player;
                 return {
-                    hasShield: player.hasShield,
-                    shieldActive: !!player.shield,
+                    hasShield: player.powerUpManager?.hasPowerUp('SHIELD_STONE'),
+                    shieldActive: !!player.shieldVisual,
                     lives: state.lives,
                     invulnerable: player.invulnerable
                 };
@@ -136,8 +147,8 @@ async function runTest() {
             const player = state.player;
             player.x = 50;
             player.y = 300;
-            player.hasShield = false;
-            player.shield = null;
+            player.powerUpManager?.removePowerUp('SHIELD_STONE');
+            player.shieldVisual = null;
         });
         
         const powerGloveInfo = await t.page.evaluate(() => {
@@ -150,14 +161,19 @@ async function runTest() {
         if (powerGloveInfo) {
             console.log('Power glove found at:', powerGloveInfo);
             
-            // Move player to power glove
+            // Move player to power glove (ensure proper collision)
             await t.page.evaluate((pos) => {
                 const state = window.game.stateManager.currentState;
                 const player = state.player;
-                player.x = pos.x;
+                // Move player near the power glove, not exactly on it
+                player.x = pos.x - 10;
                 player.y = pos.y;
             }, powerGloveInfo);
             
+            await t.wait(100);
+            
+            // Move player into the power glove to trigger collision
+            await t.movePlayer('right', 300);
             await t.wait(500);
             
             // Check if power glove was collected
@@ -165,7 +181,7 @@ async function runTest() {
                 const state = window.game.stateManager.currentState;
                 const player = state.player;
                 return {
-                    canShoot: player.canShoot
+                    canShoot: player.powerUpManager?.hasPowerUp('POWER_GLOVE')
                 };
             });
             
@@ -220,8 +236,9 @@ async function runTest() {
             const manager = player.powerUpManager;
             return {
                 exists: !!manager,
-                hasShield: manager?.hasShield || false,
-                canShoot: manager?.canShoot || false
+                hasShield: manager?.hasPowerUp('SHIELD_STONE') || false,
+                canShoot: manager?.hasPowerUp('POWER_GLOVE') || false,
+                activePowerUps: manager?.getActivePowerUps() || []
             };
         });
         
