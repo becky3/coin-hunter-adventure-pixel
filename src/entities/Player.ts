@@ -9,7 +9,7 @@ import { Logger } from '../utils/Logger';
 import type { CharacterConfig, CharacterAnimationConfig } from '../config/ResourceConfig';
 import { PowerUpManager } from '../managers/PowerUpManager';
 import { PowerUpConfig, PowerUpType } from '../types/PowerUpTypes';
-import { ShieldEffectVisual, ShieldBreakEffect } from '../effects/ShieldEffectVisual';
+import { ShieldEffectVisual } from '../effects/ShieldEffect';
 
 
 const DEFAULT_PLAYER_CONFIG = {
@@ -104,7 +104,7 @@ export class Player extends Entity {
     private frameCount: number;
     private powerUpManager: PowerUpManager;
     private shieldVisual: ShieldEffectVisual | null = null;
-    private shieldBreakEffect: ShieldBreakEffect | null = null;
+    private hasPowerGlove: boolean = false;
     private skipBlinkEffect?: boolean;
 
     constructor(x?: number, y?: number) {
@@ -346,12 +346,6 @@ export class Player extends Entity {
             this.shieldVisual.update(deltaTime);
         }
         
-        if (this.shieldBreakEffect) {
-            const stillActive = this.shieldBreakEffect.update(deltaTime);
-            if (!stillActive) {
-                this.shieldBreakEffect = null;
-            }
-        }
     }
     
     private handleMovement(input: { left: boolean; right: boolean; jump: boolean; action: boolean }): void {
@@ -700,10 +694,6 @@ export class Player extends Entity {
         if (this.shieldVisual) {
             this.shieldVisual.render(renderer);
         }
-        
-        if (this.shieldBreakEffect) {
-            this.shieldBreakEffect.render(renderer);
-        }
     }
     
     getState(): PlayerState {
@@ -760,7 +750,14 @@ export class Player extends Entity {
         this.shieldVisual = visual;
     }
     
-    setShieldBreakEffect(effect: ShieldBreakEffect | null): void {
-        this.shieldBreakEffect = effect;
+    setHasPowerGlove(hasGlove: boolean): void {
+        Logger.log('[Player] setHasPowerGlove called with:', hasGlove);
+        this.hasPowerGlove = hasGlove;
+        this.updateAnimationState();
     }
+    
+    getHasPowerGlove(): boolean {
+        return this.hasPowerGlove;
+    }
+    
 }

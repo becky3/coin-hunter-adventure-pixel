@@ -125,6 +125,15 @@
         }
       ],
       "animations": []
+    },
+    "effects": {
+      "sprites": [
+        {
+          "name": "shield_bubble",
+          "type": "sprite"
+        }
+      ],
+      "animations": []
     }
   }
 }

@@ -2,7 +2,7 @@ import { PowerUpEffect, PowerUpType } from '../types/PowerUpTypes';
 import { Player } from '../entities/Player';
 import { Logger } from '../utils/Logger';
 import { EntityManager } from '../managers/EntityManager';
-import { ShieldEffectVisual, ShieldBreakEffect } from '../effects/ShieldEffectVisual';
+import { ShieldEffectVisual } from '../effects/ShieldEffect';
 
 /**
  * Shield effect that blocks one instance of damage
@@ -12,6 +12,8 @@ export class ShieldEffect implements PowerUpEffect<Player> {
     private shieldActive: boolean = false;
     private entityManager: EntityManager;
     private shieldVisual: ShieldEffectVisual | null = null;
+    private breakingTime: number = 0;
+    private isBreaking: boolean = false;
 
     constructor(entityManager: EntityManager) {
         this.entityManager = entityManager;
@@ -44,16 +46,15 @@ export class ShieldEffect implements PowerUpEffect<Player> {
                 const musicSystem = this.entityManager.getMusicSystem();
                 if (musicSystem) {
                     musicSystem.playSEFromPattern('shieldBreak');
+                    musicSystem.playSE('damage');
                 }
                 
                 if (this.shieldVisual) {
-                    const breakParticles = this.shieldVisual.createBreakEffect();
-                    const breakEffect = new ShieldBreakEffect(breakParticles);
-                    target.setShieldBreakEffect(breakEffect);
-                    target.setShieldVisual(null);
+                    this.shieldVisual.setBreaking(true);
                 }
                 
-                target.getPowerUpManager().removePowerUp(PowerUpType.SHIELD_STONE);
+                this.isBreaking = true;
+                this.breakingTime = 1.0;
                 
                 return false;
             }
@@ -65,7 +66,19 @@ export class ShieldEffect implements PowerUpEffect<Player> {
         };
     }
 
-    onUpdate(_target: Player, _deltaTime: number): void {
+    onUpdate(target: Player, deltaTime: number): void {
+        if (this.shieldVisual) {
+            this.shieldVisual.update(deltaTime);
+        }
+        
+        if (this.isBreaking) {
+            this.breakingTime -= deltaTime;
+            Logger.log(`[ShieldEffect] Breaking countdown: ${this.breakingTime.toFixed(3)}s remaining (deltaTime: ${deltaTime})`);
+            if (this.breakingTime <= 0) {
+                this.isBreaking = false;
+                target.getPowerUpManager().removePowerUp(PowerUpType.SHIELD_STONE);
+            }
+        }
     }
 
     onRemove(target: Player): void {

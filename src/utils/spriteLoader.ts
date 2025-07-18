@@ -103,7 +103,8 @@ const SPRITE_DEFINITIONS = {
     enemies: ['slime_idle1', 'slime_idle2', 'bird_fly1', 'bird_fly2', 'bat_hang', 'bat_fly1', 'bat_fly2'],
     items: ['coin_spin1', 'coin_spin2', 'coin_spin3', 'coin_spin4'],
     terrain: ['ground_tile', 'cloud_small', 'cloud_large', 'spring', 'goal_flag'],
-    ui: ['heart', 'heart_empty']
+    ui: ['heart', 'heart_empty'],
+    effects: ['shield_left', 'shield_right']
 } as const;
 
 export { SpriteLoader, SPRITE_DEFINITIONS };

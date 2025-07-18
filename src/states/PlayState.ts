@@ -176,7 +176,9 @@ export class PlayState implements GameState {
                 { category: 'tiles', name: 'grass_ground' },
                 { category: 'powerups', name: 'shield_stone' },
                 { category: 'powerups', name: 'power_glove' },
-                { category: 'projectiles', name: 'energy_bullet' }
+                { category: 'projectiles', name: 'energy_bullet' },
+                { category: 'effects', name: 'shield_left' },
+                { category: 'effects', name: 'shield_right' }
             ];
             
             const animationList = [
