@@ -73,6 +73,12 @@
       "name": "BULLET WALL TEST",
       "description": "Test stage for bullet wall collision",
       "filename": "stage-bullet-test.json"
+    },
+    {
+      "id": "test-all-sprites",
+      "name": "ALL SPRITES TEST",
+      "description": "Visual test of all sprites and animations",
+      "filename": "test-all-sprites.json"
     }
   ]
 }
