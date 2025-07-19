@@ -725,12 +725,9 @@ export class Player extends Entity {
             return;
         }
         
-        if (collisionInfo.other.constructor.name === 'Enemy' || 
-            collisionInfo.other.constructor.name === 'Slime') {
-            if ('onCollisionWithPlayer' in collisionInfo.other) {
-                type EntityWithPlayerCollision = { onCollisionWithPlayer: (player: Player) => void };
-                (collisionInfo.other as unknown as EntityWithPlayerCollision).onCollisionWithPlayer(this);
-            }
+        if ('onCollisionWithPlayer' in collisionInfo.other && typeof collisionInfo.other.onCollisionWithPlayer === 'function') {
+            type EntityWithPlayerCollision = { onCollisionWithPlayer: (player: Player) => void };
+            (collisionInfo.other as unknown as EntityWithPlayerCollision).onCollisionWithPlayer(this);
         }
     }
     

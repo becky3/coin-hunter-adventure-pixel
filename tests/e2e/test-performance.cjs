@@ -1,9 +1,10 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 // Performance monitoring test
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false,   // Change to false for more reliable testing
+        headless: testConfig.headless,
         verbose: false,
         timeout: 60000
     });

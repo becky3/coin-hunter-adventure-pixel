@@ -33,6 +33,12 @@
       "filename": "stage0-5.json"
     },
     {
+      "id": "stage0-6",
+      "name": "ENEMY TEST",
+      "description": "Enemy types test stage",
+      "filename": "stage0-6.json"
+    },
+    {
       "id": "stage1-1",
       "name": "STAGE 1-1",
       "description": "The adventure begins",

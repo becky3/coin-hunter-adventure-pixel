@@ -1,9 +1,10 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 // Test for Issue 106: Player respawn size after enemy damage
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false,
+        headless: testConfig.headless,
         verbose: true,
         timeout: 45000
     });
@@ -165,10 +166,10 @@ async function runTest() {
         }
         
         // Verify player is large after respawn
-        t.assert(!afterRespawn.player.isSmall, '❌ BUG: Player is still small after respawn! Issue 106 not fixed.');
+        t.assert(!afterRespawn.player.isSmall, 'Player should be large after respawn (Issue #106 fix verification)');
         
         t.assert(afterRespawn.player.width === initialSize.width && afterRespawn.player.height === initialSize.height, 
-            `❌ Player size incorrect after respawn. Expected: ${initialSize.width}x${initialSize.height}, Got: ${afterRespawn.player.width}x${afterRespawn.player.height}`);
+            `Player size after respawn. Expected: ${initialSize.width}x${initialSize.height}, Got: ${afterRespawn.player.width}x${afterRespawn.player.height}`);
         
         console.log('✅ Player respawned with correct large size');
         
@@ -268,7 +269,7 @@ async function runTest() {
             
             // Verify correct behavior
             t.assert(!(afterCollision.enemyDied && afterCollision.lives === beforeCollision.lives), 
-                '❌ BUG: Enemy was defeated by horizontal collision while player was small! Player should have taken damage instead.');
+                'Horizontal collision behavior check: Player should take damage when colliding with enemy while small (Issue #106 fix verification)');
             
             if (afterCollision.lives < beforeCollision.lives && !afterCollision.enemyDied) {
                 console.log('✅ Correct: Player took damage from horizontal collision while small, enemy survived');

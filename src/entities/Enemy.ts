@@ -161,7 +161,7 @@ export class Enemy extends Entity {
     onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo || !collisionInfo.other) return;
         
-        if (collisionInfo.other.constructor.name === 'Player') {
+        if ('takeDamage' in collisionInfo.other && 'jumpPower' in collisionInfo.other) {
             this.onCollisionWithPlayer(collisionInfo.other as unknown as Player);
         }
     }
