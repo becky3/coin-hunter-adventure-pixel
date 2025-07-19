@@ -112,12 +112,13 @@ GitHub Pages公開後は以下でアクセス可能になります：
 **Claudeで作業する際は、プッシュ前に必ず以下を実行してください：**
 
 ```bash
-# 並列テストを10分タイムアウトで実行
-node tests/e2e/run-tests-parallel.cjs
+# npm run push:claudeを使用（10分タイムアウトで実行）
+npm run push:claude
 ```
 
 **Bashツールで実行する際の注意:**
-- 必ず `timeout: 600000` (10分) を指定
+- 必ず `timeout: 600000` (10分) を指定して実行
+- 例: `bash("npm run push:claude", { timeout: 600000 })`
 - テストが約80秒かかるため、デフォルトの2分では不足
 
 **自動チェック**: プッシュ時に以下が自動実行されます
