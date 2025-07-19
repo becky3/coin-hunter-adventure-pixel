@@ -7,13 +7,6 @@ interface SpriteData {
     height: number;
     rows?: number;
     data: number[][];
-    frames?: {
-        [key: string]: {
-            width: number;
-            height: number;
-            data: any;
-        };
-    };
     palette?: any;
 }
 
@@ -51,42 +44,6 @@ class SpriteLoader {
         if (this.useBundledData && spriteDataMap[key]) {
             Logger.log(`[SpriteLoader] Using bundled data for: ${key}`);
             const data = spriteDataMap[key] as SpriteData;
-            
-            // Check for multi-frame format (like armor_knight.json)
-            if (data && data.frames && !data.data) {
-                Logger.log(`[SpriteLoader] Detected multi-frame format for ${key}`);
-                // Multi-frame format: use the idle frame as default
-                const defaultFrame = data.frames.idle || Object.values(data.frames)[0];
-                if (defaultFrame && defaultFrame.data) {
-                    Logger.log(`[SpriteLoader] Using frame: ${data.frames.idle ? 'idle' : 'first available'}`);
-                    
-                    // Convert string array to number array if needed
-                    let pixelData: number[][];
-                    if (typeof defaultFrame.data[0] === 'string') {
-                        Logger.log(`[SpriteLoader] Converting string pixel data to number array`);
-                        pixelData = (defaultFrame.data as string[]).map(row => 
-                            row.split('').map(char => parseInt(char, 10))
-                        );
-                    } else {
-                        pixelData = defaultFrame.data as number[][];
-                    }
-                    
-                    const convertedData: SpriteData = {
-                        name: data.name,
-                        width: defaultFrame.width,
-                        height: defaultFrame.height,
-                        data: pixelData,
-                        palette: data.palette
-                    };
-                    Logger.log(`[SpriteLoader] Converted multi-frame sprite ${key} to single frame`);
-                    this.cache.set(key, convertedData);
-                    return convertedData;
-                } else {
-                    const error = new Error(`[SpriteLoader] Critical: No valid frame data found in multi-frame sprite ${key}`);
-                    Logger.error(error.message);
-                    throw error;
-                }
-            }
             
             if (!data || !data.data) {
                 Logger.error(`[SpriteLoader] Bundled data for ${key} is invalid:`, data);

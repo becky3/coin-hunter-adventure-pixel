@@ -91,13 +91,13 @@ export const ANIMATION_DEFINITIONS = {
             loop: true
         },
         armor_knight_idle: {
-            frames: ['enemies/armor_knight'],
+            frames: ['enemies/armor_knight_idle'],
             duration: 0,
             loop: false
         },
         armor_knight_walk: {
-            frames: ['enemies/armor_knight'],
-            duration: 100,
+            frames: ['enemies/armor_knight_idle', 'enemies/armor_knight_move'],
+            duration: 400,
             loop: true
         }
     },

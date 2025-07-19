@@ -160,6 +160,10 @@ export class PlayState implements GameState {
             const spriteList = [
                 { category: 'player', name: 'idle' },
                 { category: 'player', name: 'idle_small' },
+                { category: 'player', name: 'jump1' },
+                { category: 'player', name: 'jump2' },
+                { category: 'player', name: 'jump_small1' },
+                { category: 'player', name: 'jump_small2' },
                 { category: 'terrain', name: 'spring' },
                 { category: 'terrain', name: 'goal_flag' },
                 { category: 'enemies', name: 'bat_hang' },
@@ -169,7 +173,8 @@ export class PlayState implements GameState {
                 { category: 'enemies', name: 'spider_walk1' },
                 { category: 'enemies', name: 'spider_walk2' },
                 { category: 'enemies', name: 'spider_thread' },
-                { category: 'enemies', name: 'armor_knight' },
+                { category: 'enemies', name: 'armor_knight_idle' },
+                { category: 'enemies', name: 'armor_knight_move' },
                 { category: 'environment', name: 'cloud1' },
                 { category: 'environment', name: 'cloud2' },
                 { category: 'environment', name: 'tree1' },
@@ -184,9 +189,7 @@ export class PlayState implements GameState {
             
             const animationList = [
                 { category: 'player', baseName: 'walk', frameCount: 4, frameDuration: 100 },
-                { category: 'player', baseName: 'jump', frameCount: 2, frameDuration: 100 },
                 { category: 'player', baseName: 'walk_small', frameCount: 4, frameDuration: 100 },
-                { category: 'player', baseName: 'jump_small', frameCount: 2, frameDuration: 100 },
                 { category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 100 },
                 { category: 'enemies', baseName: 'slime_idle', frameCount: 2, frameDuration: 500 },
                 { category: 'enemies', baseName: 'bird_fly', frameCount: 2, frameDuration: 200 }

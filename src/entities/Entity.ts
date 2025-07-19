@@ -53,6 +53,7 @@ export class Entity {
     
     public solid: boolean;
     public collidable: boolean;
+    public notifyTileCollision: boolean;
     
     public currentAnimation: string | null;
     public animationTime: number;
@@ -89,6 +90,7 @@ export class Entity {
         
         this.solid = true;
         this.collidable = true;
+        this.notifyTileCollision = false;
         
         this.currentAnimation = null;
         this.animationTime = 0;
