@@ -29,6 +29,12 @@ async function runTest() {
         
         // Check if animations are loaded
         const animationsLoaded = await t.page.evaluate(() => {
+            // Check if AnimationManager has animations
+            if (window.AnimationManager && window.AnimationManager.instance) {
+                const manager = window.AnimationManager.instance;
+                return manager.animations && manager.animations.size > 0;
+            }
+            // Fallback to old check
             if (!window.game?.renderer?.pixelArtRenderer) return false;
             const renderer = window.game.renderer.pixelArtRenderer;
             return renderer.sprites.size > 0 || renderer.animations.size > 0;

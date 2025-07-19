@@ -19,12 +19,12 @@ export const ANIMATION_DEFINITIONS = {
             loop: true
         },
         jump: {
-            frames: ['player/jump1'],
+            frames: ['player/jump'],
             duration: 0,
             loop: false
         },
         fall: {
-            frames: ['player/jump2'],
+            frames: ['player/jump'],
             duration: 0,
             loop: false
         },
@@ -39,12 +39,12 @@ export const ANIMATION_DEFINITIONS = {
             loop: true
         },
         jump_small: {
-            frames: ['player/jump_small1'],
+            frames: ['player/jump_small'],
             duration: 0,
             loop: false
         },
         fall_small: {
-            frames: ['player/jump_small2'],
+            frames: ['player/jump_small'],
             duration: 0,
             loop: false
         }
