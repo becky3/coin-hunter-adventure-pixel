@@ -173,6 +173,8 @@ export class PlayState implements GameState {
                 { category: 'enemies', name: 'spider_walk1' },
                 { category: 'enemies', name: 'spider_walk2' },
                 { category: 'enemies', name: 'spider_thread' },
+                { category: 'enemies', name: 'slime_idle1' },
+                { category: 'enemies', name: 'slime_idle2' },
                 { category: 'enemies', name: 'armor_knight_idle' },
                 { category: 'enemies', name: 'armor_knight_move' },
                 { category: 'environment', name: 'cloud1' },
@@ -192,6 +194,8 @@ export class PlayState implements GameState {
                 { category: 'player', baseName: 'walk_small', frameCount: 4, frameDuration: 100 },
                 { category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 100 },
                 { category: 'enemies', baseName: 'slime_idle', frameCount: 2, frameDuration: 500 },
+                { category: 'enemies', baseName: 'spider_walk', frameCount: 2, frameDuration: 300 },
+                { category: 'enemies', baseName: 'bat_fly', frameCount: 2, frameDuration: 200 },
                 { category: 'enemies', baseName: 'bird_fly', frameCount: 2, frameDuration: 200 }
             ];
             
