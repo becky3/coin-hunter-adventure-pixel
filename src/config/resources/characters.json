@@ -88,6 +88,23 @@
         "detectRange": 100,
         "attackRange": 20
       }
+    },
+    "armor_knight": {
+      "physics": {
+        "width": 16,
+        "height": 16,
+        "moveSpeed": 0.15
+      },
+      "stats": {
+        "maxHealth": 3,
+        "damage": 2,
+        "scoreValue": 300
+      },
+      "ai": {
+        "type": "patrol",
+        "detectRange": 60,
+        "attackRange": 20
+      }
     }
   }
 }

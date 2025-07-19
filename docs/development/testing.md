@@ -81,6 +81,7 @@ node tests/e2e/run-tests-stable.cjs
 | **test-fall-damage.cjs** | 落下ダメージ | 画面外落下による即死判定、ライフ減少、ゲームオーバー | ~20秒 |
 | **test-stage-validation.cjs** | ステージデータ検証 | ステージ1-1〜1-3のコイン配置、エンティティ配置の妥当性チェック | ~2秒 |
 | **test-stage0-4-simple.cjs** | デモステージ・敵生成 | stage0-4ロード、Oキーで敵生成ダイアログ、敵の動作確認 | ~25秒 |
+| **test-armor-knight.cjs** | アーマーナイト敵テスト | 踏み判定無効化、突進動作、壁での反転、高耐久性の確認 | ~25秒 |
 
 ### テストログ
 - テスト実行時のログは `tests/logs/` に自動保存
