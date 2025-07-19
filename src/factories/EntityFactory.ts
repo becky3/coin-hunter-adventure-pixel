@@ -5,6 +5,7 @@ import { GoalFlag } from '../entities/GoalFlag';
 import { Slime } from '../entities/enemies/Slime';
 import { Bat } from '../entities/enemies/Bat';
 import { Spider } from '../entities/enemies/Spider';
+import { ArmorKnight } from '../entities/enemies/ArmorKnight';
 import { Logger } from '../utils/Logger';
 import { ShieldStone } from '../entities/powerups/ShieldStone';
 import { PowerGlove } from '../entities/powerups/PowerGlove';
@@ -24,6 +25,7 @@ export class EntityFactory {
         EntityFactory.register('slime', (x, y) => Slime.create(x, y));
         EntityFactory.register('bat', (x, y) => Bat.create(x, y));
         EntityFactory.register('spider', (x, y) => Spider.create(x, y));
+        EntityFactory.register('armor_knight', (x, y) => ArmorKnight.create(x, y));
         EntityFactory.register('shield_stone', (x, y) => ShieldStone.create(x, y));
         EntityFactory.register('power_glove', (x, y) => PowerGlove.create(x, y));
     }
