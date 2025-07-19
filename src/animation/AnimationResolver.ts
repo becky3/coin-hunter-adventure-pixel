@@ -1,5 +1,3 @@
-import { Logger } from '../utils/Logger';
-
 export interface AnimationPattern {
     pattern: string;
     frameCount: number;
