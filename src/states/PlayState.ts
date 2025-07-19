@@ -19,6 +19,7 @@ import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 import { ShieldEffect } from '../powerups/ShieldEffect';
 import { PowerGloveEffect } from '../powerups/PowerGloveEffect';
 import { PowerUpType, PowerUpConfig } from '../types/PowerUpTypes';
+import { AnimationManager } from '../animation/AnimationManager';
 
 interface Game {
     renderer?: PixelRenderer;
@@ -224,6 +225,9 @@ export class PlayState implements GameState {
             ];
             
             await Promise.all(loadPromises);
+            
+            const animationManager = AnimationManager.getInstance();
+            animationManager.preloadAllAnimations();
             
             const endTime = performance.now();
             Logger.log(`[PlayState] Sprites loaded successfully in ${(endTime - startTime).toFixed(2)}ms`);

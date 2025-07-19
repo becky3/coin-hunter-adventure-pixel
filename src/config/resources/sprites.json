@@ -50,6 +50,16 @@
       ],
       "animations": [
         {
+          "name": "slime_idle",
+          "frameCount": 2,
+          "frameDuration": 500
+        },
+        {
+          "name": "slime_move",
+          "frameCount": 2,
+          "frameDuration": 300
+        },
+        {
           "name": "slime_jump",
           "frameCount": 3,
           "frameDuration": 150

@@ -12,17 +12,40 @@ parent: 開発ガイド
 
 ## アーキテクチャ
 
+### 主要コンポーネント
+
+1. **AnimationManager** - アニメーション定義の一元管理
+2. **AnimationResolver** - パターンから具体的なフレーム名を生成
+3. **AnimationRegistrar** - PixelArtRendererへの自動登録
+4. **AnimatedSprite** - エンティティごとのアニメーション状態管理
+
 ### AnimationManager
 
 アニメーションとスプライトを一元管理するシングルトンクラスです。
 
 ```typescript
 const manager = AnimationManager.getInstance();
-manager.registerAnimation('player/idle', {
-    frames: ['player/idle'],
+manager.registerAnimationPattern('player/idle', {
+    pattern: 'player/idle',
+    frameCount: 1,
     duration: 0,  // 0 = 静止画
     loop: false
 });
+```
+
+### AnimationResolver
+
+パターンベースのアニメーション定義を解決します。
+
+```typescript
+const resolver = new AnimationResolver();
+const resolved = resolver.resolvePattern({
+    pattern: 'player/walk',
+    frameCount: 4,
+    duration: 100,
+    loop: true
+});
+// resolved.frames = ['player/walk1', 'player/walk2', 'player/walk3', 'player/walk4']
 ```
 
 ### AnimatedSprite
@@ -47,7 +70,30 @@ animatedSprite.render(renderer, x, y, flipX);
 
 `src/config/animationDefinitions.ts`にすべてのアニメーション定義が含まれています。
 
-### 定義フォーマット
+### 定義フォーマット（改善版）
+
+```typescript
+export const ANIMATION_PATTERNS = {
+    player: {
+        walk: {
+            pattern: 'player/walk',    // ベースパターン
+            frameCount: 4,              // フレーム数
+            duration: 100,              // フレーム間隔（ミリ秒）
+            loop: true                  // ループするか
+        },
+        // カスタムフレームの例（特殊なケース）
+        armor_knight_walk: {
+            pattern: 'enemies/armor_knight',
+            frameCount: 2,
+            duration: 400,
+            loop: true,
+            customFrames: ['enemies/armor_knight_idle', 'enemies/armor_knight_move']
+        }
+    }
+};
+```
+
+### 旧定義フォーマット（参考）
 
 ```typescript
 {

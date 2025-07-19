@@ -189,7 +189,7 @@ export class AssetLoader {
         }
         
         if (this.renderer) {
-            const paletteName = this._getPaletteForCategory(category, name);
+            const paletteName = this._getPaletteForCategory(category, baseName);
             const colors = getColorPalette(paletteName);
             const animKey = `${category}/${baseName}`;
             this.renderer.addAnimation(
