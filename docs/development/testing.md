@@ -27,11 +27,37 @@ node tests/e2e/test-enemy-damage.cjs
 
 ### 並列テスト実行について
 
-並列テストは4つのワーカープロセスで同時実行され、以下の利点があります：
+並列テストは3つのワーカープロセスで同時実行され、以下の利点があります：
 - **実行時間**: 約80秒（シーケンシャル実行の約1/4）
 - **独立性**: 各テストが独立したブラウザインスタンスで実行
-- **信頼性**: テスト間の干渉がない
+- **信頼性**: テスト間の干渉がない（ワーカー起動時に2秒の遅延）
 - **pre-pushフック**: `git push`時に自動で並列テストが実行されます
+
+### 安定版テスト実行（run-tests-stable.cjs）
+
+リソース要求に基づいてテストをグループ化し、段階的に実行する新しい戦略：
+
+```bash
+# 安定版テストランナーを実行
+node tests/e2e/run-tests-stable.cjs
+```
+
+**グループ構成**:
+- **Fast**: 軽量テスト（3ワーカー、30秒タイムアウト）
+  - test-stage-validation.cjs
+  - test-fall-damage.cjs
+  - test-basic-flow.cjs
+- **Medium**: 中量テスト（2ワーカー、60秒タイムアウト）
+  - test-enemy-types.cjs
+  - test-jump-mechanics.cjs
+  - test-performance.cjs
+  - test-player-respawn-size.cjs
+- **Heavy**: 重量テスト（1ワーカー、90秒タイムアウト）
+  - test-enemy-damage.cjs
+  - test-powerup-features.cjs
+  - test-stage0-4-simple.cjs
+
+各グループ間には5秒の待機時間を設けてリソースの解放を確保します。
 
 ### E2Eテストファイル一覧（2025-07-19更新）
 
@@ -261,6 +287,14 @@ git push
 - Bashツールのタイムアウト問題は解決済み（10分まで設定可能）
 - Workerコードを別ファイルに分離（セキュリティ向上）
 - テスト設定を共通化（環境変数で制御可能）
+
+### テスト実行戦略の比較
+
+| 戦略 | 実行方法 | 用途 | 実行時間 |
+|------|----------|------|----------|
+| **並列実行** | `npm run test:parallel` | 通常の開発・CI | 約80秒 |
+| **安定版実行** | `node tests/e2e/run-tests-stable.cjs` | リソース制限環境 | 約2-3分 |
+| **シーケンシャル** | `npm test` | デバッグ・問題調査 | 約4分 |
 
 ### テスト設定の環境変数
 
