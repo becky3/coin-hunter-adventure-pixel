@@ -3,6 +3,7 @@ import { AnimationResolver } from './AnimationResolver';
 import { ANIMATION_PATTERNS } from '../config/animationDefinitions';
 import { SpriteLoader } from '../utils/spriteLoader';
 import { getColorPalette } from '../utils/pixelArtPalette';
+import { getPaletteForCategory } from '../utils/paletteResolver';
 import { Logger } from '../utils/Logger';
 
 /**
@@ -19,6 +20,7 @@ export class AnimationRegistrar {
 
     async registerAllAnimations(renderer: PixelArtRenderer): Promise<void> {
         const startTime = performance.now();
+        const registeredAnimations: string[] = [];
         
         for (const [category, patterns] of Object.entries(ANIMATION_PATTERNS)) {
             for (const [name, pattern] of Object.entries(patterns)) {
@@ -39,11 +41,11 @@ export class AnimationRegistrar {
                         frames.push(spriteData.data);
                     }
                     
-                    const paletteName = this.getPaletteForCategory(category, name);
+                    const paletteName = getPaletteForCategory(category, name);
                     const colors = getColorPalette(paletteName);
                     
                     renderer.addAnimation(key, frames, colors, resolved.duration);
-                    Logger.log(`[AnimationRegistrar] Registered animation: ${key}`);
+                    registeredAnimations.push(key);
                 } catch (error) {
                     Logger.error(`[AnimationRegistrar] Failed to register animation ${key}:`, error);
                 }
@@ -51,52 +53,6 @@ export class AnimationRegistrar {
         }
         
         const endTime = performance.now();
-        Logger.log(`[AnimationRegistrar] All animations registered in ${(endTime - startTime).toFixed(2)}ms`);
-    }
-
-    private getPaletteForCategory(category: string, spriteName?: string): string {
-        if (category === 'environment' && spriteName) {
-            if (spriteName.includes('cloud')) {
-                return 'sky';
-            }
-            if (spriteName.includes('tree') || spriteName.includes('grass')) {
-                return 'nature';
-            }
-            return 'stage';
-        }
-        
-        if (category === 'tiles') {
-            return 'terrain';
-        }
-        
-        if (category === 'terrain') {
-            return 'terrain';
-        }
-        
-        if (category === 'player') {
-            return 'player';
-        }
-        
-        if (category === 'enemies') {
-            return 'enemy';
-        }
-        
-        if (category === 'items' || category === 'objects') {
-            return 'item';
-        }
-        
-        if (category === 'ui') {
-            return 'ui';
-        }
-        
-        if (category === 'powerups') {
-            return 'item';
-        }
-        
-        if (category === 'projectiles' || category === 'effects') {
-            return 'effect';
-        }
-        
-        return 'stage';
+        Logger.log(`[AnimationRegistrar] Registered ${registeredAnimations.length} animations in ${(endTime - startTime).toFixed(2)}ms`);
     }
 }

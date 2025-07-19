@@ -40,7 +40,6 @@ export class AnimationResolver {
             frames.push(`${pattern}${i}`);
         }
         
-        Logger.log(`[AnimationResolver] Generated frames for ${pattern}: ${frames.join(', ')}`);
         return frames;
     }
 
