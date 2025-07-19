@@ -3,6 +3,7 @@ import { getColorPalette, paletteSystem, STAGE_PALETTES } from '../utils/pixelAr
 import { PixelArtRenderer } from '../utils/pixelArt';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
+import { getPaletteForCategory } from '../utils/paletteResolver';
 
 export interface LoadedAsset {
     key: string;
@@ -158,7 +159,7 @@ export class AssetLoader {
         }
         
         if (this.renderer) {
-            const paletteName = this._getPaletteForCategory(category, name);
+            const paletteName = getPaletteForCategory(category, name, this.currentStageType);
             const colors = getColorPalette(paletteName);
             const spriteKey = `${category}/${name}`;
             this.renderer.addSprite(
@@ -189,7 +190,7 @@ export class AssetLoader {
         }
         
         if (this.renderer) {
-            const paletteName = this._getPaletteForCategory(category, name);
+            const paletteName = getPaletteForCategory(category, baseName, this.currentStageType);
             const colors = getColorPalette(paletteName);
             const animKey = `${category}/${baseName}`;
             this.renderer.addAnimation(
@@ -211,28 +212,6 @@ export class AssetLoader {
             frameDuration,
             key: `${category}/${baseName}_anim`
         };
-    }
-    
-    private _getPaletteForCategory(category: string, spriteName?: string): string {
-        if (category === 'environment' && spriteName) {
-            if (spriteName.includes('cloud')) {
-                return 'sky';
-            } else if (spriteName.includes('tree')) {
-                return 'nature';
-            }
-        }
-        
-        const paletteMap: { [key: string]: string } = {
-            'player': 'character',
-            'enemies': 'enemy',
-            'items': 'items',
-            'terrain': this.currentStageType,
-            'tiles': this.currentStageType,
-            'environment': 'nature',
-            'ui': 'ui'
-        };
-        
-        return paletteMap[category] || this.currentStageType;
     }
     
     getLoadingProgress(): { loaded: number; total: number; percentage: number } {

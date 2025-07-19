@@ -1,14 +1,11 @@
 import { PixelArtSprite, PixelArtAnimation } from '../utils/pixelArt';
 import { Logger } from '../utils/Logger';
+import { AnimationResolver, AnimationPattern } from './AnimationResolver';
 
 interface AnimationDefinition {
     frames: string[];
     duration: number;
     loop: boolean;
-}
-
-interface AnimationConfig {
-    [animationName: string]: AnimationDefinition;
 }
 
 /**
@@ -17,13 +14,17 @@ interface AnimationConfig {
 export class AnimationManager {
     private static instance: AnimationManager | null = null;
     private animations: Map<string, AnimationDefinition>;
+    private animationPatterns: Map<string, AnimationPattern>;
     private spriteCache: Map<string, PixelArtSprite | PixelArtAnimation>;
     private pixelArtRenderer: { sprites: Map<string, PixelArtSprite>; animations: Map<string, PixelArtAnimation> } | null;
+    private resolver: AnimationResolver;
 
     private constructor() {
         this.animations = new Map();
+        this.animationPatterns = new Map();
         this.spriteCache = new Map();
         this.pixelArtRenderer = null;
+        this.resolver = new AnimationResolver();
     }
 
     static getInstance(): AnimationManager {
@@ -42,10 +43,11 @@ export class AnimationManager {
         Logger.log(`[AnimationManager] Registered animation: ${key}`);
     }
 
-    registerAnimations(config: AnimationConfig): void {
-        Object.entries(config).forEach(([key, definition]) => {
-            this.registerAnimation(key, definition);
-        });
+    registerAnimationPattern(key: string, pattern: AnimationPattern): void {
+        this.animationPatterns.set(key, pattern);
+        const resolved = this.resolver.resolvePattern(pattern);
+        this.registerAnimation(key, resolved);
+        Logger.log(`[AnimationManager] Registered animation pattern: ${key}`);
     }
 
     getAnimation(key: string): PixelArtSprite | PixelArtAnimation | null {
@@ -55,8 +57,9 @@ export class AnimationManager {
 
         const definition = this.animations.get(key);
         if (!definition) {
-            Logger.warn(`[AnimationManager] Animation not found: ${key}`);
-            return null;
+            const error = new Error(`[AnimationManager] Animation not found: ${key}`);
+            Logger.error(error.message);
+            throw error;
         }
 
         if (!this.pixelArtRenderer) {
@@ -65,8 +68,9 @@ export class AnimationManager {
         }
 
         let result: PixelArtSprite | PixelArtAnimation | null = null;
+        const pattern = this.animationPatterns.get(key);
 
-        if (definition.duration === 0 || definition.frames.length === 1) {
+        if (pattern && this.resolver.isStaticSprite(pattern)) {
             const sprite = this.pixelArtRenderer.sprites.get(definition.frames[0]);
             if (sprite) {
                 result = sprite;
@@ -80,34 +84,20 @@ export class AnimationManager {
             if (animation) {
                 result = animation;
             } else {
-                const alternativeKeys = this.getPossibleAnimationKeys(key);
-                for (const altKey of alternativeKeys) {
-                    const altAnimation = this.pixelArtRenderer.animations.get(altKey);
-                    if (altAnimation) {
-                        result = altAnimation;
-                        Logger.log(`[AnimationManager] Found animation with alternative key: ${altKey}`);
-                        break;
-                    }
+                const frameKeys = definition.frames;
+                const missingFrames = frameKeys.filter(frameKey => 
+                    !this.pixelArtRenderer.sprites.has(frameKey)
+                );
+                
+                if (missingFrames.length > 0) {
+                    const error = new Error(`[AnimationManager] Critical: Missing frames for animation ${key}: ${missingFrames.join(', ')}`);
+                    Logger.error(error.message);
+                    throw error;
                 }
                 
-                if (!result) {
-                    const frameKeys = definition.frames;
-                    const allFramesExist = frameKeys.every(frameKey => 
-                        this.pixelArtRenderer.sprites.has(frameKey)
-                    );
-
-                    if (allFramesExist) {
-                        result = this.pixelArtRenderer.sprites.get(frameKeys[0]) || null;
-                        Logger.log(`[AnimationManager] Using first frame as static sprite for ${key}`);
-                    } else {
-                        const missingFrames = frameKeys.filter(frameKey => 
-                            !this.pixelArtRenderer.sprites.has(frameKey)
-                        );
-                        const error = new Error(`[AnimationManager] Critical: Missing frames for animation ${key}: ${missingFrames.join(', ')}`);
-                        Logger.error(error.message);
-                        throw error;
-                    }
-                }
+                const error = new Error(`[AnimationManager] Critical: Animation not found in renderer: ${key}`);
+                Logger.error(error.message);
+                throw error;
             }
         }
 
@@ -118,27 +108,6 @@ export class AnimationManager {
         return result;
     }
 
-    private getPossibleAnimationKeys(key: string): string[] {
-        const parts = key.split('/');
-        if (parts.length !== 2) return [];
-        
-        const [category, name] = parts;
-        const alternatives: string[] = [];
-        
-        const baseName = name.replace(/_idle$|_move$|_jump$|_walk$|_fly$|_hang$|_spin$/, '');
-        if (baseName !== name) {
-            alternatives.push(`${category}/${baseName}`);
-        }
-        
-        if (category === 'enemies' && name === 'slime_idle') {
-            alternatives.push('enemies/slime_move');
-        }
-        if (category === 'items' && name === 'coin_spin') {
-            alternatives.push('items/coin_spin');
-        }
-        
-        return alternatives;
-    }
 
     clearCache(): void {
         this.spriteCache.clear();
