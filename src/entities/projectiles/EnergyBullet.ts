@@ -5,7 +5,6 @@ import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PowerGloveConfig } from '../../config/PowerGloveConfig';
 import { AnimatedSprite } from '../../animation/AnimatedSprite';
-import { AnimationManager } from '../../animation/AnimationManager';
 
 /**
  * Energy bullet projectile for ranged attacks

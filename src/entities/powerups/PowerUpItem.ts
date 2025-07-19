@@ -7,7 +7,6 @@ import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { MusicSystem } from '../../audio/MusicSystem';
 import { AnimatedSprite } from '../../animation/AnimatedSprite';
-import { AnimationManager } from '../../animation/AnimationManager';
 
 /**
  * Base class for all power-up items

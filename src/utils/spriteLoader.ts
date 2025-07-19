@@ -7,7 +7,7 @@ interface SpriteData {
     height: number;
     rows?: number;
     data: number[][];
-    palette?: any;
+    palette?: Record<string, string>;
 }
 
 interface SpriteConfig {
