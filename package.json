@@ -22,7 +22,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint 'src/**/*.{js,ts}'",
-    "lint:fix": "eslint 'src/**/*.{js,ts}' --fix"
+    "lint:fix": "eslint 'src/**/*.{js,ts}' --fix",
+    "push:claude": "./scripts/claude-push.sh",
+    "test:before-push": "npm run lint && node tests/e2e/run-tests-parallel.cjs"
   },
   "keywords": [
     "game",
