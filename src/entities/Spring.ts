@@ -7,6 +7,7 @@ import { Logger } from '../utils/Logger';
 import { InputSystem } from '../core/InputSystem';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
+import { AnimatedSprite } from '../animation/AnimatedSprite';
 
 /**
  * Spring platform that bounces the player
@@ -20,6 +21,7 @@ export class Spring extends Entity implements EntityInitializer {
     public physicsSystem: PhysicsSystem | null;
     private cooldownFrames: number;
     private readonly COOLDOWN_DURATION = 20;
+    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Spring instance
@@ -54,6 +56,11 @@ export class Spring extends Entity implements EntityInitializer {
         this.animationTime = 0;
         this.physicsSystem = null;
         this.cooldownFrames = 0;
+        
+        this.animatedSprite = new AnimatedSprite('spring', {
+            normal: 'items/spring_normal',
+            compressed: 'items/spring_compressed'
+        });
     }
 
     onUpdate(deltaTime: number): void {
@@ -71,6 +78,8 @@ export class Spring extends Entity implements EntityInitializer {
         if (this.triggered && this.compression <= 0.01) {
             this.triggered = false;
         }
+        
+        this.animatedSprite.setState(this.compression > 0.5 ? 'compressed' : 'normal');
         
         this.animationTime += deltaTime;
     }
@@ -104,25 +113,10 @@ export class Spring extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
-        if (renderer.assetLoader && renderer.assetLoader.hasSprite('terrain/spring')) {
-            const compression = this.compression * 0.3;
-            const offsetY = this.height * compression;
-            
-            renderer.drawSprite('terrain/spring', this.x, this.y + offsetY);
-        } else {
-            const compression = this.compression * 0.3;
-            const height = this.height * (1 - compression);
-            const offsetY = this.height - height;
-            const color = this.compression > 0 ? '#00AA00' : '#00FF00';
-            
-            renderer.drawRect(
-                this.x,
-                this.y + offsetY,
-                this.width,
-                height,
-                color
-            );
-        }
+        const compression = this.compression * 0.3;
+        const offsetY = this.height * compression;
+        
+        this.animatedSprite.render(renderer, this.x, this.y + offsetY, false);
         
         if (renderer.debug) {
             this.renderDebug(renderer);

@@ -6,6 +6,7 @@ import { Entity } from '../Entity';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PhysicsSystem } from '../../physics/PhysicsSystem';
+import { AnimatedSprite } from '../../animation/AnimatedSprite';
 
 type SpiderState = 'crawling' | 'descending' | 'ascending' | 'waiting';
 type SpiderSurface = 'ceiling' | 'wall_left' | 'wall_right' | 'floor';
@@ -32,6 +33,7 @@ export class Spider extends Enemy implements EntityInitializer {
     private lastAscentTime: number;
     private physicsSystem: PhysicsSystem | null = null;
     declare friction: number;
+    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Spider instance
@@ -90,6 +92,12 @@ export class Spider extends Enemy implements EntityInitializer {
             this.aiType = (spiderConfig.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
             this.attackRange = spiderConfig.ai.attackRange || 20;
         }
+        
+        this.animatedSprite = new AnimatedSprite('spider', {
+            idle: 'enemies/spider_idle',
+            walk: 'enemies/spider_walk',
+            thread: 'enemies/spider_thread'
+        });
     }
     
     protected updateAI(deltaTime: number): void {
@@ -119,6 +127,14 @@ export class Spider extends Enemy implements EntityInitializer {
         }
         
         this.animState = this._spiderState === 'waiting' ? 'idle' : 'walk';
+        
+        if (this._spiderState === 'descending' || this._spiderState === 'ascending') {
+            this.animatedSprite.setState('thread');
+        } else if (this._spiderState === 'waiting') {
+            this.animatedSprite.setState('idle');
+        } else {
+            this.animatedSprite.setState('walk');
+        }
     }
     
     private updateCrawling(deltaTime: number): void {
@@ -293,31 +309,11 @@ export class Spider extends Enemy implements EntityInitializer {
             return;
         }
         
-        if (renderer.pixelArtRenderer) {
-            const screenPos = renderer.worldToScreen(this.x, this.y);
-            
-            let spriteKey = 'enemies/spider_idle';
-            if (this.animState === 'walk') {
-                const frameIndex = Math.floor(Date.now() / 150) % 2;
-                spriteKey = `enemies/spider_walk${frameIndex + 1}`;
-            } else if (this._spiderState === 'descending' || this._spiderState === 'ascending') {
-                spriteKey = 'enemies/spider_thread';
-            }
-            
-            const sprite = renderer.pixelArtRenderer.sprites.get(spriteKey);
-            if (sprite) {
-                sprite.draw(
-                    renderer.ctx,
-                    screenPos.x,
-                    screenPos.y,
-                    this.direction === -1,
-                    renderer.scale
-                );
-                return;
-            }
-        }
+        this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
         
-        super.render(renderer);
+        if (renderer.debug) {
+            this.renderDebug(renderer);
+        }
     }
     
     /**
