@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sprite Loading Test</title>
+</head>
+<body>
+    <h1>Sprite Loading Test</h1>
+    <pre id="output"></pre>
+    <script type="module">
+        import { SpriteLoader } from './dist/utils/spriteLoader.js';
+        import { AnimationRegistrar } from './dist/animation/AnimationRegistrar.js';
+        import { PixelArtRenderer } from './dist/utils/pixelArt.js';
+        
+        const output = document.getElementById('output');
+        
+        async function testSpriteLoading() {
+            const log = (msg) => {
+                console.log(msg);
+                output.textContent += msg + '\n';
+            };
+            
+            log('Starting sprite loading test...');
+            
+            // Test SpriteLoader
+            const loader = new SpriteLoader();
+            const startTime = performance.now();
+            
+            // Test loading a few sprites
+            try {
+                await loader.loadSprite('player', 'idle');
+                await loader.loadSprite('enemies/spider', 'spider_idle');
+                await loader.loadSprite('items', 'coin_spin1');
+                
+                const loadTime = performance.now() - startTime;
+                log(`Sprite loading completed in ${loadTime.toFixed(2)}ms`);
+            } catch (error) {
+                log(`Error loading sprites: ${error.message}`);
+            }
+            
+            // Test AnimationRegistrar
+            const registrar = new AnimationRegistrar();
+            const renderer = new PixelArtRenderer(document.createElement('canvas'));
+            
+            const regStartTime = performance.now();
+            try {
+                await registrar.registerAllAnimations(renderer);
+                const regTime = performance.now() - regStartTime;
+                log(`Animation registration completed in ${regTime.toFixed(2)}ms`);
+            } catch (error) {
+                log(`Error registering animations: ${error.message}`);
+            }
+        }
+        
+        testSpriteLoading();
+    </script>
+</body>
+</html>
