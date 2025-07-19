@@ -1,18 +1,20 @@
-const { GameTestHelpers } = require('./utils/TestFramework.cjs');
+const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 
 /**
  * Test animation system integration
  */
 async function runTest() {
-    const helpers = new GameTestHelpers('Animation System Test');
+    const helpers = new GameTestHelpers({ timeout: 30000 });
     
-    await helpers.runTest(async () => {
-        await helpers.startStage(0, 1);
-        await helpers.sleep(1000);
+    await t.runTest(async (t) => {
+        await t.init('Animation System Test');
+        await t.navigateToGame('http://localhost:3000/?s=0-1&skip_title=true');
+        await t.waitForGameInitialization();
+        await t.wait(1000);
         
         // Check if player sprite is rendered
-        const playerData = await helpers.page.evaluate(() => {
-            const player = window.game?.entityManager?.getPlayer();
+        const playerData = await t.page.evaluate(() => {
+            const player = window.game?.stateManager?.currentState?.entityManager?.getPlayer();
             if (!player) return null;
             return {
                 x: player.x,
@@ -22,42 +24,42 @@ async function runTest() {
             };
         });
         
-        helpers.assert(playerData !== null, 'Player should exist');
-        helpers.assert(playerData.health > 0, 'Player should be alive');
+        t.assert(playerData !== null, 'Player should exist');
+        t.assert(playerData.health > 0, 'Player should be alive');
         
         // Check if animations are loaded
-        const animationsLoaded = await helpers.page.evaluate(() => {
+        const animationsLoaded = await t.page.evaluate(() => {
             if (!window.game?.renderer?.pixelArtRenderer) return false;
             const renderer = window.game.renderer.pixelArtRenderer;
             return renderer.sprites.size > 0 || renderer.animations.size > 0;
         });
         
-        helpers.assert(animationsLoaded, 'Animations should be loaded');
+        t.assert(animationsLoaded, 'Animations should be loaded');
         
         // Move player and check animation state changes
-        await helpers.pressKey('ArrowRight');
-        await helpers.sleep(200);
+        await t.pressKey('ArrowRight');
+        await t.wait(200);
         
-        const walkingState = await helpers.page.evaluate(() => {
-            const player = window.game?.entityManager?.getPlayer();
+        const walkingState = await t.page.evaluate(() => {
+            const player = window.game?.stateManager?.currentState?.entityManager?.getPlayer();
             return player?.animState;
         });
         
-        helpers.assert(walkingState === 'walk', 'Player should be walking');
+        t.assert(walkingState === 'walk', 'Player should be walking');
         
-        await helpers.releaseKey('ArrowRight');
-        await helpers.sleep(200);
+        await t.releaseKey('ArrowRight');
+        await t.wait(200);
         
-        const idleState = await helpers.page.evaluate(() => {
-            const player = window.game?.entityManager?.getPlayer();
+        const idleState = await t.page.evaluate(() => {
+            const player = window.game?.stateManager?.currentState?.entityManager?.getPlayer();
             return player?.animState;
         });
         
-        helpers.assert(idleState === 'idle', 'Player should be idle');
+        t.assert(idleState === 'idle', 'Player should be idle');
         
         // Check enemy animations
-        const enemyAnimations = await helpers.page.evaluate(() => {
-            const enemies = window.game?.entityManager?.getEnemies() || [];
+        const enemyAnimations = await t.page.evaluate(() => {
+            const enemies = window.game?.stateManager?.currentState?.entityManager?.getEnemies() || [];
             return enemies.map(enemy => ({
                 type: enemy.constructor.name,
                 state: enemy.animState,
