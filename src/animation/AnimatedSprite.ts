@@ -52,8 +52,9 @@ export class AnimatedSprite {
 
         const animation = this.animationManager.getAnimation(this.animationKey);
         if (!animation) {
-            Logger.warn(`[AnimatedSprite] Animation not found: ${this.animationKey}`);
-            return;
+            const error = new Error(`[AnimatedSprite] Critical: Animation not found: ${this.animationKey}`);
+            Logger.error(error.message);
+            throw error;
         }
 
         const screenPos = renderer.worldToScreen(x, y);

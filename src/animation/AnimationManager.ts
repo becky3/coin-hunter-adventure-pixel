@@ -71,7 +71,9 @@ export class AnimationManager {
             if (sprite) {
                 result = sprite;
             } else {
-                Logger.warn(`[AnimationManager] Sprite not found: ${definition.frames[0]}`);
+                const error = new Error(`[AnimationManager] Critical: Sprite not found: ${definition.frames[0]}`);
+                Logger.error(error.message);
+                throw error;
             }
         } else {
             const animation = this.pixelArtRenderer.animations.get(key);
@@ -101,7 +103,9 @@ export class AnimationManager {
                         const missingFrames = frameKeys.filter(frameKey => 
                             !this.pixelArtRenderer.sprites.has(frameKey)
                         );
-                        Logger.warn(`[AnimationManager] Missing frames for animation ${key}: ${missingFrames.join(', ')}`);
+                        const error = new Error(`[AnimationManager] Critical: Missing frames for animation ${key}: ${missingFrames.join(', ')}`);
+                        Logger.error(error.message);
+                        throw error;
                     }
                 }
             }
