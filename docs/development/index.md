@@ -12,11 +12,12 @@ Coin Hunter Adventure Pixelの開発に参加する方向けのドキュメン�
 1. [開発ガイドライン]({{ site.baseurl }}/development/guidelines.html) - コーディング規約とベストプラクティス
 2. [コメントルール]({{ site.baseurl }}/development/comment-rules.html) - ESLintによるコメント規約
 3. [アーキテクチャ]({{ site.baseurl }}/development/architecture.html) - システム設計と構造
-4. [物理システム]({{ site.baseurl }}/development/physics-system.html) - 物理演算とパラメータ設定
-5. [マネージャーAPI]({{ site.baseurl }}/development/managers.html) - 主要マネージャークラスのAPI
-6. [テストガイド]({{ site.baseurl }}/development/testing.html) - テストの書き方と実行方法、既存テスト一覧
-7. [敵キャラクター実装]({{ site.baseurl }}/development/enemies.html) - 敵の実装方法と仕様
-8. [パワーアップシステム]({{ site.baseurl }}/development/powerup-system.html) - パワーアップの実装方法と既存のパワーアップ
+4. [アニメーションシステム]({{ site.baseurl }}/development/animation-system.html) - 統一アニメーションシステム
+5. [物理システム]({{ site.baseurl }}/development/physics-system.html) - 物理演算とパラメータ設定
+6. [マネージャーAPI]({{ site.baseurl }}/development/managers.html) - 主要マネージャークラスのAPI
+7. [テストガイド]({{ site.baseurl }}/development/testing.html) - テストの書き方と実行方法、既存テスト一覧
+8. [敵キャラクター実装]({{ site.baseurl }}/development/enemies.html) - 敵の実装方法と仕様
+9. [パワーアップシステム]({{ site.baseurl }}/development/powerup-system.html) - パワーアップの実装方法と既存のパワーアップ
 
 ## 開発の流れ
 

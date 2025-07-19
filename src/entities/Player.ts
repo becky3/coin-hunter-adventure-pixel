@@ -10,6 +10,7 @@ import type { CharacterConfig, CharacterAnimationConfig } from '../config/Resour
 import { PowerUpManager } from '../managers/PowerUpManager';
 import { PowerUpConfig, PowerUpType } from '../types/PowerUpTypes';
 import { ShieldEffectVisual } from '../effects/ShieldEffect';
+import { AnimatedSprite } from '../animation/AnimatedSprite';
 
 
 const DEFAULT_PLAYER_CONFIG = {
@@ -101,6 +102,8 @@ export class Player extends Entity {
     private eventBus: EventBus | null;
     public variableJumpBoost: number;
     private variableJumpBoostMultiplier: number;
+    private animatedSprite: AnimatedSprite;
+    private animatedSpriteSmall: AnimatedSprite;
     private frameCount: number;
     private powerUpManager: PowerUpManager;
     private shieldVisual: ShieldEffectVisual | null = null;
@@ -238,6 +241,20 @@ export class Player extends Entity {
         this.frameCount = 0;
         
         this.powerUpManager = new PowerUpManager(this);
+        
+        this.animatedSprite = new AnimatedSprite('player', {
+            idle: 'player/idle',
+            walk: 'player/walk',
+            jump: 'player/jump',
+            fall: 'player/fall'
+        });
+        
+        this.animatedSpriteSmall = new AnimatedSprite('player_small', {
+            idle: 'player/idle_small',
+            walk: 'player/walk_small',
+            jump: 'player/jump_small',
+            fall: 'player/fall_small'
+        });
     }
     
     setInputManager(inputManager: InputSystem): void {
@@ -455,6 +472,8 @@ export class Player extends Entity {
         
         if (prevState !== this._animState) {
             this.updateSprite();
+            const currentSprite = this.isSmall ? this.animatedSpriteSmall : this.animatedSprite;
+            currentSprite.setState(this._animState);
         }
     }
     
@@ -617,63 +636,10 @@ export class Player extends Entity {
             return;
         }
         
-        if (renderer.pixelArtRenderer) {
-            const screenPos = renderer.worldToScreen(this.x, this.y);
-            
-            if (this._animState === 'walk') {
-                const sizePrefix = this.isSmall ? '_small' : '';
-                const animation = renderer.pixelArtRenderer.animations.get(`player/walk${sizePrefix}`);
-                if (animation) {
-                    animation.update(Date.now());
-                    animation.draw(
-                        renderer.ctx,
-                        screenPos.x,
-                        screenPos.y,
-                        this.flipX,
-                        renderer.scale
-                    );
-                    this.renderEffects(renderer);
-                    return;
-                }
-            }
-            
-            if (this._animState === 'jump' || this._animState === 'fall') {
-                const sizePrefix = this.isSmall ? '_small' : '';
-                const animation = renderer.pixelArtRenderer.animations.get(`player/jump${sizePrefix}`);
-                if (animation) {
-                    animation.update(Date.now());
-                    animation.draw(
-                        renderer.ctx,
-                        screenPos.x,
-                        screenPos.y,
-                        this.flipX,
-                        renderer.scale
-                    );
-                    this.renderEffects(renderer);
-                    return;
-                }
-            }
-            
-            const sprite = renderer.pixelArtRenderer.sprites.get(this.spriteKey || 'player/idle');
-            if (sprite) {
-                sprite.draw(
-                    renderer.ctx,
-                    screenPos.x,
-                    screenPos.y,
-                    this.flipX,
-                    renderer.scale
-                );
-                this.renderEffects(renderer);
-                return;
-            } else if ((window as Window & { game?: { debug?: boolean } }).game?.debug) {
-                Logger.warn('Sprite not found:', this.spriteKey);
-            }
-        }
+        const currentSprite = this.isSmall ? this.animatedSpriteSmall : this.animatedSprite;
+        currentSprite.render(renderer, this.x, this.y, this.flipX);
         
-        if (!renderer.pixelArtRenderer || !renderer.pixelArtRenderer.sprites.has(this.spriteKey || 'player/idle')) {
-            Logger.warn('Player sprite not found, falling back to rectangle. spriteKey:', this.spriteKey);
-            super.render(renderer);
-        }
+        this.renderEffects(renderer);
         
         if (renderer.debug) {
             const screenPos = renderer.worldToScreen(this.x, this.y - 20);

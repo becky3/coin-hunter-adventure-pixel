@@ -4,6 +4,7 @@ import { ResourceLoader } from '../../config/ResourceLoader';
 import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
+import { AnimatedSprite } from '../../animation/AnimatedSprite';
 
 /**
  * Slime enemy that moves horizontally
@@ -12,6 +13,7 @@ export class Slime extends Enemy implements EntityInitializer {
     public spriteKey: string;
     private bounceHeight: number;
     declare friction: number;
+    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Slime instance
@@ -53,6 +55,12 @@ export class Slime extends Enemy implements EntityInitializer {
             this.detectRange = slimeConfig.ai.detectRange || 100;
             this.attackRange = slimeConfig.ai.attackRange || 20;
         }
+        
+        this.animatedSprite = new AnimatedSprite('slime', {
+            idle: 'enemies/slime_idle',
+            move: 'enemies/slime_move',
+            jump: 'enemies/slime_jump'
+        });
     }
     
     protected updateAI(_deltaTime: number): void {
@@ -63,8 +71,10 @@ export class Slime extends Enemy implements EntityInitializer {
         if (this.grounded) {
             this.vx = this.moveSpeed * this.direction;
             this.animState = 'move';
+            this.animatedSprite.setState('move');
         } else {
             this.animState = 'jump';
+            this.animatedSprite.setState('jump');
         }
 
     }
@@ -77,24 +87,11 @@ export class Slime extends Enemy implements EntityInitializer {
             return;
         }
         
-        if (renderer.pixelArtRenderer) {
-            const screenPos = renderer.worldToScreen(this.x, this.y);
-            const animation = renderer.pixelArtRenderer.animations.get('enemies/slime_idle');
-            
-            if (animation) {
-                animation.update(Date.now());
-                animation.draw(
-                    renderer.ctx,
-                    screenPos.x,
-                    screenPos.y,
-                    this.direction === -1,
-                    renderer.scale
-                );
-                return;
-            }
-        }
+        this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
         
-        super.render(renderer);
+        if (renderer.debug) {
+            this.renderDebug(renderer);
+        }
     }
     
     /**

@@ -37,7 +37,8 @@ import enemiesSpiderIdle from './enemies/spider/spider_idle.json';
 import enemiesSpiderWalk1 from './enemies/spider/spider_walk1.json';
 import enemiesSpiderWalk2 from './enemies/spider/spider_walk2.json';
 import enemiesSpiderThread from './enemies/spider/spider_thread.json';
-import enemiesArmorKnight from './enemies/armor_knight.json';
+import enemiesArmorKnightIdle from './enemies/armor_knight_idle.json';
+import enemiesArmorKnightMove from './enemies/armor_knight_move.json';
 
 import uiHeart from './ui/heart.json';
 import uiHeartEmpty from './ui/heart_empty.json';
@@ -92,7 +93,8 @@ export const spriteDataMap: Record<string, unknown> = {
     'enemies/spider_walk1': enemiesSpiderWalk1,
     'enemies/spider_walk2': enemiesSpiderWalk2,
     'enemies/spider_thread': enemiesSpiderThread,
-    'enemies/armor_knight': enemiesArmorKnight,
+    'enemies/armor_knight_idle': enemiesArmorKnightIdle,
+    'enemies/armor_knight_move': enemiesArmorKnightMove,
     'ui/heart': uiHeart,
     'ui/heart_empty': uiHeartEmpty,
     'environment/cloud1': environmentCloud1,

@@ -19,6 +19,8 @@ import { SoundTestState } from '../states/SoundTestState';
 import { Logger } from '../utils/Logger';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { URLParams } from '../utils/urlParams';
+import { AnimationManager } from '../animation/AnimationManager';
+import { registerAllAnimations } from '../config/animationDefinitions';
 
 import { InputSystemAdapter } from '../systems/adapters/InputSystemAdapter';
 import { PhysicsSystemAdapter } from '../systems/adapters/PhysicsSystemAdapter';
@@ -91,6 +93,10 @@ export class GameCore {
 
         const pixelArtRenderer = new PixelArtRenderer(canvas);
         renderer.pixelArtRenderer = pixelArtRenderer;
+
+        const animationManager = AnimationManager.getInstance();
+        animationManager.setPixelArtRenderer(pixelArtRenderer);
+        registerAllAnimations();
 
         const assetLoader = new AssetLoader();
         assetLoader.setRenderer(pixelArtRenderer);

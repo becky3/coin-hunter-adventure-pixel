@@ -4,6 +4,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PowerGloveConfig } from '../../config/PowerGloveConfig';
+import { AnimatedSprite } from '../../animation/AnimatedSprite';
 
 /**
  * Energy bullet projectile for ranged attacks
@@ -16,6 +17,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     private destroyed: boolean = false;
     private originX: number;
     private originY: number;
+    private animatedSprite?: AnimatedSprite;
 
     constructor(x: number, y: number, direction: number, speed: number) {
         super(x, y, PowerGloveConfig.bulletWidth, PowerGloveConfig.bulletHeight);
@@ -27,6 +29,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         this.gravity = false;
         this.physicsEnabled = true;
         this.solid = false;
+        this.notifyTileCollision = true;
         
         this.lifeTime = 0;
         this.maxLifeTime = PowerGloveConfig.bulletLifetime;
@@ -65,17 +68,13 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
-        const spriteName = 'projectiles/energy_bullet';
-        
-        if (!renderer.assetLoader) {
-            throw new Error('[EnergyBullet] AssetLoader is not available');
+        if (!this.animatedSprite) {
+            this.animatedSprite = new AnimatedSprite('EnergyBullet', {
+                idle: 'projectiles/energy_bullet'
+            });
         }
         
-        if (!renderer.assetLoader.hasSprite(spriteName)) {
-            throw new Error(`[EnergyBullet] Sprite not found: ${spriteName}`);
-        }
-        
-        renderer.drawSprite(spriteName, this.x, this.y);
+        this.animatedSprite.render(renderer, this.x, this.y);
         
         if (renderer.debug) {
             this.renderDebug(renderer);

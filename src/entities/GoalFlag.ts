@@ -5,12 +5,14 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
+import { AnimatedSprite } from '../animation/AnimatedSprite';
 
 /**
  * GoalFlag implementation
  */
 export class GoalFlag extends Entity implements EntityInitializer {
     private cleared: boolean;
+    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a GoalFlag instance
@@ -38,6 +40,10 @@ export class GoalFlag extends Entity implements EntityInitializer {
         this.solid = goalConfig?.physics.solid || false;
         
         this.cleared = false;
+        
+        this.animatedSprite = new AnimatedSprite('goal_flag', {
+            idle: 'objects/goal_flag'
+        });
     }
 
     onUpdate(_deltaTime: number): void {
@@ -46,17 +52,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
-        if (renderer.assetLoader && renderer.assetLoader.hasSprite('terrain/goal_flag')) {
-            renderer.drawSprite('terrain/goal_flag', this.x, this.y);
-        } else {
-            renderer.drawRect(this.x, this.y, this.width, this.height, '#FFD700');
-            
-            renderer.drawRect(this.x + 10, this.y, 10, this.height, '#8B4513');
-            
-            const flagWidth = 20;
-            const flagHeight = 15;
-            renderer.drawRect(this.x + 20, this.y + 5, flagWidth, flagHeight, '#FF0000');
-        }
+        this.animatedSprite.render(renderer, this.x, this.y, false);
         
         if (renderer.debug) {
             this.renderDebug(renderer);

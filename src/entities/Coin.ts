@@ -5,6 +5,7 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
+import { AnimatedSprite } from '../animation/AnimatedSprite';
 
 const FLOAT_SPEED_MULTIPLIER = 0.1;
 const PIXELS_PER_UNIT = 16;
@@ -20,6 +21,7 @@ export class Coin extends Entity implements EntityInitializer {
     private floatAmplitude: number;
     private baseY: number;
     public scoreValue: number;
+    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Coin instance
@@ -56,6 +58,10 @@ export class Coin extends Entity implements EntityInitializer {
         this.baseY = y;
         
         this.scoreValue = coinConfig?.properties.scoreValue || 10;
+        
+        this.animatedSprite = new AnimatedSprite('coin', {
+            idle: 'items/coin_spin'
+        });
     }
 
     onUpdate(deltaTime: number): void {
@@ -70,27 +76,7 @@ export class Coin extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
-        if (renderer.pixelArtRenderer) {
-            const animation = renderer.pixelArtRenderer.animations.get('items/coin_spin');
-            if (animation) {
-                const screenPos = renderer.worldToScreen(this.x, this.y);
-                animation.update(Date.now());
-                animation.draw(
-                    renderer.ctx,
-                    screenPos.x,
-                    screenPos.y,
-                    false,
-                    renderer.scale
-                );
-                
-                if (renderer.debug) {
-                    this.renderDebug(renderer);
-                }
-                return;
-            }
-        }
-        
-        this.renderDefault(renderer);
+        this.animatedSprite.render(renderer, this.x, this.y, false);
         
         if (renderer.debug) {
             this.renderDebug(renderer);

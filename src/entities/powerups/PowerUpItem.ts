@@ -6,6 +6,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { MusicSystem } from '../../audio/MusicSystem';
+import { AnimatedSprite } from '../../animation/AnimatedSprite';
 
 /**
  * Base class for all power-up items
@@ -20,6 +21,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     protected baseY: number;
     declare animationTime: number;
     protected musicSystem?: MusicSystem;
+    protected animatedSprite?: AnimatedSprite;
 
     constructor(x: number, y: number, width: number, height: number, powerUpType: PowerUpType) {
         super(x, y, width, height);
@@ -51,6 +53,14 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
      * Must be implemented by subclasses
      */
     protected abstract getSpriteName(): string;
+    
+    /**
+     * Get the animation key for this power-up
+     * Can be overridden by subclasses
+     */
+    protected getAnimationKey(): string {
+        return `powerups/${this.powerUpType.toLowerCase()}`;
+    }
 
     onUpdate(deltaTime: number): void {
         if (this.collected) return;
@@ -64,17 +74,14 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
-        const spriteName = this.getSpriteName();
-        
-        if (!renderer.assetLoader) {
-            throw new Error('[PowerUpItem] AssetLoader is not available');
+        if (!this.animatedSprite) {
+            const animationKey = this.getAnimationKey();
+            this.animatedSprite = new AnimatedSprite(this.powerUpType, {
+                idle: animationKey
+            });
         }
         
-        if (!renderer.assetLoader.hasSprite(spriteName)) {
-            throw new Error(`[PowerUpItem] Sprite not found: ${spriteName}`);
-        }
-        
-        renderer.drawSprite(spriteName, this.x, this.y);
+        this.animatedSprite.render(renderer, this.x, this.y);
         
         if (renderer.debug) {
             this.renderDebug(renderer);

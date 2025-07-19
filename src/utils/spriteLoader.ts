@@ -2,10 +2,12 @@ import { spriteDataMap } from '../assets/sprites/spriteData';
 import { Logger } from './Logger';
 
 interface SpriteData {
+    name?: string;
     width: number;
     height: number;
-    rows: number;
+    rows?: number;
     data: number[][];
+    palette?: Record<string, string>;
 }
 
 interface SpriteConfig {
@@ -42,6 +44,7 @@ class SpriteLoader {
         if (this.useBundledData && spriteDataMap[key]) {
             Logger.log(`[SpriteLoader] Using bundled data for: ${key}`);
             const data = spriteDataMap[key] as SpriteData;
+            
             if (!data || !data.data) {
                 Logger.error(`[SpriteLoader] Bundled data for ${key} is invalid:`, data);
                 throw new Error(`Invalid sprite data for ${key}`);

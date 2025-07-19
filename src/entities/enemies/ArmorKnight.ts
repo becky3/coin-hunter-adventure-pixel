@@ -5,6 +5,7 @@ import { ResourceLoader } from '../../config/ResourceLoader';
 import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
+import { AnimatedSprite } from '../../animation/AnimatedSprite';
 
 /**
  * Heavily armored enemy that cannot be defeated by jumping
@@ -15,6 +16,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     private normalSpeed: number;
     private isCharging: boolean;
     private playerInRange: Player | null;
+    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create an ArmorKnight instance
@@ -57,6 +59,12 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             this.detectRange = config.ai.detectRange || 60;
             this.attackRange = config.ai.attackRange || 20;
         }
+        
+        this.animatedSprite = new AnimatedSprite('armor_knight', {
+            idle: 'enemies/armor_knight_idle',
+            move: 'enemies/armor_knight_walk',
+            charge: 'enemies/armor_knight_walk'
+        });
     }
     
     protected updateAI(_deltaTime: number): void {
@@ -70,6 +78,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             this.isCharging = true;
             this.moveSpeed = this.chargeSpeed;
             this.animState = 'charge';
+            this.animatedSprite.setState('charge');
             
             const playerDir = this.playerInRange.x > this.x ? 1 : -1;
             if (playerDir !== this.direction) {
@@ -80,6 +89,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             this.isCharging = false;
             this.moveSpeed = this.normalSpeed;
             this.animState = 'move';
+            this.animatedSprite.setState('move');
             this.playerInRange = null;
         }
 
@@ -132,9 +142,11 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             return;
         }
         
-        const screenPos = renderer.worldToScreen(this.x, this.y);
-        const color = this.isCharging ? '#8B0000' : '#696969';
-        renderer.drawRect(screenPos.x, screenPos.y, this.width, this.height, color);
+        this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        
+        if (renderer.debug) {
+            this.renderDebug(renderer);
+        }
     }
     
     /**
