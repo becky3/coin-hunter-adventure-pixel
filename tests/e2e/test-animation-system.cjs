@@ -77,4 +77,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { runTest };
+module.exports = runTest;
