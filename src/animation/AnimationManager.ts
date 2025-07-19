@@ -130,8 +130,8 @@ export class AnimationManager {
             alternatives.push(`${category}/${baseName}`);
         }
         
-        if (category === 'enemies' && name === 'slime_move') {
-            alternatives.push('enemies/slime_idle');
+        if (category === 'enemies' && name === 'slime_idle') {
+            alternatives.push('enemies/slime_move');
         }
         if (category === 'items' && name === 'coin_spin') {
             alternatives.push('items/coin_spin');

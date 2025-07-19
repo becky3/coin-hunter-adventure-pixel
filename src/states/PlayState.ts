@@ -173,6 +173,8 @@ export class PlayState implements GameState {
                 { category: 'enemies', name: 'spider_walk1' },
                 { category: 'enemies', name: 'spider_walk2' },
                 { category: 'enemies', name: 'spider_thread' },
+                { category: 'enemies', name: 'slime_idle1' },
+                { category: 'enemies', name: 'slime_idle2' },
                 { category: 'enemies', name: 'armor_knight_idle' },
                 { category: 'enemies', name: 'armor_knight_move' },
                 { category: 'environment', name: 'cloud1' },
