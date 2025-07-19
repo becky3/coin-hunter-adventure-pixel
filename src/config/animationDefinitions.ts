@@ -19,12 +19,12 @@ export const ANIMATION_DEFINITIONS = {
             loop: true
         },
         jump: {
-            frames: ['player/jump'],
+            frames: ['player/jump1'],
             duration: 0,
             loop: false
         },
         fall: {
-            frames: ['player/jump'],
+            frames: ['player/jump2'],
             duration: 0,
             loop: false
         },
@@ -39,12 +39,12 @@ export const ANIMATION_DEFINITIONS = {
             loop: true
         },
         jump_small: {
-            frames: ['player/jump_small'],
+            frames: ['player/jump_small1'],
             duration: 0,
             loop: false
         },
         fall_small: {
-            frames: ['player/jump_small'],
+            frames: ['player/jump_small2'],
             duration: 0,
             loop: false
         }
@@ -97,8 +97,8 @@ export const ANIMATION_DEFINITIONS = {
         },
         armor_knight_walk: {
             frames: ['enemies/armor_knight'],
-            duration: 0,
-            loop: false
+            duration: 100,
+            loop: true
         }
     },
     items: {

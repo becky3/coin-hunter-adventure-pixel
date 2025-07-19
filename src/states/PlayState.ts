@@ -169,6 +169,7 @@ export class PlayState implements GameState {
                 { category: 'enemies', name: 'spider_walk1' },
                 { category: 'enemies', name: 'spider_walk2' },
                 { category: 'enemies', name: 'spider_thread' },
+                { category: 'enemies', name: 'armor_knight' },
                 { category: 'environment', name: 'cloud1' },
                 { category: 'environment', name: 'cloud2' },
                 { category: 'environment', name: 'tree1' },
