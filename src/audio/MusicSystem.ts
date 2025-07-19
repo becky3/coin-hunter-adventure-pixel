@@ -83,40 +83,39 @@ export class MusicSystem {
 
     async init(): Promise<boolean> {
         const startTime = performance.now();
-        console.log('[Performance] MusicSystem.init() entered at:', startTime.toFixed(2) + 'ms');
+        Logger.log('[Performance] MusicSystem.init() entered at:', startTime.toFixed(2) + 'ms');
         Logger.log('MusicSystem: init() called');
         if (this._isInitialized) {
-            console.log('[Performance] MusicSystem already initialized');
+            Logger.log('[Performance] MusicSystem already initialized');
             Logger.log('MusicSystem: Already initialized');
             return true;
         }
         
-        console.log('[Performance] MusicSystem starting initialization...');
+        Logger.log('[Performance] MusicSystem starting initialization...');
         try {
-            console.log('[Performance] Checking AudioContext availability...');
+            Logger.log('[Performance] Checking AudioContext availability...');
             const AudioContextClass = (window as Window & { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext || (window as Window & { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
             if (!AudioContextClass) {
-                console.log('[Performance] Web Audio API not supported');
+                Logger.log('[Performance] Web Audio API not supported');
                 Logger.warn('Web Audio API is not supported in this browser');
                 return false;
             }
-            console.log('[Performance] AudioContext class found');
+            Logger.log('[Performance] AudioContext class found');
 
             try {
-                console.log('[Performance] Creating new AudioContext...');
+                Logger.log('[Performance] Creating new AudioContext...');
                 this.audioContext = new AudioContextClass() as AudioContext;
-                console.log('[Performance] AudioContext created successfully, state:', this.audioContext.state);
+                Logger.log('[Performance] AudioContext created successfully, state:', this.audioContext.state);
                 Logger.log('MusicSystem: AudioContext created');
             } catch (e) {
-                console.log('[Performance] AudioContext creation failed:', e);
+                Logger.log('[Performance] AudioContext creation failed:', e);
                 Logger.log('AudioContext creation deferred - will retry on user interaction');
                 return false;
             }
 
             if (this.audioContext.state === 'suspended') {
-                console.log('[Performance] AudioContext is suspended, will resume on first playback at:', performance.now().toFixed(2) + 'ms');
+                Logger.log('[Performance] AudioContext is suspended, will resume on first playback at:', performance.now().toFixed(2) + 'ms');
                 Logger.log('MusicSystem: AudioContext is suspended, will resume on first playback');
-                // Skip resume() to avoid hanging - audio will be enabled on user interaction
             }
             
             this.masterGain = this.audioContext.createGain();
@@ -125,13 +124,13 @@ export class MusicSystem {
             
             this._isInitialized = true;
             const endTime = performance.now();
-            console.log('[Performance] MusicSystem.init() completed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
+            Logger.log('[Performance] MusicSystem.init() completed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
             Logger.log('Music system initialized successfully');
             return true;
         } catch (error) {
             const endTime = performance.now();
-            console.log('[Performance] MusicSystem.init() failed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
-            console.log('[Performance] Error details:', error);
+            Logger.log('[Performance] MusicSystem.init() failed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
+            Logger.log('[Performance] Error details:', error);
             if (error.name === 'NotAllowedError') {
                 Logger.log('音楽システムはユーザー操作後に開始されます');
             } else {
@@ -601,11 +600,10 @@ export class MusicSystem {
             return;
         }
         
-        // Try to resume AudioContext if it's suspended
         if (this.audioContext && this.audioContext.state === 'suspended') {
-            console.log('[Performance] Attempting to resume AudioContext on SE playback');
+            Logger.log('[Performance] Attempting to resume AudioContext on SE playback');
             this.audioContext.resume().catch(e => {
-                console.log('[Performance] AudioContext resume failed on SE playback:', e);
+                Logger.log('[Performance] AudioContext resume failed on SE playback:', e);
             });
         }
         
@@ -771,13 +769,12 @@ export class MusicSystem {
             return;
         }
         
-        // Try to resume AudioContext if it's suspended
         if (this.audioContext && this.audioContext.state === 'suspended') {
-            console.log('[Performance] Attempting to resume AudioContext on playback at:', performance.now().toFixed(2) + 'ms');
+            Logger.log('[Performance] Attempting to resume AudioContext on playback at:', performance.now().toFixed(2) + 'ms');
             this.audioContext.resume().then(() => {
-                console.log('[Performance] AudioContext resumed successfully on playback');
+                Logger.log('[Performance] AudioContext resumed successfully on playback');
             }).catch(e => {
-                console.log('[Performance] AudioContext resume failed on playback:', e);
+                Logger.log('[Performance] AudioContext resume failed on playback:', e);
             });
         }
         

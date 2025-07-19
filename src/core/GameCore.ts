@@ -45,34 +45,34 @@ export class GameCore {
 
     async init(): Promise<void> {
         const initStartTime = performance.now();
-        console.log('[Performance] GameCore.init() started:', initStartTime.toFixed(2) + 'ms');
+        Logger.log('[Performance] GameCore.init() started:', initStartTime.toFixed(2) + 'ms');
         Logger.log('GameCore: init() started');
         
         Logger.log('GameCore: Initializing ResourceLoader...');
         const resourceLoaderStartTime = performance.now();
-        console.log('[Performance] Before ResourceLoader.initialize():', resourceLoaderStartTime.toFixed(2) + 'ms');
+        Logger.log('[Performance] Before ResourceLoader.initialize():', resourceLoaderStartTime.toFixed(2) + 'ms');
         const resourceLoader = ResourceLoader.getInstance();
         await resourceLoader.initialize();
         const resourceLoaderEndTime = performance.now();
-        console.log('[Performance] After ResourceLoader.initialize():', resourceLoaderEndTime.toFixed(2) + 'ms', '(took', (resourceLoaderEndTime - resourceLoaderStartTime).toFixed(2) + 'ms)');
+        Logger.log('[Performance] After ResourceLoader.initialize():', resourceLoaderEndTime.toFixed(2) + 'ms', '(took', (resourceLoaderEndTime - resourceLoaderStartTime).toFixed(2) + 'ms)');
 
         Logger.log('GameCore: Registering core services...');
         const coreServicesStartTime = performance.now();
-        console.log('[Performance] Before registerCoreServices():', coreServicesStartTime.toFixed(2) + 'ms');
+        Logger.log('[Performance] Before registerCoreServices():', coreServicesStartTime.toFixed(2) + 'ms');
         this.registerCoreServices();
-        console.log('[Performance] After registerCoreServices():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - coreServicesStartTime).toFixed(2) + 'ms)');
+        Logger.log('[Performance] After registerCoreServices():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - coreServicesStartTime).toFixed(2) + 'ms)');
 
         Logger.log('GameCore: Registering systems...');
         const systemsStartTime = performance.now();
-        console.log('[Performance] Before registerSystems():', systemsStartTime.toFixed(2) + 'ms');
+        Logger.log('[Performance] Before registerSystems():', systemsStartTime.toFixed(2) + 'ms');
         await this.registerSystems();
-        console.log('[Performance] After registerSystems():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - systemsStartTime).toFixed(2) + 'ms)');
+        Logger.log('[Performance] After registerSystems():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - systemsStartTime).toFixed(2) + 'ms)');
 
         Logger.log('GameCore: Registering states...');
         const statesStartTime = performance.now();
-        console.log('[Performance] Before registerStates():', statesStartTime.toFixed(2) + 'ms');
+        Logger.log('[Performance] Before registerStates():', statesStartTime.toFixed(2) + 'ms');
         this.registerStates();
-        console.log('[Performance] After registerStates():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - statesStartTime).toFixed(2) + 'ms)');
+        Logger.log('[Performance] After registerStates():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - statesStartTime).toFixed(2) + 'ms)');
 
         Logger.log('GameCore: Initializing debug overlay...');
         const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
@@ -86,14 +86,14 @@ export class GameCore {
 
         Logger.log('GameCore: Hiding loading screen...');
         const hideLoadingTime = performance.now();
-        console.log('[Performance] Hiding loading screen at:', hideLoadingTime.toFixed(2) + 'ms');
+        Logger.log('[Performance] Hiding loading screen at:', hideLoadingTime.toFixed(2) + 'ms');
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen) {
             loadingScreen.style.display = 'none';
         }
         
         const initEndTime = performance.now();
-        console.log('[Performance] GameCore.init() completed:', initEndTime.toFixed(2) + 'ms', '(total init took', (initEndTime - initStartTime).toFixed(2) + 'ms)');
+        Logger.log('[Performance] GameCore.init() completed:', initEndTime.toFixed(2) + 'ms', '(total init took', (initEndTime - initStartTime).toFixed(2) + 'ms)');
         Logger.log('GameCore: init() completed');
     }
 
@@ -160,14 +160,14 @@ export class GameCore {
         }
 
         const initSystemsStartTime = performance.now();
-        console.log('[Performance] Before systemManager.initSystems():', initSystemsStartTime.toFixed(2) + 'ms');
+        Logger.log('[Performance] Before systemManager.initSystems():', initSystemsStartTime.toFixed(2) + 'ms');
         await systemManager.initSystems();
-        console.log('[Performance] After systemManager.initSystems():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - initSystemsStartTime).toFixed(2) + 'ms)');
+        Logger.log('[Performance] After systemManager.initSystems():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - initSystemsStartTime).toFixed(2) + 'ms)');
 
         const musicSystem = this._serviceLocator.get<MusicSystem>(ServiceNames.AUDIO);
         try {
             const musicInitStartTime = performance.now();
-            console.log('[Performance] Before MusicSystem.init():', musicInitStartTime.toFixed(2) + 'ms');
+            Logger.log('[Performance] Before MusicSystem.init():', musicInitStartTime.toFixed(2) + 'ms');
             Logger.log('GameCore: Initializing MusicSystem...');
             const initPromise = musicSystem.init();
             const timeoutPromise = new Promise<boolean>((_, reject) => 
@@ -175,10 +175,10 @@ export class GameCore {
             );
             
             await Promise.race([initPromise, timeoutPromise]);
-            console.log('[Performance] After MusicSystem.init():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - musicInitStartTime).toFixed(2) + 'ms)');
+            Logger.log('[Performance] After MusicSystem.init():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - musicInitStartTime).toFixed(2) + 'ms)');
             Logger.log('GameCore: MusicSystem initialized');
         } catch (error) {
-            console.log('[Performance] MusicSystem init error:', error.message, 'at', performance.now().toFixed(2) + 'ms');
+            Logger.log('[Performance] MusicSystem init error:', error.message, 'at', performance.now().toFixed(2) + 'ms');
             Logger.warn('GameCore: MusicSystem initialization failed, continuing without audio:', error);
         }
     }
@@ -245,7 +245,7 @@ export class GameCore {
             Logger.log('GameCore: Skipping title, starting directly with stage:', stageId);
             stateManager.setState('play', { level: stageId });
         } else {
-            console.log('[Performance] Setting initial state to menu:', performance.now().toFixed(2) + 'ms');
+            Logger.log('[Performance] Setting initial state to menu:', performance.now().toFixed(2) + 'ms');
             stateManager.setState('menu');
             Logger.log('GameCore: Initial state set to menu');
         }
