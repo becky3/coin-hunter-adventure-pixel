@@ -1,10 +1,11 @@
 const puppeteer = require('puppeteer');
+const testConfig = require('./utils/testConfig.cjs');
 
 async function runBGMAndDebugTests() {
     console.log('🎮 BGMとデバッグ表示テスト実行中...\n');
     
     const browser = await puppeteer.launch({
-        headless: true,
+        headless: testConfig.headless,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     

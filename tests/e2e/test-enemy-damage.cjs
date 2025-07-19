@@ -1,9 +1,10 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 // Test for enemy damage mechanics
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false,
+        headless: testConfig.headless,
         verbose: true,
         timeout: 60000
     });

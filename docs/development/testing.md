@@ -259,6 +259,22 @@ git push
 - タイムアウトを90秒→120秒に延長
 - ワーカー起動時に2秒の遅延を追加
 - Bashツールのタイムアウト問題は解決済み（10分まで設定可能）
+- Workerコードを別ファイルに分離（セキュリティ向上）
+- テスト設定を共通化（環境変数で制御可能）
+
+### テスト設定の環境変数
+
+以下の環境変数でテストの動作を制御できます：
+
+- `HEADLESS=false` - ブラウザを表示してテスト実行
+- `MAX_WORKERS=4` - 並列実行のワーカー数を指定
+- `ENABLE_SCREENSHOTS=true` - デバッグ用スクリーンショットを有効化
+
+例:
+```bash
+HEADLESS=false npm run test:basic  # ブラウザを表示してテスト
+MAX_WORKERS=2 npm run test:parallel  # 2ワーカーで並列実行
+```
 
 ## GitHub Actions でのテスト実行
 

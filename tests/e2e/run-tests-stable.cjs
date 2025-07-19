@@ -95,11 +95,13 @@ async function runTest() {
 runTest();
 `;
 
+// Path to worker script
+const workerScriptPath = path.join(__dirname, 'utils', 'testWorker.cjs');
+
 // Run a single test in a worker
 function runTestInWorker(testFile, timeout) {
     return new Promise((resolve, reject) => {
-        const worker = new Worker(workerCode, {
-            eval: true,
+        const worker = new Worker(workerScriptPath, {
             workerData: { testFile }
         });
 

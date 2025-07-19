@@ -1,8 +1,9 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false,
+        headless: testConfig.headless,
         verbose: true,
         timeout: 30000
     });

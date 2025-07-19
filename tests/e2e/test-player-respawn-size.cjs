@@ -1,9 +1,10 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 // Test for Issue 106: Player respawn size after enemy damage
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false,
+        headless: testConfig.headless,
         verbose: true,
         timeout: 45000
     });

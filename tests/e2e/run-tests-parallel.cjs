@@ -2,9 +2,10 @@ const { Worker } = require('worker_threads');
 const fs = require('fs');
 const path = require('path');
 const { toJSTString } = require('./utils/dateHelper.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 // Configuration
-const MAX_WORKERS = 3; // Reduced from 4 to improve stability
+const MAX_WORKERS = testConfig.maxWorkers;
 const TEST_TIMEOUT = 120000; // Increased from 90 to 120 seconds per test
 const WORKER_START_DELAY = 2000; // 2 second delay between worker starts
 
@@ -34,40 +35,8 @@ console.error = function(...args) {
     runLogStream.write(`[${new Date().toISOString()}] [ERROR] ${message}\n`);
 };
 
-// Worker script that runs a single test
-const workerCode = `
-const { parentPort, workerData } = require('worker_threads');
-const path = require('path');
-
-async function runTest() {
-    const { testFile } = workerData;
-    const testPath = path.resolve(testFile);
-    
-    try {
-        const startTime = Date.now();
-        const testModule = require(testPath);
-        
-        // Run the test
-        await testModule();
-        
-        const duration = Date.now() - startTime;
-        parentPort.postMessage({
-            success: true,
-            testFile,
-            duration
-        });
-    } catch (error) {
-        parentPort.postMessage({
-            success: false,
-            testFile,
-            error: error.message,
-            stack: error.stack
-        });
-    }
-}
-
-runTest();
-`;
+// Path to worker script
+const workerScriptPath = path.join(__dirname, 'utils', 'testWorker.cjs');
 
 // Discover test files
 function discoverTests() {
@@ -85,8 +54,7 @@ function discoverTests() {
 // Run a single test in a worker
 function runTestInWorker(testFile) {
     return new Promise((resolve, reject) => {
-        const worker = new Worker(workerCode, {
-            eval: true,
+        const worker = new Worker(workerScriptPath, {
             workerData: { testFile }
         });
 

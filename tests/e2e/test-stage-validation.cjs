@@ -1,4 +1,5 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 const fs = require('fs');
 const path = require('path');
 
@@ -8,7 +9,7 @@ const path = require('path');
  */
 async function runTest() {
     const test = new GameTestHelpers({ 
-        headless: true,
+        headless: testConfig.headless,
         verbose: true,
         timeout: 30000  // 30秒のタイムアウト
     });

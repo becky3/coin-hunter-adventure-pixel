@@ -1,9 +1,10 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 // Basic game flow test using the new framework
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: true,  // Set to true for CI
+        headless: testConfig.headless,
         verbose: false,  // Set to true for more console logs
         timeout: 20000
     });
@@ -69,8 +70,10 @@ async function runTest() {
         console.log('Canvas info:', canvasInfo);
         
         if (!canvasInfo.hasContent) {
-            // Take a screenshot for debugging
-            await t.screenshot('canvas-empty-debug');
+            // Take a screenshot for debugging (only if enabled)
+            if (testConfig.enableScreenshots) {
+                await t.screenshot('canvas-empty-debug');
+            }
             
             // Try waiting a bit more and check again
             await t.wait(1000);

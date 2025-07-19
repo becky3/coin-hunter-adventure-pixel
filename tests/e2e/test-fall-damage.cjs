@@ -1,9 +1,10 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 // Test for fall damage mechanics
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false,
+        headless: testConfig.headless,
         verbose: true,
         timeout: 30000  // Increased from 20000 to 30000 for stability
     });

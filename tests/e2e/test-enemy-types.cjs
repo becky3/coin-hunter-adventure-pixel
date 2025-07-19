@@ -1,4 +1,5 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 /**
  * Unified enemy types test
@@ -6,7 +7,7 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
  */
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: true,
+        headless: testConfig.headless,
         verbose: false,
         timeout: 25000
     });

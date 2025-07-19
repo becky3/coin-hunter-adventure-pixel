@@ -1,4 +1,5 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+const testConfig = require('./utils/testConfig.cjs');
 
 /**
  * パフォーマンスベースライン計測テスト
@@ -6,7 +7,7 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
  */
 async function measurePerformanceBaseline() {
     const test = new GameTestHelpers({
-        headless: false,
+        headless: testConfig.headless,
         verbose: true,
         timeout: 90000  // 90秒に延長
     });
