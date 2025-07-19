@@ -5,8 +5,6 @@ export default defineConfig({
     resolve: {
         extensions: ['.ts', '.js', '.json']
     },
-    // 静的アセットの処理
-    assetsInclude: ['**/*.json'],
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
