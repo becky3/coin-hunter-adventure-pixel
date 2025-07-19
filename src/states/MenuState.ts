@@ -56,22 +56,27 @@ export class MenuState implements GameState {
     }
     
     private init(): void {
+        console.log('[Performance] MenuState.init() started:', performance.now().toFixed(2) + 'ms');
         this.logoY = -100;
         this.optionsAlpha = 0;
         this.selectedOption = 0;
         this.showHowTo = false;
         this.showCredits = false;
         if (this.game.musicSystem?.isInitialized) {
+            console.log('[Performance] Playing title BGM:', performance.now().toFixed(2) + 'ms');
             this.game.musicSystem.playBGMFromPattern('title');
         }
+        console.log('[Performance] MenuState.init() completed:', performance.now().toFixed(2) + 'ms');
     }
     
     enter(): void {
+        console.log('[Performance] MenuState.enter() called:', performance.now().toFixed(2) + 'ms');
         this.init();
         this.setupInputListeners();
         if (this.game.renderer) {
             this.game.renderer.setCamera(0, 0);
         }
+        console.log('[Performance] MenuState.enter() completed:', performance.now().toFixed(2) + 'ms');
     }
     
     private setupInputListeners(): void {

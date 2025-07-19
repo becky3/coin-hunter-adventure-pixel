@@ -117,6 +117,9 @@ export class AssetLoader {
     }
     
     async preloadGameAssets(progressCallback?: ProgressCallback): Promise<void> {
+        const startTime = performance.now();
+        console.log('[Performance] AssetLoader.preloadGameAssets() started:', startTime.toFixed(2) + 'ms');
+        
         const resourceLoader = ResourceLoader.getInstance();
         await resourceLoader.initialize();
         
@@ -124,6 +127,7 @@ export class AssetLoader {
         
         this.totalAssets = assetsToLoad.length;
         this.loadedCount = 0;
+        console.log('[Performance] Total assets to preload:', this.totalAssets);
         
         const loadPromises = assetsToLoad.map(asset => {
             if (asset.type === 'sprite' && asset.name) {
@@ -148,6 +152,9 @@ export class AssetLoader {
         });
         
         await Promise.all(loadPromises);
+        
+        const endTime = performance.now();
+        console.log('[Performance] AssetLoader.preloadGameAssets() completed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
     }
     
     private async _loadSpriteInternal(category: string, name: string): Promise<LoadedAsset> {

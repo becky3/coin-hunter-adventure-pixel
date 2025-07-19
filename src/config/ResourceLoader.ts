@@ -32,12 +32,16 @@ export class ResourceLoader {
     }
   
     async initialize(): Promise<void> {
+        const startTime = performance.now();
+        console.log('[Performance] ResourceLoader.initialize() started:', startTime.toFixed(2) + 'ms');
+        
         this.resourceIndex = await this.loadJSON('/src/config/resources/index.json');
   
         if (!this.resourceIndex) {
             throw new Error('Failed to load resource index');
         }
   
+        console.log('[Performance] Starting parallel resource loading:', performance.now().toFixed(2) + 'ms');
         await Promise.all([
             this.loadSprites(),
             this.loadCharacters(),
@@ -46,6 +50,9 @@ export class ResourceLoader {
             this.loadMusicPatterns(),
             this.loadPhysics()
         ]);
+        
+        const endTime = performance.now();
+        console.log('[Performance] ResourceLoader.initialize() completed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
   
     }
   
@@ -77,7 +84,9 @@ export class ResourceLoader {
         if (!this.resourceIndex) return;
     
         const spritesPath = '/src/config/resources/sprites.json';
+        const startTime = performance.now();
         this.sprites = await this.loadJSON(spritesPath);
+        console.log('[Performance] loadSprites completed in', (performance.now() - startTime).toFixed(2) + 'ms');
     }
   
     private async loadCharacters(): Promise<void> {
