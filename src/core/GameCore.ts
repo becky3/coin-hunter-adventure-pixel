@@ -97,6 +97,8 @@ export class GameCore {
         const animationManager = AnimationManager.getInstance();
         animationManager.setPixelArtRenderer(pixelArtRenderer);
         registerAllAnimations();
+        
+        (window as Window & { AnimationManager?: typeof AnimationManager }).AnimationManager = AnimationManager;
 
         const assetLoader = new AssetLoader();
         assetLoader.setRenderer(pixelArtRenderer);
