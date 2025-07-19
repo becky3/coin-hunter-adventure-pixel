@@ -70,22 +70,39 @@ export class AnimationManager {
             const sprite = this.pixelArtRenderer.sprites.get(definition.frames[0]);
             if (sprite) {
                 result = sprite;
+            } else {
+                Logger.warn(`[AnimationManager] Sprite not found: ${definition.frames[0]}`);
             }
         } else {
             const animation = this.pixelArtRenderer.animations.get(key);
             if (animation) {
                 result = animation;
             } else {
-                const frameKeys = definition.frames;
-                const allFramesExist = frameKeys.every(frameKey => 
-                    this.pixelArtRenderer.sprites.has(frameKey) || 
-                    this.pixelArtRenderer.animations.has(frameKey)
-                );
+                const alternativeKeys = this.getPossibleAnimationKeys(key);
+                for (const altKey of alternativeKeys) {
+                    const altAnimation = this.pixelArtRenderer.animations.get(altKey);
+                    if (altAnimation) {
+                        result = altAnimation;
+                        Logger.log(`[AnimationManager] Found animation with alternative key: ${altKey}`);
+                        break;
+                    }
+                }
+                
+                if (!result) {
+                    const frameKeys = definition.frames;
+                    const allFramesExist = frameKeys.every(frameKey => 
+                        this.pixelArtRenderer.sprites.has(frameKey)
+                    );
 
-                if (allFramesExist) {
-                    Logger.log(`[AnimationManager] Creating animation ${key} from frames: ${frameKeys.join(', ')}`);
-                } else {
-                    Logger.warn(`[AnimationManager] Not all frames exist for animation ${key}`);
+                    if (allFramesExist) {
+                        result = this.pixelArtRenderer.sprites.get(frameKeys[0]) || null;
+                        Logger.log(`[AnimationManager] Using first frame as static sprite for ${key}`);
+                    } else {
+                        const missingFrames = frameKeys.filter(frameKey => 
+                            !this.pixelArtRenderer.sprites.has(frameKey)
+                        );
+                        Logger.warn(`[AnimationManager] Missing frames for animation ${key}: ${missingFrames.join(', ')}`);
+                    }
                 }
             }
         }
@@ -95,6 +112,28 @@ export class AnimationManager {
         }
 
         return result;
+    }
+
+    private getPossibleAnimationKeys(key: string): string[] {
+        const parts = key.split('/');
+        if (parts.length !== 2) return [];
+        
+        const [category, name] = parts;
+        const alternatives: string[] = [];
+        
+        const baseName = name.replace(/_idle$|_move$|_jump$|_walk$|_fly$|_hang$|_spin$/, '');
+        if (baseName !== name) {
+            alternatives.push(`${category}/${baseName}`);
+        }
+        
+        if (category === 'enemies' && name === 'slime_move') {
+            alternatives.push('enemies/slime_idle');
+        }
+        if (category === 'items' && name === 'coin_spin') {
+            alternatives.push('items/coin_spin');
+        }
+        
+        return alternatives;
     }
 
     clearCache(): void {

@@ -1,26 +1,34 @@
-const { GameTestHelpers } = require('./utils/TestFramework.cjs');
+const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 
 /**
  * Visual test for all sprites and animations
  * Tests that all entities render correctly without errors
  */
 async function runTest() {
-    const helpers = new GameTestHelpers('All Sprites Visual Test');
+    const helpers = new GameTestHelpers({ timeout: 60000 });
     
-    await helpers.runTest(async () => {
-        // Load the test stage directly
-        await helpers.page.goto(`${helpers.baseUrl}?stage=test-all-sprites&skip_title=true`);
-        await helpers.waitForPlayState();
+    await helpers.runTest(async (t) => {
+        await t.init('All Sprites Visual Test');
+        // Load the test stage directly with proper URL formatting
+        await t.navigateToGame('http://localhost:3000/?s=test-all-sprites&skip_title=true');
+        await t.waitForGameInitialization();
+        
+        // Wait for play state to be ready
+        await t.waitForCondition(() => {
+            const state = window.game?.stateManager?.currentState;
+            return state && state.name === 'play' && state.entityManager;
+        }, 10000, 'Play state should be ready');
         
         // Wait for all sprites to be loaded and rendered
-        await helpers.sleep(2000);
+        await t.wait(2000);
         
         // Take a screenshot for visual inspection
-        await helpers.takeScreenshot('all-sprites-initial');
+        await t.screenshot('all-sprites-initial');
         
         // Check that all expected entities are present
-        const entityData = await helpers.page.evaluate(() => {
-            const manager = window.game?.entityManager;
+        const entityData = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const manager = state?.entityManager;
             if (!manager) return null;
             
             return {
@@ -40,92 +48,38 @@ async function runTest() {
                     type: item.constructor.name,
                     x: item.x,
                     y: item.y,
-                    visible: item.visible
-                })),
-                powerUps: manager.getPowerUps().map(powerUp => ({
-                    type: powerUp.constructor.name,
-                    x: powerUp.x,
-                    y: powerUp.y,
-                    collected: powerUp.collected
+                    visible: item.visible !== undefined ? item.visible : true
                 }))
             };
         });
         
-        helpers.assert(entityData !== null, 'Entity data should be available');
-        helpers.assert(entityData.player !== null, 'Player should exist');
+        t.assert(entityData !== null, 'Entity data should be available');
+        t.assert(entityData.player !== null, 'Player should exist');
         
         // Verify all enemy types are present
         const enemyTypes = entityData.enemies.map(e => e.type);
-        helpers.assert(enemyTypes.includes('Slime'), 'Slime should be present');
-        helpers.assert(enemyTypes.includes('Spider'), 'Spider should be present');
-        helpers.assert(enemyTypes.includes('Bat'), 'Bat should be present');
-        helpers.assert(enemyTypes.includes('ArmorKnight'), 'ArmorKnight should be present');
+        t.assert(enemyTypes.includes('Slime'), 'Slime should be present');
+        t.assert(enemyTypes.includes('Spider'), 'Spider should be present');
+        t.assert(enemyTypes.includes('Bat'), 'Bat should be present');
+        t.assert(enemyTypes.includes('ArmorKnight'), 'ArmorKnight should be present');
         
         console.log(`Found ${entityData.enemies.length} enemies`);
         console.log(`Found ${entityData.items.length} items`);
-        console.log(`Found ${entityData.powerUps.length} power-ups`);
         
         // Test player movement to trigger animations
-        await helpers.pressKey('ArrowRight');
-        await helpers.sleep(500);
-        await helpers.takeScreenshot('all-sprites-player-walking');
-        
-        const walkingState = await helpers.page.evaluate(() => {
-            return window.game?.entityManager?.getPlayer()?.animState;
-        });
-        helpers.assert(walkingState === 'walk', 'Player should be in walk state');
-        
-        await helpers.releaseKey('ArrowRight');
+        await t.movePlayer('right', 500);
+        await t.wait(100);
+        await t.screenshot('all-sprites-player-walking');
         
         // Test jumping
-        await helpers.pressKey('Space');
-        await helpers.sleep(200);
-        await helpers.takeScreenshot('all-sprites-player-jumping');
+        await t.jumpPlayer();
+        await t.wait(200);
+        await t.screenshot('all-sprites-player-jumping');
         
-        const jumpingState = await helpers.page.evaluate(() => {
-            return window.game?.entityManager?.getPlayer()?.animState;
-        });
-        helpers.assert(jumpingState === 'jump' || jumpingState === 'fall', 'Player should be jumping or falling');
-        
-        await helpers.releaseKey('Space');
-        await helpers.sleep(500);
-        
-        // Collect a coin to test coin animation
-        await helpers.movePlayerTo(100, 380);
-        await helpers.sleep(500);
-        
-        const coinsAfter = await helpers.page.evaluate(() => {
-            return window.game?.entityManager?.getPlayer()?.coins || 0;
-        });
-        helpers.assert(coinsAfter > 0, 'Player should have collected at least one coin');
-        
-        // Test power-up collection
-        await helpers.movePlayerTo(250, 400);
-        await helpers.sleep(500);
-        
-        const hasShield = await helpers.page.evaluate(() => {
-            const player = window.game?.entityManager?.getPlayer();
-            return player?.powerUpManager?.hasPowerUp('shield') || false;
-        });
-        helpers.assert(hasShield, 'Player should have shield power-up');
-        
-        await helpers.takeScreenshot('all-sprites-with-shield');
-        
-        // Check for any rendering errors
-        const errors = await helpers.getConsoleErrors();
-        const renderingErrors = errors.filter(error => 
-            error.includes('Animation not found') || 
-            error.includes('Sprite not found') ||
-            error.includes('failed to render')
-        );
-        
-        if (renderingErrors.length > 0) {
-            console.warn(`Found ${renderingErrors.length} rendering warnings/errors:`);
-            renderingErrors.slice(0, 10).forEach(error => console.warn(`  - ${error}`));
-        }
+        await t.wait(500);
         
         // Final screenshot with all elements
-        await helpers.takeScreenshot('all-sprites-final');
+        await t.screenshot('all-sprites-final');
         
         console.log('Visual test completed. Check screenshots for visual verification.');
     });

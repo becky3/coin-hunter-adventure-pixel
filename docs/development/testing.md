@@ -83,6 +83,7 @@ node tests/e2e/run-tests-stable.cjs
 | **test-stage0-4-simple.cjs** | デモステージ・敵生成 | stage0-4ロード、Oキーで敵生成ダイアログ、敵の動作確認 | ~25秒 |
 | **test-armor-knight.cjs** | アーマーナイト敵テスト | 踏み判定無効化、突進動作、壁での反転、高耐久性の確認 | ~25秒 |
 | **test-animation-system.cjs** | アニメーションシステム | 統一アニメーション、状態遷移、スプライト読み込み | ~20秒 |
+| **test-all-sprites-visual.cjs** | 全スプライト視覚テスト | すべてのキャラクター・オブジェクトの描画確認、スクリーンショット撮影 | ~15秒 |
 
 ### テストログ
 - テスト実行時のログは `tests/logs/` に自動保存

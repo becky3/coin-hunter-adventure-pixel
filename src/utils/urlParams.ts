@@ -14,7 +14,7 @@ export class URLParams {
     getStageId(): string | null {
         const shortForm = this.params.get('s');
         if (shortForm) {
-            if (shortForm.startsWith('stage')) {
+            if (shortForm.startsWith('stage') || shortForm.startsWith('test-')) {
                 return shortForm;
             }
             return `stage${shortForm}`;
