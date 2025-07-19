@@ -3,10 +3,36 @@ const fs = require('fs');
 const path = require('path');
 const { toJSTString } = require('./utils/dateHelper.cjs');
 
-// Configuration
-const MAX_WORKERS = 3; // Reduced from 4 to improve stability
-const TEST_TIMEOUT = 120000; // Increased from 90 to 120 seconds per test
-const WORKER_START_DELAY = 2000; // 2 second delay between worker starts
+// Stable test execution configuration
+const TEST_GROUPS = {
+    // Group 1: Fast, stable tests (run in parallel)
+    fast: [
+        'test-stage-validation.cjs',
+        'test-fall-damage.cjs',
+        'test-basic-flow.cjs'
+    ],
+    
+    // Group 2: Medium tests (run in parallel with reduced workers)
+    medium: [
+        'test-enemy-types.cjs',
+        'test-jump-mechanics.cjs',
+        'test-performance.cjs',
+        'test-player-respawn-size.cjs'
+    ],
+    
+    // Group 3: Heavy tests (run sequentially)
+    heavy: [
+        'test-enemy-damage.cjs',
+        'test-powerup-features.cjs',
+        'test-stage0-4-simple.cjs'
+    ]
+};
+
+const GROUP_CONFIGS = {
+    fast: { workers: 3, timeout: 30000, delay: 1000 },
+    medium: { workers: 2, timeout: 60000, delay: 2000 },
+    heavy: { workers: 1, timeout: 90000, delay: 3000 }
+};
 
 // Ensure logs directory exists
 const logsDir = path.join(__dirname, '..', 'logs');
@@ -15,7 +41,7 @@ if (!fs.existsSync(logsDir)) {
 }
 
 // Create a log file for the entire test run
-const runLogPath = path.join(logsDir, `run-parallel-tests-${toJSTString()}.log`);
+const runLogPath = path.join(logsDir, `run-stable-tests-${toJSTString()}.log`);
 const runLogStream = fs.createWriteStream(runLogPath, { flags: 'a' });
 
 // Override console.log to also write to log file
@@ -69,85 +95,66 @@ async function runTest() {
 runTest();
 `;
 
-// Discover test files
-function discoverTests() {
-    const testDir = __dirname;
-    const testFiles = fs.readdirSync(testDir)
-        .filter(file => {
-            return file.startsWith('test-') && file.endsWith('.cjs') && 
-                   file !== 'run-all-tests.cjs' && file !== 'run-tests-parallel.cjs';
-        })
-        .sort();
-
-    return testFiles.map(file => path.join(testDir, file));
-}
-
 // Run a single test in a worker
-function runTestInWorker(testFile) {
+function runTestInWorker(testFile, timeout) {
     return new Promise((resolve, reject) => {
         const worker = new Worker(workerCode, {
             eval: true,
             workerData: { testFile }
         });
 
-        const timeout = setTimeout(() => {
+        const timeoutHandle = setTimeout(() => {
             worker.terminate();
-            reject(new Error(`Test timeout after ${TEST_TIMEOUT / 1000} seconds`));
-        }, TEST_TIMEOUT);
+            reject(new Error(`Test timeout after ${timeout / 1000} seconds`));
+        }, timeout);
 
         worker.on('message', (result) => {
-            clearTimeout(timeout);
+            clearTimeout(timeoutHandle);
             worker.terminate();
             resolve(result);
         });
 
         worker.on('error', (error) => {
-            clearTimeout(timeout);
+            clearTimeout(timeoutHandle);
             worker.terminate();
             reject(error);
         });
 
         worker.on('exit', (code) => {
             if (code !== 0) {
-                clearTimeout(timeout);
+                clearTimeout(timeoutHandle);
                 reject(new Error(`Worker stopped with exit code ${code}`));
             }
         });
     });
 }
 
-// Main test runner
-async function runAllTestsParallel() {
-    console.log('🚀 Starting Parallel E2E Test Suite\n');
-    console.log(`Using ${MAX_WORKERS} parallel workers\n`);
+// Run a group of tests with specific configuration
+async function runTestGroup(groupName, testFiles, config) {
+    console.log(`\n📦 Running ${groupName} tests (${config.workers} workers, ${config.timeout/1000}s timeout)`);
+    console.log(`   Tests: ${testFiles.join(', ')}`);
     
-    const testFiles = discoverTests();
-    console.log(`📋 Discovered ${testFiles.length} test files:\n`);
-    testFiles.forEach(file => console.log(`   - ${path.basename(file)}`));
-    console.log('');
-    
-    const startTime = Date.now();
     const results = [];
     const testQueue = [...testFiles];
     const runningTests = new Map();
-    
-    // Process tests in parallel with staggered starts
     let workerCount = 0;
+    
     while (testQueue.length > 0 || runningTests.size > 0) {
         // Start new tests if we have capacity
-        while (runningTests.size < MAX_WORKERS && testQueue.length > 0) {
-            const testFile = testQueue.shift();
+        while (runningTests.size < config.workers && testQueue.length > 0) {
+            const testFileName = testQueue.shift();
+            const testFile = path.join(__dirname, testFileName);
             const testName = path.basename(testFile);
             
-            // Add delay between starting workers to reduce initial load spike
+            // Add delay between starting workers
             if (workerCount > 0) {
-                await new Promise(resolve => setTimeout(resolve, WORKER_START_DELAY));
+                await new Promise(resolve => setTimeout(resolve, config.delay));
             }
             workerCount++;
             
             console.log(`🔄 Starting: ${testName}`);
             
-            const promise = runTestInWorker(testFile)
+            const promise = runTestInWorker(testFile, config.timeout)
                 .then(result => {
                     const duration = result.duration ? `(${(result.duration / 1000).toFixed(2)}s)` : '';
                     if (result.success) {
@@ -178,31 +185,57 @@ async function runAllTestsParallel() {
         }
     }
     
+    return results;
+}
+
+// Main test runner
+async function runAllTestsStable() {
+    console.log('🚀 Starting Stable E2E Test Suite\n');
+    console.log('Test execution strategy:');
+    console.log('- Fast tests: Run in parallel with 3 workers');
+    console.log('- Medium tests: Run in parallel with 2 workers');
+    console.log('- Heavy tests: Run sequentially');
+    
+    const startTime = Date.now();
+    const allResults = [];
+    
+    // Run each group of tests
+    for (const [groupName, testFiles] of Object.entries(TEST_GROUPS)) {
+        const config = GROUP_CONFIGS[groupName];
+        const results = await runTestGroup(groupName, testFiles, config);
+        allResults.push(...results);
+        
+        // Add delay between groups
+        if (groupName !== 'heavy') {
+            console.log('\n⏱️  Waiting 5 seconds before next group...');
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+    }
+    
     // Generate summary
     const totalDuration = Date.now() - startTime;
-    const passed = results.filter(r => r.success).length;
-    const failed = results.filter(r => !r.success).length;
+    const passed = allResults.filter(r => r.success).length;
+    const failed = allResults.filter(r => !r.success).length;
     
     console.log(`\n${'='.repeat(60)}`);
     console.log('TEST SUITE SUMMARY');
     console.log(`${'='.repeat(60)}\n`);
     
-    console.log(`Total Tests: ${results.length}`);
+    console.log(`Total Tests: ${allResults.length}`);
     console.log(`Passed: ${passed}`);
     console.log(`Failed: ${failed}`);
     console.log(`Total Duration: ${(totalDuration / 1000).toFixed(2)}s`);
-    console.log(`Average Duration: ${(totalDuration / results.length / 1000).toFixed(2)}s per test`);
-    console.log(`Parallel Speedup: ~${MAX_WORKERS}x`);
+    console.log(`Average Duration: ${(totalDuration / allResults.length / 1000).toFixed(2)}s per test`);
     
     if (failed > 0) {
         console.log('\n❌ Failed Tests:');
-        results.filter(r => !r.success).forEach(result => {
+        allResults.filter(r => !r.success).forEach(result => {
             console.log(`   - ${result.testName}: ${result.error}`);
         });
     }
     
     // Save report
-    const reportPath = path.join(__dirname, '../reports', `parallel-test-report-${toJSTString()}.json`);
+    const reportPath = path.join(__dirname, '../reports', `stable-test-report-${toJSTString()}.json`);
     const reportDir = path.dirname(reportPath);
     
     if (!fs.existsSync(reportDir)) {
@@ -211,15 +244,15 @@ async function runAllTestsParallel() {
     
     fs.writeFileSync(reportPath, JSON.stringify({
         timestamp: toJSTString(),
-        parallel: true,
-        workers: MAX_WORKERS,
+        strategy: 'stable',
+        groups: TEST_GROUPS,
         summary: {
-            total: results.length,
+            total: allResults.length,
             passed,
             failed,
             totalDuration
         },
-        results
+        results: allResults
     }, null, 2));
     
     console.log(`\nTest report saved to: ${reportPath}`);
@@ -254,10 +287,10 @@ process.on('uncaughtException', (error) => {
 
 // Run tests
 if (require.main === module) {
-    console.log(`Starting parallel test run at ${toJSTString()}`);
+    console.log(`Starting stable test run at ${toJSTString()}`);
     console.log(`Log file: ${runLogPath}`);
     
-    runAllTestsParallel().catch(error => {
+    runAllTestsStable().catch(error => {
         console.error('Test suite failed:', error);
         runLogStream.end(() => {
             process.exit(1);

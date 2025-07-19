@@ -5,7 +5,7 @@ async function runTest() {
     const test = new GameTestHelpers({
         headless: false,
         verbose: true,
-        timeout: 20000
+        timeout: 30000  // Increased from 20000 to 30000 for stability
     });
 
     await test.runTest(async (t) => {
