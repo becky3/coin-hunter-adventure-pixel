@@ -6,7 +6,7 @@ const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 async function runTest() {
     const helpers = new GameTestHelpers({ timeout: 30000 });
     
-    await t.runTest(async (t) => {
+    await helpers.runTest(async (t) => {
         await t.init('Animation System Test');
         await t.navigateToGame('http://localhost:3000/?s=0-1&skip_title=true');
         await t.waitForGameInitialization();
