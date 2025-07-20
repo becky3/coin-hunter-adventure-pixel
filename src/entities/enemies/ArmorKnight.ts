@@ -6,6 +6,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { AnimatedSprite } from '../../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 /**
  * Heavily armored enemy that cannot be defeated by jumping
@@ -79,6 +80,9 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             this.moveSpeed = this.chargeSpeed;
             this.animState = 'charge';
             this.animatedSprite.setState('charge');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('charge');
+            }
             
             const playerDir = this.playerInRange.x > this.x ? 1 : -1;
             if (playerDir !== this.direction) {
@@ -90,6 +94,9 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             this.moveSpeed = this.normalSpeed;
             this.animState = 'move';
             this.animatedSprite.setState('move');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('move');
+            }
             this.playerInRange = null;
         }
 
@@ -142,7 +149,11 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             return;
         }
         
-        this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.render(renderer, this.x, this.y, this.direction === -1);
+        } else {
+            this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        }
         
         if (renderer.debug) {
             this.renderDebug(renderer);
@@ -156,5 +167,47 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.setEventBus(manager.getEventBus());
         manager.addEnemy(this);
         manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ENEMY);
+    }
+    
+    /**
+     * Get animation definitions for armor knight
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['enemies/armor_knight_idle.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'move',
+                sprites: ['enemies/armor_knight_move.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'charge',
+                sprites: ['enemies/armor_knight_move.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for armor knight
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x01,
+                    0x42,
+                    0x43
+                ]
+            }
+        };
     }
 }

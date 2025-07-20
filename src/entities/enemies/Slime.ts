@@ -5,6 +5,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { AnimatedSprite } from '../../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 /**
  * Slime enemy that moves horizontally
@@ -72,9 +73,15 @@ export class Slime extends Enemy implements EntityInitializer {
             this.vx = this.moveSpeed * this.direction;
             this.animState = 'move';
             this.animatedSprite.setState('move');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('move');
+            }
         } else {
             this.animState = 'jump';
             this.animatedSprite.setState('jump');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('jump');
+            }
         }
 
     }
@@ -87,7 +94,11 @@ export class Slime extends Enemy implements EntityInitializer {
             return;
         }
         
-        this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.render(renderer, this.x, this.y, this.direction === -1);
+        } else {
+            this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        }
         
         if (renderer.debug) {
             this.renderDebug(renderer);
@@ -101,5 +112,47 @@ export class Slime extends Enemy implements EntityInitializer {
         this.setEventBus(manager.getEventBus());
         manager.addEnemy(this);
         manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ENEMY);
+    }
+    
+    /**
+     * Get animation definitions for slime
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['enemies/slime.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'move',
+                sprites: ['enemies/slime_idle1.json', 'enemies/slime_idle2.json'],
+                frameDuration: 300,
+                loop: true
+            },
+            {
+                id: 'jump',
+                sprites: ['enemies/slime.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for slime
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x01,
+                    0x31,
+                    0x32
+                ]
+            }
+        };
     }
 }

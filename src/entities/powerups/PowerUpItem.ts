@@ -74,14 +74,18 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
-        if (!this.animatedSprite) {
-            const animationKey = this.getAnimationKey();
-            this.animatedSprite = new AnimatedSprite(this.powerUpType, {
-                idle: animationKey
-            });
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.render(renderer, this.x, this.y, false);
+        } else {
+            if (!this.animatedSprite) {
+                const animationKey = this.getAnimationKey();
+                this.animatedSprite = new AnimatedSprite(this.powerUpType, {
+                    idle: animationKey
+                });
+            }
+            
+            this.animatedSprite.render(renderer, this.x, this.y);
         }
-        
-        this.animatedSprite.render(renderer, this.x, this.y);
         
         if (renderer.debug) {
             this.renderDebug(renderer);

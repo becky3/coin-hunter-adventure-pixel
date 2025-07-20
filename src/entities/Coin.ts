@@ -6,6 +6,7 @@ import { Logger } from '../utils/Logger';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
 import { AnimatedSprite } from '../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 const FLOAT_SPEED_MULTIPLIER = 0.1;
 const PIXELS_PER_UNIT = 16;
@@ -76,7 +77,11 @@ export class Coin extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
-        this.animatedSprite.render(renderer, this.x, this.y, false);
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.render(renderer, this.x, this.y, false);
+        } else {
+            this.animatedSprite.render(renderer, this.x, this.y, false);
+        }
         
         if (renderer.debug) {
             this.renderDebug(renderer);
@@ -121,5 +126,35 @@ export class Coin extends Entity implements EntityInitializer {
      */
     initializeInManager(manager: EntityManager): void {
         manager.addItem(this);
+    }
+    
+    /**
+     * Get animation definitions for coin
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['items/coin_spin1.json', 'items/coin_spin2.json', 'items/coin_spin3.json', 'items/coin_spin4.json'],
+                frameDuration: 150,
+                loop: true
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for coin
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x01,
+                    0x52,
+                    0x53
+                ]
+            }
+        };
     }
 }
