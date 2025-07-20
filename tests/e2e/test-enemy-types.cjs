@@ -95,14 +95,15 @@ async function runTest() {
             if (bat) {
                 return {
                     state: bat.state,
-                    isAttacking: bat.state === 'attack',
+                    batState: bat.currentBatState,
+                    isFlying: bat.currentBatState === 'flying',
                     velocityChanged: Math.abs(bat.vx) > 0.1 || Math.abs(bat.vy) > 0.1
                 };
             }
             return null;
         });
         
-        t.assert(batAttackInfo && (batAttackInfo.isAttacking || batAttackInfo.velocityChanged), 
+        t.assert(batAttackInfo && (batAttackInfo.isFlying || batAttackInfo.velocityChanged), 
             'Bat should attack or move when player is detected');
         console.log('✅ Bat enemy detection working');
         

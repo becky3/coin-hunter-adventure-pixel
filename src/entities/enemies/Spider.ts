@@ -94,9 +94,9 @@ export class Spider extends Enemy implements EntityInitializer {
         }
         
         this.animatedSprite = new AnimatedSprite('spider', {
-            idle: 'enemies/spider/spider_idle',
-            walk: 'enemies/spider/spider_walk',
-            thread: 'enemies/spider/spider_thread'
+            idle: 'enemies/spider_idle',
+            walk: 'enemies/spider_walk',
+            thread: 'enemies/spider_thread'
         });
     }
     
