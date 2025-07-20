@@ -1,4 +1,5 @@
 import { Entity, CollisionInfo } from './Entity';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 import { InputSystem } from '../core/InputSystem';
 import { MusicSystem } from '../audio/MusicSystem.js';
 import { AssetLoader } from '../assets/AssetLoader';
@@ -10,7 +11,6 @@ import type { CharacterConfig, CharacterAnimationConfig } from '../config/Resour
 import { PowerUpManager } from '../managers/PowerUpManager';
 import { PowerUpConfig, PowerUpType } from '../types/PowerUpTypes';
 import { ShieldEffectVisual } from '../effects/ShieldEffect';
-import { AnimatedSprite } from '../animation/AnimatedSprite';
 
 
 const DEFAULT_PLAYER_CONFIG = {
@@ -102,8 +102,6 @@ export class Player extends Entity {
     private eventBus: EventBus | null;
     public variableJumpBoost: number;
     private variableJumpBoostMultiplier: number;
-    private animatedSprite: AnimatedSprite;
-    private animatedSpriteSmall: AnimatedSprite;
     private frameCount: number;
     private powerUpManager: PowerUpManager;
     private shieldVisual: ShieldEffectVisual | null = null;
@@ -241,20 +239,6 @@ export class Player extends Entity {
         this.frameCount = 0;
         
         this.powerUpManager = new PowerUpManager(this);
-        
-        this.animatedSprite = new AnimatedSprite('player', {
-            idle: 'player/idle',
-            walk: 'player/walk',
-            jump: 'player/jump',
-            fall: 'player/fall'
-        });
-        
-        this.animatedSpriteSmall = new AnimatedSprite('player_small', {
-            idle: 'player/idle_small',
-            walk: 'player/walk_small',
-            jump: 'player/jump_small',
-            fall: 'player/fall_small'
-        });
     }
     
     setInputManager(inputManager: InputSystem): void {
@@ -472,8 +456,11 @@ export class Player extends Entity {
         
         if (prevState !== this._animState) {
             this.updateSprite();
-            const currentSprite = this.isSmall ? this.animatedSpriteSmall : this.animatedSprite;
-            currentSprite.setState(this._animState);
+            
+            if (this.entityAnimationManager) {
+                const actualState = this.isSmall ? `${this._animState}_small` : this._animState;
+                this.entityAnimationManager.setState(actualState);
+            }
         }
     }
     
@@ -636,8 +623,18 @@ export class Player extends Entity {
             return;
         }
         
-        const currentSprite = this.isSmall ? this.animatedSpriteSmall : this.animatedSprite;
-        currentSprite.render(renderer, this.x, this.y, this.flipX);
+        if (this.entityAnimationManager) {
+            const actualState = this.isSmall ? `${this._animState}_small` : this._animState;
+            this.entityAnimationManager.setState(actualState);
+            
+            if (this.hasPowerGlove) {
+                this.entityAnimationManager.setPaletteVariant('powerGlove');
+            } else {
+                this.entityAnimationManager.setPaletteVariant('default');
+            }
+            
+            this.entityAnimationManager.render(renderer, this.x, this.y, this.flipX);
+        }
         
         this.renderEffects(renderer);
         
@@ -720,10 +717,96 @@ export class Player extends Entity {
         Logger.log('[Player] setHasPowerGlove called with:', hasGlove);
         this.hasPowerGlove = hasGlove;
         this.updateAnimationState();
+        
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.setPaletteVariant(hasGlove ? 'powerGlove' : 'default');
+        }
     }
     
     getHasPowerGlove(): boolean {
         return this.hasPowerGlove;
+    }
+    
+    /**
+     * Get animation definitions for player
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['player/idle.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'walk',
+                sprites: ['player/walk1.json', 'player/walk2.json', 'player/walk3.json', 'player/walk4.json'],
+                frameDuration: 100,
+                loop: true
+            },
+            {
+                id: 'jump',
+                sprites: ['player/jump1.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'fall',
+                sprites: ['player/jump2.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'idle_small',
+                sprites: ['player/idle_small.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'walk_small',
+                sprites: ['player/walk_small1.json', 'player/walk_small2.json', 'player/walk_small3.json', 'player/walk_small4.json'],
+                frameDuration: 100,
+                loop: true
+            },
+            {
+                id: 'jump_small',
+                sprites: ['player/jump_small1.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'fall_small',
+                sprites: ['player/jump_small2.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for player
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x11,
+                    0x43,
+                    0x01
+                ]
+            },
+            variants: {
+                powerGlove: {
+                    colors: [
+                        null,
+                        0x41,
+                        0x43,
+                        0x01
+                    ]
+                }
+            }
+        };
     }
     
 }

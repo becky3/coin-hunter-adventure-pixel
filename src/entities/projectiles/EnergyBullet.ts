@@ -4,7 +4,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PowerGloveConfig } from '../../config/PowerGloveConfig';
-import { AnimatedSprite } from '../../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 /**
  * Energy bullet projectile for ranged attacks
@@ -17,7 +17,6 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     private destroyed: boolean = false;
     private originX: number;
     private originY: number;
-    private animatedSprite?: AnimatedSprite;
 
     constructor(x: number, y: number, direction: number, speed: number) {
         super(x, y, PowerGloveConfig.bulletWidth, PowerGloveConfig.bulletHeight);
@@ -40,6 +39,8 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         this.originY = y;
         
         Logger.log('[EnergyBullet] Created at', x, y, 'direction:', direction);
+        
+        this.setAnimation('idle');
     }
 
     onUpdate(deltaTime: number): void {
@@ -68,17 +69,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
-        if (!this.animatedSprite) {
-            this.animatedSprite = new AnimatedSprite('EnergyBullet', {
-                idle: 'projectiles/energy_bullet'
-            });
-        }
-        
-        this.animatedSprite.render(renderer, this.x, this.y);
-        
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
 
     onCollision(collisionInfo?: CollisionInfo): void {
@@ -142,5 +133,35 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         } else {
             Logger.warn('[EnergyBullet] No physics system available');
         }
+    }
+    
+    /**
+     * Get animation definitions for energy bullet
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['projectiles/energy_bullet.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for energy bullet
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x01,
+                    0x52,
+                    0x51
+                ]
+            }
+        };
     }
 }

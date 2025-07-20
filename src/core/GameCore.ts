@@ -19,9 +19,6 @@ import { SoundTestState } from '../states/SoundTestState';
 import { Logger } from '../utils/Logger';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { URLParams } from '../utils/urlParams';
-import { AnimationManager } from '../animation/AnimationManager';
-import { registerAllAnimations } from '../config/animationDefinitions';
-import { AnimationRegistrar } from '../animation/AnimationRegistrar';
 
 import { InputSystemAdapter } from '../systems/adapters/InputSystemAdapter';
 import { PhysicsSystemAdapter } from '../systems/adapters/PhysicsSystemAdapter';
@@ -113,17 +110,6 @@ export class GameCore {
 
         const pixelArtRenderer = new PixelArtRenderer(canvas);
         renderer.pixelArtRenderer = pixelArtRenderer;
-
-        const animationManager = AnimationManager.getInstance();
-        animationManager.setPixelArtRenderer(pixelArtRenderer);
-        registerAllAnimations();
-        
-        const animationRegistrar = new AnimationRegistrar();
-        animationRegistrar.registerAllAnimations(pixelArtRenderer).catch(error => {
-            Logger.error('Failed to register animations:', error);
-        });
-        
-        (window as Window & { AnimationManager?: typeof AnimationManager }).AnimationManager = AnimationManager;
 
         const assetLoader = new AssetLoader();
         assetLoader.setRenderer(pixelArtRenderer);

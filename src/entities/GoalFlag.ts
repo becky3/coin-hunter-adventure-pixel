@@ -5,14 +5,13 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
-import { AnimatedSprite } from '../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 /**
  * GoalFlag implementation
  */
 export class GoalFlag extends Entity implements EntityInitializer {
     private cleared: boolean;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a GoalFlag instance
@@ -41,9 +40,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
         
         this.cleared = false;
         
-        this.animatedSprite = new AnimatedSprite('goal_flag', {
-            idle: 'objects/goal_flag'
-        });
+        this.setAnimation('idle');
     }
 
     onUpdate(_deltaTime: number): void {
@@ -52,11 +49,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
-        this.animatedSprite.render(renderer, this.x, this.y, false);
-        
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
 
     onCollision(collisionInfo?: CollisionInfo): boolean {
@@ -87,5 +80,35 @@ export class GoalFlag extends Entity implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         manager.addItem(this);
         manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ITEM);
+    }
+    
+    /**
+     * Get animation definitions for goal flag
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['terrain/goal_flag.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for goal flag
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x51,
+                    0x03,
+                    0x31
+                ]
+            }
+        };
     }
 }

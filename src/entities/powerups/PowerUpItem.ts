@@ -6,7 +6,6 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { MusicSystem } from '../../audio/MusicSystem';
-import { AnimatedSprite } from '../../animation/AnimatedSprite';
 
 /**
  * Base class for all power-up items
@@ -21,7 +20,6 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     protected baseY: number;
     declare animationTime: number;
     protected musicSystem?: MusicSystem;
-    protected animatedSprite?: AnimatedSprite;
 
     constructor(x: number, y: number, width: number, height: number, powerUpType: PowerUpType) {
         super(x, y, width, height);
@@ -74,18 +72,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
-        if (!this.animatedSprite) {
-            const animationKey = this.getAnimationKey();
-            this.animatedSprite = new AnimatedSprite(this.powerUpType, {
-                idle: animationKey
-            });
-        }
-        
-        this.animatedSprite.render(renderer, this.x, this.y);
-        
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
 
 

@@ -4,7 +4,7 @@ import { ResourceLoader } from '../../config/ResourceLoader';
 import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
-import { AnimatedSprite } from '../../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 /**
  * Slime enemy that moves horizontally
@@ -13,7 +13,6 @@ export class Slime extends Enemy implements EntityInitializer {
     public spriteKey: string;
     private bounceHeight: number;
     declare friction: number;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Slime instance
@@ -56,11 +55,7 @@ export class Slime extends Enemy implements EntityInitializer {
             this.attackRange = slimeConfig.ai.attackRange || 20;
         }
         
-        this.animatedSprite = new AnimatedSprite('slime', {
-            idle: 'enemies/slime_idle',
-            move: 'enemies/slime_move',
-            jump: 'enemies/slime_jump'
-        });
+        this.setAnimation('idle');
     }
     
     protected updateAI(_deltaTime: number): void {
@@ -71,10 +66,14 @@ export class Slime extends Enemy implements EntityInitializer {
         if (this.grounded) {
             this.vx = this.moveSpeed * this.direction;
             this.animState = 'move';
-            this.animatedSprite.setState('move');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('move');
+            }
         } else {
             this.animState = 'jump';
-            this.animatedSprite.setState('jump');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('jump');
+            }
         }
 
     }
@@ -87,11 +86,9 @@ export class Slime extends Enemy implements EntityInitializer {
             return;
         }
         
-        this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        this.flipX = this.direction === -1;
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
     
     /**
@@ -101,5 +98,47 @@ export class Slime extends Enemy implements EntityInitializer {
         this.setEventBus(manager.getEventBus());
         manager.addEnemy(this);
         manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ENEMY);
+    }
+    
+    /**
+     * Get animation definitions for slime
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['enemies/slime_idle1.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'move',
+                sprites: ['enemies/slime_idle1.json', 'enemies/slime_idle2.json'],
+                frameDuration: 300,
+                loop: true
+            },
+            {
+                id: 'jump',
+                sprites: ['enemies/slime_idle1.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for slime
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x60,
+                    0x62,
+                    0x00
+                ]
+            }
+        };
     }
 }

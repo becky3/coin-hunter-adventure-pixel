@@ -1,5 +1,7 @@
 import type { PixelRenderer } from '../rendering/PixelRenderer';
 import type { SpriteData } from '../types/assetTypes';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import { EntityAnimationManager } from '../animation/EntityAnimationManager';
 
 export interface Bounds {
     left: number;
@@ -25,7 +27,7 @@ let entityIdCounter = 0;
 /**
  * Base entity class for all game objects
  */
-export class Entity {
+export abstract class Entity {
     public id: number;
     
     public x: number;
@@ -61,6 +63,10 @@ export class Entity {
     
     public sprite: string | SpriteData | HTMLCanvasElement | ImageData | null;
     public spriteScale: number;
+    
+    protected entityAnimationManager?: EntityAnimationManager;
+    private animationInitialized: boolean = false;
+    private animationInitializing: boolean = false;
 
     constructor(x = 0, y = 0, width = 16, height = 16) {
         this.id = ++entityIdCounter;
@@ -98,7 +104,45 @@ export class Entity {
         
         this.sprite = null;
         this.spriteScale = 1;
+        
+        this.animationInitialized = false;
+        this.animationInitializing = false;
+        
+        this.initializeAnimations();
     }
+    
+    /**
+     * Initialize entity-specific animations
+     * Called during construction
+     */
+    protected initializeAnimations(): void {
+        try {
+            const palette = this.getPaletteDefinition();
+            this.entityAnimationManager = new EntityAnimationManager(palette);
+            
+            const animations = this.getAnimationDefinitions();
+            if (animations.length > 0) {
+                this.entityAnimationManager.initialize(animations).catch(error => {
+                    console.error(`[Entity] Failed to initialize animations for ${this.constructor.name}:`, error);
+                });
+            }
+        } catch (error) {
+            console.error(`[Entity] Failed to create EntityAnimationManager for ${this.constructor.name}:`, error);
+            this.entityAnimationManager = undefined;
+        }
+    }
+    
+    /**
+     * Get animation definitions for this entity
+     * Override in derived classes
+     */
+    protected abstract getAnimationDefinitions(): AnimationDefinition[];
+    
+    /**
+     * Get palette definition for this entity
+     * Override in derived classes
+     */
+    protected abstract getPaletteDefinition(): EntityPaletteDefinition;
 
     update(deltaTime: number): void {
         if (!this.active) return;
@@ -112,12 +156,18 @@ export class Entity {
         if (this.currentAnimation) {
             this.animationTime += deltaTime;
         }
+        
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.update(deltaTime);
+        }
     }
 
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
-        if (this.sprite) {
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.render(renderer, this.x, this.y, this.flipX);
+        } else if (this.sprite) {
             renderer.drawSprite(
                 this.sprite,
                 this.x,
@@ -125,7 +175,7 @@ export class Entity {
                 this.flipX
             );
         } else {
-            this.renderDefault(renderer);
+            throw new Error(`[Entity] ${this.constructor.name} has no way to render - neither entityAnimationManager nor sprite is available. Ensure that getAnimationDefinitions() and getPaletteDefinition() methods are implemented if required.`);
         }
         
         if (renderer.debug) {
@@ -133,24 +183,6 @@ export class Entity {
         }
     }
 
-    renderDefault(renderer: PixelRenderer): void {
-        renderer.drawRect(
-            this.x,
-            this.y,
-            this.width,
-            this.height,
-            '#FF00FF'
-        );
-        
-        renderer.drawRect(
-            this.x - 2,
-            this.y - 2,
-            this.width + 4,
-            this.height + 4,
-            '#FF00FF',
-            false
-        );
-    }
 
     renderDebug(renderer: PixelRenderer): void {
         renderer.drawRect(
@@ -245,6 +277,19 @@ export class Entity {
         if (this.currentAnimation !== animationName) {
             this.currentAnimation = animationName;
             this.animationTime = 0;
+            
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState(animationName);
+            }
+        }
+    }
+    
+    /**
+     * Set the palette variant (e.g., 'powerGlove')
+     */
+    setPaletteVariant(variant: string): void {
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.setPaletteVariant(variant);
         }
     }
 

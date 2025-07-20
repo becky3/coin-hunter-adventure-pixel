@@ -7,7 +7,7 @@ import { Logger } from '../utils/Logger';
 import { InputSystem } from '../core/InputSystem';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
-import { AnimatedSprite } from '../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 /**
  * Spring platform that bounces the player
@@ -21,7 +21,6 @@ export class Spring extends Entity implements EntityInitializer {
     public physicsSystem: PhysicsSystem | null;
     private cooldownFrames: number;
     private readonly COOLDOWN_DURATION = 20;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Spring instance
@@ -57,10 +56,7 @@ export class Spring extends Entity implements EntityInitializer {
         this.physicsSystem = null;
         this.cooldownFrames = 0;
         
-        this.animatedSprite = new AnimatedSprite('spring', {
-            normal: 'items/spring_normal',
-            compressed: 'items/spring_compressed'
-        });
+        this.setAnimation('normal');
     }
 
     onUpdate(deltaTime: number): void {
@@ -79,7 +75,9 @@ export class Spring extends Entity implements EntityInitializer {
             this.triggered = false;
         }
         
-        this.animatedSprite.setState(this.compression > 0.5 ? 'compressed' : 'normal');
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.setState(this.compression > 0.5 ? 'compressed' : 'normal');
+        }
         
         this.animationTime += deltaTime;
     }
@@ -116,11 +114,12 @@ export class Spring extends Entity implements EntityInitializer {
         const compression = this.compression * 0.3;
         const offsetY = this.height * compression;
         
-        this.animatedSprite.render(renderer, this.x, this.y + offsetY, false);
+        renderer.ctx.save();
+        renderer.ctx.translate(0, offsetY);
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
+        
+        renderer.ctx.restore();
     }
 
     onCollision(collisionInfo?: CollisionInfo): boolean {
@@ -163,5 +162,41 @@ export class Spring extends Entity implements EntityInitializer {
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addItem(this);
         manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ITEM);
+    }
+    
+    /**
+     * Get animation definitions for spring
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'normal',
+                sprites: ['terrain/spring.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'compressed',
+                sprites: ['terrain/spring.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for spring
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x42,
+                    0x41,
+                    0x40
+                ]
+            }
+        };
     }
 }

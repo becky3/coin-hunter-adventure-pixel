@@ -6,7 +6,7 @@ import { Entity } from '../Entity';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PhysicsSystem } from '../../physics/PhysicsSystem';
-import { AnimatedSprite } from '../../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 type SpiderState = 'crawling' | 'descending' | 'ascending' | 'waiting';
 type SpiderSurface = 'ceiling' | 'wall_left' | 'wall_right' | 'floor';
@@ -33,7 +33,6 @@ export class Spider extends Enemy implements EntityInitializer {
     private lastAscentTime: number;
     private physicsSystem: PhysicsSystem | null = null;
     declare friction: number;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Spider instance
@@ -93,11 +92,7 @@ export class Spider extends Enemy implements EntityInitializer {
             this.attackRange = spiderConfig.ai.attackRange || 20;
         }
         
-        this.animatedSprite = new AnimatedSprite('spider', {
-            idle: 'enemies/spider_idle',
-            walk: 'enemies/spider_walk',
-            thread: 'enemies/spider_thread'
-        });
+        this.setAnimation('idle');
     }
     
     protected updateAI(deltaTime: number): void {
@@ -129,11 +124,17 @@ export class Spider extends Enemy implements EntityInitializer {
         this.animState = this._spiderState === 'waiting' ? 'idle' : 'walk';
         
         if (this._spiderState === 'descending' || this._spiderState === 'ascending') {
-            this.animatedSprite.setState('thread');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('thread');
+            }
         } else if (this._spiderState === 'waiting') {
-            this.animatedSprite.setState('idle');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('idle');
+            }
         } else {
-            this.animatedSprite.setState('walk');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('walk');
+            }
         }
     }
     
@@ -309,11 +310,9 @@ export class Spider extends Enemy implements EntityInitializer {
             return;
         }
         
-        this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        this.flipX = this.direction === -1;
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
     
     /**
@@ -345,5 +344,47 @@ export class Spider extends Enemy implements EntityInitializer {
         manager.addEnemy(this);
         this.physicsSystem = manager.getPhysicsSystem();
         this.physicsSystem.addEntity(this, this.physicsSystem.layers.ENEMY);
+    }
+    
+    /**
+     * Get animation definitions for spider
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['enemies/spider/spider_idle.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'walk',
+                sprites: ['enemies/spider/spider_walk1.json', 'enemies/spider/spider_walk2.json'],
+                frameDuration: 150,
+                loop: true
+            },
+            {
+                id: 'thread',
+                sprites: ['enemies/spider/spider_thread.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for spider
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x01,
+                    0x31,
+                    0x50
+                ]
+            }
+        };
     }
 }

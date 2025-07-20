@@ -35,6 +35,8 @@ Coin Hunter Adventure Pixelは、HTML5 Canvas APIを使用したブラウザベ�
 - **PhysicsSystem**: 物理演算（重力、衝突判定）
 - **MusicSystem**: Web Audio APIによる音声管理（統一インターフェース実装）
 - **InputSystem**: キーボード入力の統合管理
+- **EntityAnimationManager**: エンティティベースのアニメーション管理
+- **MasterPalette**: 52色のマスターパレット定義
 
 #### マネージャーシステム
 - **EntityManager**: エンティティ（プレイヤー、敵、アイテム）の統合管理
@@ -52,6 +54,7 @@ Input → Update (Logic/Physics) → Render → (60fps repeat)
 
 ```
 src/
+├── animation/     # アニメーションシステム
 ├── audio/         # 音声システム
 ├── controllers/   # コントローラー（カメラ等）
 ├── core/          # コアシステム
@@ -62,6 +65,7 @@ src/
 ├── rendering/     # 描画システム
 ├── services/      # サービス（EventBus、ServiceLocator）
 ├── states/        # ゲーム状態
+├── types/         # 型定義
 ├── ui/            # UI関連
 └── utils/         # ユーティリティ
 ```

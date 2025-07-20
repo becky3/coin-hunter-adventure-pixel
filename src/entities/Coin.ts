@@ -5,7 +5,7 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
-import { AnimatedSprite } from '../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 const FLOAT_SPEED_MULTIPLIER = 0.1;
 const PIXELS_PER_UNIT = 16;
@@ -21,7 +21,6 @@ export class Coin extends Entity implements EntityInitializer {
     private floatAmplitude: number;
     private baseY: number;
     public scoreValue: number;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Coin instance
@@ -59,9 +58,7 @@ export class Coin extends Entity implements EntityInitializer {
         
         this.scoreValue = coinConfig?.properties.scoreValue || 10;
         
-        this.animatedSprite = new AnimatedSprite('coin', {
-            idle: 'items/coin_spin'
-        });
+        this.setAnimation('idle');
     }
 
     onUpdate(deltaTime: number): void {
@@ -76,11 +73,7 @@ export class Coin extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
-        this.animatedSprite.render(renderer, this.x, this.y, false);
-        
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
     
     public isCollected(): boolean {
@@ -121,5 +114,35 @@ export class Coin extends Entity implements EntityInitializer {
      */
     initializeInManager(manager: EntityManager): void {
         manager.addItem(this);
+    }
+    
+    /**
+     * Get animation definitions for coin
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['items/coin_spin1.json', 'items/coin_spin3.json', 'items/coin_spin4.json', 'items/coin_spin3.json'],
+                frameDuration: 150,
+                loop: true
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for coin
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x01,
+                    0x52,
+                    0x53
+                ]
+            }
+        };
     }
 }
