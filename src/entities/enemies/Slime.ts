@@ -107,7 +107,7 @@ export class Slime extends Enemy implements EntityInitializer {
         return [
             {
                 id: 'idle',
-                sprites: ['enemies/slime.json'],
+                sprites: ['enemies/slime_idle1.json'],
                 frameDuration: 0,
                 loop: false
             },
@@ -119,7 +119,7 @@ export class Slime extends Enemy implements EntityInitializer {
             },
             {
                 id: 'jump',
-                sprites: ['enemies/slime.json'],
+                sprites: ['enemies/slime_idle1.json'],
                 frameDuration: 0,
                 loop: false
             }
