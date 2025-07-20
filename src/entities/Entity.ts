@@ -111,11 +111,14 @@ export abstract class Entity {
      * Called during construction
      */
     protected initializeAnimations(): void {
-        const animations = this.getAnimationDefinitions();
         const palette = this.getPaletteDefinition();
+        this.entityAnimationManager = new EntityAnimationManager(palette);
         
+        const animations = this.getAnimationDefinitions();
         if (animations.length > 0) {
-            this.entityAnimationManager = new EntityAnimationManager(animations, palette);
+            this.entityAnimationManager.initialize(animations).catch(error => {
+                console.error('Failed to initialize animations:', error);
+            });
         }
     }
     

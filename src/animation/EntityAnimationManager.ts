@@ -7,7 +7,7 @@ import type {
     FourColorPalette
 } from '../types/animationTypes';
 import { MasterPalette } from '../rendering/MasterPalette';
-import { AssetLoader } from '../core/AssetLoader';
+import { AssetLoader } from '../assets/AssetLoader';
 
 /**
  * Manages animations and palettes for individual entities
@@ -19,14 +19,17 @@ export class EntityAnimationManager {
     private currentVariant: string = 'default';
     private lastUpdateTime: number = 0;
 
-    constructor(
-        definitions: AnimationDefinition[], 
-        palette: EntityPaletteDefinition
-    ) {
+    constructor(palette: EntityPaletteDefinition) {
         this.palette = palette;
-        this.loadAnimations(definitions);
     }
 
+    /**
+     * Initialize animations - must be called after construction
+     */
+    async initialize(definitions: AnimationDefinition[]): Promise<void> {
+        await this.loadAnimations(definitions);
+    }
+    
     /**
      * Load and process animation definitions
      */
