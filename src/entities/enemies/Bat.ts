@@ -6,6 +6,7 @@ import { Entity } from '../Entity';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { AnimatedSprite } from '../../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 type BatState = 'hanging' | 'flying';
 
@@ -108,6 +109,9 @@ export class Bat extends Enemy implements EntityInitializer {
             this.vy = 0;
             this.animState = 'hang';
             this.animatedSprite.setState('hang');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('hang');
+            }
             this.grounded = true;
             
             const player = this.findPlayer();
@@ -173,6 +177,9 @@ export class Bat extends Enemy implements EntityInitializer {
             
             this.animState = 'fly';
             this.animatedSprite.setState('fly');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('fly');
+            }
         }
     }
     
@@ -221,7 +228,12 @@ export class Bat extends Enemy implements EntityInitializer {
             return;
         }
         
-        this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.setState(this.animState === 'hang' ? 'hang' : 'fly');
+            this.entityAnimationManager.render(renderer, this.x, this.y, this.direction === -1);
+        } else {
+            this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        }
         
         if (renderer.debug) {
             this.renderDebug(renderer);
@@ -242,5 +254,41 @@ export class Bat extends Enemy implements EntityInitializer {
      */
     get currentBatState(): BatState {
         return this.batState;
+    }
+    
+    /**
+     * Get animation definitions for bat
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'hang',
+                sprites: ['enemies/bat_hang.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'fly',
+                sprites: ['enemies/bat_fly1.json', 'enemies/bat_fly2.json'],
+                frameDuration: 150,
+                loop: true
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for bat
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x01,
+                    0x21,
+                    0x41
+                ]
+            }
+        };
     }
 }

@@ -7,6 +7,7 @@ import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PhysicsSystem } from '../../physics/PhysicsSystem';
 import { AnimatedSprite } from '../../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 type SpiderState = 'crawling' | 'descending' | 'ascending' | 'waiting';
 type SpiderSurface = 'ceiling' | 'wall_left' | 'wall_right' | 'floor';
@@ -130,10 +131,19 @@ export class Spider extends Enemy implements EntityInitializer {
         
         if (this._spiderState === 'descending' || this._spiderState === 'ascending') {
             this.animatedSprite.setState('thread');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('thread');
+            }
         } else if (this._spiderState === 'waiting') {
             this.animatedSprite.setState('idle');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('idle');
+            }
         } else {
             this.animatedSprite.setState('walk');
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState('walk');
+            }
         }
     }
     
@@ -309,7 +319,11 @@ export class Spider extends Enemy implements EntityInitializer {
             return;
         }
         
-        this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.render(renderer, this.x, this.y, this.direction === -1);
+        } else {
+            this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
+        }
         
         if (renderer.debug) {
             this.renderDebug(renderer);
@@ -345,5 +359,47 @@ export class Spider extends Enemy implements EntityInitializer {
         manager.addEnemy(this);
         this.physicsSystem = manager.getPhysicsSystem();
         this.physicsSystem.addEntity(this, this.physicsSystem.layers.ENEMY);
+    }
+    
+    /**
+     * Get animation definitions for spider
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'idle',
+                sprites: ['enemies/spider/spider_idle.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'walk',
+                sprites: ['enemies/spider/spider_walk1.json', 'enemies/spider/spider_walk2.json'],
+                frameDuration: 150,
+                loop: true
+            },
+            {
+                id: 'thread',
+                sprites: ['enemies/spider/spider_thread.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for spider
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x01,
+                    0x31,
+                    0x50
+                ]
+            }
+        };
     }
 }
