@@ -1,8 +1,9 @@
 const { chromium } = require('playwright');
 
 (async () => {
+    const headlessMode = process.env.HEADLESS_MODE === 'true';
     const browser = await chromium.launch({ 
-        headless: false,
+        headless: headlessMode,
         args: ['--enable-logging', '--v=1']
     });
     const context = await browser.newContext();
@@ -26,7 +27,8 @@ const { chromium } = require('playwright');
     
     try {
         // ページを開く
-        await page.goto('http://localhost:3000', { 
+        const testUrl = process.env.TEST_URL || 'http://localhost:3000';
+        await page.goto(testUrl, { 
             waitUntil: 'networkidle',
             timeout: 120000 // 2分のタイムアウト
         });

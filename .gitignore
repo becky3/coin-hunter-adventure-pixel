@@ -19,6 +19,9 @@ tests/e2e/tests/screenshots/
 build/
 dist/
 
+# Vite
+vite.config.js.timestamp-*.mjs
+
 # Misc
 .DS_Store
 .env.local
