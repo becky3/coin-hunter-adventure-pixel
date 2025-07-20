@@ -72,19 +72,19 @@ export const ANIMATION_PATTERNS: { [category: string]: { [name: string]: Animati
             loop: false
         },
         spider_idle: {
-            pattern: 'enemies/spider_idle',
+            pattern: 'enemies/spider/spider_idle',
             frameCount: 1,
             duration: 0,
             loop: false
         },
         spider_walk: {
-            pattern: 'enemies/spider_walk',
+            pattern: 'enemies/spider/spider_walk',
             frameCount: 2,
             duration: 150,
             loop: true
         },
         spider_thread: {
-            pattern: 'enemies/spider_thread',
+            pattern: 'enemies/spider/spider_thread',
             frameCount: 1,
             duration: 0,
             loop: false
