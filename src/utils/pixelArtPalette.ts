@@ -179,12 +179,15 @@ const PALETTE_NAME_TO_MASTER_PALETTE: Record<string, number[]> = {
     character: [0, 0x11, 0x33, 0x50],
     characterPowerGlove: [0, 0x41, 0x53, 0x50],
     enemy: [0, 0x61, 0x62, 0x60],
+    enemySpider: [0, 0x01, 0x02, 0x03],
     items: [0, 0x52, 0x53, 0x51],
+    itemsPowerUp: [0, 0x11, 0x12, 0x13],
     grassland: [0, 0x50, 0x51, 0x61],
     ui: [0, 0x41, 0x03, 0x00],
     sky: [0, 0x12, 0x13, 0x03],
     nature: [0, 0x50, 0x51, 0x61],
-    shield: [0, 0x11, 0x12, 0x13]
+    shield: [0, 0x11, 0x12, 0x13],
+    effect: [0, 0x11, 0x12, 0x13]
 };
 
 const UI_PALETTE_INDICES = {
@@ -205,7 +208,11 @@ const UI_PALETTE_INDICES = {
  * Returns color palette for the specified palette name
  */
 function getColorPalette(paletteName: string): ColorPalette {
-    const masterIndices = PALETTE_NAME_TO_MASTER_PALETTE[paletteName] || PALETTE_NAME_TO_MASTER_PALETTE.character;
+    const masterIndices = PALETTE_NAME_TO_MASTER_PALETTE[paletteName];
+    if (!masterIndices) {
+        throw new Error(`[getColorPalette] Palette not found: ${paletteName}`);
+    }
+    
     const palette: ColorPalette = {};
     
     for (let i = 0; i < masterIndices.length; i++) {
@@ -213,7 +220,11 @@ function getColorPalette(paletteName: string): ColorPalette {
         if (colorIndex === 0) {
             palette[i] = null;
         } else {
-            palette[i] = paletteSystem.masterPalette[colorIndex] || '#000000';
+            const color = paletteSystem.masterPalette[colorIndex];
+            if (!color) {
+                throw new Error(`[getColorPalette] Color not found in master palette: 0x${colorIndex.toString(16).padStart(2, '0')} (palette: ${paletteName}, index: ${i})`);
+            }
+            palette[i] = color;
         }
     }
     
