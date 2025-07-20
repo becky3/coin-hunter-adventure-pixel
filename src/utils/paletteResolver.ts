@@ -2,6 +2,9 @@
  * Shared utility for resolving palette names based on category and sprite name
  */
 export function getPaletteForCategory(category: string, spriteName?: string, stageType?: string): string {
+    if (category === 'enemies' && spriteName && spriteName.includes('spider')) {
+        return 'enemySpider';
+    }
     if (category === 'environment' && spriteName) {
         if (spriteName.includes('cloud')) {
             return 'sky';
@@ -24,6 +27,10 @@ export function getPaletteForCategory(category: string, spriteName?: string, sta
         return 'enemy';
     }
     
+    if (category === 'enemies/spider') {
+        return 'enemySpider';
+    }
+    
     if (category === 'items' || category === 'objects') {
         return 'items';
     }
@@ -33,7 +40,7 @@ export function getPaletteForCategory(category: string, spriteName?: string, sta
     }
     
     if (category === 'powerups') {
-        return 'items';
+        return 'itemsPowerUp';
     }
     
     if (category === 'projectiles' || category === 'effects') {
