@@ -175,7 +175,7 @@ export abstract class Entity {
                 this.flipX
             );
         } else {
-            throw new Error(`[Entity] ${this.constructor.name} has no way to render - neither entityAnimationManager nor sprite is available`);
+            throw new Error(`[Entity] ${this.constructor.name} has no way to render - neither entityAnimationManager nor sprite is available. Ensure that getAnimationDefinitions() and getPaletteDefinition() methods are implemented if required.`);
         }
         
         if (renderer.debug) {

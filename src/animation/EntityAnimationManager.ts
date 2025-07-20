@@ -146,8 +146,11 @@ export class EntityAnimationManager {
      * Render the current animation frame with palette
      */
     render(renderer: PixelRenderer, x: number, y: number, flipX: boolean = false): void {
-        if (!this.spritesLoaded && !this.loadingPromise) {
-            this.loadingPromise = this.loadAnimations(this.animationDefinitions);
+        if (!this.spritesLoaded) {
+            if (!this.loadingPromise) {
+                this.loadingPromise = this.loadAnimations(this.animationDefinitions);
+            }
+            return;
         }
         
         const animation = this.animations.get(this.currentState);
