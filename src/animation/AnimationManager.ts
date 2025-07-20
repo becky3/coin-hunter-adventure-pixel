@@ -114,6 +114,11 @@ export class AnimationManager {
     }
 
     preloadAnimation(key: string): void {
+        const pattern = this.animationPatterns.get(key);
+        if (pattern && pattern.customFrames) {
+            Logger.log(`[AnimationManager] Skipping preload for ${key} (uses customFrames)`);
+            return;
+        }
         this.getAnimation(key);
     }
 

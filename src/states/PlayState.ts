@@ -170,10 +170,10 @@ export class PlayState implements GameState {
                 { category: 'enemies', name: 'bat_hang' },
                 { category: 'enemies', name: 'bat_fly1' },
                 { category: 'enemies', name: 'bat_fly2' },
-                { category: 'enemies', name: 'spider_idle' },
-                { category: 'enemies', name: 'spider_walk1' },
-                { category: 'enemies', name: 'spider_walk2' },
-                { category: 'enemies', name: 'spider_thread' },
+                { category: 'enemies/spider', name: 'spider_idle' },
+                { category: 'enemies/spider', name: 'spider_walk1' },
+                { category: 'enemies/spider', name: 'spider_walk2' },
+                { category: 'enemies/spider', name: 'spider_thread' },
                 { category: 'enemies', name: 'slime_idle1' },
                 { category: 'enemies', name: 'slime_idle2' },
                 { category: 'enemies', name: 'armor_knight_idle' },
@@ -195,7 +195,7 @@ export class PlayState implements GameState {
                 { category: 'player', baseName: 'walk_small', frameCount: 4, frameDuration: 100 },
                 { category: 'items', baseName: 'coin_spin', frameCount: 4, frameDuration: 100 },
                 { category: 'enemies', baseName: 'slime_idle', frameCount: 2, frameDuration: 500 },
-                { category: 'enemies', baseName: 'spider_walk', frameCount: 2, frameDuration: 300 },
+                { category: 'enemies/spider', baseName: 'spider_walk', frameCount: 2, frameDuration: 300 },
                 { category: 'enemies', baseName: 'bat_fly', frameCount: 2, frameDuration: 200 },
                 { category: 'enemies', baseName: 'bird_fly', frameCount: 2, frameDuration: 200 }
             ];

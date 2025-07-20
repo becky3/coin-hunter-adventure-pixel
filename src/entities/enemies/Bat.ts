@@ -236,4 +236,11 @@ export class Bat extends Enemy implements EntityInitializer {
         manager.addEnemy(this);
         manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ENEMY);
     }
+
+    /**
+     * Get current bat state
+     */
+    get currentBatState(): BatState {
+        return this.batState;
+    }
 }

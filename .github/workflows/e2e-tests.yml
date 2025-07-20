@@ -11,7 +11,6 @@ on:
         type: choice
         options:
           - full
-          - smoke
       branch:
         description: '実行するブランチ（デフォルト: 現在のブランチ）'
         required: false
@@ -101,17 +100,10 @@ jobs:
         CI: true
         NODE_ENV: test
       run: |
-        # 手動実行時のテストタイプを判定
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.test_type }}" = "smoke" ]; then
-          echo "🎮 スモークテストを実行中..."
-          npm run test:smoke 2>&1 | tee test-output.log
-          TEST_EXIT_CODE=${PIPESTATUS[0]}
-        else
-          echo "📊 フルテストを実行中（並列実行）..."
-          # タイムアウトを10分に設定してテスト実行（並列版を使用）
-          timeout --preserve-status 600 npm run test:parallel 2>&1 | tee test-output.log
-          TEST_EXIT_CODE=${PIPESTATUS[0]}
-        fi
+        echo "📊 E2Eテストを実行中（並列実行）..."
+        # タイムアウトを10分に設定してテスト実行
+        timeout --preserve-status 600 npm test 2>&1 | tee test-output.log
+        TEST_EXIT_CODE=${PIPESTATUS[0]}
         echo "TEST_EXIT_CODE=$TEST_EXIT_CODE" >> $GITHUB_ENV
         exit $TEST_EXIT_CODE
       continue-on-error: true
