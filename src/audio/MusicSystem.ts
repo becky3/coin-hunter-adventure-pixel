@@ -82,35 +82,40 @@ export class MusicSystem {
     }
 
     async init(): Promise<boolean> {
+        const startTime = performance.now();
+        Logger.log('[Performance] MusicSystem.init() entered at:', startTime.toFixed(2) + 'ms');
         Logger.log('MusicSystem: init() called');
         if (this._isInitialized) {
+            Logger.log('[Performance] MusicSystem already initialized');
             Logger.log('MusicSystem: Already initialized');
             return true;
         }
         
+        Logger.log('[Performance] MusicSystem starting initialization...');
         try {
+            Logger.log('[Performance] Checking AudioContext availability...');
             const AudioContextClass = (window as Window & { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext || (window as Window & { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
             if (!AudioContextClass) {
+                Logger.log('[Performance] Web Audio API not supported');
                 Logger.warn('Web Audio API is not supported in this browser');
                 return false;
             }
+            Logger.log('[Performance] AudioContext class found');
 
             try {
+                Logger.log('[Performance] Creating new AudioContext...');
                 this.audioContext = new AudioContextClass() as AudioContext;
+                Logger.log('[Performance] AudioContext created successfully, state:', this.audioContext.state);
                 Logger.log('MusicSystem: AudioContext created');
-            } catch {
+            } catch (e) {
+                Logger.log('[Performance] AudioContext creation failed:', e);
                 Logger.log('AudioContext creation deferred - will retry on user interaction');
                 return false;
             }
 
             if (this.audioContext.state === 'suspended') {
-                Logger.log('MusicSystem: AudioContext is suspended, attempting to resume...');
-                try {
-                    await this.audioContext.resume();
-                } catch {
-                    Logger.log('AudioContext resume deferred - will retry on user interaction');
-                    return false;
-                }
+                Logger.log('[Performance] AudioContext is suspended, will resume on first playback at:', performance.now().toFixed(2) + 'ms');
+                Logger.log('MusicSystem: AudioContext is suspended, will resume on first playback');
             }
             
             this.masterGain = this.audioContext.createGain();
@@ -118,10 +123,14 @@ export class MusicSystem {
             this.masterGain.gain.value = this.bgmVolume;
             
             this._isInitialized = true;
+            const endTime = performance.now();
+            Logger.log('[Performance] MusicSystem.init() completed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
             Logger.log('Music system initialized successfully');
             return true;
         } catch (error) {
-
+            const endTime = performance.now();
+            Logger.log('[Performance] MusicSystem.init() failed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
+            Logger.log('[Performance] Error details:', error);
             if (error.name === 'NotAllowedError') {
                 Logger.log('音楽システムはユーザー操作後に開始されます');
             } else {
@@ -591,6 +600,13 @@ export class MusicSystem {
             return;
         }
         
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            Logger.log('[Performance] Attempting to resume AudioContext on SE playback');
+            this.audioContext.resume().catch(e => {
+                Logger.log('[Performance] AudioContext resume failed on SE playback:', e);
+            });
+        }
+        
         switch (name) {
         case 'coin':
             this.playCoinSound();
@@ -751,6 +767,15 @@ export class MusicSystem {
     playBGMFromPattern(name: BGMName): void {
         if (this.currentBGM === name) {
             return;
+        }
+        
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            Logger.log('[Performance] Attempting to resume AudioContext on playback at:', performance.now().toFixed(2) + 'ms');
+            this.audioContext.resume().then(() => {
+                Logger.log('[Performance] AudioContext resumed successfully on playback');
+            }).catch(e => {
+                Logger.log('[Performance] AudioContext resume failed on playback:', e);
+            });
         }
         
         try {

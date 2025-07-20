@@ -2,6 +2,8 @@
 import { GameCore } from './core/GameCore';
 import { Logger } from './utils/Logger';
 
+Logger.log('[Performance] index.ts loaded:', performance.now().toFixed(2) + 'ms');
+
 window.addEventListener('error', (event) => {
     Logger.error('Global error:', event.error);
 });
@@ -12,15 +14,23 @@ window.addEventListener('unhandledrejection', (event) => {
 
 async function startGame() {
     try {
+        const startTime = performance.now();
+        Logger.log('[Performance] startGame() called:', startTime.toFixed(2) + 'ms');
         Logger.log('Starting game initialization...');
         const gameCore = new GameCore();
 
         (window as Window & { game?: GameCore }).game = gameCore;
         
         Logger.log('Initializing GameCore...');
+        const initStartTime = performance.now();
+        Logger.log('[Performance] Before gameCore.init():', initStartTime.toFixed(2) + 'ms');
         await gameCore.init();
+        const initEndTime = performance.now();
+        Logger.log('[Performance] After gameCore.init():', initEndTime.toFixed(2) + 'ms', '(took', (initEndTime - initStartTime).toFixed(2) + 'ms)');
         
         Logger.log('Starting game loop...');
+        const gameStartTime = performance.now();
+        Logger.log('[Performance] Before gameCore.start():', gameStartTime.toFixed(2) + 'ms');
         gameCore.start();
         
         Logger.log('Game started successfully');
@@ -43,7 +53,12 @@ async function startGame() {
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startGame);
+    Logger.log('[Performance] Document still loading, waiting for DOMContentLoaded');
+    document.addEventListener('DOMContentLoaded', () => {
+        Logger.log('[Performance] DOMContentLoaded fired:', performance.now().toFixed(2) + 'ms');
+        startGame();
+    });
 } else {
+    Logger.log('[Performance] Document already loaded, starting immediately');
     startGame();
 }

@@ -25,7 +25,13 @@ export default defineConfig({
     },
     // 開発時のキャッシュ設定
     optimizeDeps: {
-        force: true // 依存関係のキャッシュを常に再構築
+        // force: true を削除して、キャッシュを有効化
+        // 明示的に最適化する依存関係を指定
+        include: [
+            'playwright'
+        ],
+        // 除外する依存関係
+        exclude: []
     },
     // ESBuildの設定
     esbuild: {
