@@ -155,6 +155,20 @@ export class PixelRenderer {
         }
     }
     
+    /**
+     * Draw a single pixel at the specified world coordinates
+     * @param x World X coordinate
+     * @param y World Y coordinate
+     * @param color Color hex string
+     */
+    drawPixel(x: number, y: number, color: string): void {
+        const drawX = Math.floor((x - this.cameraX) * this.scale);
+        const drawY = Math.floor((y - this.cameraY) * this.scale);
+        
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(drawX, drawY, this.scale, this.scale);
+    }
+    
     drawRect(x: number, y: number, width: number, height: number, color: string, fill: boolean = true): void {
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);

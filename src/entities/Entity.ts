@@ -1,5 +1,7 @@
 import type { PixelRenderer } from '../rendering/PixelRenderer';
 import type { SpriteData } from '../types/assetTypes';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import { EntityAnimationManager } from '../animation/EntityAnimationManager';
 
 export interface Bounds {
     left: number;
@@ -25,7 +27,7 @@ let entityIdCounter = 0;
 /**
  * Base entity class for all game objects
  */
-export class Entity {
+export abstract class Entity {
     public id: number;
     
     public x: number;
@@ -61,6 +63,8 @@ export class Entity {
     
     public sprite: string | SpriteData | HTMLCanvasElement | ImageData | null;
     public spriteScale: number;
+    
+    protected entityAnimationManager?: EntityAnimationManager;
 
     constructor(x = 0, y = 0, width = 16, height = 16) {
         this.id = ++entityIdCounter;
@@ -98,7 +102,34 @@ export class Entity {
         
         this.sprite = null;
         this.spriteScale = 1;
+        
+        this.initializeAnimations();
     }
+    
+    /**
+     * Initialize entity-specific animations
+     * Called during construction
+     */
+    protected initializeAnimations(): void {
+        const animations = this.getAnimationDefinitions();
+        const palette = this.getPaletteDefinition();
+        
+        if (animations.length > 0) {
+            this.entityAnimationManager = new EntityAnimationManager(animations, palette);
+        }
+    }
+    
+    /**
+     * Get animation definitions for this entity
+     * Override in derived classes
+     */
+    protected abstract getAnimationDefinitions(): AnimationDefinition[];
+    
+    /**
+     * Get palette definition for this entity
+     * Override in derived classes
+     */
+    protected abstract getPaletteDefinition(): EntityPaletteDefinition;
 
     update(deltaTime: number): void {
         if (!this.active) return;
@@ -111,6 +142,10 @@ export class Entity {
     updateAnimation(deltaTime: number): void {
         if (this.currentAnimation) {
             this.animationTime += deltaTime;
+        }
+        
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.update(deltaTime);
         }
     }
 
@@ -245,6 +280,19 @@ export class Entity {
         if (this.currentAnimation !== animationName) {
             this.currentAnimation = animationName;
             this.animationTime = 0;
+            
+            if (this.entityAnimationManager) {
+                this.entityAnimationManager.setState(animationName);
+            }
+        }
+    }
+    
+    /**
+     * Set the palette variant (e.g., 'powerGlove')
+     */
+    setPaletteVariant(variant: string): void {
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.setPaletteVariant(variant);
         }
     }
 
