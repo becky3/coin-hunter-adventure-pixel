@@ -8,6 +8,7 @@ import { InputSystem } from '../core/InputSystem';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
 import { AnimatedSprite } from '../animation/AnimatedSprite';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 /**
  * Spring platform that bounces the player
@@ -80,6 +81,9 @@ export class Spring extends Entity implements EntityInitializer {
         }
         
         this.animatedSprite.setState(this.compression > 0.5 ? 'compressed' : 'normal');
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.setState(this.compression > 0.5 ? 'compressed' : 'normal');
+        }
         
         this.animationTime += deltaTime;
     }
@@ -116,7 +120,11 @@ export class Spring extends Entity implements EntityInitializer {
         const compression = this.compression * 0.3;
         const offsetY = this.height * compression;
         
-        this.animatedSprite.render(renderer, this.x, this.y + offsetY, false);
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.render(renderer, this.x, this.y + offsetY, false);
+        } else {
+            this.animatedSprite.render(renderer, this.x, this.y + offsetY, false);
+        }
         
         if (renderer.debug) {
             this.renderDebug(renderer);
@@ -163,5 +171,41 @@ export class Spring extends Entity implements EntityInitializer {
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addItem(this);
         manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ITEM);
+    }
+    
+    /**
+     * Get animation definitions for spring
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [
+            {
+                id: 'normal',
+                sprites: ['terrain/spring.json'],
+                frameDuration: 0,
+                loop: false
+            },
+            {
+                id: 'compressed',
+                sprites: ['terrain/spring.json'],
+                frameDuration: 0,
+                loop: false
+            }
+        ];
+    }
+    
+    /**
+     * Get palette definition for spring
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x01,
+                    0x33,
+                    0x34
+                ]
+            }
+        };
     }
 }
