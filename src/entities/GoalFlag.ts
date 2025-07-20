@@ -5,7 +5,6 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
-import { AnimatedSprite } from '../animation/AnimatedSprite';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 /**
@@ -13,7 +12,6 @@ import type { AnimationDefinition, EntityPaletteDefinition } from '../types/anim
  */
 export class GoalFlag extends Entity implements EntityInitializer {
     private cleared: boolean;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a GoalFlag instance
@@ -41,10 +39,6 @@ export class GoalFlag extends Entity implements EntityInitializer {
         this.solid = goalConfig?.physics.solid || false;
         
         this.cleared = false;
-        
-        this.animatedSprite = new AnimatedSprite('goal_flag', {
-            idle: 'objects/goal_flag'
-        });
     }
 
     onUpdate(_deltaTime: number): void {
@@ -52,12 +46,6 @@ export class GoalFlag extends Entity implements EntityInitializer {
 
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
-        
-        if (this.entityAnimationManager) {
-            this.entityAnimationManager.render(renderer, this.x, this.y, false);
-        } else {
-            this.animatedSprite.render(renderer, this.x, this.y, false);
-        }
         
         if (renderer.debug) {
             this.renderDebug(renderer);

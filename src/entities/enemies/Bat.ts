@@ -5,7 +5,6 @@ import { Logger } from '../../utils/Logger';
 import { Entity } from '../Entity';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
-import { AnimatedSprite } from '../../animation/AnimatedSprite';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 type BatState = 'hanging' | 'flying';
@@ -32,7 +31,6 @@ export class Bat extends Enemy implements EntityInitializer {
     public readonly oneCycleDuration: number;
     public readonly ceilingY: number;
     public readonly groundY: number;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Bat instance
@@ -87,11 +85,6 @@ export class Bat extends Enemy implements EntityInitializer {
             this.aiType = (batConfig.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
             this.attackRange = batConfig.ai.attackRange || 20;
         }
-        
-        this.animatedSprite = new AnimatedSprite('bat', {
-            hang: 'enemies/bat_hang',
-            fly: 'enemies/bat_fly'
-        });
     }
     
     protected updateAI(deltaTime: number): void {
@@ -108,7 +101,6 @@ export class Bat extends Enemy implements EntityInitializer {
             this.vx = 0;
             this.vy = 0;
             this.animState = 'hang';
-            this.animatedSprite.setState('hang');
             if (this.entityAnimationManager) {
                 this.entityAnimationManager.setState('hang');
             }
@@ -176,7 +168,6 @@ export class Bat extends Enemy implements EntityInitializer {
             }
             
             this.animState = 'fly';
-            this.animatedSprite.setState('fly');
             if (this.entityAnimationManager) {
                 this.entityAnimationManager.setState('fly');
             }
@@ -230,10 +221,8 @@ export class Bat extends Enemy implements EntityInitializer {
         
         if (this.entityAnimationManager) {
             this.entityAnimationManager.setState(this.animState === 'hang' ? 'hang' : 'fly');
-            this.entityAnimationManager.render(renderer, this.x, this.y, this.direction === -1);
-        } else {
-            this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
         }
+        this.flipX = this.direction === -1;
         
         if (renderer.debug) {
             this.renderDebug(renderer);

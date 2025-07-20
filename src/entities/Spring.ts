@@ -7,7 +7,6 @@ import { Logger } from '../utils/Logger';
 import { InputSystem } from '../core/InputSystem';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
-import { AnimatedSprite } from '../animation/AnimatedSprite';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 /**
@@ -22,7 +21,6 @@ export class Spring extends Entity implements EntityInitializer {
     public physicsSystem: PhysicsSystem | null;
     private cooldownFrames: number;
     private readonly COOLDOWN_DURATION = 20;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Spring instance
@@ -57,11 +55,6 @@ export class Spring extends Entity implements EntityInitializer {
         this.animationTime = 0;
         this.physicsSystem = null;
         this.cooldownFrames = 0;
-        
-        this.animatedSprite = new AnimatedSprite('spring', {
-            normal: 'items/spring_normal',
-            compressed: 'items/spring_compressed'
-        });
     }
 
     onUpdate(deltaTime: number): void {
@@ -80,7 +73,6 @@ export class Spring extends Entity implements EntityInitializer {
             this.triggered = false;
         }
         
-        this.animatedSprite.setState(this.compression > 0.5 ? 'compressed' : 'normal');
         if (this.entityAnimationManager) {
             this.entityAnimationManager.setState(this.compression > 0.5 ? 'compressed' : 'normal');
         }
@@ -120,11 +112,9 @@ export class Spring extends Entity implements EntityInitializer {
         const compression = this.compression * 0.3;
         const offsetY = this.height * compression;
         
-        if (this.entityAnimationManager) {
-            this.entityAnimationManager.render(renderer, this.x, this.y + offsetY, false);
-        } else {
-            this.animatedSprite.render(renderer, this.x, this.y + offsetY, false);
-        }
+        renderer.ctx.save();
+        renderer.ctx.translate(0, offsetY);
+        renderer.ctx.restore();
         
         if (renderer.debug) {
             this.renderDebug(renderer);

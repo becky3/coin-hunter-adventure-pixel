@@ -5,7 +5,6 @@ import { ResourceLoader } from '../../config/ResourceLoader';
 import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
-import { AnimatedSprite } from '../../animation/AnimatedSprite';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 /**
@@ -17,7 +16,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     private normalSpeed: number;
     private isCharging: boolean;
     private playerInRange: Player | null;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create an ArmorKnight instance
@@ -60,12 +58,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             this.detectRange = config.ai.detectRange || 60;
             this.attackRange = config.ai.attackRange || 20;
         }
-        
-        this.animatedSprite = new AnimatedSprite('armor_knight', {
-            idle: 'enemies/armor_knight_idle',
-            move: 'enemies/armor_knight_walk',
-            charge: 'enemies/armor_knight_walk'
-        });
     }
     
     protected updateAI(_deltaTime: number): void {
@@ -79,7 +71,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             this.isCharging = true;
             this.moveSpeed = this.chargeSpeed;
             this.animState = 'charge';
-            this.animatedSprite.setState('charge');
             if (this.entityAnimationManager) {
                 this.entityAnimationManager.setState('charge');
             }
@@ -93,7 +84,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             this.isCharging = false;
             this.moveSpeed = this.normalSpeed;
             this.animState = 'move';
-            this.animatedSprite.setState('move');
             if (this.entityAnimationManager) {
                 this.entityAnimationManager.setState('move');
             }
@@ -149,11 +139,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             return;
         }
         
-        if (this.entityAnimationManager) {
-            this.entityAnimationManager.render(renderer, this.x, this.y, this.direction === -1);
-        } else {
-            this.animatedSprite.render(renderer, this.x, this.y, this.direction === -1);
-        }
+        this.flipX = this.direction === -1;
         
         if (renderer.debug) {
             this.renderDebug(renderer);

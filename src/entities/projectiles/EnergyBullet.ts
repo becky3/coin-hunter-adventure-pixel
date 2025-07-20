@@ -4,7 +4,6 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PowerGloveConfig } from '../../config/PowerGloveConfig';
-import { AnimatedSprite } from '../../animation/AnimatedSprite';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 /**
@@ -18,7 +17,6 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     private destroyed: boolean = false;
     private originX: number;
     private originY: number;
-    private animatedSprite?: AnimatedSprite;
 
     constructor(x: number, y: number, direction: number, speed: number) {
         super(x, y, PowerGloveConfig.bulletWidth, PowerGloveConfig.bulletHeight);
@@ -68,17 +66,6 @@ export class EnergyBullet extends Entity implements EntityInitializer {
 
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
-        
-        if (this.entityAnimationManager) {
-            this.entityAnimationManager.render(renderer, this.x, this.y, false);
-        } else {
-            if (!this.animatedSprite) {
-                this.animatedSprite = new AnimatedSprite('EnergyBullet', {
-                    idle: 'projectiles/energy_bullet'
-                });
-            }
-            this.animatedSprite.render(renderer, this.x, this.y);
-        }
         
         if (renderer.debug) {
             this.renderDebug(renderer);

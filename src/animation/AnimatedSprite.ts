@@ -1,5 +1,4 @@
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { Logger } from '../utils/Logger';
 
 interface AnimationStateConfig {
     [stateName: string]: string;
@@ -14,12 +13,8 @@ export class AnimatedSprite {
     private currentState: string;
     private entityType: string;
 
-    constructor(entityType: string, states: AnimationStateConfig) {
-        this.states = states;
-        this.currentState = 'idle';
-        this.entityType = entityType;
-        
-        Logger.warn(`[AnimatedSprite] Legacy fallback used for ${entityType}. Entity should implement getAnimationDefinitions() and getPaletteDefinition()`);
+    constructor(entityType: string, _states: AnimationStateConfig) {
+        throw new Error(`[AnimatedSprite] Legacy fallback is not allowed. Entity '${entityType}' must implement getAnimationDefinitions() and getPaletteDefinition() methods. Fallback has been disabled per project requirements.`);
     }
 
     setState(state: string): void {

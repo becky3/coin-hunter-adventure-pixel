@@ -21,6 +21,7 @@ async function runTest() {
         
         // Navigate to stage 0-6 which is dedicated for enemy type testing
         await t.navigateToGame('http://localhost:3000?s=0-6&skip_title=true');
+        
         await t.waitForGameInitialization();
         
         // With skip_title=true, we should go directly to play state

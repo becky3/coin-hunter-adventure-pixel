@@ -5,7 +5,6 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
-import { AnimatedSprite } from '../animation/AnimatedSprite';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 const FLOAT_SPEED_MULTIPLIER = 0.1;
@@ -22,7 +21,6 @@ export class Coin extends Entity implements EntityInitializer {
     private floatAmplitude: number;
     private baseY: number;
     public scoreValue: number;
-    private animatedSprite: AnimatedSprite;
 
     /**
      * Factory method to create a Coin instance
@@ -59,10 +57,6 @@ export class Coin extends Entity implements EntityInitializer {
         this.baseY = y;
         
         this.scoreValue = coinConfig?.properties.scoreValue || 10;
-        
-        this.animatedSprite = new AnimatedSprite('coin', {
-            idle: 'items/coin_spin'
-        });
     }
 
     onUpdate(deltaTime: number): void {
@@ -79,8 +73,6 @@ export class Coin extends Entity implements EntityInitializer {
         
         if (this.entityAnimationManager) {
             this.entityAnimationManager.render(renderer, this.x, this.y, false);
-        } else {
-            this.animatedSprite.render(renderer, this.x, this.y, false);
         }
         
         if (renderer.debug) {

@@ -7,7 +7,9 @@ import type {
     FourColorPalette
 } from '../types/animationTypes';
 import { MasterPalette } from '../rendering/MasterPalette';
-import { AssetLoader } from '../assets/AssetLoader';
+import { ServiceLocator } from '../services/ServiceLocator';
+import { ServiceNames } from '../services/ServiceNames';
+import type { AssetLoader } from '../assets/AssetLoader';
 
 /**
  * Manages animations and palettes for individual entities
@@ -18,6 +20,9 @@ export class EntityAnimationManager {
     private currentState: string = 'idle';
     private currentVariant: string = 'default';
     private lastUpdateTime: number = 0;
+    private animationDefinitions: AnimationDefinition[] = [];
+    private spritesLoaded: boolean = false;
+    private loadingPromise: Promise<void> | null = null;
 
     constructor(palette: EntityPaletteDefinition) {
         this.palette = palette;
@@ -27,7 +32,18 @@ export class EntityAnimationManager {
      * Initialize animations - must be called after construction
      */
     async initialize(definitions: AnimationDefinition[]): Promise<void> {
-        await this.loadAnimations(definitions);
+        this.animationDefinitions = definitions;
+        
+        for (const def of definitions) {
+            this.animations.set(def.id, {
+                id: def.id,
+                frames: [],
+                frameDuration: def.frameDuration,
+                loop: def.loop,
+                currentFrame: 0,
+                elapsedTime: 0
+            });
+        }
     }
     
     /**
@@ -44,15 +60,13 @@ export class EntityAnimationManager {
                 }
             }
 
-            this.animations.set(def.id, {
-                id: def.id,
-                frames,
-                frameDuration: def.frameDuration,
-                loop: def.loop,
-                currentFrame: 0,
-                elapsedTime: 0
-            });
+            const animation = this.animations.get(def.id);
+            if (animation) {
+                animation.frames = frames;
+            }
         }
+        
+        this.spritesLoaded = true;
     }
 
     /**
@@ -60,8 +74,19 @@ export class EntityAnimationManager {
      */
     private async loadSprite(path: string): Promise<SpriteData | null> {
         try {
-            const assetLoader = AssetLoader.getInstance();
-            const sprite = await assetLoader.loadSprite(path);
+            const assetLoader = ServiceLocator.get<AssetLoader>(ServiceNames.ASSET_LOADER);
+            
+            const cleanPath = path.replace(/\.json$/, '');
+            
+            const parts = cleanPath.split('/');
+            if (parts.length < 2) {
+                throw new Error(`Invalid sprite path: ${path}`);
+            }
+            
+            const category = parts.slice(0, -1).join('/');
+            const name = parts[parts.length - 1];
+            
+            const sprite = await assetLoader.loadSprite(category, name);
             
             return {
                 width: sprite.width,
@@ -120,6 +145,10 @@ export class EntityAnimationManager {
      * Render the current animation frame with palette
      */
     render(renderer: PixelRenderer, x: number, y: number, flipX: boolean = false): void {
+        if (!this.spritesLoaded && !this.loadingPromise) {
+            this.loadingPromise = this.loadAnimations(this.animationDefinitions);
+        }
+        
         const animation = this.animations.get(this.currentState);
         if (!animation || animation.frames.length === 0) return;
 

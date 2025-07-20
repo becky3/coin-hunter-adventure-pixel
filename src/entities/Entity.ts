@@ -65,6 +65,8 @@ export abstract class Entity {
     public spriteScale: number;
     
     protected entityAnimationManager?: EntityAnimationManager;
+    private animationInitialized: boolean = false;
+    private animationInitializing: boolean = false;
 
     constructor(x = 0, y = 0, width = 16, height = 16) {
         this.id = ++entityIdCounter;
@@ -103,7 +105,8 @@ export abstract class Entity {
         this.sprite = null;
         this.spriteScale = 1;
         
-        this.initializeAnimations();
+        this.animationInitialized = false;
+        this.animationInitializing = false;
     }
     
     /**
@@ -111,14 +114,19 @@ export abstract class Entity {
      * Called during construction
      */
     protected initializeAnimations(): void {
-        const palette = this.getPaletteDefinition();
-        this.entityAnimationManager = new EntityAnimationManager(palette);
-        
-        const animations = this.getAnimationDefinitions();
-        if (animations.length > 0) {
-            this.entityAnimationManager.initialize(animations).catch(error => {
-                console.error('Failed to initialize animations:', error);
-            });
+        try {
+            const palette = this.getPaletteDefinition();
+            this.entityAnimationManager = new EntityAnimationManager(palette);
+            
+            const animations = this.getAnimationDefinitions();
+            if (animations.length > 0) {
+                this.entityAnimationManager.initialize(animations).catch(error => {
+                    console.error(`[Entity] Failed to initialize animations for ${this.constructor.name}:`, error);
+                });
+            }
+        } catch (error) {
+            console.error(`[Entity] Failed to create EntityAnimationManager for ${this.constructor.name}:`, error);
+            this.entityAnimationManager = undefined;
         }
     }
     
@@ -162,8 +170,6 @@ export abstract class Entity {
                 this.y,
                 this.flipX
             );
-        } else {
-            this.renderDefault(renderer);
         }
         
         if (renderer.debug) {
@@ -171,24 +177,6 @@ export abstract class Entity {
         }
     }
 
-    renderDefault(renderer: PixelRenderer): void {
-        renderer.drawRect(
-            this.x,
-            this.y,
-            this.width,
-            this.height,
-            '#FF00FF'
-        );
-        
-        renderer.drawRect(
-            this.x - 2,
-            this.y - 2,
-            this.width + 4,
-            this.height + 4,
-            '#FF00FF',
-            false
-        );
-    }
 
     renderDebug(renderer: PixelRenderer): void {
         renderer.drawRect(
