@@ -39,6 +39,8 @@ export class GoalFlag extends Entity implements EntityInitializer {
         this.solid = goalConfig?.physics.solid || false;
         
         this.cleared = false;
+        
+        this.setAnimation('idle');
     }
 
     onUpdate(_deltaTime: number): void {
@@ -47,9 +49,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
 
     onCollision(collisionInfo?: CollisionInfo): boolean {
@@ -104,9 +104,9 @@ export class GoalFlag extends Entity implements EntityInitializer {
             default: {
                 colors: [
                     null,
-                    0x01,
-                    0x42,
-                    0x53
+                    0x51,
+                    0x03,
+                    0x31
                 ]
             }
         };

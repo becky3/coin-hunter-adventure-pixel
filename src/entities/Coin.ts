@@ -57,6 +57,8 @@ export class Coin extends Entity implements EntityInitializer {
         this.baseY = y;
         
         this.scoreValue = coinConfig?.properties.scoreValue || 10;
+        
+        this.setAnimation('idle');
     }
 
     onUpdate(deltaTime: number): void {
@@ -71,13 +73,7 @@ export class Coin extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
-        if (this.entityAnimationManager) {
-            this.entityAnimationManager.render(renderer, this.x, this.y, false);
-        }
-        
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
     
     public isCollected(): boolean {
@@ -127,7 +123,7 @@ export class Coin extends Entity implements EntityInitializer {
         return [
             {
                 id: 'idle',
-                sprites: ['items/coin_spin1.json', 'items/coin_spin2.json', 'items/coin_spin3.json', 'items/coin_spin4.json'],
+                sprites: ['items/coin_spin1.json', 'items/coin_spin3.json', 'items/coin_spin4.json', 'items/coin_spin3.json'],
                 frameDuration: 150,
                 loop: true
             }

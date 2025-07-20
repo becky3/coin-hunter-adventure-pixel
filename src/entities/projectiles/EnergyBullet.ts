@@ -39,6 +39,8 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         this.originY = y;
         
         Logger.log('[EnergyBullet] Created at', x, y, 'direction:', direction);
+        
+        this.setAnimation('idle');
     }
 
     onUpdate(deltaTime: number): void {
@@ -67,9 +69,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
 
     onCollision(collisionInfo?: CollisionInfo): void {

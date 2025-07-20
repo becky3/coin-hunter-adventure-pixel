@@ -54,6 +54,8 @@ export class Slime extends Enemy implements EntityInitializer {
             this.detectRange = slimeConfig.ai.detectRange || 100;
             this.attackRange = slimeConfig.ai.attackRange || 20;
         }
+        
+        this.setAnimation('idle');
     }
     
     protected updateAI(_deltaTime: number): void {
@@ -86,9 +88,7 @@ export class Slime extends Enemy implements EntityInitializer {
         
         this.flipX = this.direction === -1;
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
     
     /**
@@ -134,9 +134,9 @@ export class Slime extends Enemy implements EntityInitializer {
             default: {
                 colors: [
                     null,
-                    0x01,
-                    0x31,
-                    0x32
+                    0x60,
+                    0x62,
+                    0x00
                 ]
             }
         };

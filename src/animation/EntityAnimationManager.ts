@@ -129,10 +129,11 @@ export class EntityAnimationManager {
         const animation = this.animations.get(this.currentState);
         if (!animation) return;
 
-        animation.elapsedTime += deltaTime;
+        animation.elapsedTime += deltaTime * 1000;
 
         if (animation.frameDuration > 0 && animation.frames.length > 1) {
-            const frameTime = animation.elapsedTime % (animation.frameDuration * animation.frames.length);
+            const totalDuration = animation.frameDuration * animation.frames.length;
+            const frameTime = animation.elapsedTime % totalDuration;
             animation.currentFrame = Math.floor(frameTime / animation.frameDuration);
 
             if (!animation.loop && animation.currentFrame >= animation.frames.length - 1) {

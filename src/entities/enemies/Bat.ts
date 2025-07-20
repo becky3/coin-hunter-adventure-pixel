@@ -85,6 +85,8 @@ export class Bat extends Enemy implements EntityInitializer {
             this.aiType = (batConfig.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
             this.attackRange = batConfig.ai.attackRange || 20;
         }
+        
+        this.setAnimation('hang');
     }
     
     protected updateAI(deltaTime: number): void {
@@ -224,9 +226,7 @@ export class Bat extends Enemy implements EntityInitializer {
         }
         this.flipX = this.direction === -1;
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
     
     /**
@@ -273,9 +273,9 @@ export class Bat extends Enemy implements EntityInitializer {
             default: {
                 colors: [
                     null,
-                    0x01,
-                    0x21,
-                    0x41
+                    0x90,
+                    0x91,
+                    0x21
                 ]
             }
         };

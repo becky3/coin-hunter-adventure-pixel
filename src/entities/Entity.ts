@@ -107,6 +107,8 @@ export abstract class Entity {
         
         this.animationInitialized = false;
         this.animationInitializing = false;
+        
+        this.initializeAnimations();
     }
     
     /**
@@ -163,13 +165,17 @@ export abstract class Entity {
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
-        if (this.sprite) {
+        if (this.entityAnimationManager) {
+            this.entityAnimationManager.render(renderer, this.x, this.y, this.flipX);
+        } else if (this.sprite) {
             renderer.drawSprite(
                 this.sprite,
                 this.x,
                 this.y,
                 this.flipX
             );
+        } else {
+            throw new Error(`[Entity] ${this.constructor.name} has no way to render - neither entityAnimationManager nor sprite is available`);
         }
         
         if (renderer.debug) {

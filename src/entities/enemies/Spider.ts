@@ -91,6 +91,8 @@ export class Spider extends Enemy implements EntityInitializer {
             this.aiType = (spiderConfig.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
             this.attackRange = spiderConfig.ai.attackRange || 20;
         }
+        
+        this.setAnimation('idle');
     }
     
     protected updateAI(deltaTime: number): void {
@@ -310,9 +312,7 @@ export class Spider extends Enemy implements EntityInitializer {
         
         this.flipX = this.direction === -1;
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
     
     /**

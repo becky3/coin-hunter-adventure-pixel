@@ -18,6 +18,8 @@ export class PowerGlove extends PowerUpItem {
         super(x, y, 16, 16, PowerUpType.POWER_GLOVE);
         
         Logger.log('[PowerGlove] Created at', x, y);
+        
+        this.setAnimation('idle');
     }
 
     protected createPowerUpConfig(): PowerUpConfig {

@@ -18,6 +18,8 @@ export class ShieldStone extends PowerUpItem {
         super(x, y, 16, 16, PowerUpType.SHIELD_STONE);
         
         Logger.log('[ShieldStone] Created at', x, y);
+        
+        this.setAnimation('idle');
     }
 
     protected createPowerUpConfig(): PowerUpConfig {

@@ -58,6 +58,8 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             this.detectRange = config.ai.detectRange || 60;
             this.attackRange = config.ai.attackRange || 20;
         }
+        
+        this.setAnimation('idle');
     }
     
     protected updateAI(_deltaTime: number): void {
@@ -141,9 +143,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         
         this.flipX = this.direction === -1;
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
     }
     
     /**

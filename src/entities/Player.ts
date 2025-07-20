@@ -791,18 +791,18 @@ export class Player extends Entity {
             default: {
                 colors: [
                     null,
-                    0x01,
-                    0x41,
-                    0x33
+                    0x11,
+                    0x43,
+                    0x01
                 ]
             },
             variants: {
                 powerGlove: {
                     colors: [
                         null,
-                        0x01,
-                        0x52,
-                        0x33
+                        0x41,
+                        0x43,
+                        0x01
                     ]
                 }
             }

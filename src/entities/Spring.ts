@@ -55,6 +55,8 @@ export class Spring extends Entity implements EntityInitializer {
         this.animationTime = 0;
         this.physicsSystem = null;
         this.cooldownFrames = 0;
+        
+        this.setAnimation('normal');
     }
 
     onUpdate(deltaTime: number): void {
@@ -114,11 +116,10 @@ export class Spring extends Entity implements EntityInitializer {
         
         renderer.ctx.save();
         renderer.ctx.translate(0, offsetY);
-        renderer.ctx.restore();
         
-        if (renderer.debug) {
-            this.renderDebug(renderer);
-        }
+        super.render(renderer);
+        
+        renderer.ctx.restore();
     }
 
     onCollision(collisionInfo?: CollisionInfo): boolean {
@@ -191,9 +192,9 @@ export class Spring extends Entity implements EntityInitializer {
             default: {
                 colors: [
                     null,
-                    0x01,
-                    0x33,
-                    0x34
+                    0x42,
+                    0x41,
+                    0x40
                 ]
             }
         };
