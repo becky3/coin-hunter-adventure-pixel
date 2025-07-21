@@ -48,6 +48,7 @@ export class PhysicsSystem {
     private entities: Set<PhysicsEntity>;
     private tileMap: number[][] | null;
     private tileSize: number;
+    private groundDetectionRatio: number = 0.4;
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
@@ -90,6 +91,14 @@ export class PhysicsSystem {
     get gravity(): number { return this._gravity; }
     get maxFallSpeed(): number { return this._maxFallSpeed; }
     get friction(): number { return this._friction; }
+    
+    getGroundDetectionRatio(): number {
+        return this.groundDetectionRatio;
+    }
+    
+    setGroundDetectionRatio(value: number): void {
+        this.groundDetectionRatio = Math.max(0.0, Math.min(1.0, value));
+    }
     
     setGravity(value: number): void {
         if (value >= 0) {
@@ -357,14 +366,19 @@ export class PhysicsSystem {
     
     updateGroundedState(entity: PhysicsEntity): void {
         entity.grounded = false;
+        
+        const detectionWidth = entity.width * this.groundDetectionRatio;
+        const offsetX = (entity.width - detectionWidth) / 2;
+        
         const testBounds: Bounds = {
-            left: entity.x,
+            left: entity.x + offsetX,
             top: entity.y + entity.height + 1,
-            right: entity.x + entity.width,
+            right: entity.x + offsetX + detectionWidth,
             bottom: entity.y + entity.height + 2,
-            width: entity.width,
+            width: detectionWidth,
             height: 1
         };
+        
         if (this.tileMap) {
             const row = Math.floor(testBounds.top / this.tileSize);
             const startCol = Math.floor(testBounds.left / this.tileSize);
