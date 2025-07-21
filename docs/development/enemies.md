@@ -69,6 +69,20 @@ export class Enemy extends Entity {
 - **検知クールダウン**: 上昇完了後3秒間は新たな検知を行わない
 - **EntityInitializer実装**: 自己初期化により EntityManagerの責務を軽減
 
+### ArmorKnight（アーマーナイト）
+- **ファイル**: `src/entities/enemies/ArmorKnight.ts`
+- **特徴**:
+  - 重装甲で踏みつけ無効（高く跳ね返される）
+  - プレイヤー検知で高速突進（速度6倍）
+  - 矩形検知範囲（横84px、縦128px）
+  - 特殊攻撃でのみダメージを受ける
+
+#### ArmorKnightの実装詳細
+- **踏みつけ無効**: `canBeStomped()` が `false` を返す、反発力 -16
+- **突進システム**: 検知範囲内のプレイヤーに向かって突進、アニメーション切り替え
+- **ダメージ処理**: projectileとpowerupタイプのダメージのみ有効
+- **検知システム**: EventBusを使用したプレイヤー検索、矩形範囲判定
+
 ## 新しい敵の追加方法
 
 1. **クラスの作成**
