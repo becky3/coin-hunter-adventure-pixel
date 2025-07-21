@@ -53,6 +53,8 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.isCharging = false;
         this.playerInRange = null;
         
+        this.stompBounceVelocity = -16;
+        
         if (config?.ai) {
             this.aiType = (config.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
             this.detectRange = config.ai.detectRange || 60;

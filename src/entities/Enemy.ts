@@ -26,6 +26,7 @@ export class Enemy extends Entity {
     public animState: string;
     public facingRight: boolean;
     public canJump: boolean;
+    public stompBounceVelocity: number;
     protected eventBus: EventBus | null;
 
     constructor(x: number, y: number, width: number = 16, height: number = 16) {
@@ -51,6 +52,8 @@ export class Enemy extends Entity {
         this.facingRight = true;
         
         this.canJump = false;
+        
+        this.stompBounceVelocity = -5;
         
         this.eventBus = null;
         
@@ -146,7 +149,7 @@ export class Enemy extends Entity {
         const playerCenter = player.y + player.height / 2;
         const isAboveEnemy = playerCenter < enemyCenter;
         const isFalling = player.vy > 0;
-        const wasJustBounced = player.vy < -5;
+        const wasJustBounced = player.vy < 0;
         
         
         if (isAboveEnemy && (isFalling || wasJustBounced)) {
@@ -160,8 +163,6 @@ export class Enemy extends Entity {
             
             if (this.canBeStomped()) {
                 this.takeDamage(1);
-                player.vy = -5;
-                player.grounded = false;
                 const scoreGained = 100;
                 player.addScore(scoreGained);
                 
@@ -172,10 +173,10 @@ export class Enemy extends Entity {
                         position: { x: this.x, y: this.y }
                     });
                 }
-            } else {
-                player.vy = -8;
-                player.grounded = false;
             }
+            
+            player.vy = this.stompBounceVelocity;
+            player.grounded = false;
             return;
         } else {
             if (player.takeDamage) {
