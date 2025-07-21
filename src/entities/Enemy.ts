@@ -70,7 +70,6 @@ export class Enemy extends Entity {
             const wasInvincible = this.invincibleTime > 0;
             this.invincibleTime -= deltaTime * 1000;
             
-            // 無敵時間が終了したときの通知
             if (wasInvincible && this.invincibleTime <= 0 && this.eventBus) {
                 this.eventBus.emit('enemy:invincible-end', {
                     enemy: this
@@ -110,7 +109,6 @@ export class Enemy extends Entity {
                     position: { x: this.x, y: this.y }
                 });
                 
-                // 無敵時間終了の通知
                 this.eventBus.emit('enemy:invincible-start', {
                     enemy: this,
                     duration: this.invincibleTime

@@ -69,11 +69,10 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             return;
         }
         
-        // hurt状態の処理
         if (this.state === 'hurt') {
             this.isCharging = false;
             this.moveSpeed = this.normalSpeed;
-            this.vx = 0; // hurt中は移動を停止
+            this.vx = 0;
             if (this.stateTimer <= 0) {
                 Logger.log('ArmorKnight', 'Recovering from hurt state');
                 this.state = 'idle';
@@ -82,7 +81,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
                     this.entityAnimationManager.setState(this.animState);
                 }
                 
-                // hurt状態から回復したことを通知
                 if (this.eventBus) {
                     this.eventBus.emit('enemy:state-changed', {
                         enemy: this,
@@ -159,7 +157,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || player.invulnerable) return;
         
-        // 通常の敵と同じ判定方式を使用
         const enemyCenter = this.y + this.height / 2;
         const playerCenter = player.y + player.height / 2;
         const isAboveEnemy = playerCenter < enemyCenter;
@@ -173,14 +170,12 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             const hasHorizontalOverlap = playerRight > enemyLeft && playerLeft < enemyRight;
             
             if (hasHorizontalOverlap) {
-                // ArmorKnightは倒せないので、プレイヤーを跳ね返す
                 player.vy = -8;
                 Logger.log('ArmorKnight', `Player bounced off armor - player center: ${playerCenter}, enemy center: ${enemyCenter}, player vy: ${player.vy}`);
                 return;
             }
         }
         
-        // 踏みつけ判定に失敗した場合のみダメージ
         if (player.takeDamage) {
             Logger.log('ArmorKnight', `Player takes damage - player center: ${playerCenter}, enemy center: ${enemyCenter}, player vy: ${player.vy}`);
             player.takeDamage();

@@ -85,6 +85,12 @@
       "name": "ARMOR KNIGHT TEST",
       "description": "Test stage for ArmorKnight mechanics",
       "filename": "test-armor-knight.json"
+    },
+    {
+      "id": "test-armor-knight-stomp",
+      "name": "ARMOR KNIGHT STOMP TEST",
+      "description": "Test stage for ArmorKnight stomp mechanics",
+      "filename": "test-armor-knight-stomp.json"
     }
   ]
 }
