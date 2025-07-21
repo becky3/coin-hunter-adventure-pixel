@@ -128,7 +128,11 @@ async function runArmorKnightChargeTest() {
 }
 
 // テストを実行
-runArmorKnightChargeTest().catch(error => {
-    console.error('Test failed:', error);
-    process.exit(1);
-});
+if (require.main === module) {
+    runArmorKnightChargeTest().catch(error => {
+        console.error('Test failed:', error);
+        process.exit(1);
+    });
+}
+
+module.exports = runArmorKnightChargeTest;

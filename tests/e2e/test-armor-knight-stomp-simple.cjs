@@ -292,7 +292,11 @@ async function runArmorKnightStompTest() {
 }
 
 // テストを実行
-runArmorKnightStompTest().catch(error => {
-    console.error('Test failed:', error);
-    process.exit(1);
-});
+if (require.main === module) {
+    runArmorKnightStompTest().catch(error => {
+        console.error('Test failed:', error);
+        process.exit(1);
+    });
+}
+
+module.exports = runArmorKnightStompTest;

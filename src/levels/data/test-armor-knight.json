@@ -37,16 +37,6 @@
   },
   "entities": [
     {
-      "type": "power_glove",
-      "x": 3,
-      "y": 12
-    },
-    {
-      "type": "shield_stone",
-      "x": 25,
-      "y": 12
-    },
-    {
       "type": "armor_knight",
       "x": 18,
       "y": 12

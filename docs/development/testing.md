@@ -81,10 +81,9 @@ node tests/e2e/run-tests-stable.cjs
 | **test-fall-damage.cjs** | 落下ダメージ | 画面外落下による即死判定、ライフ減少、ゲームオーバー | ~20秒 |
 | **test-stage-validation.cjs** | ステージデータ検証 | ステージ1-1〜1-3のコイン配置、エンティティ配置の妥当性チェック | ~2秒 |
 | **test-stage0-4-simple.cjs** | デモステージ・敵生成 | stage0-4ロード、Oキーで敵生成ダイアログ、敵の動作確認 | ~25秒 |
-| **test-armor-knight.cjs** | ArmorKnight基本動作テスト | 横からの接触ダメージ、基本パラメータ、移動確認 | ~15秒 |
+| **test-armor-knight.cjs** | ArmorKnight基本動作テスト | 横からの接触ダメージ（小さくなる）、基本パラメータ、移動確認 | ~15秒 |
 | **test-armor-knight-stomp-simple.cjs** | ArmorKnight踏みつけテスト | 踏みつけ時の反発、ダメージ無効、高い跳ね返り | ~15秒 |
 | **test-armor-knight-charge-simple.cjs** | ArmorKnight突進テスト | プレイヤー検知、突進速度変化、追跡動作 | ~15秒 |
-| **test-armor-knight-damage.cjs** | ArmorKnightダメージテスト | 通常攻撃無効、特殊攻撃のみ有効 | ~20秒 |
 | **test-animation-system.cjs** | アニメーションシステム | エンティティベースアニメーション、状態遷移、パレット適用 | ~20秒 |
 | **test-all-sprites-visual.cjs** | 全スプライト視覚テスト | すべてのキャラクター・オブジェクトの描画確認、スクリーンショット撮影 | ~15秒 |
 | **test-hole-falling.cjs** | 穴の落下物理テスト | 1マス幅の穴への落下、プレイヤー幅14pxでの動作確認 | ~15秒 |

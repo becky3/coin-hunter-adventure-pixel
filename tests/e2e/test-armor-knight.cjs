@@ -65,20 +65,38 @@ async function runArmorKnightTest() {
         
         console.log('\n=== 横からの接触ダメージテスト ===');
         
-        // プレイヤーの初期状態を記録
-        const beforeCollision = await t.getPlayerStats();
+        // プレイヤーの初期状態を記録（サイズも取得）
+        const beforeCollision = await t.page.evaluate(() => {
+            const player = window.game.stateManager.currentState.player;
+            return {
+                health: player.health,
+                isSmall: player.isSmall,
+                width: player.width,
+                height: player.height
+            };
+        });
         console.log('Player before collision:', beforeCollision);
         
         // プレイヤーをArmorKnightの位置まで移動
         await t.movePlayer('right', 2000);
         await t.wait(500);
         
-        const afterCollision = await t.getPlayerStats();
+        const afterCollision = await t.page.evaluate(() => {
+            const player = window.game.stateManager.currentState.player;
+            return {
+                health: player.health,
+                isSmall: player.isSmall,
+                width: player.width,
+                height: player.height
+            };
+        });
         console.log('Player after collision:', afterCollision);
         
-        // 検証：プレイヤーがダメージを受けたか
-        t.assert(afterCollision.health < beforeCollision.health, 
-            'Player should take damage from side collision with ArmorKnight');
+        // 検証：プレイヤーが小さくなったか（ダメージを受けたか）
+        t.assert(afterCollision.isSmall === true && beforeCollision.isSmall === false, 
+            'Player should become small after collision with ArmorKnight');
+        t.assert(afterCollision.height < beforeCollision.height, 
+            'Player height should decrease after taking damage');
         
         console.log('\n=== ArmorKnightの移動確認 ===');
         
@@ -114,7 +132,11 @@ async function runArmorKnightTest() {
 }
 
 // テストを実行
-runArmorKnightTest().catch(error => {
-    console.error('Test failed:', error);
-    process.exit(1);
-});
+if (require.main === module) {
+    runArmorKnightTest().catch(error => {
+        console.error('Test failed:', error);
+        process.exit(1);
+    });
+}
+
+module.exports = runArmorKnightTest;
