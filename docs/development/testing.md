@@ -10,20 +10,20 @@ parent: 開発者向け
 
 ### E2Eテスト実行
 ```bash
-# 全テストを実行（シーケンシャル、約4分）
+# 全テストを並列実行（推奨、約80秒で完了）
 npm test
 
-# 全テストを並列実行（推奨、約80秒で完了）
-npm run test:parallel
-
-# テスト階層別実行
-npm run test:basic    # 基本フローのみ（~25秒）
-npm run test:core     # 基本＋主要機能（~1分）
-npm run test:full     # 全テスト並列実行（~1.5分）
+# Claudeでの作業時（重要）
+npm run test:claude  # タイムアウト10分で実行
 
 # 個別テストを実行
 node tests/e2e/test-enemy-damage.cjs
 ```
+
+#### Claudeでのテスト実行時の注意事項
+- **必ず `npm run test:claude` を使用すること**
+- Bashツールでテストを実行する際は `timeout: 600000` (10分) を指定
+- テストが約80秒かかるため、デフォルトの2分タイムアウトでは不足
 
 ### 並列テスト実行について
 
@@ -84,7 +84,7 @@ node tests/e2e/run-tests-stable.cjs
 | **test-armor-knight.cjs** | アーマーナイト敵テスト | 踏み判定無効化、突進動作、壁での反転、高耐久性の確認 | ~25秒 |
 | **test-animation-system.cjs** | アニメーションシステム | エンティティベースアニメーション、状態遷移、パレット適用 | ~20秒 |
 | **test-all-sprites-visual.cjs** | 全スプライト視覚テスト | すべてのキャラクター・オブジェクトの描画確認、スクリーンショット撮影 | ~15秒 |
-| **test-hole-falling.cjs** | 穴の落下物理テスト | 1マス幅の穴への落下、地面判定の中心検出、様々な幅の穴でのテスト | ~19秒 |
+| **test-hole-falling.cjs** | 穴の落下物理テスト | 1マス幅の穴への落下、プレイヤー幅14pxでの動作確認 | ~15秒 |
 
 ### テストログ
 - テスト実行時のログは `tests/logs/` に自動保存
@@ -96,6 +96,13 @@ node tests/e2e/run-tests-stable.cjs
   - タイムアウトした場合でも、どこまで実行されたか確認可能
 
 ### 既知の問題と解決策
+
+#### テスト実行時のタイムアウト（Claude環境）
+- **問題**: Claudeでテスト実行時に30秒でタイムアウトする
+- **原因**: Bashツールのデフォルトタイムアウトが2分（120秒）
+- **解決策**: 
+  - `npm run test:claude` を使用（10分タイムアウト設定済み）
+  - Bashツールで直接実行する場合は `timeout: 600000` を指定
 
 #### タイムアウトエラー
 - **問題**: E2EテストがPlayState ready timeoutで失敗することがある

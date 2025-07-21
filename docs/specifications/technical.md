@@ -30,28 +30,40 @@ ctx.imageSmoothingEnabled = false;
 
 ## 物理演算
 
-### 基本パラメータ（調整済み）
+### 基本パラメータ
 ```typescript
-GRAVITY: 0.433         // 重力加速度（元の66%）
-MAX_FALL_SPEED: 10     // 最大落下速度
+GRAVITY: 0.65          // 重力加速度
+MAX_FALL_SPEED: 15     // 最大落下速度
 FRICTION: 0.8          // 地面摩擦
 ```
 
 ### プレイヤー物理パラメータ
 ```typescript
-jumpPower: 5.25        // ジャンプ初速度
-variableJumpBoost: 0.15  // 可変ジャンプのブースト値
+jumpPower: 10          // ジャンプ初速度
+minJumpTime: 0         // 最小ジャンプ時間
+maxJumpTime: 400       // 最大ジャンプ時間（可変ジャンプ）
 gravityScale: 1.0      // 重力スケール（個別調整用）
+width: 14              // コリジョン幅（ピクセル）
+height: 32             // コリジョン高さ（ピクセル）
+smallWidth: 14         // 小サイズ時のコリジョン幅
+smallHeight: 16        // 小サイズ時のコリジョン高さ
 ```
 
 ### 衝突判定
 - **矩形判定**: AABB (Axis-Aligned Bounding Box)
 - **プラットフォーム**: 一方通行判定（上からのみ乗れる）
+- **地面判定**: プレイヤーは中心点のみで判定（1マスの穴に落ちるため）
+- **垂直衝突**: プレイヤー落下時は中心点のみで判定
 
 ### 物理システムの構成
 - **PhysicsSystem**: 全体の物理演算を管理
 - **Entity**: 個別の物理プロパティを保持
 - **競合回避**: PhysicsSystemが有効な場合、Entity.updatePhysics()はスキップ
+
+### 穴の落下判定
+- プレイヤーのコリジョン幅は14ピクセル（タイルサイズ16ピクセルより小さい）
+- これにより1マス幅の穴に落ちることが可能
+- 描画サイズとコリジョンサイズは独立（描画は変更なし）
 
 ## エンティティ構成
 
