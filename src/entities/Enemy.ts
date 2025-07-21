@@ -131,6 +131,13 @@ export class Enemy extends Entity {
 
     }
 
+    /**
+     * Returns whether this enemy can be defeated by stomping
+     */
+    canBeStomped(): boolean {
+        return true;
+    }
+
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || player.invulnerable) return;
         
@@ -140,6 +147,8 @@ export class Enemy extends Entity {
         const isAboveEnemy = playerCenter < enemyCenter;
         const isFalling = player.vy > 0;
         
+        Logger.log('Enemy', `${this.constructor.name} collision - playerY: ${player.y}, enemyY: ${this.y}, playerVy: ${player.vy}, isAboveEnemy: ${isAboveEnemy}, isFalling: ${isFalling}`);
+        
         if (isAboveEnemy && isFalling) {
             const playerLeft = player.x;
             const playerRight = player.x + player.width;
@@ -148,19 +157,30 @@ export class Enemy extends Entity {
             const hasHorizontalOverlap = playerRight > enemyLeft && playerLeft < enemyRight;
             
             if (!hasHorizontalOverlap) return;
-            this.takeDamage(1);
-            player.vy = -5;
-            const scoreGained = 100;
-            player.addScore(scoreGained);
             
-            if (this.eventBus) {
-                this.eventBus.emit('enemy:defeated', {
-                    enemy: this,
-                    score: scoreGained,
-                    position: { x: this.x, y: this.y }
-                });
+            if (this.canBeStomped()) {
+                this.takeDamage(1);
+                player.vy = -5;
+                player.grounded = false;
+                const scoreGained = 100;
+                player.addScore(scoreGained);
+                
+                if (this.eventBus) {
+                    this.eventBus.emit('enemy:defeated', {
+                        enemy: this,
+                        score: scoreGained,
+                        position: { x: this.x, y: this.y }
+                    });
+                }
+            } else {
+                const beforeVy = player.vy;
+                player.vy = -8;
+                player.grounded = false;
+                Logger.log('Enemy', `${this.constructor.name} cannot be stomped - player bounces off. vy changed from ${beforeVy} to ${player.vy}, grounded set to false`);
             }
+            return;
         } else {
+            Logger.log('Enemy', `${this.constructor.name} - player takes damage (not stomping)`);
             if (player.takeDamage) {
                 player.takeDamage();
             }

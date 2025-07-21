@@ -157,29 +157,14 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || player.invulnerable) return;
         
-        const enemyCenter = this.y + this.height / 2;
-        const playerCenter = player.y + player.height / 2;
-        const isAboveEnemy = playerCenter < enemyCenter;
-        const isFalling = player.vy > 0;
-        
-        if (isAboveEnemy && isFalling) {
-            const playerLeft = player.x;
-            const playerRight = player.x + player.width;
-            const enemyLeft = this.x;
-            const enemyRight = this.x + this.width;
-            const hasHorizontalOverlap = playerRight > enemyLeft && playerLeft < enemyRight;
-            
-            if (hasHorizontalOverlap) {
-                player.vy = -8;
-                Logger.log('ArmorKnight', `Player bounced off armor - player center: ${playerCenter}, enemy center: ${enemyCenter}, player vy: ${player.vy}`);
-                return;
-            }
-        }
-        
-        if (player.takeDamage) {
-            Logger.log('ArmorKnight', `Player takes damage - player center: ${playerCenter}, enemy center: ${enemyCenter}, player vy: ${player.vy}`);
-            player.takeDamage();
-        }
+        super.onCollisionWithPlayer(player);
+    }
+
+    /**
+     * ArmorKnight cannot be defeated by stomping
+     */
+    canBeStomped(): boolean {
+        return false;
     }
 
     /**
