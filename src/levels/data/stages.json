@@ -39,6 +39,12 @@
       "filename": "stage0-6.json"
     },
     {
+      "id": "stage0-7",
+      "name": "HOLE FALLING TEST",
+      "description": "Test stage for one-tile hole falling physics",
+      "filename": "stage0-7.json"
+    },
+    {
       "id": "stage1-1",
       "name": "STAGE 1-1",
       "description": "The adventure begins",

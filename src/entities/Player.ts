@@ -14,9 +14,9 @@ import { ShieldEffectVisual } from '../effects/ShieldEffect';
 
 
 const DEFAULT_PLAYER_CONFIG = {
-    width: 16,
+    width: 14,
     height: 32,
-    smallWidth: 16,
+    smallWidth: 14,
     smallHeight: 16,
     speed: 1.17,
     jumpPower: 10,
