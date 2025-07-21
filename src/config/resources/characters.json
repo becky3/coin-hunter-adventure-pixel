@@ -102,7 +102,9 @@
       },
       "ai": {
         "type": "patrol",
-        "detectRange": 60,
+        "detectRange": 84,
+        "detectRangeWidth": 84,
+        "detectRangeHeight": 128,
         "attackRange": 20
       }
     }

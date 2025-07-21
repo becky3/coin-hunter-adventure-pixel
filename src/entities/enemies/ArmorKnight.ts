@@ -16,6 +16,8 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     private normalSpeed: number;
     private isCharging: boolean;
     private playerInRange: Player | null;
+    private detectRangeWidth: number;
+    private detectRangeHeight: number;
 
     /**
      * Factory method to create an ArmorKnight instance
@@ -45,7 +47,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.damage = config?.stats.damage || 2;
         this.normalSpeed = config?.physics.moveSpeed || 0.15;
         this.moveSpeed = this.normalSpeed;
-        this.chargeSpeed = this.normalSpeed * 2;
+        this.chargeSpeed = this.normalSpeed * 6;
         
         this.spriteKey = 'enemies/armor_knight';
         this.animState = 'idle';
@@ -57,7 +59,9 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         
         if (config?.ai) {
             this.aiType = (config.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
-            this.detectRange = config.ai.detectRange || 60;
+            this.detectRange = config.ai.detectRange || 84;
+            this.detectRangeWidth = config.ai.detectRangeWidth || 84;
+            this.detectRangeHeight = config.ai.detectRangeHeight || 128;
             this.attackRange = config.ai.attackRange || 20;
         }
         
@@ -126,13 +130,13 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     }
 
     /**
-     * Check if a player is within detection range
+     * Check if a player is within detection range (rectangular)
      */
     private isPlayerInRange(player: Player): boolean {
-        const dx = player.x - this.x;
-        const dy = player.y - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance <= this.detectRange;
+        const dx = Math.abs(player.x - this.x);
+        const dy = Math.abs(player.y - this.y);
+        
+        return dx <= this.detectRangeWidth && dy <= this.detectRangeHeight;
     }
     
     /**
