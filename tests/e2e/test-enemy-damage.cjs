@@ -39,7 +39,7 @@ async function runTest() {
             enemies: enemies.map(e => ({ x: e.x, y: e.y, type: e.type }))
         };
         
-        await t.page.evaluate(() => {
+        const detailedEnemyInfo = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
             const entityManager = state?.entityManager;
             if (!entityManager) return { error: 'No EntityManager' };
@@ -62,8 +62,9 @@ async function runTest() {
             };
         });
         console.log('Entity info:', enemyInfo);
+        console.log('Detailed enemy info:', detailedEnemyInfo);
         
-        t.assert(enemyInfo.enemies > 0, 'Enemies should be found in level - stage should load correctly');
+        t.assert(enemyInfo.enemyCount > 0, 'Enemies should be found in level - stage should load correctly');
         
         // Check enemy positions
         console.log('Enemy positions:');

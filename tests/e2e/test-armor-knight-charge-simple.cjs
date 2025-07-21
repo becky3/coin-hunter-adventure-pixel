@@ -37,15 +37,15 @@ async function runArmorKnightChargeTest() {
             if (!armorKnightEntity) return { error: 'ArmorKnight not found in stage' };
             
             // グローバル変数に保存（テスト用）
-            window.testArmorKnight = armorKnight;
+            window.testArmorKnight = armorKnightEntity;
             
             return {
                 success: true,
                 playerPos: { x: player.x, y: player.y },
-                knightPos: { x: armorKnight.x, y: armorKnight.y },
-                detectRange: armorKnight.detectRange,
-                normalSpeed: armorKnight.normalSpeed,
-                chargeSpeed: armorKnight.chargeSpeed
+                knightPos: { x: armorKnightEntity.x, y: armorKnightEntity.y },
+                detectRange: armorKnightEntity.detectRange,
+                normalSpeed: armorKnightEntity.normalSpeed,
+                chargeSpeed: armorKnightEntity.chargeSpeed
             };
         });
         

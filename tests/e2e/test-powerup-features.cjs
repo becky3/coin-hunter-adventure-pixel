@@ -31,7 +31,7 @@ async function runTest() {
             const playerEntity = state.player;
             return {
                 hasShield: playerEntity.powerUpManager?.hasPowerUp('SHIELD_STONE'),
-                canShoot: player.powerUpManager?.hasPowerUp('POWER_GLOVE'),
+                canShoot: playerEntity.powerUpManager?.hasPowerUp('POWER_GLOVE'),
                 lives: state.lives
             };
         });
