@@ -41,7 +41,7 @@ async function runArmorKnightChargeTest() {
             
             return {
                 success: true,
-                playerPos: { x: player.x, y: player.y },
+                playerPos: { x: playerEntity.x, y: playerEntity.y },
                 knightPos: { x: armorKnightEntity.x, y: armorKnightEntity.y },
                 detectRange: armorKnightEntity.detectRange,
                 normalSpeed: armorKnightEntity.normalSpeed,

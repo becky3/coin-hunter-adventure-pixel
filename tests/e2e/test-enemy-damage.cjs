@@ -68,9 +68,11 @@ async function runTest() {
         
         // Check enemy positions
         console.log('Enemy positions:');
-        enemyInfo.enemyDetails.forEach((enemy, index) => {
-            console.log(`  Enemy ${index + 1} (${enemy.type}): x=${enemy.position.x}, y=${enemy.position.y}, alive=${enemy.alive}`);
-        });
+        if (detailedEnemyInfo.enemyDetails) {
+            detailedEnemyInfo.enemyDetails.forEach((enemy, index) => {
+                console.log(`  Enemy ${index + 1} (${enemy.type}): x=${enemy.position.x}, y=${enemy.position.y}, alive=${enemy.alive}`);
+            });
+        }
         
         // Check level entities from stage data
         const levelInfo = await t.page.evaluate(() => {
