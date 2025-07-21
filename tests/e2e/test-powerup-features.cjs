@@ -67,7 +67,7 @@ async function runTest() {
             await t.wait(100);
             
             // Move player into the shield stone to trigger collision
-            await t.movePlayer('right', 300);
+            await t.movePlayer('right', 100);
             await t.wait(500);
             
             // Check if shield was collected

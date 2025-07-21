@@ -48,7 +48,7 @@ export class PhysicsSystem {
     private entities: Set<PhysicsEntity>;
     private tileMap: number[][] | null;
     private tileSize: number;
-    private groundDetectionRatio: number = 0.4;
+    private groundDetectionRatio: number = 0.2;
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
@@ -223,8 +223,16 @@ export class PhysicsSystem {
         if (!this.tileMap) return;
         
         const bounds = entity.getBounds();
-        const startCol = Math.floor(bounds.left / this.tileSize);
-        const endCol = Math.floor(bounds.right / this.tileSize);
+        let startCol, endCol;
+        
+        if (axis === 'vertical' && entity.vy >= 0 && entity.type === 'player') {
+            const centerX = entity.x + entity.width / 2;
+            startCol = endCol = Math.floor(centerX / this.tileSize);
+        } else {
+            startCol = Math.floor(bounds.left / this.tileSize);
+            endCol = Math.floor(bounds.right / this.tileSize);
+        }
+        
         const startRow = Math.floor(bounds.top / this.tileSize);
         const endRow = Math.floor(bounds.bottom / this.tileSize);
         const clampedStartCol = Math.max(0, startCol);
@@ -275,7 +283,9 @@ export class PhysicsSystem {
             if (entity.vy > 0) {
                 entity.y = tileBounds.top - entity.height;
                 entity.vy = 0;
-                entity.grounded = true;
+                if (entity.type !== 'player') {
+                    entity.grounded = true;
+                }
             } else if (entity.vy < 0) {
                 entity.y = tileBounds.bottom;
                 entity.vy = 0;
@@ -367,30 +377,24 @@ export class PhysicsSystem {
     updateGroundedState(entity: PhysicsEntity): void {
         entity.grounded = false;
         
-        const detectionWidth = entity.width * this.groundDetectionRatio;
-        const offsetX = (entity.width - detectionWidth) / 2;
-        
-        const testBounds: Bounds = {
-            left: entity.x + offsetX,
-            top: entity.y + entity.height + 1,
-            right: entity.x + offsetX + detectionWidth,
-            bottom: entity.y + entity.height + 2,
-            width: detectionWidth,
-            height: 1
-        };
+        const centerX = entity.x + entity.width / 2;
+        const testY = entity.y + entity.height + 1;
         
         if (this.tileMap) {
-            const row = Math.floor(testBounds.top / this.tileSize);
-            const startCol = Math.floor(testBounds.left / this.tileSize);
-            const endCol = Math.floor(testBounds.right / this.tileSize);
+            const row = Math.floor(testY / this.tileSize);
+            const col = Math.floor(centerX / this.tileSize);
             
-            if (row >= 0 && row < this.tileMap.length) {
-                for (let col = startCol; col <= endCol; col++) {
-                    if (col >= 0 && col < this.tileMap[row].length && this.tileMap[row][col] === 1) {
-                        entity.grounded = true;
-                        break;
-                    }
+            if (entity.type === 'player') {
+                Logger.log(`[updateGroundedState] Player at (${entity.x}, ${entity.y}), center=${centerX}, checking tile (${col}, ${row})`);
+                if (row >= 0 && row < this.tileMap.length && col >= 0 && col < this.tileMap[row].length) {
+                    Logger.log(`[updateGroundedState] Tile value at (${col}, ${row}): ${this.tileMap[row][col]}`);
                 }
+            }
+            
+            if (row >= 0 && row < this.tileMap.length && 
+                col >= 0 && col < this.tileMap[row].length && 
+                this.tileMap[row][col] === 1) {
+                entity.grounded = true;
             }
         }
     }
