@@ -12,17 +12,10 @@ async function runTest() {
     await test.runTest(async (t) => {
         // Initialize
         await t.init('Performance Test');
-        await t.injectErrorTracking();
-        await t.navigateToGame('http://localhost:3000?s=0-1&skip_title=true');
-        await t.waitForGameInitialization();
         
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        
-        // Ensure input focus
-        await t.clickAt(100, 100);
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-1');
         await t.wait(1000); // Wait for game state to stabilize
-        await t.assertPlayerExists();
         
         console.log('\n--- Starting Performance Monitoring ---\n');
         

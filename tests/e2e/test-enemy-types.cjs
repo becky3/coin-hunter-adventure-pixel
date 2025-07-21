@@ -16,17 +16,8 @@ async function runTest() {
         // Initialize test
         await t.init('Enemy Types Test');
         
-        // Setup error tracking
-        await t.injectErrorTracking();
-        
-        // Navigate to stage 0-6 which is dedicated for enemy type testing
-        await t.navigateToGame('http://localhost:3000?s=0-6&skip_title=true');
-        
-        await t.waitForGameInitialization();
-        
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        await t.assertPlayerExists();
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-6');
         
         console.log('\n=== Testing Enemy Types ===');
         
@@ -46,7 +37,11 @@ async function runTest() {
         
         await t.wait(500);
         
-        // Check Bat behavior
+        // Check Bat behavior using new method
+        await t.wait(500);
+        const enemies = await t.getEntity('enemies');
+        const bat = enemies.find(e => e.type === 'Bat');
+        
         const batInfo = await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
             const enemies = state.entityManager.getEnemies() || [];

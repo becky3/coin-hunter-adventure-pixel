@@ -16,17 +16,8 @@ async function runTest() {
         // Initialize test
         await t.init('Hole Falling Test');
         
-        // Setup error tracking
-        await t.injectErrorTracking();
-        
-        // Navigate to hole falling test stage
-        await t.navigateToGame('http://localhost:3000?s=0-7&skip_title=true');
-        
-        await t.waitForGameInitialization();
-        
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        await t.assertPlayerExists();
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-7');
         
         console.log('\n=== Testing Hole Falling Physics ===');
         

@@ -16,28 +16,21 @@ async function runTest() {
         // Initialize test
         await t.init('PowerUp Features Test');
         
-        // Setup error tracking
-        await t.injectErrorTracking();
-        
-        // Navigate to stage 0-5 which has powerup items
-        await t.navigateToGame('http://localhost:3000?s=0-5&skip_title=true');
-        await t.waitForGameInitialization();
-        
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        await t.assertPlayerExists();
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-5');
         
         console.log('\n=== Testing PowerUp Features ===');
         
         // === PART 1: Shield PowerUp System ===
         console.log('\n--- Part 1: Shield PowerUp System ---');
         
-        // Get initial player state
+        // Get initial player state using new method
+        const player = await t.getEntity('player');
         const initialState = await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
-            const player = state.player;
+            const playerEntity = state.player;
             return {
-                hasShield: player.powerUpManager?.hasPowerUp('SHIELD_STONE'),
+                hasShield: playerEntity.powerUpManager?.hasPowerUp('SHIELD_STONE'),
                 canShoot: player.powerUpManager?.hasPowerUp('POWER_GLOVE'),
                 lives: state.lives
             };

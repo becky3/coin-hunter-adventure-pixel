@@ -13,39 +13,33 @@ async function runTest() {
         // Initialize game
         await t.init('Enemy Damage Test');
         
-        // Setup error tracking
-        await t.injectErrorTracking();
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-2');
         
-        // Navigate to game with stage 0-2 (enemy damage test stage)
-        await t.navigateToGame('http://localhost:3000?s=0-2&skip_title=true');
-        await t.waitForGameInitialization();
-        
-        // Take initial screenshot
-        // await t.screenshot('test-initialized');
-        
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        
-        // Ensure input focus
-        await t.ensureInputFocus();
-        await t.assertPlayerExists();
-        
-        // Get initial player stats
-        const initialStats = await t.getPlayerStats();
-        console.log('Initial player stats:', initialStats);
-        
-        // Get initial lives
-        const initialLives = await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            return state?.lives || 0;
+        // Get initial player stats using new method
+        const initialPlayer = await t.getEntity('player');
+        console.log('Initial player stats:', {
+            position: { x: initialPlayer.x, y: initialPlayer.y },
+            health: initialPlayer.health,
+            isSmall: initialPlayer.isSmall,
+            grounded: initialPlayer.grounded
         });
+        
+        // Get initial lives using new helper
+        const initialLives = await t.getLives();
         console.log('Initial lives:', initialLives);
         
         // Test 1: First damage should make player small
         console.log('\n--- Test 1: First Enemy Damage (Large -> Small) ---');
         
-        // Check if enemies exist
-        const enemyInfo = await t.page.evaluate(() => {
+        // Check if enemies exist using new method
+        const enemies = await t.getEntity('enemies');
+        const enemyInfo = {
+            enemyCount: enemies.length,
+            enemies: enemies.map(e => ({ x: e.x, y: e.y, type: e.type }))
+        };
+        
+        await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
             const entityManager = state?.entityManager;
             if (!entityManager) return { error: 'No EntityManager' };

@@ -17,23 +17,8 @@ async function runArmorKnightStompTest() {
     await test.runTest(async (t) => {
         await t.init('ArmorKnight Stomp Test (Simple)');
         
-        // エラートラッキングを設定
-        await t.injectErrorTracking();
-        
-        // 踏みつけ専用テストステージで開始
-        await t.navigateToGame('http://localhost:3000?s=test-armor-knight-stomp&skip_title=true');
-        
-        // ゲームの初期化を待つ
-        await t.waitForGameInitialization();
-        
-        // play状態であることを確認
-        await t.assertState('play');
-        
-        // 入力フォーカスを確保
-        await t.ensureInputFocus();
-        
-        // プレイヤーの存在を確認
-        await t.assertPlayerExists();
+        // Use quickStart for simplified initialization
+        await t.quickStart('test-armor-knight-stomp');
         
         console.log('\n=== ArmorKnight Stomp Test (Simple) ===');
         

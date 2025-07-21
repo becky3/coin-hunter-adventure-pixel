@@ -445,7 +445,101 @@ E2Eテストの基盤となるフレームワークです。
 
 ## テスト作成ガイド
 
-### 基本構造
+### 🚀 クイックスタートガイド（新規実装者向け）
+
+新しいE2Eテストを作成する最も簡単な方法：
+
+1. **テンプレートをコピー**
+   ```bash
+   cp tests/e2e/test-template.cjs tests/e2e/test-your-feature.cjs
+   ```
+
+2. **最小限のコードでテスト開始**
+   ```javascript
+   const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
+   const testConfig = require('./utils/testConfig.cjs');
+
+   async function runTest() {
+       const test = new GameTestHelpers({
+           headless: testConfig.headless,
+           verbose: true,
+           timeout: 30000
+       });
+
+       await test.runTest(async (t) => {
+           await t.init('Your Test Name');
+           
+           // これだけでゲーム開始！
+           await t.quickStart('1-1');
+           
+           // プレイヤーを動かす
+           await t.movePlayer('right', 1000);
+           await t.jumpPlayer();
+           
+           // エラーチェック
+           await t.checkForErrors();
+       });
+   }
+
+   if (require.main === module) {
+       runTest().catch(error => {
+           console.error('Test failed:', error);
+           process.exit(1);
+       });
+   }
+
+   module.exports = runTest;
+   ```
+
+### 新しい簡易メソッドの詳細
+
+#### quickStart - ゲーム開始の全てを1行で
+```javascript
+// 最もシンプル - ステージ1-1で開始
+await t.quickStart('1-1');
+
+// カスタムステージ
+await t.quickStart('test-enemy');
+
+// オプション指定
+await t.quickStart('0-2', {
+    skipTitle: false,      // タイトル画面を表示
+    ensureFocus: true,     // 自動的にフォーカス設定
+    injectErrorTracking: true  // エラー追跡有効
+});
+```
+
+#### getEntity - エンティティ取得が簡単に
+```javascript
+// プレイヤー情報を取得
+const player = await t.getEntity('player');
+console.log(player.x, player.y, player.health, player.isSmall);
+
+// 全ての敵を取得
+const enemies = await t.getEntity('enemies');
+enemies.forEach(enemy => console.log(enemy.type, enemy.x, enemy.y));
+
+// 特定の敵を1体だけ取得
+const slime = await t.getEntity('Slime', { single: true });
+
+// 全てのアイテムを取得
+const items = await t.getEntity('items');
+```
+
+#### その他の便利メソッド
+```javascript
+// プレイヤーをテレポート（テスト準備に便利）
+await t.teleportPlayer(300, 100);
+
+// エンティティの出現を待つ
+await t.waitForEntity('Boss', 5000);
+
+// ゲーム情報の取得
+const lives = await t.getLives();
+const stageInfo = await t.getStageInfo();
+```
+
+### 基本構造（従来の方法）
 
 ```javascript
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
@@ -487,6 +581,19 @@ module.exports = runTest;
 ```
 
 ### 共通ヘルパーメソッド (GameTestHelpers)
+
+#### 🆕 新しい簡易メソッド（推奨）
+
+| メソッド | 説明 | 使用例 |
+|----------|------|--------|
+| **quickStart(stage, options)** | ゲームを一発で開始（初期化・フォーカス・エラー追跡込み） | `await t.quickStart('1-1')` |
+| **getEntity(type, options)** | 任意のエンティティを取得 | `const player = await t.getEntity('player')` |
+| **waitForEntity(type, timeout)** | エンティティのスポーンを待つ | `await t.waitForEntity('Slime', 5000)` |
+| **teleportPlayer(x, y)** | プレイヤーを任意の座標に移動 | `await t.teleportPlayer(200, 100)` |
+| **getLives()** | 現在のライフ数を取得 | `const lives = await t.getLives()` |
+| **getStageInfo()** | ステージ情報を取得 | `const info = await t.getStageInfo()` |
+
+#### 従来のメソッド
 
 | メソッド | 説明 | 使用例 |
 |----------|------|--------|

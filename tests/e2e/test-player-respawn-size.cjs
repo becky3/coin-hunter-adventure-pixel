@@ -13,26 +13,16 @@ async function runTest() {
         // Initialize game
         await t.init('Player Respawn Size Test (Issue 106)');
         
-        // Setup error tracking
-        await t.injectErrorTracking();
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-2');
         
-        // Navigate to game with stage 0-2 (enemy damage test stage)
-        await t.navigateToGame('http://localhost:3000?s=0-2&skip_title=true');
-        await t.waitForGameInitialization();
-        
-        // Take initial screenshot
-        // await t.screenshot('test-initialized');
-        
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        
-        // Ensure input focus
-        await t.ensureInputFocus();
-        await t.assertPlayerExists();
-        
-        // Get initial player stats
-        const initialStats = await t.getPlayerStats();
-        console.log('Initial player stats:', initialStats);
+        // Get initial player stats using new method
+        const initialPlayer = await t.getEntity('player');
+        console.log('Initial player stats:', {
+            position: { x: initialPlayer.x, y: initialPlayer.y },
+            health: initialPlayer.health,
+            isSmall: initialPlayer.isSmall
+        });
         
         // Get initial player size
         const initialSize = await t.page.evaluate(() => {
