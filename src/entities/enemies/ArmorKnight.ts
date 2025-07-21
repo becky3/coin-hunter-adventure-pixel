@@ -11,6 +11,9 @@ import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/a
  * Heavily armored enemy that cannot be defeated by jumping
  */
 export class ArmorKnight extends Enemy implements EntityInitializer {
+    private static readonly CHARGE_SPEED_MULTIPLIER = 6;
+    private static readonly DEFAULT_STOMP_BOUNCE_VELOCITY = -16;
+    
     public spriteKey: string;
     private chargeSpeed: number;
     private normalSpeed: number;
@@ -47,7 +50,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.damage = config?.stats.damage || 2;
         this.normalSpeed = config?.physics.moveSpeed || 0.15;
         this.moveSpeed = this.normalSpeed;
-        this.chargeSpeed = this.normalSpeed * 6;
+        this.chargeSpeed = this.normalSpeed * ArmorKnight.CHARGE_SPEED_MULTIPLIER;
         
         this.spriteKey = 'enemies/armor_knight';
         this.animState = 'idle';
@@ -55,7 +58,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.isCharging = false;
         this.playerInRange = null;
         
-        this.stompBounceVelocity = -16;
+        this.stompBounceVelocity = ArmorKnight.DEFAULT_STOMP_BOUNCE_VELOCITY;
         
         if (config?.ai) {
             this.aiType = (config.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';

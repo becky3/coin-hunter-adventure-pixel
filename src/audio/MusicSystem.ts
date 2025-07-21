@@ -69,7 +69,7 @@ export class MusicSystem {
 
         this.activeNodes = [];
 
-        this.bgmVolume = 0.03;
+        this.bgmVolume = 0.3;
         this.sfxVolume = 0.5;
         this.isMuted = false;
         
