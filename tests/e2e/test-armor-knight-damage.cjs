@@ -6,8 +6,12 @@
 
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 const testConfig = require('./utils/testConfig.cjs');
+const { stabilizeBeforeTest } = require('./utils/stabilize-before-test.cjs');
 
 async function runArmorKnightDamageTest() {
+    // Viteが安定するまで待つ
+    await stabilizeBeforeTest(2000);
+    
     const test = new GameTestHelpers({
         headless: testConfig.headless,
         verbose: true,
@@ -80,9 +84,9 @@ async function runArmorKnightDamageTest() {
         console.log('After PowerGlove:', afterPowerGlove);
         t.assert(afterPowerGlove.hasPowerGlove, 'Player should have PowerGlove');
         
-        // ArmorKnightに近づく（通り過ぎないように）
+        // ArmorKnightに近づく（遠めに保つ）
         console.log('Moving closer to ArmorKnight...');
-        await t.movePlayer('right', 400);
+        await t.movePlayer('right', 700);
         await t.wait(500);
         
         // 攻撃前のArmorKnightの状態
@@ -94,11 +98,55 @@ async function runArmorKnightDamageTest() {
         });
         console.log('ArmorKnight health before attack:', beforeAttack.health);
         
+        // イベントリスナーを設定
+        await t.page.evaluate(() => {
+            window.enemyInvinciblePromise = null;
+            window.enemyRecoveredPromise = null;
+            
+            // PlayStateから直接EventBusを取得
+            const state = window.game.stateManager.currentState;
+            const eventBus = state.eventBus;
+            
+            // 無敵時間終了の監視
+            eventBus.on('enemy:invincible-end', (data) => {
+                if (data.enemy.constructor.name === 'ArmorKnight' && window.enemyInvincibleResolve) {
+                    window.enemyInvincibleResolve();
+                }
+            });
+            
+            // hurt状態から回復の監視
+            eventBus.on('enemy:state-changed', (data) => {
+                if (data.enemy.constructor.name === 'ArmorKnight' && 
+                    data.previousState === 'hurt' && 
+                    window.enemyRecoveredResolve) {
+                    window.enemyRecoveredResolve();
+                }
+            });
+        });
+        
         // パワーグローブで攻撃（3回）
         console.log('Attacking with PowerGlove...');
         for (let i = 0; i < 3; i++) {
+            // 2回目以降の攻撃前に無敵時間終了を待つ
+            if (i > 0) {
+                console.log('Waiting for invincibility to end...');
+                
+                // Promise を作成
+                await t.page.evaluate(() => {
+                    window.enemyInvinciblePromise = new Promise((resolve) => {
+                        window.enemyInvincibleResolve = resolve;
+                    });
+                });
+                
+                // 無敵時間終了を待つ（最大2秒）
+                await Promise.race([
+                    t.page.evaluate(() => window.enemyInvinciblePromise),
+                    t.wait(2000)
+                ]);
+            }
+            
             await t.holdKey('.', 100); // Hold the key for 100ms
-            await t.wait(1000);
+            await t.wait(200); // 次の行動まで少し待つ
             
             const afterAttack = await t.page.evaluate(() => {
                 const armorKnight = window.game.stateManager.currentState.entityManager.enemies.find(

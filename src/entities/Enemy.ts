@@ -6,7 +6,7 @@ import { Logger } from '../utils/Logger';
 import { EventBus } from '../services/EventBus';
 
 export type AIType = 'patrol' | 'chase' | 'idle';
-export type EnemyState = 'idle' | 'hurt' | 'dead';
+export type EnemyState = 'idle' | 'walk' | 'hurt' | 'dead';
 
 /**
  * Base enemy entity class
@@ -67,7 +67,15 @@ export class Enemy extends Entity {
         if (!this.active) return;
         
         if (this.invincibleTime > 0) {
+            const wasInvincible = this.invincibleTime > 0;
             this.invincibleTime -= deltaTime * 1000;
+            
+            // 無敵時間が終了したときの通知
+            if (wasInvincible && this.invincibleTime <= 0 && this.eventBus) {
+                this.eventBus.emit('enemy:invincible-end', {
+                    enemy: this
+                });
+            }
         }
         
         if (this.stateTimer > 0) {
@@ -100,6 +108,12 @@ export class Enemy extends Entity {
                     enemy: this,
                     damage: amount,
                     position: { x: this.x, y: this.y }
+                });
+                
+                // 無敵時間終了の通知
+                this.eventBus.emit('enemy:invincible-start', {
+                    enemy: this,
+                    duration: this.invincibleTime
                 });
             }
         }

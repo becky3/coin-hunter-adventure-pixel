@@ -98,10 +98,37 @@ class TestFramework {
         return this.page;
     }
 
-    async navigateToGame(url = 'http://localhost:3000') {
+    async navigateToGame(url = 'http://localhost:3000', maxRetries = 3) {
         console.log(`Navigating to: ${url}`);
-        await this.page.goto(url, { waitUntil: 'load' });
-        console.log('✅ Page loaded');
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                await this.page.goto(url, { 
+                    waitUntil: 'load',
+                    timeout: 30000
+                });
+                
+                // Viteの接続を待つ
+                await this.page.waitForFunction(() => {
+                    // Viteが接続されているか確認
+                    return !window.__vite_connecting;
+                }, { timeout: 5000 }).catch(() => {
+                    console.log('⚠️ Vite connection check timed out, continuing anyway');
+                });
+                
+                console.log('✅ Page loaded');
+                return;
+            } catch (error) {
+                console.log(`❌ Navigation attempt ${attempt} failed: ${error.message}`);
+                
+                if (attempt < maxRetries) {
+                    console.log(`Retrying in 3 seconds... (attempt ${attempt + 1}/${maxRetries})`);
+                    await this.wait(3000);
+                } else {
+                    throw error;
+                }
+            }
+        }
     }
 
     async safeScreenshot(name) {
