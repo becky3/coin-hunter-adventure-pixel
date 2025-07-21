@@ -48,7 +48,6 @@ export class PhysicsSystem {
     private entities: Set<PhysicsEntity>;
     private tileMap: number[][] | null;
     private tileSize: number;
-    private groundDetectionRatio: number = 0.2;
     private collisionPairs: Map<string, boolean>;
 
     constructor() {
@@ -91,14 +90,6 @@ export class PhysicsSystem {
     get gravity(): number { return this._gravity; }
     get maxFallSpeed(): number { return this._maxFallSpeed; }
     get friction(): number { return this._friction; }
-    
-    getGroundDetectionRatio(): number {
-        return this.groundDetectionRatio;
-    }
-    
-    setGroundDetectionRatio(value: number): void {
-        this.groundDetectionRatio = Math.max(0.0, Math.min(1.0, value));
-    }
     
     setGravity(value: number): void {
         if (value >= 0) {
@@ -383,13 +374,6 @@ export class PhysicsSystem {
         if (this.tileMap) {
             const row = Math.floor(testY / this.tileSize);
             const col = Math.floor(centerX / this.tileSize);
-            
-            if (entity.type === 'player') {
-                Logger.log(`[updateGroundedState] Player at (${entity.x}, ${entity.y}), center=${centerX}, checking tile (${col}, ${row})`);
-                if (row >= 0 && row < this.tileMap.length && col >= 0 && col < this.tileMap[row].length) {
-                    Logger.log(`[updateGroundedState] Tile value at (${col}, ${row}): ${this.tileMap[row][col]}`);
-                }
-            }
             
             if (row >= 0 && row < this.tileMap.length && 
                 col >= 0 && col < this.tileMap[row].length && 
