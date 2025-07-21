@@ -146,10 +146,10 @@ export class Enemy extends Entity {
         const playerCenter = player.y + player.height / 2;
         const isAboveEnemy = playerCenter < enemyCenter;
         const isFalling = player.vy > 0;
+        const wasJustBounced = player.vy < -5;
         
-        Logger.log('Enemy', `${this.constructor.name} collision - playerY: ${player.y}, enemyY: ${this.y}, playerVy: ${player.vy}, isAboveEnemy: ${isAboveEnemy}, isFalling: ${isFalling}`);
         
-        if (isAboveEnemy && isFalling) {
+        if (isAboveEnemy && (isFalling || wasJustBounced)) {
             const playerLeft = player.x;
             const playerRight = player.x + player.width;
             const enemyLeft = this.x;
@@ -173,14 +173,11 @@ export class Enemy extends Entity {
                     });
                 }
             } else {
-                const beforeVy = player.vy;
                 player.vy = -8;
                 player.grounded = false;
-                Logger.log('Enemy', `${this.constructor.name} cannot be stomped - player bounces off. vy changed from ${beforeVy} to ${player.vy}, grounded set to false`);
             }
             return;
         } else {
-            Logger.log('Enemy', `${this.constructor.name} - player takes damage (not stomping)`);
             if (player.takeDamage) {
                 player.takeDamage();
             }

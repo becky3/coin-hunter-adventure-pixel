@@ -82,6 +82,11 @@ async function runArmorKnightStompTest() {
             const armorKnight = window.game.stateManager.currentState.entityManager.enemies.find(e => e.constructor.name === 'ArmorKnight');
             const originalMethod = armorKnight.onCollisionWithPlayer;
             armorKnight.onCollisionWithPlayer = function(player) {
+                const enemyCenter = this.y + this.height / 2;
+                const playerCenter = player.y + player.height / 2;
+                const isAboveEnemy = playerCenter < enemyCenter;
+                const isFalling = player.vy > 0;
+                
                 window.collisionLog.push({
                     timestamp: Date.now(),
                     phase: 'before',
@@ -89,15 +94,19 @@ async function runArmorKnightStompTest() {
                     playerVy: player.vy,
                     knightY: this.y,
                     playerHealth: player.health,
-                    playerCenter: player.y + player.height / 2,
-                    knightCenter: this.y + this.height / 2
+                    playerCenter: playerCenter,
+                    knightCenter: enemyCenter,
+                    isAboveEnemy: isAboveEnemy,
+                    isFalling: isFalling,
+                    invulnerable: player.invulnerable
                 });
                 originalMethod.call(this, player);
                 window.collisionLog.push({
                     timestamp: Date.now(),
                     phase: 'after',
                     playerHealth: player.health,
-                    playerVy: player.vy
+                    playerVy: player.vy,
+                    invulnerable: player.invulnerable
                 });
             };
             
@@ -257,9 +266,8 @@ async function runArmorKnightStompTest() {
         t.assert(afterStomp.armorKnight.state !== 'dead', 'ArmorKnight should not be dead');
         
         // 検証: プレイヤーが実際に跳ね返っている（Y座標の変化で確認）
-        // 現状、物理エンジンの制約でこのテストは失敗する可能性があるため、一旦スキップ
-        // t.assert(bounceDetected, 
-        //     'Player should visibly bounce off ArmorKnight (Y position should move upward)');
+        t.assert(bounceDetected, 
+            'Player should visibly bounce off ArmorKnight (Y position should move upward)');
         
         // 検証: 最終的にプレイヤーがダメージを受けていない
         const finalHealth = afterStomp.player.health;
@@ -271,13 +279,11 @@ async function runArmorKnightStompTest() {
         console.log(`Final player health: ${finalHealth}/${initialState.player.maxHealth}`);
         console.log(`Collision count: ${afterStomp.collisionLog.length}`);
         
-        // 現状、物理エンジンの制約で反発が視覚的に確認できないが、
-        // 重要なのはプレイヤーがダメージを受けていないこと
-        if (finalHealth === initialState.player.maxHealth) {
-            console.log('\n✅ ArmorKnight stomp test PASSED! (Player took no damage)');
+        if (bounceDetected && finalHealth === initialState.player.maxHealth) {
+            console.log('\n✅ ArmorKnight stomp test PASSED!');
         } else {
             console.log('\n❌ ArmorKnight stomp test FAILED!');
-            t.assert(false, 'Player took damage when stomping ArmorKnight');
+            t.assert(false, 'ArmorKnight stomp behavior is not working correctly');
         }
         
         // エラーチェック
