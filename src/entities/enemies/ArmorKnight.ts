@@ -11,11 +11,16 @@ import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/a
  * Heavily armored enemy that cannot be defeated by jumping
  */
 export class ArmorKnight extends Enemy implements EntityInitializer {
+    private static readonly CHARGE_SPEED_MULTIPLIER = 6;
+    private static readonly DEFAULT_STOMP_BOUNCE_VELOCITY = -16;
+    
     public spriteKey: string;
     private chargeSpeed: number;
     private normalSpeed: number;
     private isCharging: boolean;
     private playerInRange: Player | null;
+    private detectRangeWidth: number;
+    private detectRangeHeight: number;
 
     /**
      * Factory method to create an ArmorKnight instance
@@ -45,7 +50,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.damage = config?.stats.damage || 2;
         this.normalSpeed = config?.physics.moveSpeed || 0.15;
         this.moveSpeed = this.normalSpeed;
-        this.chargeSpeed = this.normalSpeed * 2;
+        this.chargeSpeed = this.normalSpeed * ArmorKnight.CHARGE_SPEED_MULTIPLIER;
         
         this.spriteKey = 'enemies/armor_knight';
         this.animState = 'idle';
@@ -53,9 +58,13 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.isCharging = false;
         this.playerInRange = null;
         
+        this.stompBounceVelocity = ArmorKnight.DEFAULT_STOMP_BOUNCE_VELOCITY;
+        
         if (config?.ai) {
             this.aiType = (config.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
-            this.detectRange = config.ai.detectRange || 60;
+            this.detectRange = config.ai.detectRange || 84;
+            this.detectRangeWidth = config.ai.detectRangeWidth || 84;
+            this.detectRangeHeight = config.ai.detectRangeHeight || 128;
             this.attackRange = config.ai.attackRange || 20;
         }
         
@@ -63,13 +72,39 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     }
     
     protected updateAI(_deltaTime: number): void {
-        if (this.state === 'dead' || this.state === 'hurt') {
+        if (this.state === 'dead') {
             this.isCharging = false;
             this.moveSpeed = this.normalSpeed;
             return;
         }
+        
+        if (this.state === 'hurt') {
+            this.isCharging = false;
+            this.moveSpeed = this.normalSpeed;
+            this.vx = 0;
+            if (this.stateTimer <= 0) {
+                Logger.log('ArmorKnight', 'Recovering from hurt state');
+                this.state = 'idle';
+                this.animState = 'move';
+                if (this.entityAnimationManager) {
+                    this.entityAnimationManager.setState(this.animState);
+                }
+                
+                if (this.eventBus) {
+                    this.eventBus.emit('enemy:state-changed', {
+                        enemy: this,
+                        previousState: 'hurt',
+                        newState: 'idle'
+                    });
+                }
+            }
+            return;
+        }
 
-        if (this.playerInRange && this.isPlayerStillInRange(this.playerInRange)) {
+        const player = this.findPlayer();
+        
+        if (player && this.isPlayerInRange(player)) {
+            this.playerInRange = player;
             this.isCharging = true;
             this.moveSpeed = this.chargeSpeed;
             this.animState = 'charge';
@@ -98,20 +133,37 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     }
 
     /**
-     * Check if a player is still within detection range
+     * Check if a player is within detection range (rectangular)
      */
-    private isPlayerStillInRange(player: Player): boolean {
-        const dx = player.x - this.x;
-        const dy = player.y - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance <= this.detectRange;
+    private isPlayerInRange(player: Player): boolean {
+        const dx = Math.abs(player.x - this.x);
+        const dy = Math.abs(player.y - this.y);
+        
+        return dx <= this.detectRangeWidth && dy <= this.detectRangeHeight;
     }
-
+    
     /**
-     * Set the player that's in range for charging
+     * Find the player using the event bus
      */
-    public setPlayerInRange(player: Player | null): void {
-        this.playerInRange = player;
+    private findPlayer(): Player | null {
+        if (!this.eventBus) {
+            Logger.log('ArmorKnight', 'No eventBus available');
+            return null;
+        }
+        
+        try {
+            const results = this.eventBus.emit('entity:findPlayer');
+            if (results && Array.isArray(results) && results.length > 0) {
+                const player = results[0];
+                if (player && typeof player === 'object' && 'x' in player && 'y' in player) {
+                    return player as Player;
+                }
+            }
+            return null;
+        } catch (error) {
+            Logger.warn('ArmorKnight', 'Failed to find player:', error);
+            return null;
+        }
     }
 
     /**
@@ -120,9 +172,14 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || player.invulnerable) return;
         
-        if (player.takeDamage) {
-            player.takeDamage();
-        }
+        super.onCollisionWithPlayer(player);
+    }
+
+    /**
+     * ArmorKnight cannot be defeated by stomping
+     */
+    canBeStomped(): boolean {
+        return false;
     }
 
     /**

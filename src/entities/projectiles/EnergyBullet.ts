@@ -84,18 +84,13 @@ export class EnergyBullet extends Entity implements EntityInitializer {
             return;
         }
         
-        const otherClassName = collisionInfo.other.constructor.name;
+        const other = collisionInfo.other as Entity & { takeDamage?: (damage: number, source?: string) => void };
+        const otherClassName = other.constructor.name;
         Logger.log('[EnergyBullet] Collision with', otherClassName, 'at', this.x, this.y);
         
-        if (otherClassName === 'Enemy' || otherClassName === 'Slime' || 
-            otherClassName === 'Bird' || otherClassName === 'Bat' || 
-            otherClassName === 'Spider') {
-            
-            const enemy = collisionInfo.other as Entity & { takeDamage?: (damage: number) => void };
-            if (enemy.takeDamage && typeof enemy.takeDamage === 'function') {
-                enemy.takeDamage(this.damage);
-                Logger.log('[EnergyBullet] Hit enemy:', otherClassName);
-            }
+        if (other.isProjectileTarget && other.takeDamage && typeof other.takeDamage === 'function') {
+            other.takeDamage(this.damage, 'projectile');
+            Logger.log('[EnergyBullet] Hit projectile target:', otherClassName);
             this.destroy();
         }
         else if (otherClassName === 'Platform' || otherClassName === 'Wall') {

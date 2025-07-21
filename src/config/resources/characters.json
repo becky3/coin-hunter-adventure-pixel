@@ -97,12 +97,14 @@
       },
       "stats": {
         "maxHealth": 3,
-        "damage": 2,
+        "damage": 1,
         "scoreValue": 300
       },
       "ai": {
         "type": "patrol",
-        "detectRange": 60,
+        "detectRange": 84,
+        "detectRangeWidth": 84,
+        "detectRangeHeight": 128,
         "attackRange": 20
       }
     }

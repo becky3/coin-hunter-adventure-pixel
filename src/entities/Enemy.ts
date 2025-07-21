@@ -6,7 +6,7 @@ import { Logger } from '../utils/Logger';
 import { EventBus } from '../services/EventBus';
 
 export type AIType = 'patrol' | 'chase' | 'idle';
-export type EnemyState = 'idle' | 'hurt' | 'dead';
+export type EnemyState = 'idle' | 'walk' | 'hurt' | 'dead';
 
 /**
  * Base enemy entity class
@@ -26,6 +26,7 @@ export class Enemy extends Entity {
     public animState: string;
     public facingRight: boolean;
     public canJump: boolean;
+    public stompBounceVelocity: number;
     protected eventBus: EventBus | null;
 
     constructor(x: number, y: number, width: number = 16, height: number = 16) {
@@ -36,6 +37,8 @@ export class Enemy extends Entity {
         this.damage = 1;
         this.moveSpeed = 30;
         this.direction = 1;
+        
+        this.isProjectileTarget = true;
         
         this.aiType = 'patrol';
         this.detectRange = 100;
@@ -49,6 +52,8 @@ export class Enemy extends Entity {
         this.facingRight = true;
         
         this.canJump = false;
+        
+        this.stompBounceVelocity = -5;
         
         this.eventBus = null;
         
@@ -65,7 +70,14 @@ export class Enemy extends Entity {
         if (!this.active) return;
         
         if (this.invincibleTime > 0) {
+            const wasInvincible = this.invincibleTime > 0;
             this.invincibleTime -= deltaTime * 1000;
+            
+            if (wasInvincible && this.invincibleTime <= 0 && this.eventBus) {
+                this.eventBus.emit('enemy:invincible-end', {
+                    enemy: this
+                });
+            }
         }
         
         if (this.stateTimer > 0) {
@@ -99,6 +111,11 @@ export class Enemy extends Entity {
                     damage: amount,
                     position: { x: this.x, y: this.y }
                 });
+                
+                this.eventBus.emit('enemy:invincible-start', {
+                    enemy: this,
+                    duration: this.invincibleTime
+                });
             }
         }
     }
@@ -117,6 +134,13 @@ export class Enemy extends Entity {
 
     }
 
+    /**
+     * Returns whether this enemy can be defeated by stomping
+     */
+    canBeStomped(): boolean {
+        return true;
+    }
+
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || player.invulnerable) return;
         
@@ -125,8 +149,10 @@ export class Enemy extends Entity {
         const playerCenter = player.y + player.height / 2;
         const isAboveEnemy = playerCenter < enemyCenter;
         const isFalling = player.vy > 0;
+        const wasJustBounced = player.vy < 0;
         
-        if (isAboveEnemy && isFalling) {
+        
+        if (isAboveEnemy && (isFalling || wasJustBounced)) {
             const playerLeft = player.x;
             const playerRight = player.x + player.width;
             const enemyLeft = this.x;
@@ -134,18 +160,24 @@ export class Enemy extends Entity {
             const hasHorizontalOverlap = playerRight > enemyLeft && playerLeft < enemyRight;
             
             if (!hasHorizontalOverlap) return;
-            this.takeDamage(1);
-            player.vy = -5;
-            const scoreGained = 100;
-            player.addScore(scoreGained);
             
-            if (this.eventBus) {
-                this.eventBus.emit('enemy:defeated', {
-                    enemy: this,
-                    score: scoreGained,
-                    position: { x: this.x, y: this.y }
-                });
+            if (this.canBeStomped()) {
+                this.takeDamage(1);
+                const scoreGained = 100;
+                player.addScore(scoreGained);
+                
+                if (this.eventBus) {
+                    this.eventBus.emit('enemy:defeated', {
+                        enemy: this,
+                        score: scoreGained,
+                        position: { x: this.x, y: this.y }
+                    });
+                }
             }
+            
+            player.vy = this.stompBounceVelocity;
+            player.grounded = false;
+            return;
         } else {
             if (player.takeDamage) {
                 player.takeDamage();

@@ -358,3 +358,16 @@ PRのコメント欄で以下のコマンドを入力するとテストが実行
 - 現状に満足せず、常により良い方法を探す
 - 小さな改善の積み重ねがプロジェクトを進化させる
 - あなたの視点が新しい価値を生み出す
+
+## 最近の更新（2025-07-21）
+
+### ArmorKnight実装完了
+- 踏みつけ無効の重装甲敵キャラクター
+- プレイヤー検知による高速突進機能
+- Enemy基底クラスにstompBounceVelocityプロパティ追加
+- 詳細は `docs/specifications/enemies/armor-knight.md` を参照
+
+### 関連Issue/PR
+- Issue #134: ArmorKnight実装
+- PR #204: ArmorKnightのバグ修正
+- Issue #207: E2Eテストの共通処理整理（作成済み）
