@@ -9,15 +9,9 @@ async function runTest() {
     
     await helpers.runTest(async (t) => {
         await t.init('All Sprites Visual Test');
-        // Load the test stage directly with proper URL formatting
-        await t.navigateToGame('http://localhost:3000/?s=test-all-sprites&skip_title=true');
-        await t.waitForGameInitialization();
         
-        // Wait for play state to be ready
-        await t.waitForCondition(() => {
-            const state = window.game?.stateManager?.currentState;
-            return state && state.name === 'play' && state.entityManager;
-        }, 10000, 'Play state should be ready');
+        // Use quickStart for simplified initialization
+        await t.quickStart('test-all-sprites');
         
         // Wait for all sprites to be loaded and rendered
         await t.wait(2000);

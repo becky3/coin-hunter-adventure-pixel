@@ -16,19 +16,8 @@ async function runTest() {
         // Initialize test
         await t.init('Jump Mechanics Test');
         
-        // Setup error tracking
-        await t.injectErrorTracking();
-        
-        // Navigate to game with skip_title for faster testing
-        await t.navigateToGame('http://localhost:3000/?skip_title=true&s=0-1');
-        await t.waitForGameInitialization();
-        
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        
-        // Ensure input focus
-        await t.ensureInputFocus();
-        await t.assertPlayerExists();
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-1');
         
         console.log('\n=== Testing Jump Mechanics ===');
         
