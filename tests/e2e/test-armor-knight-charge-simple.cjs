@@ -19,8 +19,8 @@ async function runArmorKnightChargeTest() {
         // エラートラッキングを設定
         await t.injectErrorTracking();
         
-        // E2Eテスト用ステージで開始
-        await t.navigateToGame('http://localhost:3000?s=stage0-1&skip_title=true');
+        // ArmorKnightテストステージで開始（広い場所でのテスト用）
+        await t.navigateToGame('http://localhost:3000?s=test-armor-knight&skip_title=true');
         
         // ゲームの初期化を待つ
         await t.waitForGameInitialization();
@@ -33,23 +33,14 @@ async function runArmorKnightChargeTest() {
         
         console.log('\n=== ArmorKnight Charge Simple Test ===');
         
-        // ArmorKnightをプレイヤーの近くにスポーン
-        const spawnResult = await t.page.evaluate(() => {
+        // 既存のArmorKnightを取得
+        const initialSetup = await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
-            const player = state.player;
+            const player = state.entityManager.getPlayer();
+            const armorKnight = state.entityManager.enemies.find(e => e.constructor.name === 'ArmorKnight');
             
             if (!player) return { error: 'Player not found' };
-            
-            // EntityFactoryを使用してArmorKnightを作成
-            const entityFactory = window.game.serviceLocator.get('entityFactory');
-            
-            // プレイヤーの右側100ピクセルにスポーン
-            const armorKnight = entityFactory.create('armor_knight', player.x + 100, player.y);
-            
-            if (!armorKnight) return { error: 'Failed to create ArmorKnight' };
-            
-            // EntityManagerに登録
-            armorKnight.initializeInManager(state.entityManager);
+            if (!armorKnight) return { error: 'ArmorKnight not found in stage' };
             
             // グローバル変数に保存（テスト用）
             window.testArmorKnight = armorKnight;
@@ -64,10 +55,10 @@ async function runArmorKnightChargeTest() {
             };
         });
         
-        console.log('Spawn result:', JSON.stringify(spawnResult, null, 2));
+        console.log('Initial setup:', JSON.stringify(initialSetup, null, 2));
         
-        if (spawnResult.error) {
-            t.assert(false, `Failed to spawn ArmorKnight: ${spawnResult.error}`);
+        if (initialSetup.error) {
+            t.assert(false, `Failed to get entities: ${initialSetup.error}`);
             return;
         }
         
@@ -86,15 +77,17 @@ async function runArmorKnightChargeTest() {
         console.log('Initial state:', JSON.stringify(initialState, null, 2));
         t.assert(!initialState.isCharging, 'ArmorKnight should not be charging initially');
         
-        // プレイヤーを近づけて検知範囲内に入れる
+        // プレイヤーをArmorKnightに近づける
+        // 初期位置: Player(2,12), ArmorKnight(18,12) - 距離約256ピクセル
+        // 検知範囲は60ピクセルなので、距離を約200ピクセル移動する必要がある
         console.log('Moving player closer to ArmorKnight...');
-        await t.movePlayer('right', 300);
+        await t.movePlayer('right', 2000);  // 2秒間右に移動
         await t.wait(500);
         
         // 突進状態を確認
         const chargingState = await t.page.evaluate(() => {
             const ak = window.testArmorKnight;
-            const player = window.game.stateManager.currentState.player;
+            const player = window.game.stateManager.currentState.entityManager.getPlayer();
             const distance = Math.sqrt(Math.pow(player.x - ak.x, 2) + Math.pow(player.y - ak.y, 2));
             
             return {

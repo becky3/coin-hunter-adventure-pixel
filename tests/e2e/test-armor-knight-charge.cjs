@@ -29,12 +29,19 @@ async function runArmorKnightChargeTest() {
         // play状態であることを確認
         await t.assertState('play');
         
+        // プレイヤーの存在を確認
+        await t.assertPlayerExists();
+        
         console.log('\n=== ArmorKnight Charge Test ===');
         
         // ArmorKnightをプレイヤーの近くにスポーン
         await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
-            const player = state.player;
+            const player = state.entityManager.getPlayer();
+            
+            if (!player) {
+                throw new Error('Player not found in test-armor-knight-charge');
+            }
             
             // ArmorKnightをプレイヤーの右側80ピクセルにスポーン（検知範囲60より外）
             const armorKnight = window.game.serviceLocator.get('entityFactory').create('armor_knight', player.x + 80, player.y);
