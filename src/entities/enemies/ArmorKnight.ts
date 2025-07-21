@@ -139,12 +139,18 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
      * Find the player using the event bus
      */
     private findPlayer(): Player | null {
-        if (!this.eventBus) return null;
+        if (!this.eventBus) {
+            Logger.log('ArmorKnight', 'No eventBus available');
+            return null;
+        }
         
         try {
-            const result = this.eventBus.emit('entity:findPlayer');
-            if (result && typeof result === 'object' && 'x' in result && 'y' in result) {
-                return result as Player;
+            const results = this.eventBus.emit('entity:findPlayer');
+            if (results && Array.isArray(results) && results.length > 0) {
+                const player = results[0];
+                if (player && typeof player === 'object' && 'x' in player && 'y' in player) {
+                    return player as Player;
+                }
             }
             return null;
         } catch (error) {
