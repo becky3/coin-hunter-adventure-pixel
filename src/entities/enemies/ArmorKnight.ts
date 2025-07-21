@@ -120,8 +120,17 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || player.invulnerable) return;
         
-        if (player.takeDamage) {
-            player.takeDamage();
+        const playerBottom = player.y + player.height;
+        const enemyTop = this.y;
+        const isPlayerAbove = playerBottom <= enemyTop + 8 && player.vy > 0;
+        
+        if (isPlayerAbove) {
+            player.vy = -5;
+            Logger.log('ArmorKnight', 'Player bounced off armor');
+        } else {
+            if (player.takeDamage) {
+                player.takeDamage();
+            }
         }
     }
 

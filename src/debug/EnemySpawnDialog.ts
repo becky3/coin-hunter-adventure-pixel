@@ -13,7 +13,7 @@ export class EnemySpawnDialog {
         'slime',
         'bat',
         'spider',
-        'armorKnight',
+        'armor_knight',
         'flyingWizard',
         'fireSlime',
         'lavaBubble'
