@@ -69,7 +69,10 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             return;
         }
 
-        if (this.playerInRange && this.isPlayerStillInRange(this.playerInRange)) {
+        const player = this.findPlayer();
+        
+        if (player && this.isPlayerInRange(player)) {
+            this.playerInRange = player;
             this.isCharging = true;
             this.moveSpeed = this.chargeSpeed;
             this.animState = 'charge';
@@ -98,20 +101,28 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     }
 
     /**
-     * Check if a player is still within detection range
+     * Check if a player is within detection range
      */
-    private isPlayerStillInRange(player: Player): boolean {
+    private isPlayerInRange(player: Player): boolean {
         const dx = player.x - this.x;
         const dy = player.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         return distance <= this.detectRange;
     }
-
+    
     /**
-     * Set the player that's in range for charging
+     * Find the player using the event bus
      */
-    public setPlayerInRange(player: Player | null): void {
-        this.playerInRange = player;
+    private findPlayer(): Player | null {
+        if (!this.eventBus) return null;
+        
+        try {
+            const player = this.eventBus.emit('entity:findPlayer');
+            return player as Player;
+        } catch (error) {
+            Logger.warn('ArmorKnight', 'Failed to find player:', error);
+            return null;
+        }
     }
 
     /**
@@ -120,17 +131,27 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || player.invulnerable) return;
         
-        const playerBottom = player.y + player.height;
-        const enemyTop = this.y;
-        const isPlayerAbove = playerBottom <= enemyTop + 8 && player.vy > 0;
+        const enemyCenter = this.y + this.height / 2;
+        const playerCenter = player.y + player.height / 2;
+        const isAboveEnemy = playerCenter < enemyCenter;
+        const isFalling = player.vy > 0;
         
-        if (isPlayerAbove) {
-            player.vy = -5;
-            Logger.log('ArmorKnight', 'Player bounced off armor');
-        } else {
-            if (player.takeDamage) {
-                player.takeDamage();
+        if (isAboveEnemy && isFalling) {
+            const playerLeft = player.x;
+            const playerRight = player.x + player.width;
+            const enemyLeft = this.x;
+            const enemyRight = this.x + this.width;
+            const hasHorizontalOverlap = playerRight > enemyLeft && playerLeft < enemyRight;
+            
+            if (hasHorizontalOverlap) {
+                player.vy = -5;
+                Logger.log('ArmorKnight', 'Player bounced off armor');
+                return;
             }
+        }
+        
+        if (player.takeDamage) {
+            player.takeDamage();
         }
     }
 

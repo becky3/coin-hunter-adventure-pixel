@@ -97,7 +97,7 @@
       },
       "stats": {
         "maxHealth": 3,
-        "damage": 2,
+        "damage": 1,
         "scoreValue": 300
       },
       "ai": {

@@ -47,6 +47,26 @@
       "y": 12
     },
     {
+      "type": "shield_stone",
+      "x": 20,
+      "y": 12
+    },
+    {
+      "type": "power_glove",
+      "x": 30,
+      "y": 12
+    },
+    {
+      "type": "armor_knight",
+      "x": 60,
+      "y": 12
+    },
+    {
+      "type": "armor_knight",
+      "x": 80,
+      "y": 12
+    },
+    {
       "type": "goal",
       "x": 115,
       "y": 12
