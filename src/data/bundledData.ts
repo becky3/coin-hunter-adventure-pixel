@@ -35,6 +35,8 @@ import stage2_1 from '../levels/data/stage2-1.json';
 import level1 from '../levels/data/level1.json';
 import performanceTest from '../levels/data/performance-test.json';
 import testAllSprites from '../levels/data/test-all-sprites.json';
+import stageBulletTest from '../levels/data/stage-bullet-test.json';
+import testArmorKnight from '../levels/data/test-armor-knight.json';
 
 export const bundledResourceData: Record<string, unknown> = {
     '/src/config/resources/index.json': resourceIndex,
@@ -76,6 +78,8 @@ export const bundledStageData: Record<string, unknown> = {
     '/src/levels/data/level1.json': level1,
     '/src/levels/data/performance-test.json': performanceTest,
     '/src/levels/data/test-all-sprites.json': testAllSprites,
+    '/src/levels/data/stage-bullet-test.json': stageBulletTest,
+    '/src/levels/data/test-armor-knight.json': testArmorKnight,
 };
 
 export const allBundledData: Record<string, unknown> = {

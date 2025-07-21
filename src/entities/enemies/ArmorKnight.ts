@@ -144,7 +144,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
             const hasHorizontalOverlap = playerRight > enemyLeft && playerLeft < enemyRight;
             
             if (hasHorizontalOverlap) {
-                player.vy = -5;
+                player.vy = -8;
                 Logger.log('ArmorKnight', 'Player bounced off armor');
                 return;
             }

@@ -55,6 +55,7 @@ export abstract class Entity {
     
     public solid: boolean;
     public collidable: boolean;
+    public isProjectileTarget: boolean;
     public notifyTileCollision: boolean;
     
     public currentAnimation: string | null;
@@ -96,6 +97,7 @@ export abstract class Entity {
         
         this.solid = true;
         this.collidable = true;
+        this.isProjectileTarget = false;
         this.notifyTileCollision = false;
         
         this.currentAnimation = null;

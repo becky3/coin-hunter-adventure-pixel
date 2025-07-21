@@ -79,6 +79,12 @@
       "name": "ALL SPRITES TEST",
       "description": "Visual test of all sprites and animations",
       "filename": "test-all-sprites.json"
+    },
+    {
+      "id": "test-armor-knight",
+      "name": "ARMOR KNIGHT TEST",
+      "description": "Test stage for ArmorKnight mechanics",
+      "filename": "test-armor-knight.json"
     }
   ]
 }

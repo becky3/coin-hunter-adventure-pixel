@@ -37,6 +37,8 @@ export class Enemy extends Entity {
         this.moveSpeed = 30;
         this.direction = 1;
         
+        this.isProjectileTarget = true;
+        
         this.aiType = 'patrol';
         this.detectRange = 100;
         this.attackRange = 20;
