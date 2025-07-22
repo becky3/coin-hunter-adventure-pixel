@@ -361,8 +361,6 @@ export class PlayState implements GameState {
 
         this.updateTimer();
 
-        this.game.physicsSystem.update(deltaTime);
-
         this.entityManager.updateAll(deltaTime);
 
         const player = this.entityManager.getPlayer();
@@ -433,7 +431,7 @@ export class PlayState implements GameState {
         }
 
         if (this.game.physicsSystem) {
-            this.game.physicsSystem.entities.clear();
+            this.game.physicsSystem.clearCollisionPairs();
             this.game.physicsSystem.tileMap = null;
         }
 

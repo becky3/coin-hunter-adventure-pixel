@@ -24,8 +24,6 @@
         "solid": true
       },
       "properties": {
-        "bouncePower": 14,
-        "compressionMax": 8,
         "expansionSpeed": 0.2
       },
       "sprite": {

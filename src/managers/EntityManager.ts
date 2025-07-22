@@ -101,6 +101,40 @@ export class EntityManager {
         return this.projectiles;
     }
     
+    getAllActiveEntities(): Entity[] {
+        const allEntities: Entity[] = [];
+        
+        if (this.player && this.player.active) {
+            allEntities.push(this.player);
+        }
+        
+        this.enemies.forEach(enemy => {
+            if (enemy.active) {
+                allEntities.push(enemy);
+            }
+        });
+        
+        this.items.forEach(item => {
+            if (item.active) {
+                allEntities.push(item);
+            }
+        });
+        
+        this.platforms.forEach(platform => {
+            if (platform.active) {
+                allEntities.push(platform);
+            }
+        });
+        
+        this.projectiles.forEach(projectile => {
+            if (projectile.active) {
+                allEntities.push(projectile);
+            }
+        });
+        
+        return allEntities;
+    }
+    
     getEventBus(): EventBus {
         return this.eventBus;
     }
@@ -132,7 +166,7 @@ export class EntityManager {
         this.player.setAssetLoader(this.assetLoader);
         this.player.setEventBus(this.eventBus);
         
-        this.physicsSystem.addEntity(this.player, this.physicsSystem.layers.PLAYER);
+        this.player.physicsLayer = this.physicsSystem.layers.PLAYER;
         
         this.eventBus.emit('player:created', { player: this.player });
         
@@ -200,6 +234,9 @@ export class EntityManager {
 
     updateAll(deltaTime: number): void {
         try {
+            const allEntities = this.getAllActiveEntities();
+            this.physicsSystem.update(deltaTime, allEntities);
+            
             if (this.player) {
                 this.player.update(deltaTime);
             }
@@ -350,6 +387,8 @@ export class EntityManager {
         this.platforms = [];
         this.projectiles = [];
         
+        this.physicsSystem.clearCollisionPairs();
+        
         this.eventBus.emit('entities:cleared');
     }
     
@@ -380,7 +419,7 @@ export class EntityManager {
                 } else {
                     entity.setEventBus(this.eventBus);
                     this.enemies.push(entity);
-                    this.physicsSystem.addEntity(entity, this.physicsSystem.layers.ENEMY);
+                    entity.physicsLayer = this.physicsSystem.layers.ENEMY;
                 }
                 
                 this.eventBus.emit('enemy:spawned', {

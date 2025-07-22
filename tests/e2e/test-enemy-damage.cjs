@@ -119,7 +119,7 @@ async function runTest() {
                 tileMapRows: physicsSystem.tileMap ? physicsSystem.tileMap.length : 0,
                 gravity: physicsSystem.gravity,
                 tileSize: physicsSystem.tileSize,
-                entities: physicsSystem.getEntities ? Array.from(physicsSystem.getEntities()).length : 0
+                entities: game.stateManager?.currentState?.entityManager ? game.stateManager.currentState.entityManager.getAllActiveEntities().length : 0
             };
         });
         console.log('Physics system state:', physicsState);

@@ -21,7 +21,6 @@ import { ResourceLoader } from '../config/ResourceLoader';
 import { URLParams } from '../utils/urlParams';
 
 import { InputSystemAdapter } from '../systems/adapters/InputSystemAdapter';
-import { PhysicsSystemAdapter } from '../systems/adapters/PhysicsSystemAdapter';
 import { StateSystemAdapter } from '../systems/adapters/StateSystemAdapter';
 import { RenderSystemAdapter } from '../systems/adapters/RenderSystemAdapter';
 import { DebugSystemAdapter } from '../systems/adapters/DebugSystemAdapter';
@@ -133,11 +132,9 @@ export class GameCore {
         const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
 
         const inputSystem = this._serviceLocator.get<InputSystemImpl>(ServiceNames.INPUT);
-        const physicsSystem = this._serviceLocator.get<PhysicsSystem>(ServiceNames.PHYSICS);
         const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
 
         systemManager.registerSystem(new InputSystemAdapter(inputSystem));
-        systemManager.registerSystem(new PhysicsSystemAdapter(physicsSystem));
         systemManager.registerSystem(new StateSystemAdapter(stateManager));
         systemManager.registerSystem(new RenderSystemAdapter(stateManager));
         

@@ -47,7 +47,7 @@ export class Spring extends Entity implements EntityInitializer {
         this.physicsEnabled = false;
         this.solid = springConfig?.physics.solid ?? true;
         
-        this.baseBounceMultiplier = 2.5;
+        this.baseBounceMultiplier = 3.5;
         this.compression = 0;
         this.triggered = false;
         this.animationSpeed = springConfig?.properties.expansionSpeed || 0.2;
@@ -161,7 +161,7 @@ export class Spring extends Entity implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addItem(this);
-        manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ITEM);
+        this.physicsLayer = manager.getPhysicsSystem().layers.ITEM;
     }
     
     /**

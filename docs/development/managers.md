@@ -12,7 +12,7 @@ parent: 開発者向け
 
 ## EntityManager
 
-エンティティ（プレイヤー、敵、アイテム）を統合管理するクラスです。
+エンティティ（プレイヤー、敵、アイテム）を統合管理するクラスです。すべてのエンティティの単一の真実の源（Single Source of Truth）として機能します。
 
 ### コンストラクタ
 
@@ -27,6 +27,10 @@ constructor(game: GameServices)
   - `musicSystem?`: MusicSystem
   - `assetLoader?`: AssetLoader
   - `inputSystem`: InputSystem
+
+### 設計原則
+
+EntityManagerは、ゲーム内のすべてのエンティティを管理する唯一の場所です。PhysicsSystemなどの他のシステムは、EntityManagerから必要なエンティティを取得します。これにより、エンティティの重複管理を防ぎ、システム間の一貫性を保ちます。
 
 ### EntityInitializerインターフェース
 
@@ -71,6 +75,12 @@ getItems(): Entity[]
 getProjectiles(): Entity[]
 ```
 すべての弾丸エンティティの配列を取得します。
+
+#### getPhysicsSystem()
+```typescript
+getPhysicsSystem(): PhysicsSystem
+```
+PhysicsSystemインスタンスを取得します。エンティティがPhysicsSystemにアクセスする必要がある場合に使用します。
 
 #### addProjectile(projectile: Entity)
 ```typescript

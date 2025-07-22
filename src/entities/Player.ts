@@ -390,13 +390,6 @@ export class Player extends Entity {
         if (this._isJumping) {
             this.jumpTime += deltaTime * 1000;
             
-            
-            if (this.isSpringBounce && input.jump && !this.canVariableJump) {
-                this.canVariableJump = true;
-                this.jumpTime = 0;
-                Logger.log('[Player] Variable jump enabled for spring bounce');
-            }
-            
             if (!input.jump && this.canVariableJump) {
                 if (this.vy < 0) {
                     this.vy *= 0.5;

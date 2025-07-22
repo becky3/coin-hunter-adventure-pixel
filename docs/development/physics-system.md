@@ -51,12 +51,16 @@
 
 ### 実装詳細
 ```typescript
-// Player.ts内の定数
-const VARIABLE_JUMP_GRAVITY_FACTOR = 0.4;  // 重力打ち消し係数
+// physics.jsonで設定される値
+"player": {
+    "jumpPower": 8.5,                       // 基本ジャンプ力
+    "variableJumpBoost": 2.3,              // 可変ジャンプのブースト値
+    "variableJumpBoostMultiplier": 0.4,   // ブースト係数
+}
 
 // ジャンプ中の処理
 if (jumpButtonHeld && canVariableJump) {
-    const boost = VARIABLE_JUMP_GRAVITY_FACTOR * variableJumpBoost * deltaTime * 60;
+    const boost = variableJumpBoostMultiplier * variableJumpBoost * deltaTime * 60;
     entity.vy -= boost;  // 上向きの力を継続的に適用
 }
 ```
@@ -64,8 +68,13 @@ if (jumpButtonHeld && canVariableJump) {
 ### パラメータ
 - **minJumpTime**: 0ms（いつでも中断可能）
 - **maxJumpTime**: 400ms（最大保持時間）
-- **variableJumpBoost**: 0.3（デフォルト値）
-- **効果**: 最大で通常の200%の高さまでジャンプ可能
+- **variableJumpBoost**: 2.3（現在の設定値）
+- **variableJumpBoostMultiplier**: 0.4（ブースト係数）
+- **効果**: ボタンを離すタイミングでジャンプ高さを調整可能
+
+### スプリングとの相互作用
+- スプリングでバウンス後は可変ジャンプ無効（無限ジャンプ防止）
+- スプリングの反発力は`baseBounceMultiplier`（3.5）でプレイヤーのジャンプ力を増幅
 
 ## テスト用ツール
 

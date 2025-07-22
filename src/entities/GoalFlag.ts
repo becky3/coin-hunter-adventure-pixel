@@ -79,7 +79,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
      */
     initializeInManager(manager: EntityManager): void {
         manager.addItem(this);
-        manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ITEM);
+        this.physicsLayer = manager.getPhysicsSystem().layers.ITEM;
     }
     
     /**

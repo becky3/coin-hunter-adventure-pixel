@@ -60,7 +60,8 @@ async function runArmorKnightTest() {
         console.log('Player before collision:', beforeCollision);
         
         // プレイヤーをArmorKnightの位置まで移動
-        await t.movePlayer('right', 2000);
+        // ArmorKnightは約x=282にいるので、十分な距離を移動する必要がある
+        await t.movePlayer('right', 3000);
         await t.wait(500);
         
         const afterCollision = await t.getEntity('player');

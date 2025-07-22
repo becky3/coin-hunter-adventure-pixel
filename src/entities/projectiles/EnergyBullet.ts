@@ -103,10 +103,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         
         this.destroyed = true;
         this.visible = false;
-        
-        if (this.physicsSystem) {
-            this.physicsSystem.removeEntity(this);
-        }
+        this.active = false;
         
         Logger.log('[EnergyBullet] Destroyed at position:', this.x, this.y, 'lifetime:', this.lifeTime);
     }
@@ -123,8 +120,8 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         manager.addProjectile(this);
         const physicsSystem = manager.getPhysicsSystem();
         if (physicsSystem) {
-            Logger.log('[EnergyBullet] Adding to physics system');
-            physicsSystem.addEntity(this, physicsSystem.layers.PROJECTILE || physicsSystem.layers.DEFAULT);
+            Logger.log('[EnergyBullet] Setting physics layer');
+            this.physicsLayer = physicsSystem.layers.PROJECTILE || physicsSystem.layers.TILE;
         } else {
             Logger.warn('[EnergyBullet] No physics system available');
         }

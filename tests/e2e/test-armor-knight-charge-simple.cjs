@@ -73,9 +73,9 @@ async function runArmorKnightChargeTest() {
         
         // プレイヤーをArmorKnightに近づける
         // 初期位置: Player(2,12), ArmorKnight(18,12) - 距離約256ピクセル
-        // 検知範囲は60ピクセルなので、距離を約200ピクセル移動する必要がある
+        // 検知範囲は84ピクセルなので、十分に近づける必要がある
         console.log('Moving player closer to ArmorKnight...');
-        await t.movePlayer('right', 2000);  // 2秒間右に移動
+        await t.movePlayer('right', 2200);  // 2.2秒間右に移動
         await t.wait(500);
         
         // 突進状態を確認
