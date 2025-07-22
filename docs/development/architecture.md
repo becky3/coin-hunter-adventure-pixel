@@ -40,6 +40,8 @@ Coin Hunter Adventure Pixelは、HTML5 Canvas APIを使用したブラウザベ�
 
 #### マネージャーシステム
 - **EntityManager**: エンティティ（プレイヤー、敵、アイテム）の統合管理
+  - すべてのエンティティの単一の真実の源（Single Source of Truth）
+  - PhysicsSystemはEntityManagerから必要なエンティティを取得
 - **CameraController**: カメラの動作とビューポート制御
 - **LevelManager**: レベルデータとタイルマップの管理
 - **HUDManager**: UIとHUD（ヘッドアップディスプレイ）の処理
