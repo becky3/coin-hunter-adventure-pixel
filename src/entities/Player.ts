@@ -507,8 +507,8 @@ export class Player extends Entity {
         Logger.log(`[Player] respawn called at (${x}, ${y})`);
         
         this.isSmall = false;
-        this.width = DEFAULT_PLAYER_CONFIG.width;
-        this.height = DEFAULT_PLAYER_CONFIG.height;
+        this.width = this.originalWidth;
+        this.height = this.originalHeight;
         
         this.x = x;
         this.y = y - this.height;
