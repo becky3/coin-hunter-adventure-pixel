@@ -39,14 +39,29 @@ FRICTION: 0.8          // 地面摩擦
 
 ### プレイヤー物理パラメータ
 ```typescript
-jumpPower: 10          // ジャンプ初速度
-minJumpTime: 0         // 最小ジャンプ時間
-maxJumpTime: 400       // 最大ジャンプ時間（可変ジャンプ）
-gravityScale: 1.0      // 重力スケール（個別調整用）
-width: 14              // コリジョン幅（ピクセル）
-height: 32             // コリジョン高さ（ピクセル）
-smallWidth: 14         // 小サイズ時のコリジョン幅
-smallHeight: 16        // 小サイズ時のコリジョン高さ
+// 移動関連
+speed: 1.755               // 通常移動速度
+dashSpeedMultiplier: 1.6   // ダッシュ時の速度倍率
+dashAccelerationTime: 0.5  // ダッシュ加速時間（秒）
+dashAnimationSpeed: 0.4    // ダッシュ時のアニメーション速度
+
+// ジャンプ関連
+jumpPower: 8.5             // ジャンプ初速度
+minJumpTime: 0             // 最小ジャンプ時間
+maxJumpTime: 400           // 最大ジャンプ時間（可変ジャンプ）
+variableJumpBoost: 2.3     // 可変ジャンプブースト
+variableJumpBoostMultiplier: 0.4  // 可変ジャンプブースト係数
+
+// 物理関連
+gravityScale: 1.0          // 重力スケール（個別調整用）
+airResistance: 0.13        // 空気抵抗
+maxFallSpeed: 15           // 最大落下速度
+
+// サイズ関連
+width: 14                  // コリジョン幅（ピクセル）
+height: 32                 // コリジョン高さ（ピクセル）
+smallWidth: 14             // 小サイズ時のコリジョン幅
+smallHeight: 16            // 小サイズ時のコリジョン高さ
 ```
 
 ### 衝突判定
@@ -108,8 +123,12 @@ Entity {
 
 ### キーボード
 - **矢印キー/WASD**: 移動
+- **Shift（左右）+ 移動キー**: ダッシュ（高速移動）
 - **スペース/上矢印/W**: ジャンプ
+- **ピリオド（.）**: 攻撃（パワーグローブ装備時）
 - **Escape**: ポーズ/メニュー
+- **M**: ミュート切り替え
+- **P**: ポーズ
 
 ### タッチ対応
 - 画面左半分: 左移動
