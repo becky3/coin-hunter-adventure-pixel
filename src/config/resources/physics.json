@@ -4,16 +4,6 @@
     "maxFallSpeed": 15,
     "friction": 0.8
   },
-  "player": {
-    "jumpPower": 8.5,
-    "variableJumpBoost": 2.3,
-    "variableJumpBoostMultiplier": 0.4,
-    "minJumpTime": 0,
-    "maxJumpTime": 400,
-    "airResistance": 0.13,
-    "gravityScale": 1.0,
-    "defaultMaxFallSpeed": 15
-  },
   "enemies": {
     "default": {
       "airResistance": 0.0,

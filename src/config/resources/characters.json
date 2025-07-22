@@ -1,12 +1,19 @@
 {
   "player": {
     "physics": {
-      "width": 16,
+      "width": 14,
       "height": 32,
+      "smallWidth": 14,
+      "smallHeight": 16,
       "speed": 1.17,
-      "jumpPower": 5.25,
-      "minJumpTime": 8,
-      "maxJumpTime": 20,
+      "jumpPower": 8.5,
+      "variableJumpBoost": 2.3,
+      "variableJumpBoostMultiplier": 0.4,
+      "minJumpTime": 0,
+      "maxJumpTime": 400,
+      "airResistance": 0.13,
+      "gravityScale": 1.0,
+      "maxFallSpeed": 15,
       "dashSpeedMultiplier": 2.4,
       "dashAccelerationTime": 0.5,
       "dashAnimationSpeed": 0.4

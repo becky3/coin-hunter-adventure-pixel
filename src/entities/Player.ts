@@ -117,7 +117,6 @@ export class Player extends Entity {
     constructor(x?: number, y?: number) {
         const resourceLoader = ResourceLoader.getInstance();
         const playerConfig = resourceLoader.getCharacterConfig('player', 'main');
-        const physicsConfig = resourceLoader.getPhysicsConfig('player');
         
         const config = {
             ...DEFAULT_PLAYER_CONFIG,
@@ -138,17 +137,19 @@ export class Player extends Entity {
         this.speed = config.speed;
         this.jumpPower = config.jumpPower;
         
-        this.airResistance = playerConfig.physics?.airResistance ?? this.airResistance;
-        this.gravityScale = playerConfig.physics?.gravityScale ?? this.gravityScale;
-        this.maxFallSpeed = playerConfig.physics?.maxFallSpeed ?? this.maxFallSpeed;
+        this.airResistance = playerConfig.physics.airResistance;
+        this.gravityScale = playerConfig.physics.gravityScale;
+        this.maxFallSpeed = playerConfig.physics.maxFallSpeed;
         this.dashSpeedMultiplier = playerConfig.physics.dashSpeedMultiplier;
         this.dashAccelerationTime = playerConfig.physics.dashAccelerationTime;
         this.dashAnimationSpeed = playerConfig.physics.dashAnimationSpeed;
+        this.variableJumpBoost = playerConfig.physics.variableJumpBoost;
+        this.variableJumpBoostMultiplier = playerConfig.physics.variableJumpBoostMultiplier;
         
         this.playerConfig = config;
         
         Logger.log('[Player] Jump Configuration Debug:');
-        Logger.log('  - Config source:', 'physics.json');
+        Logger.log('  - Config source:', 'characters.json');
         Logger.log('  - jumpPower:', this.jumpPower);
         Logger.log('  - variableJumpBoost:', this.variableJumpBoost);
         Logger.log('  - variableJumpBoostMultiplier:', this.variableJumpBoostMultiplier);
@@ -200,44 +201,6 @@ export class Player extends Entity {
             speed: { ...DEFAULT_ANIMATION_CONFIG.speed, ...playerConfig.animations.speed },
             frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
         } : DEFAULT_ANIMATION_CONFIG;
-        
-        if (physicsConfig) {
-            this.jumpPower = physicsConfig.jumpPower;
-            this.variableJumpBoost = physicsConfig.variableJumpBoost;
-            this.variableJumpBoostMultiplier = physicsConfig.variableJumpBoostMultiplier;
-        } else {
-            this.jumpPower = config.jumpPower;
-            this.variableJumpBoost = 0.5;
-            this.variableJumpBoostMultiplier = 0.4;
-        }
-        
-        if (physicsConfig) {
-            if (physicsConfig.minJumpTime !== undefined) {
-                this.playerConfig.minJumpTime = physicsConfig.minJumpTime;
-            }
-            if (physicsConfig.maxJumpTime !== undefined) {
-                this.playerConfig.maxJumpTime = physicsConfig.maxJumpTime;
-            }
-            
-            if (physicsConfig.airResistance !== undefined) {
-                this.airResistance = physicsConfig.airResistance;
-            }
-            if (physicsConfig.gravityScale !== undefined) {
-                this.gravityScale = physicsConfig.gravityScale;
-            }
-            if (physicsConfig.defaultMaxFallSpeed !== undefined) {
-                this.maxFallSpeed = physicsConfig.defaultMaxFallSpeed;
-            }
-            if (physicsConfig.dashSpeedMultiplier !== undefined) {
-                this.dashSpeedMultiplier = physicsConfig.dashSpeedMultiplier;
-            }
-            if (physicsConfig.dashAccelerationTime !== undefined) {
-                this.dashAccelerationTime = physicsConfig.dashAccelerationTime;
-            }
-            if (physicsConfig.dashAnimationSpeed !== undefined) {
-                this.dashAnimationSpeed = physicsConfig.dashAnimationSpeed;
-            }
-        }
         
         this.gravityStrength = 1.0;
         this.frameCount = 0;
@@ -516,7 +479,7 @@ export class Player extends Entity {
         this.vy = 0;
         this._isDead = false;
         this._invulnerable = true;
-        this.invulnerabilityTime = DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
+        this.invulnerabilityTime = this.playerConfig.invulnerabilityTime;
         this._animState = 'idle';
         this.animFrame = 0;
         this.animTimer = 0;
@@ -558,10 +521,11 @@ export class Player extends Entity {
             return true;
         }
         
+        const playerConfig = ResourceLoader.getInstance().getCharacterConfig('player', 'main');
         this.isSmall = true;
-        this.width = DEFAULT_PLAYER_CONFIG.smallWidth;
-        this.height = DEFAULT_PLAYER_CONFIG.smallHeight;
-        this.y += DEFAULT_PLAYER_CONFIG.height - DEFAULT_PLAYER_CONFIG.smallHeight;
+        this.width = playerConfig.physics.smallWidth;
+        this.height = playerConfig.physics.smallHeight;
+        this.y += this.originalHeight - playerConfig.physics.smallHeight;
         this.updateSprite();
         
         if (this.powerUpManager.hasPowerUp(PowerUpType.POWER_GLOVE)) {
@@ -569,7 +533,7 @@ export class Player extends Entity {
         }
         
         this._invulnerable = true;
-        this.invulnerabilityTime = DEFAULT_PLAYER_CONFIG.invulnerabilityTime;
+        this.invulnerabilityTime = this.playerConfig.invulnerabilityTime;
         
         if (this.musicSystem) {
             this.musicSystem.playSE('damage');
