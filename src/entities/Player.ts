@@ -107,27 +107,19 @@ export class Player extends Entity {
     private shieldVisual: ShieldEffectVisual | null = null;
     private hasPowerGlove: boolean = false;
     private skipBlinkEffect?: boolean;
-    private dashSpeedMultiplier: number = 2.0;
-    private dashAccelerationTime: number = 1.0;
-    private dashAnimationSpeed: number = 0.5;
+    private dashSpeedMultiplier: number = 0;
+    private dashAccelerationTime: number = 0;
+    private dashAnimationSpeed: number = 0;
     private currentDashMultiplier: number = 1.0;
     private isDashing: boolean = false;
     private dashTimer: number = 0;
 
     constructor(x?: number, y?: number) {
-        let playerConfig = null;
-        let physicsConfig = null;
-        try {
-            const resourceLoader = ResourceLoader.getInstance();
-            playerConfig = resourceLoader.getCharacterConfig('player', 'main');
-            physicsConfig = resourceLoader.getPhysicsConfig('player');
-        } catch {
-            Logger.warn('[Player] ResourceLoader not available, using default configuration');
-            playerConfig = null;
-            physicsConfig = null;
-        }
+        const resourceLoader = ResourceLoader.getInstance();
+        const playerConfig = resourceLoader.getCharacterConfig('player', 'main');
+        const physicsConfig = resourceLoader.getPhysicsConfig('player');
         
-        const config = playerConfig ? {
+        const config = {
             ...DEFAULT_PLAYER_CONFIG,
             width: playerConfig.physics.width,
             height: playerConfig.physics.height,
@@ -139,22 +131,19 @@ export class Player extends Entity {
             invulnerabilityTime: playerConfig.stats.invulnerabilityTime ?? DEFAULT_PLAYER_CONFIG.invulnerabilityTime,
             spawnX: playerConfig.spawn?.x ?? DEFAULT_PLAYER_CONFIG.spawnX,
             spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY
-        } : DEFAULT_PLAYER_CONFIG;
+        };
         
         super(x ?? config.spawnX, (y ?? config.spawnY) - config.height, config.width, config.height);
         
         this.speed = config.speed;
         this.jumpPower = config.jumpPower;
         
-        if (playerConfig?.physics?.airResistance !== undefined) {
-            this.airResistance = playerConfig.physics.airResistance;
-        }
-        if (playerConfig?.physics?.gravityScale !== undefined) {
-            this.gravityScale = playerConfig.physics.gravityScale;
-        }
-        if (playerConfig?.physics?.maxFallSpeed !== undefined) {
-            this.maxFallSpeed = playerConfig.physics.maxFallSpeed;
-        }
+        this.airResistance = playerConfig.physics?.airResistance ?? this.airResistance;
+        this.gravityScale = playerConfig.physics?.gravityScale ?? this.gravityScale;
+        this.maxFallSpeed = playerConfig.physics?.maxFallSpeed ?? this.maxFallSpeed;
+        this.dashSpeedMultiplier = playerConfig.physics.dashSpeedMultiplier;
+        this.dashAccelerationTime = playerConfig.physics.dashAccelerationTime;
+        this.dashAnimationSpeed = playerConfig.physics.dashAnimationSpeed;
         
         this.playerConfig = config;
         

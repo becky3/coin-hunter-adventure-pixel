@@ -150,7 +150,14 @@ export class ResourceLoader {
     }
   
     getCharacterConfig(type: string, name: string): CharacterConfig | null {
-        if (!this.characters || !this.characters[type]) {
+        if (!this.characters) {
+            return null;
+        }
+        
+        if (type === 'player' && name === 'main') {
+            return (this.characters as Record<string, CharacterConfig>).player || null;
+        }
+        if (!this.characters[type]) {
             return null;
         }
         return this.characters[type][name] || null;

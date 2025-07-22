@@ -43,19 +43,57 @@ async function runTest() {
         console.log('\n2. Testing dash movement speed...');
         const dashStartX = (await t.getEntity('player')).x;
         
-        // ShiftとArrowRightを同時に押す
+        // キー押下を開始
         console.log('Pressing Shift + Right...');
         await t.page.keyboard.down('ShiftLeft');
         await t.page.keyboard.down('ArrowRight');
         
-        await t.wait(1000);
+        // 加速データを収集
+        const accelerationData = await t.page.evaluate(() => {
+            return new Promise((resolve) => {
+                const player = window.game.stateManager.currentState.player;
+                const data = [];
+                let startTime = Date.now();
+                const startX = player.x;
+                
+                const interval = setInterval(() => {
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    data.push({
+                        time: elapsed,
+                        dashTimer: player.dashTimer,
+                        currentMultiplier: player.currentDashMultiplier,
+                        x: player.x,
+                        distance: player.x - startX
+                    });
+                    
+                    if (elapsed >= 1.0) {
+                        clearInterval(interval);
+                        resolve({
+                            data: data,
+                            finalDistance: player.x - startX
+                        });
+                    }
+                }, 100); // 100msごとに記録
+            });
+        });
         
+        // キーを離す
         await t.page.keyboard.up('ArrowRight');
         await t.page.keyboard.up('ShiftLeft');
         
-        const dashEndX = (await t.getEntity('player')).x;
-        const dashDistance = dashEndX - dashStartX;
-        console.log(`Dash movement: ${dashDistance}px in 1 second`);
+        console.log('\n=== Acceleration Curve ===');
+        console.log('Time | Multiplier | Distance');
+        accelerationData.data.forEach(d => {
+            if (d.time <= 0.5 || Math.abs(d.time - 0.5) < 0.05 || d.time >= 0.9) {
+                console.log(`${d.time.toFixed(1)}s | ${d.currentMultiplier.toFixed(2)}x | ${d.distance.toFixed(1)}px`);
+            }
+        });
+        
+        const halfSecondData = accelerationData.data.find(d => d.time >= 0.5);
+        console.log(`\n0.5秒時点の速度倍率: ${halfSecondData.currentMultiplier.toFixed(3)}x (目標: 2.4x)`);
+        
+        const dashDistance = accelerationData.finalDistance;
+        console.log(`\nDash movement: ${dashDistance}px in 1 second`);
         
         // ダッシュが通常移動より速いことを確認
         t.assert(dashDistance > normalDistance * 1.5, 
