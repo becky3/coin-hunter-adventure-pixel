@@ -374,7 +374,8 @@ export class Player extends Entity {
             
             this.dashTimer += deltaTime;
             const progress = Math.min(this.dashTimer / this.dashAccelerationTime, 1.0);
-            this.currentDashMultiplier = 1.0 + (this.dashSpeedMultiplier - 1.0) * progress;
+            const easedProgress = 1.0 - Math.pow(1.0 - progress, 3);
+            this.currentDashMultiplier = 1.0 + (this.dashSpeedMultiplier - 1.0) * easedProgress;
         } else {
             this.isDashing = false;
             this.dashTimer = 0;

@@ -7,9 +7,9 @@
       "jumpPower": 5.25,
       "minJumpTime": 8,
       "maxJumpTime": 20,
-      "dashSpeedMultiplier": 2.0,
-      "dashAccelerationTime": 1.0,
-      "dashAnimationSpeed": 0.5
+      "dashSpeedMultiplier": 2.4,
+      "dashAccelerationTime": 0.5,
+      "dashAnimationSpeed": 0.4
     },
     "stats": {
       "maxHealth": 3,
