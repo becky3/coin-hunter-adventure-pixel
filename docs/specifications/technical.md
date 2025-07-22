@@ -38,31 +38,15 @@ FRICTION: 0.8          // 地面摩擦
 ```
 
 ### プレイヤー物理パラメータ
-```typescript
-// 移動関連
-speed: 1.755               // 通常移動速度
-dashSpeedMultiplier: 1.6   // ダッシュ時の速度倍率
-dashAccelerationTime: 0.5  // ダッシュ加速時間（秒）
-dashAnimationSpeed: 0.4    // ダッシュ時のアニメーション速度
 
-// ジャンプ関連
-jumpPower: 8.5             // ジャンプ初速度
-minJumpTime: 0             // 最小ジャンプ時間
-maxJumpTime: 400           // 最大ジャンプ時間（可変ジャンプ）
-variableJumpBoost: 2.3     // 可変ジャンプブースト
-variableJumpBoostMultiplier: 0.4  // 可変ジャンプブースト係数
+プレイヤーの物理挙動は以下のパラメータで制御されます：
 
-// 物理関連
-gravityScale: 1.0          // 重力スケール（個別調整用）
-airResistance: 0.13        // 空気抵抗
-maxFallSpeed: 15           // 最大落下速度
+- **移動関連**: 通常速度、ダッシュ倍率、加速時間
+- **ジャンプ関連**: ジャンプ力、可変ジャンプ、滞空時間
+- **物理関連**: 重力影響、空気抵抗、最大落下速度
+- **サイズ関連**: 通常時と小サイズ時のコリジョンサイズ
 
-// サイズ関連
-width: 14                  // コリジョン幅（ピクセル）
-height: 32                 // コリジョン高さ（ピクセル）
-smallWidth: 14             // 小サイズ時のコリジョン幅
-smallHeight: 16            // 小サイズ時のコリジョン高さ
-```
+詳細な値は `src/config/resources/characters.json` で管理されています。
 
 ### 衝突判定
 - **矩形判定**: AABB (Axis-Aligned Bounding Box)
