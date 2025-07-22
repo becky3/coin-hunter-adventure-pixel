@@ -155,8 +155,12 @@ async function runArmorKnightStompTest() {
         console.log('Moving player to the right towards the pit...');
         
         // 右に移動（movePlayerメソッドを使用）
-        // プレイヤーを穴の位置まで移動（初期位置128から穴の中心168まで約40ピクセル）
-        await t.movePlayer('right', 300);  // 300ms右に歩く
+        // プレイヤーを穴の位置まで移動
+        // 初期位置(8,10)からArmorKnightの位置(10,11)の真上に移動
+        // X座標: 8*16=128 から 10*16=160 まで約32ピクセル
+        // プレイヤーの移動速度を考慮して、十分な時間を確保
+        // プレイヤーが穴を超えるように少し余分に移動
+        await t.movePlayer('right', 500);  // 500ms右に歩く
         await t.wait(200);  // 落下を待つ
         
         console.log('Tracking player fall...');
@@ -187,10 +191,13 @@ async function runArmorKnightStompTest() {
             }
             previousY = pos.player.y;
             
-            // 衝突範囲内かチェック
-            if (Math.abs(pos.player.x - pos.armorKnight.x) < 16 && 
-                Math.abs(pos.player.y - pos.armorKnight.y) < 16) {
-                console.log('Player and ArmorKnight are in collision range!');
+            // 衝突範囲内かチェック（プレイヤーのサイズも考慮）
+            const playerBottom = pos.player.y + 32; // プレイヤーの高さは32
+            const armorKnightTop = pos.armorKnight.y;
+            if (Math.abs(pos.player.x - pos.armorKnight.x) < 20 && 
+                playerBottom >= armorKnightTop &&
+                pos.player.y <= pos.armorKnight.y + 16) {
+                console.log(`Player and ArmorKnight are in collision range! PlayerBottom:${playerBottom}, ArmorKnightTop:${armorKnightTop}`);
             }
         }
         

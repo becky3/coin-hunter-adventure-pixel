@@ -431,7 +431,7 @@ export class PlayState implements GameState {
         }
 
         if (this.game.physicsSystem) {
-            this.game.physicsSystem.entities.clear();
+            this.game.physicsSystem.clearCollisionPairs();
             this.game.physicsSystem.tileMap = null;
         }
 
