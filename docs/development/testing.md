@@ -94,6 +94,7 @@ const slime = await t.getEntity('Slime', { single: true });
 | test-armor-knight.cjs | ArmorKnight基本動作 | ~15秒 |
 | test-armor-knight-stomp-simple.cjs | ArmorKnight踏みつけ | ~15秒 |
 | test-armor-knight-charge-simple.cjs | ArmorKnight突進 | ~15秒 |
+| test-dash-movement.cjs | ダッシュ移動機能（SHIFT+移動） | ~15秒 |
 | その他多数 | 各種機能テスト | - |
 
 ## 新しいテストを追加する手順
