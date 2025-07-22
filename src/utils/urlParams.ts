@@ -43,4 +43,12 @@ export class URLParams {
     shouldSkipTitle(): boolean {
         return this.params.get('skip_title') === 'true';
     }
+    
+    /**
+     * テストモードかどうか
+     * test=true の場合、AudioContextなどを無効化してテスト用に最適化
+     */
+    isTestMode(): boolean {
+        return this.params.get('test') === 'true';
+    }
 }

@@ -430,6 +430,310 @@ class GameTestHelpers extends TestFramework {
         });
     }
 
+    // ============================================================================
+    // 新しい簡易メソッド - テスト作成を簡単にするためのヘルパー
+    // ============================================================================
+
+    /**
+     * ゲームを指定ステージで開始する統合メソッド
+     * これ1つでゲーム開始からプレイヤー操作可能な状態まで持っていけます
+     * 
+     * @param {string} stageName - ステージ名（例: '1-1', '0-2', 'test-armor-knight'）
+     * @param {Object} options - オプション設定
+     * @param {boolean} options.skipTitle - タイトル画面をスキップ（デフォルト: true）
+     * @param {boolean} options.ensureFocus - 自動的に入力フォーカスを設定（デフォルト: true）
+     * @param {boolean} options.injectErrorTracking - エラー追跡を有効化（デフォルト: true）
+     * @returns {Promise<void>}
+     * 
+     * @example
+     * // 最もシンプルな使い方
+     * await t.quickStart('1-1');
+     * 
+     * // オプション指定
+     * await t.quickStart('test-enemy', { skipTitle: false });
+     */
+    async quickStart(stageName, options = {}) {
+        const config = {
+            skipTitle: true,
+            ensureFocus: true,
+            injectErrorTracking: true,
+            ...options
+        };
+
+        console.log(`🚀 Quick starting game with stage: ${stageName}`);
+        
+        // エラー追跡を設定
+        if (config.injectErrorTracking) {
+            await this.injectErrorTracking();
+        }
+        
+        // URLを構築
+        const params = new URLSearchParams();
+        params.append('s', stageName);
+        if (config.skipTitle) {
+            params.append('skip_title', 'true');
+        }
+        // テストモードを有効化（AudioContext無効化など）
+        params.append('test', 'true');
+        const url = `http://localhost:3000?${params.toString()}`;
+        
+        // ゲームに移動
+        await this.navigateToGame(url);
+        await this.waitForGameInitialization();
+        
+        if (config.skipTitle) {
+            // skip_titleの場合は直接play状態になる
+            await this.assertState('play');
+            
+            if (config.ensureFocus) {
+                await this.ensureInputFocus();
+            }
+        } else {
+            // タイトル画面を経由する場合
+            await this.startNewGame();
+        }
+        
+        // プレイヤーの存在を確認
+        console.log('Checking player existence...');
+        const gameState = await this.getGameState();
+        console.log('Game state:', JSON.stringify({
+            hasState: !!gameState,
+            hasPlayer: !!gameState?.player,
+            currentState: gameState?.currentState
+        }));
+        
+        await this.assertPlayerExists();
+        
+        console.log(`✅ Game ready! You can now control the player.`);
+    }
+
+    /**
+     * 任意のエンティティを取得する汎用メソッド
+     * 
+     * @param {string} type - エンティティタイプ
+     *   - 'player' - プレイヤーを取得
+     *   - 'enemies' - 全ての敵を配列で取得
+     *   - 'items' - 全てのアイテムを配列で取得
+     *   - クラス名（例: 'ArmorKnight', 'Slime', 'ShieldStone'） - 特定のクラスのエンティティを取得
+     * @param {Object} options - 追加オプション
+     * @param {boolean} options.single - 配列でなく単一のエンティティを返す（デフォルト: false）
+     * @returns {Promise<Object|Array|null>} エンティティまたはエンティティの配列
+     * 
+     * @example
+     * // プレイヤーを取得
+     * const player = await t.getEntity('player');
+     * 
+     * // 全ての敵を取得
+     * const enemies = await t.getEntity('enemies');
+     * 
+     * // 特定の敵を取得
+     * const armorKnight = await t.getEntity('ArmorKnight', { single: true });
+     * 
+     * // 全てのコインを取得
+     * const coins = await t.getEntity('Coin');
+     */
+    async getEntity(type, options = {}) {
+        const config = {
+            single: false,
+            ...options
+        };
+
+        return await this.page.evaluate((entityType, opt) => {
+            const state = window.game?.stateManager?.currentState;
+            if (!state) return null;
+            
+            const entityManager = state.entityManager || state.getEntityManager?.();
+            if (!entityManager) return null;
+            
+            // プレイヤーの特別処理
+            if (entityType === 'player') {
+                const player = state.player || entityManager.player || entityManager.getPlayer?.();
+                if (!player) return null;
+                
+                return {
+                    x: player.x,
+                    y: player.y,
+                    vx: player.vx || 0,
+                    vy: player.vy || 0,
+                    width: player.width,
+                    height: player.height,
+                    health: player.health,
+                    isSmall: player.isSmall,
+                    grounded: player.grounded,
+                    invulnerable: player.invulnerable || false,
+                    score: player.score || 0
+                };
+            }
+            
+            // 全ての敵を取得
+            if (entityType === 'enemies') {
+                const enemies = entityManager.enemies || entityManager.getEnemies?.() || [];
+                return enemies.map(enemy => ({
+                    type: enemy.constructor.name,
+                    x: enemy.x,
+                    y: enemy.y,
+                    vx: enemy.vx || 0,
+                    vy: enemy.vy || 0,
+                    width: enemy.width,
+                    height: enemy.height,
+                    health: enemy.health || 0,
+                    alive: enemy.health > 0
+                }));
+            }
+            
+            // 全てのアイテムを取得
+            if (entityType === 'items') {
+                const items = entityManager.items || entityManager.getItems?.() || [];
+                return items.map(item => ({
+                    type: item.constructor.name,
+                    x: item.x,
+                    y: item.y,
+                    width: item.width,
+                    height: item.height,
+                    active: item.active !== false,
+                    collected: !item.active
+                }));
+            }
+            
+            // 特定のクラスのエンティティを取得
+            const allEntities = [
+                ...(entityManager.enemies || []),
+                ...(entityManager.items || [])
+            ];
+            
+            const filtered = allEntities.filter(e => e.constructor.name === entityType);
+            
+            if (opt.single) {
+                const entity = filtered[0];
+                if (!entity) return null;
+                
+                return {
+                    type: entity.constructor.name,
+                    x: entity.x,
+                    y: entity.y,
+                    vx: entity.vx || 0,
+                    vy: entity.vy || 0,
+                    width: entity.width,
+                    height: entity.height,
+                    health: entity.health,
+                    active: entity.active !== false
+                };
+            }
+            
+            return filtered.map(entity => ({
+                type: entity.constructor.name,
+                x: entity.x,
+                y: entity.y,
+                vx: entity.vx || 0,
+                vy: entity.vy || 0,
+                width: entity.width,
+                height: entity.height,
+                health: entity.health,
+                active: entity.active !== false
+            }));
+        }, type, config);
+    }
+
+    /**
+     * 特定のエンティティがスポーンされるまで待機
+     * 
+     * @param {string} entityType - エンティティタイプ（クラス名）
+     * @param {number} timeout - タイムアウト時間（ミリ秒）
+     * @returns {Promise<Object>} スポーンされたエンティティ
+     * 
+     * @example
+     * // 敵の生成を待つ
+     * await t.waitForEntity('Slime');
+     * 
+     * // 5秒待つ
+     * await t.waitForEntity('ArmorKnight', 5000);
+     */
+    async waitForEntity(entityType, timeout = 5000) {
+        console.log(`⏳ Waiting for ${entityType} to spawn...`);
+        
+        const startTime = Date.now();
+        let entity = null;
+        
+        while (Date.now() - startTime < timeout) {
+            entity = await this.getEntity(entityType, { single: true });
+            if (entity) {
+                console.log(`✅ ${entityType} spawned at (${entity.x}, ${entity.y})`);
+                return entity;
+            }
+            await this.wait(100); // 100ms待機
+        }
+        
+        throw new Error(`Timeout waiting for ${entityType} to spawn`);
+    }
+
+    /**
+     * プレイヤーを特定の座標に移動（テレポート）
+     * デバッグやテスト準備に便利
+     * 
+     * @param {number} x - X座標
+     * @param {number} y - Y座標
+     * @returns {Promise<void>}
+     * 
+     * @example
+     * // プレイヤーを敵の近くに配置
+     * await t.teleportPlayer(200, 100);
+     */
+    async teleportPlayer(x, y) {
+        await this.page.evaluate((posX, posY) => {
+            const state = window.game?.stateManager?.currentState;
+            const player = state?.player || state?.entityManager?.player;
+            if (player) {
+                player.x = posX;
+                player.y = posY;
+                player.vx = 0;
+                player.vy = 0;
+            }
+        }, x, y);
+        
+        console.log(`📍 Player teleported to (${x}, ${y})`);
+    }
+
+    /**
+     * ゲーム内のライフ数を取得
+     * 
+     * @returns {Promise<number>} 現在のライフ数
+     * 
+     * @example
+     * const lives = await t.getLives();
+     * console.log(`Remaining lives: ${lives}`);
+     */
+    async getLives() {
+        return await this.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            return state?.lives || 0;
+        });
+    }
+
+    /**
+     * 現在のステージ情報を取得
+     * 
+     * @returns {Promise<Object>} ステージ情報
+     * 
+     * @example
+     * const stage = await t.getStageInfo();
+     * console.log(`Current stage: ${stage.name}`);
+     */
+    async getStageInfo() {
+        return await this.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const levelManager = state?.levelManager || state?.getLevelManager?.();
+            const levelData = levelManager?.levelData || {};
+            
+            return {
+                name: levelData.name || 'unknown',
+                width: levelData.width || 0,
+                height: levelData.height || 0,
+                tileSize: levelData.tileSize || 16,
+                entityCount: levelData.entities?.length || 0
+            };
+        });
+    }
+
     async injectErrorTracking() {
         if (!this.page) {
             console.warn('Page not initialized. Call init() first.');

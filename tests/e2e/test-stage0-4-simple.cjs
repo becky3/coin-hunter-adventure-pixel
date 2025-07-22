@@ -10,19 +10,10 @@ async function runTest() {
     
     await test.runTest(async (t) => {
         await t.init('Stage 0-4 Enemy Spawn Test');
-        await t.injectErrorTracking();
         
-        // Stage 0-4を開く
-        await t.navigateToGame('http://localhost:3000?s=0-4&skip_title=true');
-        await t.waitForGameInitialization();
-        
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        
-        // Ensure input focus
-        await t.clickAt(100, 100);
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-4');
         await t.wait(2000);  // stage0-4のロードに時間がかかるため長めに待機
-        await t.assertPlayerExists();
         
         console.log('✅ Stage 0-4 loaded successfully');
         

@@ -40,27 +40,15 @@ npm run build
 
 ### テスト
 
-#### E2Eテスト
 ```bash
-# スモークテスト（約10秒）
-npm run test:smoke
-
-# フルテストスイート（約1-2分）
+# 全テストを並列実行（約80秒）
 npm test
 
-# 個別テスト
-npm run test:basic       # 基本フローテスト
-npm run test:performance # パフォーマンステスト
-npm run test:stress      # ストレステスト
-```
+# Claudeでの実行（タイムアウト10分設定）
+npm run test:claude
 
-#### Git Pushフックでの自動テスト
-```bash
-# 通常のpush（クイックテストのみ）
-git push
-
-# フルテストを含むpush
-RUN_FULL_TESTS=true git push
+# 個別テスト実行
+node tests/e2e/test-[テスト名].cjs
 ```
 
 詳細は [テストガイド](docs/development/testing.md) を参照してください。

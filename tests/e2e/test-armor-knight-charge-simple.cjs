@@ -16,42 +16,36 @@ async function runArmorKnightChargeTest() {
     await test.runTest(async (t) => {
         await t.init('ArmorKnight Charge Simple Test');
         
-        // エラートラッキングを設定
-        await t.injectErrorTracking();
-        
-        // ArmorKnightテストステージで開始（広い場所でのテスト用）
-        await t.navigateToGame('http://localhost:3000?s=test-armor-knight&skip_title=true');
-        
-        // ゲームの初期化を待つ
-        await t.waitForGameInitialization();
-        
-        // play状態であることを確認
-        await t.assertState('play');
-        
-        // プレイヤーの存在を確認
-        await t.assertPlayerExists();
+        // Use quickStart for simplified initialization
+        await t.quickStart('test-armor-knight');
         
         console.log('\n=== ArmorKnight Charge Simple Test ===');
         
-        // 既存のArmorKnightを取得
+        // 既存のArmorKnightを取得する前に新メソッドでチェック
+        const player = await t.getEntity('player');
+        const armorKnight = await t.getEntity('ArmorKnight', { single: true });
+        
+        t.assert(player !== null, 'Player should exist');
+        t.assert(armorKnight !== null, 'ArmorKnight should exist in test stage');
+        
         const initialSetup = await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
-            const player = state.entityManager.getPlayer();
-            const armorKnight = state.entityManager.enemies.find(e => e.constructor.name === 'ArmorKnight');
+            const playerEntity = state.entityManager.getPlayer();
+            const armorKnightEntity = state.entityManager.enemies.find(e => e.constructor.name === 'ArmorKnight');
             
-            if (!player) return { error: 'Player not found' };
-            if (!armorKnight) return { error: 'ArmorKnight not found in stage' };
+            if (!playerEntity) return { error: 'Player not found' };
+            if (!armorKnightEntity) return { error: 'ArmorKnight not found in stage' };
             
             // グローバル変数に保存（テスト用）
-            window.testArmorKnight = armorKnight;
+            window.testArmorKnight = armorKnightEntity;
             
             return {
                 success: true,
-                playerPos: { x: player.x, y: player.y },
-                knightPos: { x: armorKnight.x, y: armorKnight.y },
-                detectRange: armorKnight.detectRange,
-                normalSpeed: armorKnight.normalSpeed,
-                chargeSpeed: armorKnight.chargeSpeed
+                playerPos: { x: playerEntity.x, y: playerEntity.y },
+                knightPos: { x: armorKnightEntity.x, y: armorKnightEntity.y },
+                detectRange: armorKnightEntity.detectRange,
+                normalSpeed: armorKnightEntity.normalSpeed,
+                chargeSpeed: armorKnightEntity.chargeSpeed
             };
         });
         

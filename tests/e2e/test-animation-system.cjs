@@ -8,20 +8,23 @@ async function runTest() {
     
     await helpers.runTest(async (t) => {
         await t.init('Animation System Test');
-        await t.navigateToGame('http://localhost:3000/?s=0-1&skip_title=true');
-        await t.waitForGameInitialization();
+        
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-1');
         await t.wait(1000);
         
-        // Check if player sprite is rendered
-        const playerData = await t.page.evaluate(() => {
-            const player = window.game?.stateManager?.currentState?.entityManager?.getPlayer();
-            if (!player) return null;
-            return {
-                x: player.x,
-                y: player.y,
-                state: player.animState,
-                health: player.health
-            };
+        // Check if player sprite is rendered using new method
+        const player = await t.getEntity('player');
+        const playerData = player ? {
+            x: player.x,
+            y: player.y,
+            health: player.health
+        } : null;
+        
+        // Get animation state separately
+        const animState = await t.page.evaluate(() => {
+            const playerEntity = window.game?.stateManager?.currentState?.entityManager?.getPlayer();
+            return playerEntity?.animState;
         });
         
         t.assert(playerData !== null, 'Player should exist');

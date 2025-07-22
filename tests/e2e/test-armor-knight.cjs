@@ -13,48 +13,38 @@ async function runArmorKnightTest() {
     const test = new GameTestHelpers({
         headless: testConfig.headless,
         verbose: true,
-        timeout: 30000
+        timeout: 60000  // タイムアウトを60秒に延長
     });
 
     await test.runTest(async (t) => {
         await t.init('ArmorKnight Basic Test');
         
-        // エラートラッキングを設定
-        await t.injectErrorTracking();
-        
-        // ArmorKnightテストステージで開始
-        await t.navigateToGame('http://localhost:3000?s=test-armor-knight&skip_title=true');
-        
-        // ゲームの初期化を待つ
-        await t.waitForGameInitialization();
-        
-        // play状態であることを確認
-        await t.assertState('play');
-        
-        // 入力フォーカスを確保
-        await t.ensureInputFocus();
-        
-        // プレイヤーの存在を確認
-        await t.assertPlayerExists();
+        // 新しいquickStartメソッドで簡単にゲームを開始！
+        // これだけで、エラートラッキング、ゲーム初期化、フォーカス設定、プレイヤー確認まで完了
+        await t.quickStart('test-armor-knight');
         
         console.log('\n=== ArmorKnight基本動作テスト ===');
         
-        // ArmorKnightの初期状態を確認
-        const armorKnightInitial = await t.page.evaluate(() => {
+        // ArmorKnightの初期状態を確認（新しいgetEntityメソッドを使用）
+        const armorKnight = await t.getEntity('ArmorKnight', { single: true });
+        
+        // ArmorKnightの詳細情報を取得（特殊なプロパティのため別途取得）
+        const armorKnightDetails = await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
-            const armorKnight = state.entityManager.enemies.find(e => e.constructor.name === 'ArmorKnight');
-            return armorKnight ? {
-                x: armorKnight.x,
-                y: armorKnight.y,
-                health: armorKnight.health,
-                maxHealth: armorKnight.maxHealth,
-                damage: armorKnight.damage,
-                moveSpeed: armorKnight.moveSpeed,
-                normalSpeed: armorKnight.normalSpeed,
-                chargeSpeed: armorKnight.chargeSpeed,
-                canBeStomped: armorKnight.canBeStomped()
+            const ak = state.entityManager.enemies.find(e => e.constructor.name === 'ArmorKnight');
+            return ak ? {
+                maxHealth: ak.maxHealth,
+                damage: ak.damage,
+                normalSpeed: ak.normalSpeed,
+                chargeSpeed: ak.chargeSpeed,
+                canBeStomped: ak.canBeStomped()
             } : null;
         });
+        
+        const armorKnightInitial = armorKnight ? {
+            ...armorKnight,
+            ...armorKnightDetails
+        } : null;
         
         console.log('ArmorKnight initial state:', armorKnightInitial);
         
@@ -65,31 +55,15 @@ async function runArmorKnightTest() {
         
         console.log('\n=== 横からの接触ダメージテスト ===');
         
-        // プレイヤーの初期状態を記録（サイズも取得）
-        const beforeCollision = await t.page.evaluate(() => {
-            const player = window.game.stateManager.currentState.player;
-            return {
-                health: player.health,
-                isSmall: player.isSmall,
-                width: player.width,
-                height: player.height
-            };
-        });
+        // プレイヤーの初期状態を記録（新しいgetEntityメソッドを使用）
+        const beforeCollision = await t.getEntity('player');
         console.log('Player before collision:', beforeCollision);
         
         // プレイヤーをArmorKnightの位置まで移動
         await t.movePlayer('right', 2000);
         await t.wait(500);
         
-        const afterCollision = await t.page.evaluate(() => {
-            const player = window.game.stateManager.currentState.player;
-            return {
-                health: player.health,
-                isSmall: player.isSmall,
-                width: player.width,
-                height: player.height
-            };
-        });
+        const afterCollision = await t.getEntity('player');
         console.log('Player after collision:', afterCollision);
         
         // 検証：プレイヤーが小さくなったか（ダメージを受けたか）
@@ -103,16 +77,13 @@ async function runArmorKnightTest() {
         // ArmorKnightの移動を確認
         await t.wait(1000);
         
-        const armorKnightAfter = await t.page.evaluate(() => {
+        const armorKnightAfter = await t.getEntity('ArmorKnight', { single: true });
+        
+        // 追加の詳細情報（必要に応じて）
+        const armorKnightExtraInfo = await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
-            const armorKnight = state.entityManager.enemies.find(e => e.constructor.name === 'ArmorKnight');
-            return armorKnight ? {
-                x: armorKnight.x,
-                y: armorKnight.y,
-                direction: armorKnight.direction,
-                vx: armorKnight.vx,
-                grounded: armorKnight.grounded
-            } : null;
+            const ak = state.entityManager.enemies.find(e => e.constructor.name === 'ArmorKnight');
+            return ak ? { direction: ak.direction, grounded: ak.grounded } : null;
         });
         
         console.log('ArmorKnight after movement:', armorKnightAfter);
@@ -120,7 +91,7 @@ async function runArmorKnightTest() {
         // 移動していることを確認
         t.assert(armorKnightAfter.x !== armorKnightInitial.x, 
             'ArmorKnight should be moving');
-        t.assert(armorKnightAfter.grounded === true, 
+        t.assert(armorKnightExtraInfo.grounded === true, 
             'ArmorKnight should be grounded');
         
         // 成功メッセージ

@@ -13,32 +13,19 @@ async function runTest() {
         // Initialize game
         await t.init('Fall Damage Test');
         
-        // Setup error tracking
-        await t.injectErrorTracking();
+        // Use quickStart for simplified initialization
+        await t.quickStart('0-3');
         
-        // Navigate to game with stage 0-3 (fall damage test stage)
-        await t.navigateToGame('http://localhost:3000?s=0-3&skip_title=true');
-        await t.waitForGameInitialization();
-        
-        // Take initial screenshot
-        // await t.screenshot('test-initialized');
-        
-        // With skip_title=true, we should go directly to play state
-        await t.assertState('play');
-        
-        // Ensure input focus
-        await t.ensureInputFocus();
-        await t.assertPlayerExists();
-        
-        // Get initial player stats
-        const initialStats = await t.getPlayerStats();
-        console.log('Initial player stats:', initialStats);
-        
-        // Get initial lives
-        const initialLives = await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            return state?.lives || 0;
+        // Get initial player stats using new method
+        const initialPlayer = await t.getEntity('player');
+        console.log('Initial player stats:', {
+            position: { x: initialPlayer.x, y: initialPlayer.y },
+            health: initialPlayer.health,
+            isSmall: initialPlayer.isSmall
         });
+        
+        // Get initial lives using new helper
+        const initialLives = await t.getLives();
         console.log('Initial lives:', initialLives);
         
         // Test: Fall multiple times until game over (includes first fall verification)
@@ -116,11 +103,8 @@ async function runTest() {
             
             console.log(`Fall ${fallCount} result: ${fallResult.result}`);
             
-            // Check lives
-            currentLives = await t.page.evaluate(() => {
-                const state = window.game?.stateManager?.currentState;
-                return state?.lives || 0;
-            });
+            // Check lives using new helper
+            currentLives = await t.getLives();
             console.log(`Lives after fall ${fallCount}: ${currentLives}`);
             
             // 最初の落下では1ライフ減ることを確認
@@ -138,11 +122,8 @@ async function runTest() {
         // Test 2: Verify HUD shows correct lives
         console.log('\n--- Test 2: HUD Verification ---');
         
-        // Get current internal lives
-        const finalLives = await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            return state?.lives || 0;
-        });
+        // Get current internal lives using new helper
+        const finalLives = await t.getLives();
         
         // Check if HUD is rendering lives correctly
         const hudData = await t.page.evaluate(() => {

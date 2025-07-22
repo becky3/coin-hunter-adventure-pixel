@@ -54,6 +54,8 @@ export class MusicSystem {
     private currentMusicConfig: MusicConfig | null;
     private patternLoopTimeout: NodeJS.Timeout | null;
     
+    private skipAudioContext: boolean;
+    
     
     constructor() {
 
@@ -75,19 +77,27 @@ export class MusicSystem {
         
         this.currentMusicConfig = null;
         this.patternLoopTimeout = null;
+        this.skipAudioContext = false;
     }
     
     get isInitialized(): boolean {
         return this._isInitialized;
     }
 
-    async init(): Promise<boolean> {
+    async init(options: { skipAudioContext?: boolean } = {}): Promise<boolean> {
         const startTime = performance.now();
         Logger.log('[Performance] MusicSystem.init() entered at:', startTime.toFixed(2) + 'ms');
         Logger.log('MusicSystem: init() called');
         if (this._isInitialized) {
             Logger.log('[Performance] MusicSystem already initialized');
             Logger.log('MusicSystem: Already initialized');
+            return true;
+        }
+        
+        if (options.skipAudioContext) {
+            Logger.log('MusicSystem: Skipping AudioContext initialization');
+            this.skipAudioContext = true;
+            this._isInitialized = true;
             return true;
         }
         
@@ -282,7 +292,7 @@ export class MusicSystem {
     }
 
     playJumpSound(): void {
-        if (!this.isInitialized || this.isMuted) return;
+        if (!this.isInitialized || this.isMuted || !this.audioContext) return;
         
         let jumpConfig = null;
         try {
@@ -324,7 +334,7 @@ export class MusicSystem {
     }
 
     playCoinSound(): void {
-        if (!this.isInitialized || this.isMuted) return;
+        if (!this.isInitialized || this.isMuted || !this.audioContext) return;
 
         const notes: NoteInfo[] = [
             { freq: this.getNoteFrequency('A5'), time: 0, duration: 0.08 },
@@ -334,7 +344,7 @@ export class MusicSystem {
         
         notes.forEach(({ freq, time, duration }) => {
             setTimeout(() => {
-                if (!this.isInitialized || this.isMuted || freq === undefined) return;
+                if (!this.isInitialized || this.isMuted || !this.audioContext || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'sine', 0.5);
             }, time * MS_PER_SEC);
         });
@@ -382,7 +392,7 @@ export class MusicSystem {
     }
 
     playButtonClickSound(): void {
-        if (!this.isInitialized || this.isMuted) return;
+        if (!this.isInitialized || this.isMuted || !this.audioContext) return;
         
         this.playSoundEffect(
             800,
@@ -394,7 +404,7 @@ export class MusicSystem {
     }
 
     playGameStartSound(): void {
-        if (!this.isInitialized || this.isMuted) return;
+        if (!this.isInitialized || this.isMuted || !this.audioContext) return;
 
         const notes: NoteInfo[] = [
             { freq: this.getNoteFrequency('C4'), time: 0, duration: 0.1 },
@@ -405,14 +415,14 @@ export class MusicSystem {
         
         notes.forEach(({ freq, time, duration }) => {
             setTimeout(() => {
-                if (!this.isInitialized || this.isMuted || freq === undefined) return;
+                if (!this.isInitialized || this.isMuted || !this.audioContext || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'sine', 0.6);
             }, time * MS_PER_SEC);
         });
     }
 
     playGoalSound(): void {
-        if (!this.isInitialized || this.isMuted) return;
+        if (!this.isInitialized || this.isMuted || !this.audioContext) return;
 
         const notes: NoteInfo[] = [
             { freq: this.getNoteFrequency('G4'), time: 0, duration: 0.15 },
@@ -427,7 +437,7 @@ export class MusicSystem {
         
         notes.forEach(({ freq, time, duration }) => {
             setTimeout(() => {
-                if (!this.isInitialized || this.isMuted || freq === undefined) return;
+                if (!this.isInitialized || this.isMuted || !this.audioContext || freq === undefined) return;
                 this.playSoundEffect(freq, duration, 'square', 0.4, {
                     attack: 0.01,
                     decayTime: 0.1,
@@ -464,8 +474,7 @@ export class MusicSystem {
     }
 
     pauseBGM(): void {
-
-        if (this.isPaused) {
+        if (this.isPaused || !this.audioContext) {
             return;
         }
 
@@ -477,8 +486,7 @@ export class MusicSystem {
     }
 
     resumeBGM(): void {
-
-        if (!this.isPaused) {
+        if (!this.isPaused || !this.audioContext) {
             return;
         }
         
@@ -586,8 +594,8 @@ export class MusicSystem {
     }
     
     playBGM(name: BGMName): void {
-        if (!this.isInitialized) {
-            Logger.warn(`[MusicSystem] Cannot play BGM '${name}' - system not initialized`);
+        if (!this.isInitialized || !this.audioContext) {
+            Logger.warn(`[MusicSystem] Cannot play BGM '${name}' - system not initialized or no AudioContext`);
             return;
         }
         
@@ -595,8 +603,8 @@ export class MusicSystem {
     }
     
     playSE(name: SEName): void {
-        if (!this.isInitialized) {
-            Logger.warn(`[MusicSystem] Cannot play SE '${name}' - system not initialized`);
+        if (!this.isInitialized || !this.audioContext) {
+            Logger.warn(`[MusicSystem] Cannot play SE '${name}' - system not initialized or no AudioContext`);
             return;
         }
         
@@ -765,7 +773,7 @@ export class MusicSystem {
     }
     
     playBGMFromPattern(name: BGMName): void {
-        if (this.currentBGM === name) {
+        if (this.currentBGM === name || !this.audioContext) {
             return;
         }
         

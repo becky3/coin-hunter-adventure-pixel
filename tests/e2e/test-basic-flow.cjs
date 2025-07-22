@@ -167,7 +167,8 @@ async function runTest() {
         // Move right
         await t.movePlayer('right', 1000);
         await t.wait(500);
-        const afterRightPos = await t.getPlayerPosition();
+        const afterRightPlayer = await t.getEntity('player');
+        const afterRightPos = { x: afterRightPlayer.x, y: afterRightPlayer.y };
         console.log(`After moving right: (${afterRightPos.x.toFixed(2)}, ${afterRightPos.y.toFixed(2)})`);
         
         t.assert(afterRightPos.x > startPos.x, 'Player should move right');

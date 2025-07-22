@@ -155,7 +155,10 @@ export class GameCore {
             const musicInitStartTime = performance.now();
             Logger.log('[Performance] Before MusicSystem.init():', musicInitStartTime.toFixed(2) + 'ms');
             Logger.log('GameCore: Initializing MusicSystem...');
-            const initPromise = musicSystem.init();
+            const urlParams = new URLParams();
+            const isTestMode = urlParams.isTestMode();
+            
+            const initPromise = musicSystem.init({ skipAudioContext: isTestMode });
             const timeoutPromise = new Promise<boolean>((_, reject) => 
                 setTimeout(() => reject(new Error('MusicSystem init timeout')), 5000)
             );
