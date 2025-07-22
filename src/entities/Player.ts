@@ -107,6 +107,12 @@ export class Player extends Entity {
     private shieldVisual: ShieldEffectVisual | null = null;
     private hasPowerGlove: boolean = false;
     private skipBlinkEffect?: boolean;
+    private dashSpeedMultiplier: number = 2.0;
+    private dashAccelerationTime: number = 1.0;
+    private dashAnimationSpeed: number = 0.5;
+    private currentDashMultiplier: number = 1.0;
+    private isDashing: boolean = false;
+    private dashTimer: number = 0;
 
     constructor(x?: number, y?: number) {
         let playerConfig = null;
@@ -233,6 +239,15 @@ export class Player extends Entity {
             if (physicsConfig.defaultMaxFallSpeed !== undefined) {
                 this.maxFallSpeed = physicsConfig.defaultMaxFallSpeed;
             }
+            if (physicsConfig.dashSpeedMultiplier !== undefined) {
+                this.dashSpeedMultiplier = physicsConfig.dashSpeedMultiplier;
+            }
+            if (physicsConfig.dashAccelerationTime !== undefined) {
+                this.dashAccelerationTime = physicsConfig.dashAccelerationTime;
+            }
+            if (physicsConfig.dashAnimationSpeed !== undefined) {
+                this.dashAnimationSpeed = physicsConfig.dashAnimationSpeed;
+            }
         }
         
         this.gravityStrength = 1.0;
@@ -322,10 +337,11 @@ export class Player extends Entity {
             left: this.inputManager.isActionPressed('left'),
             right: this.inputManager.isActionPressed('right'),
             jump: this.inputManager.isActionPressed('jump'),
-            action: this.inputManager.isActionPressed('action')
+            action: this.inputManager.isActionPressed('action'),
+            dash: this.inputManager.isActionPressed('dash')
         };
         
-        this.handleMovement(input);
+        this.handleMovement(input, deltaTime);
         this.handleJump(input, deltaTime);
         
         this.updateAnimationState();
@@ -349,12 +365,29 @@ export class Player extends Entity {
         
     }
     
-    private handleMovement(input: { left: boolean; right: boolean; jump: boolean; action: boolean }): void {
+    private handleMovement(input: { left: boolean; right: boolean; jump: boolean; action: boolean; dash: boolean }, deltaTime: number): void {
+        if (input.dash && (input.left || input.right)) {
+            if (!this.isDashing) {
+                this.isDashing = true;
+                this.dashTimer = 0;
+            }
+            
+            this.dashTimer += deltaTime;
+            const progress = Math.min(this.dashTimer / this.dashAccelerationTime, 1.0);
+            this.currentDashMultiplier = 1.0 + (this.dashSpeedMultiplier - 1.0) * progress;
+        } else {
+            this.isDashing = false;
+            this.dashTimer = 0;
+            this.currentDashMultiplier = 1.0;
+        }
+        
+        const effectiveSpeed = this.speed * this.currentDashMultiplier;
+        
         if (input.left) {
-            this.vx = -this.speed;
+            this.vx = -effectiveSpeed;
             this._facing = 'left';
         } else if (input.right) {
-            this.vx = this.speed;
+            this.vx = effectiveSpeed;
             this._facing = 'right';
         } else {
             this.vx *= 0.8;
@@ -460,7 +493,11 @@ export class Player extends Entity {
     private updateAnimationFrame(deltaTime: number): void {
         this.animTimer += deltaTime * 1000;
         
-        const speed = (this.animationConfig.speed && this.animationConfig.speed[this._animState]) || DEFAULT_ANIMATION_CONFIG.speed[this._animState] || 200;
+        let speed = (this.animationConfig.speed && this.animationConfig.speed[this._animState]) || DEFAULT_ANIMATION_CONFIG.speed[this._animState] || 200;
+        
+        if (this.isDashing && this._animState === 'walk') {
+            speed *= this.dashAnimationSpeed;
+        }
         
         if (this.animTimer >= speed) {
             this.animTimer = 0;
