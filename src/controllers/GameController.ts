@@ -63,7 +63,7 @@ export class GameController {
     }
     
     async initializeLevel(levelName: string): Promise<LevelData | null> {
-        this.services.physicsSystem.clearEntities();
+        this.entityManager.clear();
         
         await this.levelManager.initialize();
         
@@ -148,8 +148,6 @@ export class GameController {
         this.entityManager.updateAll(deltaTime);
         this.cameraController.update(deltaTime);
         this.hudManager.update(deltaTime);
-        
-        this.services.physicsSystem.update(deltaTime);
     }
     
     render(): void {
@@ -165,7 +163,6 @@ export class GameController {
     cleanup(): void {
         this.hudManager.cleanup();
         this.entityManager.clear();
-        this.services.physicsSystem.clearEntities();
     }
     
     getGameTime(): number {

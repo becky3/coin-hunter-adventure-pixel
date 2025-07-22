@@ -46,12 +46,12 @@ async function runTest() {
         // 物理システムの確認
         const physicsInfo = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;
-            const physicsSystem = state?.physicsSystem || window.game?.physicsSystem;
-            if (!physicsSystem) {
-                return { error: 'Physics system not found' };
+            const entityManager = state?.entityManager;
+            if (!entityManager) {
+                return { error: 'EntityManager not found' };
             }
             
-            const entities = physicsSystem.getEntities ? Array.from(physicsSystem.getEntities()) : [];
+            const entities = entityManager.getAllActiveEntities ? entityManager.getAllActiveEntities() : [];
             const bats = entities.filter(e => e.constructor.name === 'Bat');
             
             return {

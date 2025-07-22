@@ -120,12 +120,12 @@ async function runArmorKnightStompTest() {
                 height: window.game.stateManager.currentState.player.height
             });
             
-            // 物理システムに登録されているか確認
-            const physicsSystem = window.game.stateManager.currentState.entityManager.physicsSystem;
-            const entitiesInPhysics = Array.from(physicsSystem.getEntities());
-            console.log('Entities in physics system:', entitiesInPhysics.length);
-            console.log('ArmorKnight in physics?', entitiesInPhysics.some(e => e.constructor.name === 'ArmorKnight'));
-            console.log('Player in physics?', entitiesInPhysics.some(e => e.constructor.name === 'Player'));
+            // EntityManagerから登録されているエンティティを確認
+            const entityManager = window.game.stateManager.currentState.entityManager;
+            const allEntities = entityManager.getAllActiveEntities();
+            console.log('Entities in manager:', allEntities.length);
+            console.log('ArmorKnight present?', allEntities.some(e => e.constructor.name === 'ArmorKnight'));
+            console.log('Player present?', allEntities.some(e => e.constructor.name === 'Player'));
         });
         
         // プレイヤーは穴の上の地面にスポーンしている

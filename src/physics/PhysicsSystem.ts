@@ -26,7 +26,6 @@ type CollisionMatrix = {
 
 interface PhysicsEntity extends Entity {
     physicsLayer?: PhysicsLayer;
-    physicsSystem?: PhysicsSystem;
     airResistance?: number;
     gravityScale?: number;
     maxFallSpeed?: number;
@@ -45,7 +44,6 @@ export class PhysicsSystem {
     private _friction: number;
     public readonly layers: PhysicsLayers;
     private collisionMatrix: CollisionMatrix;
-    private entities: Set<PhysicsEntity>;
     private tileMap: number[][] | null;
     private tileSize: number;
     private collisionPairs: Map<string, boolean>;
@@ -81,7 +79,6 @@ export class PhysicsSystem {
             [this.layers.PLATFORM]: [this.layers.PLAYER, this.layers.ENEMY],
             [this.layers.PROJECTILE]: [this.layers.TILE]
         };
-        this.entities = new Set();
         this.tileMap = null;
         this.tileSize = 16;
         this.collisionPairs = new Map();
@@ -109,16 +106,8 @@ export class PhysicsSystem {
         }
     }
     
-    getEntityCount(): number {
-        return this.entities.size;
-    }
-    
-    getEntities(): Set<PhysicsEntity> {
-        return new Set(this.entities);
-    }
-    
-    clearEntities(): void {
-        this.entities.clear();
+    clearCollisionPairs(): void {
+        this.collisionPairs.clear();
         this.frameCount = 0;
     }
     
@@ -127,37 +116,21 @@ export class PhysicsSystem {
         this.tileSize = tileSize;
     }
     
-    addEntity(entity: PhysicsEntity, layer: PhysicsLayer = this.layers.TILE): void {
-        entity.physicsLayer = layer;
-        this.entities.add(entity);
-        entity.physicsSystem = this;
-        if (entity.gravity) {
-            entity.grounded = false;
-        }
-    }
-    
-    removeEntity(entity: PhysicsEntity): void {
-        this.entities.delete(entity);
-    }
-    
-    hasEntity(entity: PhysicsEntity): boolean {
-        return this.entities.has(entity);
-    }
     
     private frameCount: number = 0;
     
-    update(deltaTime: number): void {
+    update(deltaTime: number, entities: PhysicsEntity[]): void {
         this.frameCount++;
         
         
         const clampedDeltaTime = Math.min(deltaTime, 0.033);
         
-        for (const entity of this.entities) {
+        for (const entity of entities) {
             if (entity.active) {
                 this.updateGroundedState(entity);
             }
         }
-        for (const entity of this.entities) {
+        for (const entity of entities) {
             if (!entity.active) continue;
             
             if ('physicsEnabled' in entity && entity.physicsEnabled === false) {
@@ -172,7 +145,7 @@ export class PhysicsSystem {
             this.checkCollisionsForEntity(entity, 'vertical');
             this.applyFriction(entity, clampedDeltaTime);
         }
-        this.checkEntityCollisions();
+        this.checkEntityCollisions(entities);
     }
     
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
@@ -284,17 +257,16 @@ export class PhysicsSystem {
         }
     }
     
-    checkEntityCollisions(): void {
-        const entitiesArray = Array.from(this.entities);
+    checkEntityCollisions(entities: PhysicsEntity[]): void {
         const currentPairs = new Set<string>();
         
-        for (let i = 0; i < entitiesArray.length; i++) {
-            const entityA = entitiesArray[i];
+        for (let i = 0; i < entities.length; i++) {
+            const entityA = entities[i];
             if (!entityA.active || !entityA.collidable) continue;
             const collisionLayers = entityA.physicsLayer ? this.collisionMatrix[entityA.physicsLayer] || [] : [];
             
-            for (let j = i + 1; j < entitiesArray.length; j++) {
-                const entityB = entitiesArray[j];
+            for (let j = i + 1; j < entities.length; j++) {
+                const entityB = entities[j];
                 if (!entityB.active || !entityB.collidable) continue;
                 if (entityB.physicsLayer && entityA.physicsLayer && 
                     (collisionLayers.includes(entityB.physicsLayer) ||
@@ -429,8 +401,8 @@ export class PhysicsSystem {
         return null;
     }
     
-    renderDebug(renderer: IRenderer): void {
-        for (const entity of this.entities) {
+    renderDebug(renderer: IRenderer, entities: PhysicsEntity[]): void {
+        for (const entity of entities) {
             if (!entity.active) continue;
             
             const bounds = entity.getBounds();

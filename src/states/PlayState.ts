@@ -361,8 +361,6 @@ export class PlayState implements GameState {
 
         this.updateTimer();
 
-        this.game.physicsSystem.update(deltaTime);
-
         this.entityManager.updateAll(deltaTime);
 
         const player = this.entityManager.getPlayer();

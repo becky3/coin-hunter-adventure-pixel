@@ -235,7 +235,7 @@ export class Bat extends Enemy implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         this.setEventBus(manager.getEventBus());
         manager.addEnemy(this);
-        manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ENEMY);
+        this.physicsLayer = manager.getPhysicsSystem().layers.ENEMY;
     }
 
     /**

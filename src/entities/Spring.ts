@@ -161,7 +161,7 @@ export class Spring extends Entity implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addItem(this);
-        manager.getPhysicsSystem().addEntity(this, manager.getPhysicsSystem().layers.ITEM);
+        this.physicsLayer = manager.getPhysicsSystem().layers.ITEM;
     }
     
     /**

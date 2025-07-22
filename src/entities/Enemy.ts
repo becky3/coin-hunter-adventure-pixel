@@ -122,10 +122,7 @@ export class Enemy extends Entity {
 
     die(): void {
         this.state = 'dead';
-        
-        if (this.physicsSystem) {
-            this.physicsSystem.removeEntity(this);
-        }
+        this.active = false;
         
         this.onDeath();
     }
