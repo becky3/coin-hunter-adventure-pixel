@@ -591,7 +591,7 @@ class GameTestHelpers extends TestFramework {
                     width: item.width,
                     height: item.height,
                     active: item.active !== false,
-                    collected: !item.active || false
+                    collected: !item.active
                 }));
             }
             

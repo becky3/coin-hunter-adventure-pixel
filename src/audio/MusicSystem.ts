@@ -54,6 +54,8 @@ export class MusicSystem {
     private currentMusicConfig: MusicConfig | null;
     private patternLoopTimeout: NodeJS.Timeout | null;
     
+    private skipAudioContext: boolean;
+    
     
     constructor() {
 
@@ -75,6 +77,7 @@ export class MusicSystem {
         
         this.currentMusicConfig = null;
         this.patternLoopTimeout = null;
+        this.skipAudioContext = false;
     }
     
     get isInitialized(): boolean {
@@ -93,6 +96,7 @@ export class MusicSystem {
         
         if (options.skipAudioContext) {
             Logger.log('MusicSystem: Skipping AudioContext initialization');
+            this.skipAudioContext = true;
             this._isInitialized = true;
             return true;
         }

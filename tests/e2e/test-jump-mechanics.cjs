@@ -123,7 +123,7 @@ async function runTest() {
         
         // Verify variable jump is working
         const heightDifference = longJumpMaxHeight - shortJumpMaxHeight;
-        // 閾値を20から14に変更（タイミングの違いで数ピクセルの誤差が生じるため）
+        // Threshold adjusted from 20 to 14 due to timing differences causing a few pixels of variance
         t.assert(heightDifference > 14, `Variable jump should work: long jump (${longJumpMaxHeight.toFixed(1)}) should be significantly higher than short jump (${shortJumpMaxHeight.toFixed(1)})`);
         console.log('✅ Variable jump working correctly (difference:', heightDifference.toFixed(1), 'pixels)');
         
