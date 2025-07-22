@@ -14,7 +14,7 @@
       "airResistance": 0.13,
       "gravityScale": 1.0,
       "maxFallSpeed": 15,
-      "dashSpeedMultiplier": 2.4,
+      "dashSpeedMultiplier": 1.6,
       "dashAccelerationTime": 0.5,
       "dashAnimationSpeed": 0.4
     },
