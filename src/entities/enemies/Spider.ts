@@ -342,7 +342,8 @@ export class Spider extends Enemy implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         this.setEventBus(manager.getEventBus());
         manager.addEnemy(this);
-        this.physicsLayer = manager.getPhysicsSystem().layers.ENEMY;
+        this.physicsSystem = manager.getPhysicsSystem();
+        this.physicsLayer = this.physicsSystem.layers.ENEMY;
     }
     
     /**
