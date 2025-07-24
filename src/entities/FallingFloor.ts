@@ -1,23 +1,21 @@
 import { Entity, CollisionInfo } from './Entity';
-import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
+import { Logger } from '../utils/Logger';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 /**
  * Falling floor platform that collapses when the player steps on it
  */
 export class FallingFloor extends Entity implements EntityInitializer {
-    private state: 'stable' | 'shaking' | 'falling' | 'respawning';
+    private state: 'stable' | 'shaking' | 'falling';
     private stateTimer: number;
     
     private originalX: number;
     private originalY: number;
     
-    private readonly SHAKE_DURATION = 60;
-    private readonly RESPAWN_DELAY = 180;
     
     private shakeAmplitude: number;
     private shakeFrequency: number;
@@ -50,6 +48,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.solid = true;
         this.collidable = true;
         this.ignoreTileCollisions = true;
+        this.notifyTileCollision = false;
         
         this.shakeAmplitude = 2;
         this.shakeFrequency = 0.5;
@@ -67,11 +66,13 @@ export class FallingFloor extends Entity implements EntityInitializer {
             break;
                 
         case 'shaking':
-            this.stateTimer += deltaTime * 60;
+            this.stateTimer += deltaTime;
                 
-            this.shakeOffset = Math.sin(this.stateTimer * this.shakeFrequency) * this.shakeAmplitude;
+            this.shakeOffset = Math.sin(this.stateTimer * 60 * this.shakeFrequency) * this.shakeAmplitude;
                 
-            if (this.stateTimer >= this.SHAKE_DURATION) {
+                
+            if (this.stateTimer >= 1.0) {
+                Logger.log(`[FallingFloor] Shake complete, starting fall at (${this.x}, ${this.y})`);
                 this.startFalling();
             }
                 
@@ -81,18 +82,8 @@ export class FallingFloor extends Entity implements EntityInitializer {
             break;
                 
         case 'falling':
-            this.stateTimer += deltaTime * 60;
-                
-            if (this.y > this.originalY + 100) {
-                this.startRespawning();
-            }
-            break;
-                
-        case 'respawning':
-            this.stateTimer += deltaTime * 60;
-                
-            if (this.stateTimer >= this.RESPAWN_DELAY) {
-                this.respawn();
+            if (this.x === 320 && this.originalY === 128) {
+                Logger.log(`[FallingFloor] Falling: y=${this.y}, vy=${this.vy}, gravity=${this.gravity}, physicsEnabled=${this.physicsEnabled}`);
             }
             break;
         }
@@ -118,38 +109,13 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.solid = false;
         this.vy = 0;
         
+        Logger.log(`[FallingFloor] Started falling: gravity=${this.gravity}, physicsEnabled=${this.physicsEnabled}, ignoreTileCollisions=${this.ignoreTileCollisions}`);
+        
         if (this.entityAnimationManager) {
             this.entityAnimationManager.setState('broken');
         }
     }
     
-    private startRespawning(): void {
-        this.state = 'respawning';
-        this.stateTimer = 0;
-        
-        this.visible = false;
-        this.active = true;
-    }
-    
-    private respawn(): void {
-        this.state = 'stable';
-        this.stateTimer = 0;
-        
-        this.x = this.originalX;
-        this.y = this.originalY;
-        
-        this.gravity = false;
-        this.physicsEnabled = false;
-        this.solid = true;
-        this.vy = 0;
-        
-        this.visible = true;
-        this.active = true;
-        
-        if (this.entityAnimationManager) {
-            this.entityAnimationManager.setState('normal');
-        }
-    }
     
     render(renderer: PixelRenderer): void {
         if (!this.visible) return;
@@ -167,22 +133,16 @@ export class FallingFloor extends Entity implements EntityInitializer {
     }
     
     onCollision(collisionInfo?: CollisionInfo): boolean {
-        if (!collisionInfo) {
+        if (!collisionInfo || this.state !== 'stable') {
             return false;
         }
         
         const other = collisionInfo.other;
         
         if (other && other.constructor.name === 'Player') {
-            const player = other as unknown as Player;
-            
-            const fromTop = collisionInfo.side === 'bottom' || 
-                          (player.y + player.height <= this.y + 4 && player.vy >= 0);
-            
-            if (fromTop && this.state === 'stable') {
-                this.startShaking();
-                return true;
-            }
+            Logger.log(`[FallingFloor] onCollision called at (${this.x}, ${this.y}), state=${this.state}`);
+            this.startShaking();
+            return true;
         }
         
         return false;
@@ -219,6 +179,8 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addPlatform(this);
         this.physicsLayer = manager.getPhysicsSystem().layers.PLATFORM;
+        
+        Logger.log(`[FallingFloor] Initialized at (${this.x}, ${this.y}), layer: ${this.physicsLayer}, active: ${this.active}, collidable: ${this.collidable}, solid: ${this.solid}`);
     }
     
     /**
@@ -258,9 +220,9 @@ export class FallingFloor extends Entity implements EntityInitializer {
             default: {
                 colors: [
                     null,
-                    0x17,
-                    0x16,
-                    0x15
+                    0x50,
+                    0x51,
+                    0x01
                 ]
             }
         };
