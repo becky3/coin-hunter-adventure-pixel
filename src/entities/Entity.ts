@@ -57,6 +57,7 @@ export abstract class Entity {
     public collidable: boolean;
     public isProjectileTarget: boolean;
     public notifyTileCollision: boolean;
+    public ignoreTileCollisions: boolean;
     
     public currentAnimation: string | null;
     public animationTime: number;
@@ -99,6 +100,7 @@ export abstract class Entity {
         this.collidable = true;
         this.isProjectileTarget = false;
         this.notifyTileCollision = false;
+        this.ignoreTileCollisions = false;
         
         this.currentAnimation = null;
         this.animationTime = 0;

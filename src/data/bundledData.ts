@@ -39,6 +39,7 @@ import stageBulletTest from '../levels/data/stage-bullet-test.json';
 import testAllSprites from '../levels/data/test-all-sprites.json';
 import testArmorKnight from '../levels/data/test-armor-knight.json';
 import testArmorKnightStomp from '../levels/data/test-armor-knight-stomp.json';
+import stageTestFallingFloor from '../levels/data/stage-test-falling-floor.json';
 
 export const bundledResourceData: Record<string, unknown> = {
     '/src/config/resources/index.json': resourceIndex,
@@ -84,6 +85,7 @@ export const bundledStageData: Record<string, unknown> = {
     '/src/levels/data/test-all-sprites.json': testAllSprites,
     '/src/levels/data/test-armor-knight.json': testArmorKnight,
     '/src/levels/data/test-armor-knight-stomp.json': testArmorKnightStomp,
+    '/src/levels/data/stage-test-falling-floor.json': stageTestFallingFloor,
 };
 
 export const allBundledData: Record<string, unknown> = {

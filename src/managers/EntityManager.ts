@@ -151,6 +151,10 @@ export class EntityManager {
         this.items.push(item);
     }
     
+    addPlatform(platform: Entity): void {
+        this.platforms.push(platform);
+    }
+    
     addProjectile(projectile: Entity): void {
         Logger.log('[EntityManager] Adding projectile:', projectile.constructor.name, 'Total before:', this.projectiles.length);
         this.projectiles.push(projectile);
@@ -252,6 +256,12 @@ export class EntityManager {
             this.items.forEach(item => {
                 if (item.update) {
                     item.update(deltaTime);
+                }
+            });
+            
+            this.platforms.forEach(platform => {
+                if (platform.update) {
+                    platform.update(deltaTime);
                 }
             });
             
@@ -357,6 +367,12 @@ export class EntityManager {
     }
 
     renderAll(renderer: PixelRenderer): void {
+        this.platforms.forEach(platform => {
+            if (platform.render) {
+                platform.render(renderer);
+            }
+        });
+        
         this.items.forEach(item => {
             if (item.render) {
                 item.render(renderer);

@@ -179,7 +179,9 @@ export class PhysicsSystem {
     checkCollisionsForEntity(entity: PhysicsEntity, axis: 'horizontal' | 'vertical'): void {
         if (!entity.collidable) return;
         if (this.tileMap && entity.physicsLayer !== this.layers.TILE) {
-            this.checkTileCollisions(entity, axis);
+            if (!('ignoreTileCollisions' in entity) || !entity.ignoreTileCollisions) {
+                this.checkTileCollisions(entity, axis);
+            }
         }
     }
     
@@ -268,6 +270,8 @@ export class PhysicsSystem {
             for (let j = i + 1; j < entities.length; j++) {
                 const entityB = entities[j];
                 if (!entityB.active || !entityB.collidable) continue;
+                
+                
                 if (entityB.physicsLayer && entityA.physicsLayer && 
                     (collisionLayers.includes(entityB.physicsLayer) ||
                      (this.collisionMatrix[entityB.physicsLayer] || []).includes(entityA.physicsLayer))) {
@@ -277,6 +281,8 @@ export class PhysicsSystem {
                     
                     if (this.checkAABB(entityA.getBounds(), entityB.getBounds())) {
                         currentPairs.add(pairKey);
+                        
+                        
                         if (!this.collisionPairs.has(pairKey)) {
                             this.collisionPairs.set(pairKey, true);
                             this.notifyCollision(entityA, entityB);

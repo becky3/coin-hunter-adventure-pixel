@@ -97,6 +97,12 @@
       "name": "ARMOR KNIGHT STOMP TEST",
       "description": "Test stage for ArmorKnight stomp mechanics",
       "filename": "test-armor-knight-stomp.json"
+    },
+    {
+      "id": "stage-test-falling-floor",
+      "name": "FALLING FLOOR TEST",
+      "description": "Test stage for falling floor gimmick",
+      "filename": "stage-test-falling-floor.json"
     }
   ]
 }

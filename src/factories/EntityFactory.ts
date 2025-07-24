@@ -1,6 +1,7 @@
 import { Entity } from '../entities/Entity';
 import { Coin } from '../entities/Coin';
 import { Spring } from '../entities/Spring';
+import { FallingFloor } from '../entities/FallingFloor';
 import { GoalFlag } from '../entities/GoalFlag';
 import { Slime } from '../entities/enemies/Slime';
 import { Bat } from '../entities/enemies/Bat';
@@ -21,6 +22,7 @@ export class EntityFactory {
     static {
         EntityFactory.register('coin', (x, y) => Coin.create(x, y));
         EntityFactory.register('spring', (x, y) => Spring.create(x, y));
+        EntityFactory.register('falling_floor', (x, y) => FallingFloor.create(x, y));
         EntityFactory.register('goal', (x, y) => GoalFlag.create(x, y));
         EntityFactory.register('slime', (x, y) => Slime.create(x, y));
         EntityFactory.register('bat', (x, y) => Bat.create(x, y));

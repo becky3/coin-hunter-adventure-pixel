@@ -83,6 +83,22 @@
           "type": "sprite"
         },
         {
+          "name": "falling_floor_normal",
+          "type": "sprite"
+        },
+        {
+          "name": "falling_floor_crack1",
+          "type": "sprite"
+        },
+        {
+          "name": "falling_floor_crack2",
+          "type": "sprite"
+        },
+        {
+          "name": "falling_floor_broken",
+          "type": "sprite"
+        },
+        {
           "name": "goal_flag",
           "type": "sprite"
         }

@@ -595,10 +595,25 @@ class GameTestHelpers extends TestFramework {
                 }));
             }
             
+            // 全てのプラットフォームを取得
+            if (entityType === 'platforms') {
+                const platforms = entityManager.platforms || entityManager.getPlatforms?.() || [];
+                return platforms.map(platform => ({
+                    type: platform.constructor.name,
+                    x: platform.x,
+                    y: platform.y,
+                    width: platform.width,
+                    height: platform.height,
+                    active: platform.active !== false,
+                    solid: platform.solid !== false
+                }));
+            }
+            
             // 特定のクラスのエンティティを取得
             const allEntities = [
                 ...(entityManager.enemies || []),
-                ...(entityManager.items || [])
+                ...(entityManager.items || []),
+                ...(entityManager.platforms || [])
             ];
             
             const filtered = allEntities.filter(e => e.constructor.name === entityType);
