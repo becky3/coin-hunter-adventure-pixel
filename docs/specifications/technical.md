@@ -80,10 +80,13 @@ Entity {
 
 ### エンティティ種別
 1. **Player** - プレイヤーキャラクター
-2. **Enemy** - 敵（Slime、Bird）
+2. **Enemy** - 敵（Slime、Bird、Bat、Spider、ArmorKnight）
 3. **Coin** - 収集アイテム
 4. **Spring** - ジャンプ台
 5. **GoalFlag** - ゴール地点
+6. **PowerGlove** - パワーアップアイテム
+7. **ShieldStone** - シールドアイテム
+8. **FallingFloor** - 落ちる床ギミック
 
 ## アニメーション
 
@@ -102,6 +105,7 @@ Entity {
 - **スライム**: idle, move(2F)
 - **コウモリ**: hang, fly(2F)
 - **クモ**: idle, walk(2F)
+- **FallingFloor**: normal, shaking(2F), broken
 
 ## 入力システム
 
