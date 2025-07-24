@@ -165,7 +165,7 @@ export class PhysicsSystem {
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
         
-        if (entity.constructor.name === 'FallingFloor') {
+        if ('state' in entity && 'shakeOffset' in entity) {
             Logger.log(`[PhysicsSystem] Applying gravity to FallingFloor: gravity=${entity.gravity}, grounded=${entity.grounded}, vy=${entity.vy}`);
         }
         
@@ -199,7 +199,7 @@ export class PhysicsSystem {
         if (this.tileMap && entity.physicsLayer !== this.layers.TILE) {
             if (!('ignoreTileCollisions' in entity) || !entity.ignoreTileCollisions) {
                 this.checkTileCollisions(entity, axis);
-            } else if (entity.constructor.name === 'FallingFloor' && axis === 'vertical') {
+            } else if ('state' in entity && 'shakeOffset' in entity && axis === 'vertical') {
                 Logger.log(`[PhysicsSystem] FallingFloor skipping tile collision: y=${entity.y}, vy=${entity.vy}, ignoreTileCollisions=${entity.ignoreTileCollisions}`);
             }
         }
@@ -231,7 +231,7 @@ export class PhysicsSystem {
                             
                             if (!this.platformCollisionPairs.has(pairKey)) {
                                 this.platformCollisionPairs.set(pairKey, true);
-                                if (platform.constructor.name === 'FallingFloor') {
+                                if ('state' in platform && 'shakeOffset' in platform) {
                                     Logger.log('[PhysicsSystem] FallingFloor collision detected, calling onCollision');
                                 }
                                 if (platform.onCollision) {
@@ -272,7 +272,7 @@ export class PhysicsSystem {
         const bounds = entity.getBounds();
         let startCol, endCol;
         
-        if (axis === 'vertical' && entity.vy >= 0 && entity.type === 'player') {
+        if (axis === 'vertical' && entity.vy >= 0 && 'jumpPower' in entity) {
             const centerX = entity.x + entity.width / 2;
             startCol = endCol = Math.floor(centerX / this.tileSize);
         } else {
@@ -320,7 +320,7 @@ export class PhysicsSystem {
                 entity.x = tileBounds.left - entity.width;
                 entity.vx = 0;
             } else if (entity.vx < 0) {
-                if (entity.constructor.name === 'EnergyBullet') {
+                if ('damage' in entity && 'speed' in entity) {
                     Logger.log('[PhysicsSystem] Bullet collision: moving from', entity.x, 'to', tileBounds.right);
                 }
                 entity.x = tileBounds.right;

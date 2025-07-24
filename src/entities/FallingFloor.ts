@@ -82,9 +82,6 @@ export class FallingFloor extends Entity implements EntityInitializer {
             break;
                 
         case 'falling':
-            if (this.x === 320 && this.originalY === 128) {
-                Logger.log(`[FallingFloor] Falling: y=${this.y}, vy=${this.vy}, gravity=${this.gravity}, physicsEnabled=${this.physicsEnabled}`);
-            }
             break;
         }
         
@@ -154,7 +151,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
     }
     
     onCollision(collisionInfo?: CollisionInfo): boolean {
-        Logger.log(`[FallingFloor] onCollision called at (${this.x}, ${this.y}), state=${this.state}, other=${collisionInfo?.other?.constructor.name}`);
+        Logger.log(`[FallingFloor] onCollision called at (${this.x}, ${this.y}), state=${this.state}`);
         
         if (!collisionInfo || this.state !== 'stable') {
             return false;
@@ -162,7 +159,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
         
         const other = collisionInfo.other;
         
-        if (other && other.constructor.name === 'Player') {
+        if (other && 'jumpPower' in other) {
             Logger.log('[FallingFloor] Player collision detected, starting shaking');
             this.startShaking();
             return true;
