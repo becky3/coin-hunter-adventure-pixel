@@ -1,7 +1,8 @@
 /**
  * ArmorKnight踏みつけテスト（シンプル版）
  * 
- * ArmorKnightを踏みつけてもプレイヤーがダメージを受けないことを確認
+ * プレイヤーがArmorKnightの真上から落下して踏みつけた時に
+ * ダメージを受けずに跳ね返ることを確認
  */
 
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
@@ -151,17 +152,11 @@ async function runArmorKnightStompTest() {
             console.log(`Before move - Player position: x=${player.x}, y=${player.y}`);
         });
         
-        // プレイヤーを穴に向かって移動させる
-        console.log('Moving player to the right towards the pit...');
+        // プレイヤーは自動的に落下する
+        console.log('Waiting for player to fall onto ArmorKnight...');
         
-        // 右に移動（movePlayerメソッドを使用）
-        // プレイヤーを穴の位置まで移動
-        // 初期位置(8,10)からArmorKnightの位置(10,11)の真上に移動
-        // X座標: 8*16=128 から 10*16=160 まで約32ピクセル
-        // プレイヤーの移動速度を考慮して、十分な時間を確保
-        // プレイヤーが穴を超えるように少し余分に移動
-        await t.movePlayer('right', 500);  // 500ms右に歩く
-        await t.wait(200);  // 落下を待つ
+        // 落下開始を少し待つ
+        await t.wait(100);
         
         console.log('Tracking player fall...');
         

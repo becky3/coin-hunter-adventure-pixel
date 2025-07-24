@@ -361,7 +361,11 @@ export class PhysicsSystem {
                         currentPairs.add(pairKey);
                         
                         if (entityA.solid && entityB.solid) {
-                            this.resolveSolidCollision(entityA, entityB);
+                            const aIsPlatform = entityA.physicsLayer === this.layers.PLATFORM;
+                            const bIsPlatform = entityB.physicsLayer === this.layers.PLATFORM;
+                            if (aIsPlatform || bIsPlatform) {
+                                this.resolveSolidCollision(entityA, entityB);
+                            }
                         }
                         
                         if (!this.collisionPairs.has(pairKey)) {
