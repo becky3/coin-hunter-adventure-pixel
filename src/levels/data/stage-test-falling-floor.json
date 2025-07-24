@@ -6,8 +6,8 @@
   "tileSize": 16,
   "backgroundColor": 18,
   "playerSpawn": {
-    "x": 4,
-    "y": 10
+    "x": 20,
+    "y": 6
   },
   "goal": {
     "x": 55,

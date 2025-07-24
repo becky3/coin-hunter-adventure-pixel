@@ -148,10 +148,16 @@ export class EntityManager {
     }
     
     addItem(item: Entity): void {
+        if ('setEventBus' in item && typeof item.setEventBus === 'function') {
+            item.setEventBus(this.eventBus);
+        }
         this.items.push(item);
     }
     
     addPlatform(platform: Entity): void {
+        if ('setEventBus' in platform && typeof platform.setEventBus === 'function') {
+            platform.setEventBus(this.eventBus);
+        }
         this.platforms.push(platform);
     }
     

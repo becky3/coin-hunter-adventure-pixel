@@ -97,6 +97,19 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.state = 'shaking';
         this.stateTimer = 0;
         this.shakeOffset = 0;
+        
+        Logger.log(`[FallingFloor] startShaking: eventBus=${this.eventBus ? 'exists' : 'null'}`);
+        
+        if (this.eventBus) {
+            this.eventBus.emit('fallingfloor:shaking', { 
+                floor: this,
+                x: this.x,
+                y: this.y
+            });
+            Logger.log('[FallingFloor] Emitted fallingfloor:shaking event');
+        } else {
+            Logger.warn('[FallingFloor] No eventBus available to emit event');
+        }
     }
     
     private startFalling(): void {
@@ -113,6 +126,14 @@ export class FallingFloor extends Entity implements EntityInitializer {
         
         if (this.entityAnimationManager) {
             this.entityAnimationManager.setState('broken');
+        }
+        
+        if (this.eventBus) {
+            this.eventBus.emit('fallingfloor:falling', { 
+                floor: this,
+                x: this.x,
+                y: this.y
+            });
         }
     }
     
@@ -133,6 +154,8 @@ export class FallingFloor extends Entity implements EntityInitializer {
     }
     
     onCollision(collisionInfo?: CollisionInfo): boolean {
+        Logger.log(`[FallingFloor] onCollision called at (${this.x}, ${this.y}), state=${this.state}, other=${collisionInfo?.other?.constructor.name}`);
+        
         if (!collisionInfo || this.state !== 'stable') {
             return false;
         }
@@ -140,7 +163,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
         const other = collisionInfo.other;
         
         if (other && other.constructor.name === 'Player') {
-            Logger.log(`[FallingFloor] onCollision called at (${this.x}, ${this.y}), state=${this.state}`);
+            Logger.log('[FallingFloor] Player collision detected, starting shaking');
             this.startShaking();
             return true;
         }

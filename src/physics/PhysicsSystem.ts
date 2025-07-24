@@ -231,6 +231,9 @@ export class PhysicsSystem {
                             
                             if (!this.platformCollisionPairs.has(pairKey)) {
                                 this.platformCollisionPairs.set(pairKey, true);
+                                if (platform.constructor.name === 'FallingFloor') {
+                                    Logger.log('[PhysicsSystem] FallingFloor collision detected, calling onCollision');
+                                }
                                 if (platform.onCollision) {
                                     platform.onCollision({
                                         other: player,

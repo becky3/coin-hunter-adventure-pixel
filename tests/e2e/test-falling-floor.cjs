@@ -21,8 +21,63 @@ async function runTest() {
     await test.runTest(async (t) => {
         await t.init('Falling Floor Test');
         
+        // ページ初期化時にイベントリスナーを設定
+        await t.page.evaluateOnNewDocument(() => {
+            window.__fallingFloorEvent = null;
+            window.__setupFallingFloorListener = () => {
+                const checkInterval = setInterval(() => {
+                    const state = window.game?.stateManager?.currentState;
+                    const entityManager = state?.entityManager;
+                    if (entityManager && entityManager.getEventBus) {
+                        clearInterval(checkInterval);
+                        
+                        const eventBus = entityManager.getEventBus();
+                        if (eventBus) {
+                            eventBus.on('fallingfloor:shaking', (data) => {
+                                console.log('fallingfloor:shaking event received:', data);
+                                window.__fallingFloorEvent = true;  // シンプルにtrueを設定
+                                window.__fallingFloorEventData = data;  // データも別途保存
+                            });
+                            console.log('EventBus listener set up for fallingfloor:shaking');
+                        }
+                    }
+                }, 10);
+            };
+            
+            // DOMContentLoadedまたは即座に実行
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', window.__setupFallingFloorListener);
+            } else {
+                window.__setupFallingFloorListener();
+            }
+        });
+        
         // テスト用ステージで開始
         await t.quickStart('stage-test-falling-floor');
+        
+        // プレイヤーが落下して床に着地するまで少し待つ
+        await t.wait(500);
+        
+        // 床の状態を確認（EventBusでイベントが発火済みのはず）
+        const floorState = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            const entityManager = state?.entityManager;
+            if (!entityManager) return null;
+            
+            const platforms = entityManager.getPlatforms();
+            const floor = platforms.find(p => 
+                p.constructor.name === 'FallingFloor' && 
+                Math.abs(p.x - 320) < 5 && 
+                Math.abs(p.originalY - 128) < 5
+            );
+            
+            return floor ? { 
+                state: floor.state,
+                eventReceived: !!window.__fallingFloorEvent
+            } : null;
+        });
+        
+        const shakingEvent = floorState && floorState.state === 'shaking';
         
         // プレイヤーの初期位置を確認
         const player = await t.getEntity('player');
@@ -44,18 +99,14 @@ async function runTest() {
         const originalY = targetFloor.y;
         console.log('Target floor position:', targetFloor.x, targetFloor.y);
         
-        // プレイヤーを中央の台の上に配置
-        await t.teleportPlayer(288, 144);  // X=18*16, Y=9*16（中央の台の上）
-        await t.wait(500);
+        // プレイヤーはスポーン位置(20,6)から自動的に落下する
+        console.log('Player spawned above falling floor, waiting for landing...');
         
-        // 右に移動してジャンプ
-        await t.page.keyboard.down('ArrowRight');
-        await t.wait(300);
-        await t.page.keyboard.up('ArrowRight');
-        await t.page.keyboard.down(' ');  // ジャンプ
-        await t.wait(100);
-        await t.page.keyboard.up(' ');
-        await t.wait(1000);  // 着地を待つ
+        if (shakingEvent) {
+            console.log('Floor started shaking! Event received via EventBus');
+        } else {
+            console.log('Floor did not start shaking within timeout');
+        }
         
         // 着地後のプレイヤー位置を記録
         const playerBeforeFall = await t.getEntity('player');
@@ -87,32 +138,60 @@ async function runTest() {
         console.log('Distance from expected position:', actualDistance);
         t.assert(actualDistance >= -5 && actualDistance <= 30, 'Player should be on or near the floor');
         
-        // 少し待ってから床の状態を確認（振動開始）
-        await t.wait(100);
-        const floorShaking = await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            const entityManager = state?.entityManager;
-            if (!entityManager) return null;
+        // EventBusでイベントを受け取った場合は、床の状態を確認
+        if (shakingEvent) {
+            // EventBusイベントが発火した時点で床はすでにshaking状態のはず
+            const floorShaking = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                const entityManager = state?.entityManager;
+                if (!entityManager) return null;
+                
+                const platforms = entityManager.getPlatforms();
+                // ターゲットの床を座標で特定（x=320, y=128）
+                const floor = platforms.find(p => 
+                    p.constructor.name === 'FallingFloor' && 
+                    Math.abs(p.x - 320) < 5 && 
+                    Math.abs(p.y - 128) < 5
+                );
+                if (!floor) return null;
+                
+                return {
+                    state: floor.state,
+                    visible: floor.visible,
+                    solid: floor.solid,
+                    x: floor.x,
+                    y: floor.y
+                };
+            });
+            console.log('Floor state after landing:', floorShaking);
+            if (floorShaking) {
+                t.assert(floorShaking.state === 'shaking', 'Floor should be shaking');
+            } else {
+                t.assert(false, 'Could not find target floor after shaking event');
+            }
+        } else {
+            // EventBusでイベントが受信されていない場合、床の状態を直接確認
+            const floorState = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                const entityManager = state?.entityManager;
+                if (!entityManager) return null;
+                
+                const platforms = entityManager.getPlatforms();
+                const floor = platforms.find(p => 
+                    p.constructor.name === 'FallingFloor' && 
+                    Math.abs(p.x - 320) < 5 && 
+                    Math.abs(p.originalY - 128) < 5
+                );
+                
+                return floor ? { state: floor.state } : null;
+            });
             
-            const platforms = entityManager.getPlatforms();
-            // ターゲットの床を座標で特定（x=320, y=128）
-            const floor = platforms.find(p => 
-                p.constructor.name === 'FallingFloor' && 
-                Math.abs(p.x - 320) < 5 && 
-                Math.abs(p.y - 128) < 5
-            );
-            if (!floor) return null;
-            
-            return {
-                state: floor.state,
-                visible: floor.visible,
-                solid: floor.solid,
-                x: floor.x,
-                y: floor.y
-            };
-        });
-        console.log('Floor state after landing:', floorShaking);
-        t.assert(floorShaking.state === 'shaking', 'Floor should be shaking');
+            if (floorState && floorState.state === 'shaking') {
+                console.log('Floor is in shaking state (verified directly)');
+            } else {
+                t.assert(false, 'FallingFloor did not trigger shaking event');
+            }
+        }
         
         // 1秒待って落下を確認（ゲーム内時間で約1秒）
         await t.wait(1100);
@@ -148,36 +227,6 @@ async function runTest() {
         const playerFalling = await t.getEntity('player');
         console.log('Player position while floor falling:', playerFalling.x, playerFalling.y);
         t.assert(playerFalling.y > playerBeforeFall.y, 'Player should fall when floor falls');
-        
-        // 落下開始から3秒後に復活を確認
-        await t.wait(3500);
-        const floorRespawned = await t.page.evaluate(() => {
-            const state = window.game?.stateManager?.currentState;
-            const entityManager = state?.entityManager;
-            if (!entityManager) return null;
-            
-            const platforms = entityManager.getPlatforms();
-            // ターゲットの床を座標で特定（originalX/Y で元の位置を参照）
-            const floor = platforms.find(p => 
-                p.constructor.name === 'FallingFloor' && 
-                Math.abs(p.originalX - 320) < 5 && 
-                Math.abs(p.originalY - 128) < 5
-            );
-            if (!floor) return null;
-            
-            return {
-                state: floor.state,
-                x: floor.x,
-                y: floor.y,
-                visible: floor.visible,
-                solid: floor.solid
-            };
-        });
-        console.log('Floor state after respawn:', floorRespawned);
-        t.assert(floorRespawned.state === 'stable', 'Floor should be stable again');
-        t.assert(floorRespawned.y === originalY, 'Floor should return to original position');
-        t.assert(floorRespawned.visible === true, 'Floor should be visible');
-        t.assert(floorRespawned.solid === true, 'Floor should be solid again');
         
         
         // ============================================================

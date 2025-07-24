@@ -3,7 +3,6 @@ import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
-import { EventBus } from '../services/EventBus';
 
 export type AIType = 'patrol' | 'chase' | 'idle';
 export type EnemyState = 'idle' | 'walk' | 'hurt' | 'dead';
@@ -27,7 +26,6 @@ export class Enemy extends Entity {
     public facingRight: boolean;
     public canJump: boolean;
     public stompBounceVelocity: number;
-    protected eventBus: EventBus | null;
 
     constructor(x: number, y: number, width: number = 16, height: number = 16) {
         super(x, y, width, height);
@@ -62,9 +60,6 @@ export class Enemy extends Entity {
         }
     }
     
-    setEventBus(eventBus: EventBus): void {
-        this.eventBus = eventBus;
-    }
 
     update(deltaTime: number): void {
         if (!this.active) return;
