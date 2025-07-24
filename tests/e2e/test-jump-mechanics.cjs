@@ -162,17 +162,8 @@ async function runTest() {
         // === PART 4: Spring Bounce Test ===
         console.log('\n--- Part 4: Spring Bounce Test ---');
         
-        // Create a spring for testing
-        console.log('\nCreating spring for bounce test...');
-        await t.page.evaluate(() => {
-            const state = window.game.stateManager.currentState;
-            const Spring = window.Spring;
-            if (Spring && state) {
-                const spring = new Spring(200, 300);
-                spring.initializeInManager(state.entityManager);
-                console.log('Spring created at x=200, y=300');
-            }
-        });
+        // Use existing spring from stage 0-1
+        console.log('\nUsing existing spring from stage...');
         
         // Move player to spring
         await t.page.evaluate(() => {

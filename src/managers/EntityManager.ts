@@ -148,7 +148,17 @@ export class EntityManager {
     }
     
     addItem(item: Entity): void {
+        if ('setEventBus' in item && typeof item.setEventBus === 'function') {
+            item.setEventBus(this.eventBus);
+        }
         this.items.push(item);
+    }
+    
+    addPlatform(platform: Entity): void {
+        if ('setEventBus' in platform && typeof platform.setEventBus === 'function') {
+            platform.setEventBus(this.eventBus);
+        }
+        this.platforms.push(platform);
     }
     
     addProjectile(projectile: Entity): void {
@@ -255,6 +265,12 @@ export class EntityManager {
                 }
             });
             
+            this.platforms.forEach(platform => {
+                if (platform.update) {
+                    platform.update(deltaTime);
+                }
+            });
+            
             this.projectiles = this.projectiles.filter(projectile => {
                 if (projectile.update) {
                     projectile.update(deltaTime);
@@ -357,6 +373,12 @@ export class EntityManager {
     }
 
     renderAll(renderer: PixelRenderer): void {
+        this.platforms.forEach(platform => {
+            if (platform.render) {
+                platform.render(renderer);
+            }
+        });
+        
         this.items.forEach(item => {
             if (item.render) {
                 item.render(renderer);

@@ -47,6 +47,7 @@ export class PhysicsSystem {
     private tileMap: number[][] | null;
     private tileSize: number;
     private collisionPairs: Map<string, boolean>;
+    private platformCollisionPairs: Map<string, boolean>;
 
     constructor() {
         const resourceLoader = ResourceLoader.getInstance();
@@ -82,6 +83,7 @@ export class PhysicsSystem {
         this.tileMap = null;
         this.tileSize = 16;
         this.collisionPairs = new Map();
+        this.platformCollisionPairs = new Map();
     }
     
     get gravity(): number { return this._gravity; }
@@ -108,6 +110,7 @@ export class PhysicsSystem {
     
     clearCollisionPairs(): void {
         this.collisionPairs.clear();
+        this.platformCollisionPairs.clear();
         this.frameCount = 0;
     }
     
@@ -127,7 +130,9 @@ export class PhysicsSystem {
         
         for (const entity of entities) {
             if (entity.active) {
-                this.updateGroundedState(entity);
+                if (!('ignoreTileCollisions' in entity) || !entity.ignoreTileCollisions) {
+                    this.updateGroundedState(entity);
+                }
             }
         }
         for (const entity of entities) {
@@ -141,8 +146,17 @@ export class PhysicsSystem {
 
             entity.x += entity.vx * clampedDeltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
             this.checkCollisionsForEntity(entity, 'horizontal');
+            
+            if (entity.physicsLayer === this.layers.PLAYER) {
+                this.checkPlatformCollisions(entity, entities, 'horizontal');
+            }
             entity.y += entity.vy * clampedDeltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
             this.checkCollisionsForEntity(entity, 'vertical');
+            
+            if (entity.physicsLayer === this.layers.PLAYER) {
+                this.checkPlatformCollisions(entity, entities, 'vertical');
+            }
+            
             this.applyFriction(entity, clampedDeltaTime);
         }
         this.checkEntityCollisions(entities);
@@ -150,6 +164,10 @@ export class PhysicsSystem {
     
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
+        
+        if (entity.constructor.name === 'FallingFloor') {
+            Logger.log(`[PhysicsSystem] Applying gravity to FallingFloor: gravity=${entity.gravity}, grounded=${entity.grounded}, vy=${entity.vy}`);
+        }
         
         const effectiveGravity = this.gravity * (entity.gravityScale || 1.0);
         entity.vy += effectiveGravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
@@ -179,7 +197,72 @@ export class PhysicsSystem {
     checkCollisionsForEntity(entity: PhysicsEntity, axis: 'horizontal' | 'vertical'): void {
         if (!entity.collidable) return;
         if (this.tileMap && entity.physicsLayer !== this.layers.TILE) {
-            this.checkTileCollisions(entity, axis);
+            if (!('ignoreTileCollisions' in entity) || !entity.ignoreTileCollisions) {
+                this.checkTileCollisions(entity, axis);
+            } else if (entity.constructor.name === 'FallingFloor' && axis === 'vertical') {
+                Logger.log(`[PhysicsSystem] FallingFloor skipping tile collision: y=${entity.y}, vy=${entity.vy}, ignoreTileCollisions=${entity.ignoreTileCollisions}`);
+            }
+        }
+    }
+    
+    checkPlatformCollisions(player: PhysicsEntity, entities: PhysicsEntity[], axis: 'horizontal' | 'vertical'): void {
+        const playerBounds = player.getBounds();
+        const currentCollisions = new Set<string>();
+        
+        for (const platform of entities) {
+            if (!platform.active || !platform.collidable || !platform.solid) continue;
+            if (platform.physicsLayer !== this.layers.PLATFORM) continue;
+            
+            const platformBounds = platform.getBounds();
+            
+            if (this.checkAABB(playerBounds, platformBounds)) {
+                const pairKey = `${player.id}-${platform.id}`;
+                currentCollisions.add(pairKey);
+                
+                if (axis === 'vertical') {
+                    if (player.vy > 0) {
+                        const playerPrevY = player.y - player.vy * 0.016 * 60;
+                        const playerPrevBottom = playerPrevY + player.height;
+                        
+                        if (playerPrevBottom <= platformBounds.top + 2) {
+                            player.y = platformBounds.top - player.height;
+                            player.vy = 0;
+                            player.grounded = true;
+                            
+                            if (!this.platformCollisionPairs.has(pairKey)) {
+                                this.platformCollisionPairs.set(pairKey, true);
+                                if ('state' in platform && 'shakeOffset' in platform) {
+                                    Logger.log('[PhysicsSystem] FallingFloor collision detected, calling onCollision');
+                                }
+                                if (platform.onCollision) {
+                                    platform.onCollision({
+                                        other: player,
+                                        side: 'top'
+                                    });
+                                }
+                            }
+                        }
+                    } else if (player.vy < 0) {
+                        player.y = platformBounds.bottom;
+                        player.vy = 0;
+                    }
+                } else if (axis === 'horizontal') {
+                    if (player.vx > 0) {
+                        player.x = platformBounds.left - player.width;
+                    } else if (player.vx < 0) {
+                        player.x = platformBounds.right;
+                    }
+                    player.vx = 0;
+                }
+            }
+        }
+        
+        if (axis === 'vertical') {
+            for (const [pairKey] of this.platformCollisionPairs) {
+                if (pairKey.startsWith(`${player.id}-`) && !currentCollisions.has(pairKey)) {
+                    this.platformCollisionPairs.delete(pairKey);
+                }
+            }
         }
     }
     
@@ -268,6 +351,8 @@ export class PhysicsSystem {
             for (let j = i + 1; j < entities.length; j++) {
                 const entityB = entities[j];
                 if (!entityB.active || !entityB.collidable) continue;
+                
+                
                 if (entityB.physicsLayer && entityA.physicsLayer && 
                     (collisionLayers.includes(entityB.physicsLayer) ||
                      (this.collisionMatrix[entityB.physicsLayer] || []).includes(entityA.physicsLayer))) {
@@ -277,6 +362,15 @@ export class PhysicsSystem {
                     
                     if (this.checkAABB(entityA.getBounds(), entityB.getBounds())) {
                         currentPairs.add(pairKey);
+                        
+                        if (entityA.solid && entityB.solid) {
+                            const aIsPlatform = entityA.physicsLayer === this.layers.PLATFORM;
+                            const bIsPlatform = entityB.physicsLayer === this.layers.PLATFORM;
+                            if (aIsPlatform || bIsPlatform) {
+                                this.resolveSolidCollision(entityA, entityB);
+                            }
+                        }
+                        
                         if (!this.collisionPairs.has(pairKey)) {
                             this.collisionPairs.set(pairKey, true);
                             this.notifyCollision(entityA, entityB);
@@ -335,6 +429,66 @@ export class PhysicsSystem {
         }
         
         return 'none';
+    }
+    
+    resolveSolidCollision(entityA: PhysicsEntity, entityB: PhysicsEntity): void {
+        const aIsPlayer = entityA.physicsLayer === this.layers.PLAYER;
+        const bIsPlayer = entityB.physicsLayer === this.layers.PLAYER;
+        const aIsPlatform = entityA.physicsLayer === this.layers.PLATFORM;
+        const bIsPlatform = entityB.physicsLayer === this.layers.PLATFORM;
+        
+        if ((aIsPlayer && bIsPlatform) || (bIsPlayer && aIsPlatform)) {
+            const player = aIsPlayer ? entityA : entityB;
+            const platform = aIsPlayer ? entityB : entityA;
+            
+            const side = this.getCollisionSide(player, platform);
+            
+            if (side === 'bottom' && player.vy >= 0) {
+                const newY = platform.y - player.height;
+                const adjustment = player.y - newY;
+                if (adjustment > 0.1) {
+                    player.y = newY;
+                    player.vy = 0;
+                }
+                player.grounded = true;
+            } else if (side === 'top' && player.vy < 0) {
+                player.y = platform.y + platform.height;
+                player.vy = 0;
+            } else if (side === 'left' && player.vx > 0) {
+                player.x = platform.x - player.width;
+                player.vx = 0;
+            } else if (side === 'right' && player.vx < 0) {
+                player.x = platform.x + platform.width;
+                player.vx = 0;
+            }
+            return;
+        }
+        
+        const aStatic = !entityA.physicsEnabled || !entityA.gravity;
+        const bStatic = !entityB.physicsEnabled || !entityB.gravity;
+        
+        if (aStatic && bStatic) return;
+        if (!aStatic && !bStatic) return;
+        
+        const movingEntity = aStatic ? entityB : entityA;
+        const staticEntity = aStatic ? entityA : entityB;
+        
+        const side = this.getCollisionSide(movingEntity, staticEntity);
+        
+        if (side === 'bottom') {
+            movingEntity.y = staticEntity.y - movingEntity.height;
+            movingEntity.vy = 0;
+            movingEntity.grounded = true;
+        } else if (side === 'top') {
+            movingEntity.y = staticEntity.y + staticEntity.height;
+            movingEntity.vy = 0;
+        } else if (side === 'left') {
+            movingEntity.x = staticEntity.x + staticEntity.width;
+            movingEntity.vx = 0;
+        } else if (side === 'right') {
+            movingEntity.x = staticEntity.x - movingEntity.width;
+            movingEntity.vx = 0;
+        }
     }
     
     updateGroundedState(entity: PhysicsEntity): void {

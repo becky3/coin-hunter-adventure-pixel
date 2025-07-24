@@ -53,7 +53,10 @@ export class MasterPalette {
      * @returns Color hex string or magenta if undefined
      */
     static getColor(index: number): string {
-        return this.colors[index] || '#FF00FF';
+        if (!(index in this.colors)) {
+            throw new Error(`[MasterPalette] Invalid color index 0x${index.toString(16).toUpperCase()}. Valid indices are: ${Object.keys(this.colors).map(k => '0x' + parseInt(k).toString(16).toUpperCase()).join(', ')}`);
+        }
+        return this.colors[index];
     }
 
     /**

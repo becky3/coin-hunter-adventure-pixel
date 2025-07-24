@@ -4,7 +4,6 @@ import { InputSystem } from '../core/InputSystem';
 import { MusicSystem } from '../audio/MusicSystem.js';
 import { AssetLoader } from '../assets/AssetLoader';
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { EventBus } from '../services/EventBus';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
 import type { CharacterConfig, CharacterAnimationConfig } from '../config/ResourceConfig';
@@ -99,7 +98,6 @@ export class Player extends Entity {
     private inputManager: InputSystem | null;
     private musicSystem: MusicSystem | null;
     private assetLoader: AssetLoader | null;
-    private eventBus: EventBus | null;
     public variableJumpBoost: number;
     private variableJumpBoostMultiplier: number;
     private frameCount: number;
@@ -224,9 +222,6 @@ export class Player extends Entity {
         this.assetLoader = assetLoader;
     }
     
-    setEventBus(eventBus: EventBus): void {
-        this.eventBus = eventBus;
-    }
     
     get health(): number { return this._health; }
     get maxHealth(): number { return this._maxHealth; }

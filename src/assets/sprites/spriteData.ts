@@ -19,6 +19,10 @@ import terrainGoalFlag from './terrain/goal_flag.json';
 import terrainCloudLarge from './terrain/cloud_large.json';
 import terrainCloudSmall from './terrain/cloud_small.json';
 import terrainGroundTile from './terrain/ground_tile.json';
+import terrainFallingFloorNormal from './terrain/falling_floor_normal.json';
+import terrainFallingFloorCrack1 from './terrain/falling_floor_crack1.json';
+import terrainFallingFloorCrack2 from './terrain/falling_floor_crack2.json';
+import terrainFallingFloorBroken from './terrain/falling_floor_broken.json';
 
 import itemsCoinSpin1 from './items/coin_spin1.json';
 import itemsCoinSpin2 from './items/coin_spin2.json';
@@ -76,6 +80,10 @@ export const spriteDataMap: Record<string, unknown> = {
     'terrain/cloud_large': terrainCloudLarge,
     'terrain/cloud_small': terrainCloudSmall,
     'terrain/ground_tile': terrainGroundTile,
+    'terrain/falling_floor_normal': terrainFallingFloorNormal,
+    'terrain/falling_floor_crack1': terrainFallingFloorCrack1,
+    'terrain/falling_floor_crack2': terrainFallingFloorCrack2,
+    'terrain/falling_floor_broken': terrainFallingFloorBroken,
     'items/coin_spin1': itemsCoinSpin1,
     'items/coin_spin2': itemsCoinSpin2,
     'items/coin_spin3': itemsCoinSpin3,

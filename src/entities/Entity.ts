@@ -2,6 +2,7 @@ import type { PixelRenderer } from '../rendering/PixelRenderer';
 import type { SpriteData } from '../types/assetTypes';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 import { EntityAnimationManager } from '../animation/EntityAnimationManager';
+import { EventBus } from '../events/EventBus';
 
 export interface Bounds {
     left: number;
@@ -57,6 +58,7 @@ export abstract class Entity {
     public collidable: boolean;
     public isProjectileTarget: boolean;
     public notifyTileCollision: boolean;
+    public ignoreTileCollisions: boolean;
     
     public currentAnimation: string | null;
     public animationTime: number;
@@ -68,6 +70,8 @@ export abstract class Entity {
     protected entityAnimationManager?: EntityAnimationManager;
     private animationInitialized: boolean = false;
     private animationInitializing: boolean = false;
+    
+    protected eventBus: EventBus | null = null;
 
     constructor(x = 0, y = 0, width = 16, height = 16) {
         this.id = ++entityIdCounter;
@@ -99,6 +103,7 @@ export abstract class Entity {
         this.collidable = true;
         this.isProjectileTarget = false;
         this.notifyTileCollision = false;
+        this.ignoreTileCollisions = false;
         
         this.currentAnimation = null;
         this.animationTime = 0;
@@ -293,6 +298,10 @@ export abstract class Entity {
         if (this.entityAnimationManager) {
             this.entityAnimationManager.setPaletteVariant(variant);
         }
+    }
+    
+    setEventBus(eventBus: EventBus): void {
+        this.eventBus = eventBus;
     }
 
     reset(x: number, y: number): void {
