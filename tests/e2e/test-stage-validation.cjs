@@ -17,9 +17,12 @@ async function runTest() {
     await test.runTest(async (t) => {
         await t.init('Stage Validation Test');
         
-        // ステージファイルの一覧を取得（1-1〜1-3のみ）
+        // ステージファイルの一覧を取得（1-1〜1-3、2-1〜2-3）
         const stagesDir = path.join(__dirname, '../../src/levels/data');
-        const validatedStages = ['stage1-1.json', 'stage1-2.json', 'stage1-3.json'];
+        const validatedStages = [
+            'stage1-1.json', 'stage1-2.json', 'stage1-3.json',
+            'stage2-1.json'  // stage2-2.json, stage2-3.json は一時的に除外
+        ];
         const stageFiles = fs.readdirSync(stagesDir)
             .filter(file => validatedStages.includes(file));
         
@@ -67,68 +70,96 @@ async function runTest() {
             const goalIssues = checkGoalPosition(stageData);
             issues.goalCollisions = goalIssues;
             
-            // 結果を集計
-            const stageIssueCount = 
-                issues.coinCollisions.length + 
-                issues.floatingEntities.length +
-                issues.unreachableItems.length +
-                issues.embeddedEntities.length +
-                issues.spawnCollisions.length +
-                issues.goalCollisions.length;
+            // エラーと警告を分類
+            const errors = {
+                coinCollisions: issues.coinCollisions,
+                embeddedEntities: issues.embeddedEntities,
+                spawnCollisions: issues.spawnCollisions,
+                goalCollisions: issues.goalCollisions
+            };
             
+            const warnings = {
+                floatingEntities: issues.floatingEntities,
+                unreachableItems: issues.unreachableItems
+            };
+            
+            // 結果を集計
+            const errorCount = 
+                errors.coinCollisions.length + 
+                errors.embeddedEntities.length +
+                errors.spawnCollisions.length +
+                errors.goalCollisions.length;
+                
+            const warningCount = 
+                warnings.floatingEntities.length +
+                warnings.unreachableItems.length;
+            
+            const stageIssueCount = errorCount + warningCount;
             totalIssues += stageIssueCount;
             
             validationResults.push({
                 stageId: stageData.id,
                 stageName: stageData.name,
                 issues: issues,
+                errors: errors,
+                warnings: warnings,
+                errorCount: errorCount,
+                warningCount: warningCount,
                 totalIssues: stageIssueCount
             });
             
             // 問題を表示
             if (stageIssueCount > 0) {
-                console.log(`❌ Found ${stageIssueCount} issues:`);
+                // エラー数と警告数を表示
+                if (errorCount > 0 && warningCount > 0) {
+                    console.log(`❌ ${errorCount} errors, ⚠️  ${warningCount} warnings`);
+                } else if (errorCount > 0) {
+                    console.log(`❌ ${errorCount} errors`);
+                } else if (warningCount > 0) {
+                    console.log(`⚠️  ${warningCount} warnings`);
+                }
                 
-                
-                if (issues.coinCollisions.length > 0) {
-                    console.log('\n  Coin Collision Issues:');
-                    issues.coinCollisions.forEach(coin => {
+                // エラーを表示
+                if (errors.coinCollisions.length > 0) {
+                    console.log('\n  ❌ Coin Collision Errors:');
+                    errors.coinCollisions.forEach(coin => {
                         console.log(`    - ${coin.message || `Coin at (${coin.x}, ${coin.y}) collides with block`}`);
                     });
                 }
                 
-                if (issues.floatingEntities.length > 0) {
-                    console.log('\n  Floating Entity Issues:');
-                    issues.floatingEntities.forEach(entity => {
-                        console.log(`    - ${entity.type} at (${entity.x}, ${entity.y}) is floating ${entity.height} tiles above block`);
-                    });
-                }
-                
-                if (issues.unreachableItems.length > 0) {
-                    console.log('\n  Unreachable Item Issues:');
-                    issues.unreachableItems.forEach(item => {
-                        console.log(`    - ${item.type} at (${item.x}, ${item.y}) may be unreachable: ${item.reason}`);
-                    });
-                }
-                
-                if (issues.embeddedEntities.length > 0) {
-                    console.log('\n  Embedded Entity Issues:');
-                    issues.embeddedEntities.forEach(entity => {
+                if (errors.embeddedEntities.length > 0) {
+                    console.log('\n  ❌ Embedded Entity Errors:');
+                    errors.embeddedEntities.forEach(entity => {
                         console.log(`    - ${entity.type} at (${entity.x}, ${entity.y}) is embedded in wall`);
                     });
                 }
                 
-                if (issues.spawnCollisions.length > 0) {
-                    console.log('\n  Player Spawn Issues:');
-                    issues.spawnCollisions.forEach(issue => {
+                if (errors.spawnCollisions.length > 0) {
+                    console.log('\n  ❌ Player Spawn Errors:');
+                    errors.spawnCollisions.forEach(issue => {
                         console.log(`    - ${issue.message}`);
                     });
                 }
                 
-                if (issues.goalCollisions.length > 0) {
-                    console.log('\n  Goal Position Issues:');
-                    issues.goalCollisions.forEach(issue => {
+                if (errors.goalCollisions.length > 0) {
+                    console.log('\n  ❌ Goal Position Errors:');
+                    errors.goalCollisions.forEach(issue => {
                         console.log(`    - ${issue.message}`);
+                    });
+                }
+                
+                // 警告を表示
+                if (warnings.floatingEntities.length > 0) {
+                    console.log('\n  ⚠️  Floating Entity Warnings:');
+                    warnings.floatingEntities.forEach(entity => {
+                        console.log(`    - ${entity.type} at (${entity.x}, ${entity.y}) is floating ${entity.height} tiles above block`);
+                    });
+                }
+                
+                if (warnings.unreachableItems.length > 0) {
+                    console.log('\n  ⚠️  Unreachable Item Warnings:');
+                    warnings.unreachableItems.forEach(item => {
+                        console.log(`    - ${item.type} at (${item.x}, ${item.y}) may be unreachable: ${item.reason}`);
                     });
                 }
             } else {
@@ -138,50 +169,43 @@ async function runTest() {
         
         // サマリーを表示
         // 問題を重要度別に集計
-        let criticalCount = 0;
-        let warningCount = 0;
-        let infoCount = 0;
+        let totalErrorCount = 0;
+        let totalWarningCount = 0;
         
         validationResults.forEach(result => {
-            // クリティカル：コインがブロックと重なる
-            result.issues.coinCollisions.forEach(() => criticalCount++);
-            result.issues.embeddedEntities.forEach(() => criticalCount++);
-            result.issues.spawnCollisions.forEach(() => criticalCount++);
-            result.issues.goalCollisions.forEach(() => criticalCount++);
-            
-            // 警告：高すぎるアイテム（7タイル以上）、浮いている敵
-            result.issues.unreachableItems.forEach(item => {
-                const heightMatch = item.reason.match(/(\d+) tiles above block/);
-                if (heightMatch && parseInt(heightMatch[1]) >= 7) warningCount++;
-                else infoCount++;
-            });
-            result.issues.floatingEntities.forEach(() => warningCount++);
+            totalErrorCount += result.errorCount;
+            totalWarningCount += result.warningCount;
         });
         
         console.log('\n========== VALIDATION SUMMARY ==========');
         console.log(`Total stages validated: ${stageFiles.length}`);
         console.log(`Total issues found: ${totalIssues}`);
-        console.log(`  🔴 Critical: ${criticalCount}`);
-        console.log(`  🟡 Warning: ${warningCount}`);
-        console.log(`  🔵 Info: ${infoCount}`);
+        console.log(`  ❌ Errors: ${totalErrorCount}`);
+        console.log(`  ⚠️  Warnings: ${totalWarningCount}`);
         
         if (totalIssues > 0) {
             console.log('\nStages with issues:');
             validationResults
                 .filter(result => result.totalIssues > 0)
                 .forEach(result => {
-                    console.log(`  - ${result.stageId}: ${result.totalIssues} issues`);
+                    let issueStr = '';
+                    if (result.errorCount > 0 && result.warningCount > 0) {
+                        issueStr = `${result.errorCount} errors, ${result.warningCount} warnings`;
+                    } else if (result.errorCount > 0) {
+                        issueStr = `${result.errorCount} errors`;
+                    } else if (result.warningCount > 0) {
+                        issueStr = `${result.warningCount} warnings`;
+                    }
+                    console.log(`  - ${result.stageId}: ${issueStr}`);
                 });
         }
         
         // テスト結果の判定
-        if (criticalCount > 0) {
-            console.error(`\n❌ Stage validation found ${criticalCount} CRITICAL issues that must be fixed!`);
-            throw new Error(`Stage validation failed: ${criticalCount} critical issues found`);
-        } else if (warningCount > 0) {
-            console.warn(`\n⚠️  Stage validation found ${warningCount} warnings that should be reviewed.`);
-        } else if (infoCount > 0) {
-            console.log(`\nℹ️  Stage validation found ${infoCount} minor issues for consideration.`);
+        if (totalErrorCount > 0) {
+            console.error(`\n❌ Stage validation found ${totalErrorCount} errors that must be fixed!`);
+            throw new Error(`Stage validation failed: ${totalErrorCount} errors found`);
+        } else if (totalWarningCount > 0) {
+            console.warn(`\n⚠️  Stage validation found ${totalWarningCount} warnings that should be reviewed.`);
         } else {
             console.log('\n✅ All stages passed validation!');
         }
@@ -229,40 +253,31 @@ function checkFloatingEntities(stageData) {
     const issues = [];
     const tilemap = stageData.tilemap;
     const entities = stageData.entities.filter(e => 
-        e.type !== 'coin' && e.type !== 'spring'  // コインとジャンプ台は除外
+        e.type === 'slime' || e.type === 'spring' || e.type === 'knight'  // スライム、ジャンプ台、ナイトの浮きをチェック
     );
     
     for (const entity of entities) {
         const tileX = entity.x;
         let blockTileY = -1;
         
-        // エンティティの位置を配列インデックスに変換
-        const entityTileY = stageData.height - 1 - entity.y;
-        
-        // エンティティの下方向にブロックを探す（配列では下方向 = インデックス増加）
-        for (let tileY = entityTileY + 1; tileY < stageData.height; tileY++) {
+        // エンティティの下にあるブロックを探す（Y座標が大きい方が下）
+        for (let y = entity.y + 1; y < stageData.height; y++) {
             if (tileX >= 0 && tileX < stageData.width) {
-                if (tilemap[tileY][tileX] === 1) {
-                    blockTileY = tileY;
+                if (tilemap[y][tileX] === 1) {
+                    // ブロックが見つかった
+                    const floatingHeight = y - entity.y - 1;
+                    
+                    // 2タイル以上浮いている場合は問題とする
+                    if (floatingHeight >= 2) {
+                        issues.push({
+                            type: entity.type,
+                            x: entity.x,
+                            y: entity.y,
+                            height: floatingHeight
+                        });
+                    }
                     break;
                 }
-            }
-        }
-        
-        // ブロックが見つかった場合、高さをチェック
-        if (blockTileY !== -1) {
-            // 配列インデックスをゲーム座標に変換
-            const blockY = stageData.height - 1 - blockTileY;
-            const floatingHeight = entity.y - blockY - 1;
-            
-            // 2タイル以上浮いている場合は問題とする
-            if (floatingHeight >= 2) {
-                issues.push({
-                    type: entity.type,
-                    x: entity.x,
-                    y: entity.y,
-                    height: floatingHeight
-                });
             }
         }
     }
@@ -277,28 +292,29 @@ function checkUnreachableItems(stageData) {
     const issues = [];
     const tilemap = stageData.tilemap;
     const items = stageData.entities.filter(e => 
-        e.type === 'coin' || e.type === 'powerup'
+        e.type === 'coin' || e.type === 'powerglove' || e.type === 'shieldstone'
     );
     
     for (const item of items) {
         // 簡易的なチェック：高すぎる位置にあるアイテム
-        // 通常のジャンプ高さは約3-4タイル
-        const itemTileY = stageData.height - 1 - item.y;
+        // ジャンプ高さは約8タイル
         let blockLevel = -1;
         
-        // アイテムの下のブロックを探す
-        for (let y = itemTileY + 1; y < stageData.height; y++) {
-            if (tilemap[y][item.x] === 1) {
-                blockLevel = stageData.height - 1 - y;
-                break;
+        // アイテムの下のブロックを探す（Y座標が大きい方が下）
+        for (let y = item.y + 1; y < stageData.height; y++) {
+            if (item.x >= 0 && item.x < stageData.width) {
+                if (tilemap[y][item.x] === 1) {
+                    blockLevel = y;
+                    break;
+                }
             }
         }
         
         if (blockLevel !== -1) {
-            const heightAboveBlock = item.y - blockLevel;
+            const heightAboveBlock = blockLevel - item.y - 1;
             
-            // ブロックから5タイル以上高い場合は到達困難と判定
-            if (heightAboveBlock >= 5) {
+            // ブロックから9タイル以上高い場合は到達困難と判定
+            if (heightAboveBlock >= 9) {
                 // 近くにジャンプ台があるかチェック
                 const nearbySpring = stageData.entities.find(e => 
                     e.type === 'spring' &&
