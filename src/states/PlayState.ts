@@ -12,7 +12,7 @@ import { TILE_SIZE } from '../constants/gameConstants';
 import { Logger } from '../utils/Logger';
 import { MusicSystem } from '../audio/MusicSystem';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
-import { AssetLoader, StageType } from '../assets/AssetLoader';
+import { AssetLoader } from '../assets/AssetLoader';
 import { BackgroundRenderer } from '../rendering/BackgroundRenderer';
 import { TileRenderer } from '../rendering/TileRenderer';
 import { PerformanceMonitor } from '../performance/PerformanceMonitor';
@@ -253,12 +253,15 @@ export class PlayState implements GameState {
             throw new Error('No level specified in PlayState parameters');
         }
         
-        const stageType = this.determineStageType(levelName);
-        if (this.game.assetLoader) {
-            this.game.assetLoader.setStageType(stageType);
+        const levelData = await this.gameController.initializeLevel(levelName);
+        
+        if (!levelData.stageType) {
+            throw new Error(`Stage ${levelName} is missing required stageType property`);
         }
         
-        const levelData = await this.gameController.initializeLevel(levelName);
+        if (this.game.assetLoader) {
+            this.game.assetLoader.setStageType(levelData.stageType);
+        }
         
         const dimensions = this.levelManager.getLevelDimensions();
         this.cameraController.setLevelBounds(dimensions.width, dimensions.height);
@@ -691,14 +694,4 @@ export class PlayState implements GameState {
         Logger.log(`Player warped to (${pixelX}, ${pixelY})`);
     }
     
-    private determineStageType(levelName: string): StageType {
-        if (levelName.startsWith('stage1')) {
-            return 'grassland';
-        } else if (levelName.startsWith('stage2')) {
-            return 'cave';
-        } else if (levelName.startsWith('stage3')) {
-            return 'snow';
-        }
-        return 'grassland';
-    }
 }

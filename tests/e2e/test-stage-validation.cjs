@@ -45,7 +45,8 @@ async function runTest() {
                 embeddedEntities: [],
                 spawnCollisions: [],
                 goalCollisions: [],
-                invalidEntityTypes: []
+                invalidEntityTypes: [],
+                invalidPalette: []
             };
             
             // 1. エンティティタイプの検証
@@ -79,13 +80,18 @@ async function runTest() {
             const goalIssues = checkGoalPosition(stageData);
             issues.goalCollisions = goalIssues;
             
+            // 8. パレットの存在チェック
+            const paletteIssues = checkPalette(stageData);
+            issues.invalidPalette = paletteIssues;
+            
             // エラーと警告を分類
             const errors = {
                 invalidEntityTypes: issues.invalidEntityTypes,
                 coinCollisions: issues.coinCollisions,
                 embeddedEntities: issues.embeddedEntities,
                 spawnCollisions: issues.spawnCollisions,
-                goalCollisions: issues.goalCollisions
+                goalCollisions: issues.goalCollisions,
+                invalidPalette: issues.invalidPalette
             };
             
             const warnings = {
@@ -99,7 +105,8 @@ async function runTest() {
                 errors.coinCollisions.length + 
                 errors.embeddedEntities.length +
                 errors.spawnCollisions.length +
-                errors.goalCollisions.length;
+                errors.goalCollisions.length +
+                errors.invalidPalette.length;
                 
             const warningCount = 
                 warnings.floatingEntities.length +
@@ -162,6 +169,13 @@ async function runTest() {
                 if (errors.goalCollisions.length > 0) {
                     console.log('\n  ❌ Goal Position Errors:');
                     errors.goalCollisions.forEach(issue => {
+                        console.log(`    - ${issue.message}`);
+                    });
+                }
+                
+                if (errors.invalidPalette.length > 0) {
+                    console.log('\n  ❌ Invalid Palette Errors:');
+                    errors.invalidPalette.forEach(issue => {
                         console.log(`    - ${issue.message}`);
                     });
                 }
@@ -532,6 +546,33 @@ function checkGoalPosition(stageData) {
                 });
             }
         }
+    }
+    
+    return issues;
+}
+
+/**
+ * ステージタイプのパレットが定義されているかチェック
+ */
+function checkPalette(stageData) {
+    const issues = [];
+    
+    // stageTypeが定義されているか確認
+    if (!stageData.stageType) {
+        issues.push({
+            message: `Stage ${stageData.id} is missing stageType property`
+        });
+        return issues;
+    }
+    
+    // パレットが実際に定義されているかチェック
+    // PALETTE_NAME_TO_MASTER_PALETTEに定義されている必要がある
+    const definedPalettes = ['grassland', 'cave', 'snow'];  // 現在定義されているステージタイプパレット
+    
+    if (!definedPalettes.includes(stageData.stageType)) {
+        issues.push({
+            message: `Stage ${stageData.id} requires "${stageData.stageType}" palette, but it is not defined in PALETTE_NAME_TO_MASTER_PALETTE`
+        });
     }
     
     return issues;

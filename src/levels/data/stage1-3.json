@@ -1,6 +1,7 @@
 {
   "id": "stage1-3",
   "name": "STAGE 1-3",
+  "stageType": "grassland",
   "width": 180,
   "height": 15,
   "tileSize": 16,

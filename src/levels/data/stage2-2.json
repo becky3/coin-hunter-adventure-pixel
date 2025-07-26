@@ -1,6 +1,7 @@
 {
   "id": "stage2-2",
   "name": "STAGE 2-2",
+  "stageType": "cave",
   "width": 200,
   "height": 15,
   "tileSize": 16,

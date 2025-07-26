@@ -1,6 +1,7 @@
 {
   "id": "stage-bullet-test",
   "name": "BULLET WALL TEST",
+  "stageType": "grassland",
   "width": 40,
   "height": 15,
   "tileSize": 16,
