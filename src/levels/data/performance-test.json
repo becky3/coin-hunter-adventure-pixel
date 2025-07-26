@@ -1,6 +1,7 @@
 {
   "id": "performance-test",
   "name": "PERFORMANCE TEST",
+  "stageType": "grassland",
   "width": 20,
   "height": 15,
   "tileSize": 16,

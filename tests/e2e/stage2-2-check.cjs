@@ -91,11 +91,16 @@ async function runTest() {
             const entityManager = state?.entityManager;
             if (!entityManager) return { error: 'EntityManager not found' };
             
-            const allEntities = entityManager.getAll();
+            // 各カテゴリからエンティティを取得
+            const enemies = entityManager.getEnemies() || [];
+            const platforms = entityManager.getPlatforms() || [];
+            const items = entityManager.getItems() || [];
+            
             const fallingFloors = [];
             const spiders = [];
             
-            allEntities.forEach(entity => {
+            // platformsからFallingFloorを探す
+            platforms.forEach(entity => {
                 if (entity.constructor.name === 'FallingFloor') {
                     fallingFloors.push({
                         type: 'FallingFloor',
@@ -107,7 +112,12 @@ async function runTest() {
                         height: entity.height,
                         state: entity.state
                     });
-                } else if (entity.constructor.name === 'Spider') {
+                }
+            });
+            
+            // enemiesからSpiderを探す
+            enemies.forEach(entity => {
+                if (entity.constructor.name === 'Spider') {
                     spiders.push({
                         type: 'Spider',
                         x: entity.x,
@@ -119,7 +129,7 @@ async function runTest() {
             });
             
             return {
-                totalEntities: allEntities.length,
+                totalEntities: enemies.length + platforms.length + items.length,
                 fallingFloors: fallingFloors,
                 spiders: spiders,
                 fallingFloorCount: fallingFloors.length,
@@ -154,10 +164,6 @@ async function runTest() {
             });
         }
         
-        // スクリーンショットを撮る
-        await t.wait(1000);
-        await t.takeScreenshot('stage2-2-initial');
-        
         // プレイヤーを少し動かしてFallingFloorの近くへ
         console.log('\nMoving player to interact with FallingFloor...');
         await t.wait(500);
@@ -171,8 +177,10 @@ async function runTest() {
             const entityManager = state?.entityManager;
             if (!entityManager) return null;
             
+            const platforms = entityManager.getPlatforms() || [];
             const fallingFloors = [];
-            entityManager.getAll().forEach(entity => {
+            
+            platforms.forEach(entity => {
                 if (entity.constructor.name === 'FallingFloor') {
                     fallingFloors.push({
                         x: entity.x,
@@ -196,7 +204,6 @@ async function runTest() {
             });
         }
         
-        await t.takeScreenshot('stage2-2-after-move');
         
         // エラーチェック
         await t.checkForErrors();
@@ -206,7 +213,11 @@ async function runTest() {
 }
 
 // テストを実行
-runTest().catch(error => {
-    console.error('Test failed:', error);
-    process.exit(1);
-});
+if (require.main === module) {
+    runTest().catch(error => {
+        console.error('Test failed:', error);
+        process.exit(1);
+    });
+}
+
+module.exports = runTest;
