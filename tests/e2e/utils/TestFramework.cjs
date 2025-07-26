@@ -13,10 +13,10 @@ class TestFramework {
         this.options = {
             headless: options.headless ?? true,
             devtools: options.devtools ?? false,
-            screenshotPath: options.screenshotPath ?? 'tests/screenshots',
+            screenshotPath: options.screenshotPath ?? path.join(__dirname, '../../screenshots'),
             timeout: options.timeout,
             logToFile: options.logToFile ?? true,
-            logPath: options.logPath ?? 'tests/logs',
+            logPath: options.logPath ?? path.join(__dirname, '../../logs'),
             ...options
         };
         
