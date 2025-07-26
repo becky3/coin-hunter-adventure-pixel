@@ -220,7 +220,7 @@ async function measurePerformanceBaseline() {
         if (csvData) {
             const fs = require('fs');
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const filename = `tests/logs/performance-baseline-${timestamp}.csv`;
+            const filename = path.join(__dirname, '..', 'logs', `performance-baseline-${timestamp}.csv`);
             fs.writeFileSync(filename, csvData);
             console.log(`\n📄 詳細データを保存: ${filename}`);
         }
