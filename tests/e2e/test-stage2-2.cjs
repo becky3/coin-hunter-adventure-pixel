@@ -23,9 +23,13 @@ async function runTest() {
         
         // コンソールエラーを収集
         const consoleErrors = [];
+        const uniqueErrors = new Set();
         t.page.on('console', msg => {
             if (msg.type() === 'error') {
-                consoleErrors.push(msg.text());
+                const errorText = msg.text();
+                consoleErrors.push(errorText);
+                // ユニークなエラーのみ記録
+                uniqueErrors.add(errorText);
             }
         });
         
@@ -36,38 +40,50 @@ async function runTest() {
         // コンソールエラーを表示
         if (consoleErrors.length > 0) {
             console.log(`\n⚠️ Console errors detected: ${consoleErrors.length}`);
-            // 最初の5個だけ表示
-            consoleErrors.slice(0, 5).forEach((err, i) => {
+            console.log(`Unique errors: ${uniqueErrors.size}`);
+            // ユニークなエラーを表示
+            Array.from(uniqueErrors).forEach((err, i) => {
                 console.log(`  [${i}] ${err}`);
             });
-            if (consoleErrors.length > 5) {
-                console.log(`  ... and ${consoleErrors.length - 5} more errors`);
-            }
         }
         
-        // AssetLoaderの状態を確認
-        const assetLoaderInfo = await t.page.evaluate(() => {
-            const assetLoader = window.AssetLoader?.getInstance?.();
-            if (!assetLoader) return { error: 'AssetLoader not found' };
-            
-            // スプライトキャッシュの状態を確認
-            const spriteCache = assetLoader.sprites || {};
-            const terrainSprites = {};
-            
-            Object.keys(spriteCache).forEach(key => {
-                if (key.startsWith('terrain/')) {
-                    terrainSprites[key] = true;
+        // スプライトデータの詳細を確認
+        const spriteDebugInfo = await t.page.evaluate(() => {
+            try {
+                // EntityAnimationManagerから直接確認
+                const state = window.game?.stateManager?.currentState;
+                const entityManager = state?.entityManager;
+                if (!entityManager) return { error: 'EntityManager not found' };
+                
+                // FallingFloorエンティティを探す
+                const fallingFloors = entityManager.getPlatforms().filter(p => 
+                    p.constructor.name === 'FallingFloor'
+                );
+                
+                if (fallingFloors.length === 0) {
+                    return { error: 'No FallingFloor entities found' };
                 }
-            });
-            
-            return {
-                totalCachedSprites: Object.keys(spriteCache).length,
-                terrainSprites: terrainSprites,
-                hasFallingFloor: !!spriteCache['terrain/falling_floor_normal']
-            };
+                
+                // 最初のFallingFloorのアニメーション状態を確認
+                const firstFloor = fallingFloors[0];
+                const animManager = firstFloor.entityAnimationManager;
+                
+                return {
+                    fallingFloorCount: fallingFloors.length,
+                    firstFloorInfo: {
+                        hasAnimationManager: !!animManager,
+                        currentAnimation: animManager?.currentAnimation,
+                        animationState: animManager?.getState?.(),
+                        visible: firstFloor.visible,
+                        position: { x: firstFloor.x, y: firstFloor.y }
+                    }
+                };
+            } catch (e) {
+                return { error: e.message };
+            }
         });
         
-        console.log('\nAssetLoader info:', assetLoaderInfo);
+        console.log('\nSprite debug info:', spriteDebugInfo);
         
         // プレイヤーの存在を確認
         const player = await t.getEntity('player');
