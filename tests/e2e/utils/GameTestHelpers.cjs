@@ -493,15 +493,61 @@ class GameTestHelpers extends TestFramework {
             await this.startNewGame();
         }
         
-        // プレイヤーの存在を確認
-        console.log('Checking player existence...');
-        const gameState = await this.getGameState();
-        console.log('Game state:', JSON.stringify({
-            hasState: !!gameState,
-            hasPlayer: !!gameState?.player,
-            currentState: gameState?.currentState
-        }));
+        // プレイヤーの生成を待つ
+        console.log('Waiting for player creation...');
         
+        // player:createdイベントを待機
+        const playerCreated = await this.page.evaluate(() => {
+            return new Promise((resolve) => {
+                // 既にプレイヤーが存在する場合
+                const existingPlayer = window.game?.stateManager?.currentState?.entityManager?.getPlayer?.();
+                if (existingPlayer) {
+                    console.log('Player already exists');
+                    resolve(true);
+                    return;
+                }
+                
+                // イベントバスを取得してリスナーを設定
+                const checkEventBus = () => {
+                    const state = window.game?.stateManager?.currentState;
+                    const eventBus = state?.entityManager?.getEventBus?.() || state?.eventBus;
+                    
+                    if (eventBus) {
+                        console.log('Setting up player:created listener');
+                        eventBus.once('player:created', () => {
+                            console.log('player:created event received');
+                            resolve(true);
+                        });
+                        
+                        // 念のため、既に作成されていないか再確認
+                        setTimeout(() => {
+                            const player = state?.entityManager?.getPlayer?.();
+                            if (player) {
+                                console.log('Player found after timeout check');
+                                resolve(true);
+                            }
+                        }, 100);
+                    } else {
+                        // EventBusがまだない場合は少し待って再試行
+                        setTimeout(checkEventBus, 50);
+                    }
+                };
+                
+                checkEventBus();
+                
+                // タイムアウト設定（5秒）
+                setTimeout(() => {
+                    console.error('Timeout waiting for player creation');
+                    resolve(false);
+                }, 5000);
+            });
+        });
+        
+        if (!playerCreated) {
+            throw new Error('Player was not created within timeout');
+        }
+        
+        // プレイヤーの存在を最終確認
         await this.assertPlayerExists();
         
         console.log(`✅ Game ready! You can now control the player.`);

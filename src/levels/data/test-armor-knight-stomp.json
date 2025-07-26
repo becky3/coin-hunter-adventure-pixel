@@ -1,6 +1,7 @@
 {
   "id": "test-armor-knight-stomp",
   "name": "ARMOR KNIGHT STOMP TEST",
+  "stageType": "grassland",
   "width": 20,
   "height": 15,
   "tileSize": 16,

@@ -1,6 +1,7 @@
 {
   "id": "stage0-4",
   "name": "ENEMY DEMO",
+  "stageType": "grassland",
   "width": 120,
   "height": 15,
   "tileSize": 16,

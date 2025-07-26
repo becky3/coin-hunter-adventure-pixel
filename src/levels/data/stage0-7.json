@@ -1,6 +1,7 @@
 {
   "id": "stage0-7",
   "name": "HOLE FALLING TEST",
+  "stageType": "grassland",
   "width": 30,
   "height": 15,
   "tileSize": 16,

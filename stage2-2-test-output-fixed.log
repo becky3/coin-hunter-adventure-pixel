@@ -1,0 +1,304 @@
+Log file created: /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/logs/stage-2-2-visibility-test-2025-07-26_09-07-00-JST.log
+
+==================================================
+Starting test: Stage 2-2 Visibility Test
+Time: 2025-07-26_09-07-00-JST (JST)
+==================================================
+
+Test timeout set to: 30000ms
+🚀 Quick starting game with stage: stage2-2
+💉 Error tracking injected
+Navigating to: http://localhost:3000?s=stage2-2&skip_title=true&test=true
+[Browser Console log] [Performance] Page start: 5111.60ms
+[Browser Console log] [Performance] Loading screen visible
+[Browser Console debug] [vite] connecting...
+[Browser Console debug] [vite] connected.
+[Browser Console log] [09:07:06.814] [EntityFactory] Registered entity type: coin
+[Browser Console log] [09:07:06.816] [EntityFactory] Registered entity type: spring
+[Browser Console log] [09:07:06.817] [EntityFactory] Registered entity type: falling_floor
+[Browser Console log] [09:07:06.817] [EntityFactory] Registered entity type: goal
+[Browser Console log] [09:07:06.817] [EntityFactory] Registered entity type: slime
+[Browser Console log] [09:07:06.817] [EntityFactory] Registered entity type: bat
+[Browser Console log] [09:07:06.817] [EntityFactory] Registered entity type: spider
+[Browser Console log] [09:07:06.817] [EntityFactory] Registered entity type: armor_knight
+[Browser Console log] [09:07:06.817] [EntityFactory] Registered entity type: shield_stone
+[Browser Console log] [09:07:06.817] [EntityFactory] Registered entity type: power_glove
+[Browser Console log] [09:07:06.817] [Performance] index.ts loaded: 5323.20ms
+[Browser Console log] [09:07:06.817] [Performance] Document already loaded, starting immediately
+[Browser Console log] [09:07:06.817] [Performance] startGame() called: 5323.60ms
+[Browser Console log] [09:07:06.817] Starting game initialization...
+[Browser Console log] [09:07:06.818] Initializing GameCore...
+[Browser Console log] [09:07:06.818] [Performance] Before gameCore.init(): 5323.90ms
+[Browser Console log] [09:07:06.818] [Performance] GameCore.init() started: 5324.10ms
+[Browser Console log] [09:07:06.818] GameCore: init() started
+[Browser Console log] [09:07:06.818] GameCore: Initializing ResourceLoader...
+[Browser Console log] [09:07:06.818] [Performance] Before ResourceLoader.initialize(): 5324.30ms
+[Browser Console log] [09:07:06.818] [Performance] ResourceLoader.initialize() started: 5324.50ms
+[Browser Console log] [09:07:06.818] [ResourceLoader] Using bundled data for: /src/config/resources/index.json
+[Browser Console log] [09:07:06.819] [Performance] Starting parallel resource loading: 5324.80ms
+[Browser Console log] [09:07:06.819] [ResourceLoader] Using bundled data for: /src/config/resources/sprites.json
+[Browser Console log] [09:07:06.819] [ResourceLoader] Using bundled data for: /src/config/resources/characters.json
+[Browser Console log] [09:07:06.819] [ResourceLoader] Using bundled data for: /src/config/resources/audio.json
+[Browser Console log] [09:07:06.819] [ResourceLoader] Using bundled data for: /src/config/resources/objects.json
+[Browser Console log] [09:07:06.819] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/title.json
+[Browser Console log] [09:07:06.819] [ResourceLoader] Using bundled data for: /src/config/resources/physics.json
+[Browser Console log] [09:07:06.819] [Performance] loadSprites completed in 0.60ms
+[Browser Console log] [09:07:06.819] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/game.json
+[Browser Console log] [09:07:06.819] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/victory.json
+[Browser Console log] [09:07:06.819] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/gameover.json
+[Browser Console log] [09:07:06.820] [ResourceLoader] Using bundled data for: /src/config/resources/se/coin.json
+[Browser Console log] [09:07:06.820] [ResourceLoader] Using bundled data for: /src/config/resources/se/jump.json
+[Browser Console log] [09:07:06.820] [ResourceLoader] Using bundled data for: /src/config/resources/se/damage.json
+[Browser Console log] [09:07:06.820] [ResourceLoader] Using bundled data for: /src/config/resources/se/button.json
+[Browser Console log] [09:07:06.820] [ResourceLoader] Using bundled data for: /src/config/resources/se/powerup.json
+[Browser Console log] [09:07:06.820] [ResourceLoader] Using bundled data for: /src/config/resources/se/gameStart.json
+[Browser Console log] [09:07:06.820] [ResourceLoader] Using bundled data for: /src/config/resources/se/goal.json
+[Browser Console log] [09:07:06.820] [ResourceLoader] Using bundled data for: /src/config/resources/se/enemyDefeat.json
+[Browser Console log] [09:07:06.820] [ResourceLoader] Using bundled data for: /src/config/resources/se/projectile.json
+[Browser Console log] [09:07:06.820] [Performance] ResourceLoader.initialize() completed: 5326.40ms (took 1.90ms)
+[Browser Console log] [09:07:06.820] [Performance] After ResourceLoader.initialize(): 5326.40ms (took 2.10ms)
+[Browser Console log] [09:07:06.820] GameCore: Registering core services...
+[Browser Console log] [09:07:06.820] [Performance] Before registerCoreServices(): 5326.50ms
+[Browser Console log] [09:07:06.823] [PhysicsSystem] Initialized with:
+[Browser Console log] [09:07:06.823]   - Gravity: 0.65
+[Browser Console log] [09:07:06.823]   - Max fall speed: 15
+[Browser Console log] [09:07:06.823]   - Friction: 0.8
+[Browser Console log] [09:07:06.824] [Performance] After registerCoreServices(): 5329.70ms (took 3.20ms)
+[Browser Console log] [09:07:06.824] GameCore: Registering systems...
+[Browser Console log] [09:07:06.824] [Performance] Before registerSystems(): 5329.90ms
+[Browser Console log] [09:07:06.826] [Performance] Before systemManager.initSystems(): 5332.00ms
+[Browser Console log] [09:07:06.826] [Performance] After systemManager.initSystems(): 5332.10ms (took 0.10ms)
+[Browser Console log] [09:07:06.826] [Performance] Before MusicSystem.init(): 5332.30ms
+[Browser Console log] [09:07:06.826] GameCore: Initializing MusicSystem...
+[Browser Console log] [09:07:06.826] [Performance] MusicSystem.init() entered at: 5332.50ms
+[Browser Console log] [09:07:06.826] MusicSystem: init() called
+[Browser Console log] [09:07:06.827] MusicSystem: Skipping AudioContext initialization
+[Browser Console log] [09:07:06.827] [Performance] After MusicSystem.init(): 5332.80ms (took 0.50ms)
+[Browser Console log] [09:07:06.827] GameCore: MusicSystem initialized
+[Browser Console log] [09:07:06.827] [Performance] After registerSystems(): 5332.90ms (took 3.00ms)
+[Browser Console log] [09:07:06.827] GameCore: Registering states...
+[Browser Console log] [09:07:06.827] [Performance] Before registerStates(): 5333.10ms
+[Browser Console log] [09:07:06.828] Initialized optimized background: 40 clouds, 30 trees
+[Browser Console log] [09:07:06.828] [PlayState] Using optimized background renderer
+[Browser Console log] [09:07:06.828] [Performance] After registerStates(): 5334.60ms (took 1.60ms)
+[Browser Console log] [09:07:06.829] GameCore: Initializing debug overlay...
+[Browser Console log] [09:07:06.833] [PerformanceMonitor] Initialized
+[Browser Console log] [09:07:06.833] [LevelLoader] Using bundled data for: /src/levels/data/stages.json
+[Browser Console log] [09:07:06.833] DebugOverlay Loaded 19 stages from stages.json
+[Browser Console log] [09:07:06.836] EnemySpawnDialog Initialized
+[Browser Console log] [09:07:06.836] DebugOverlay Initialized with stage: stage2-2 (index: 11)
+[Browser Console log] [09:07:06.836] GameCore: Hiding loading screen...
+[Browser Console log] [09:07:06.836] [Performance] Hiding loading screen at: 5342.60ms
+[Browser Console log] [09:07:06.836] [Performance] GameCore.init() completed: 5342.70ms (total init took 18.60ms)
+[Browser Console log] [09:07:06.836] GameCore: init() completed
+[Browser Console log] [09:07:06.836] [Performance] After gameCore.init(): 5342.70ms (took 18.80ms)
+[Browser Console log] [09:07:06.837] Starting game loop...
+[Browser Console log] [09:07:06.837] [Performance] Before gameCore.start(): 5342.90ms
+[Browser Console log] [09:07:06.837] GameCore: Starting game loop...
+[Browser Console log] [09:07:06.837] GameCore: Game loop started, running: true
+[Browser Console log] [09:07:06.837] GameCore: Skipping title, starting directly with stage: stage2-2
+[Browser Console log] [09:07:06.837] [PlayState] enter() called with params: JSHandle@object
+[Browser Console log] [09:07:06.838] [PlayState] Starting initialization...
+[Browser Console log] [09:07:06.838] [PlayState] Checking/loading sprites...
+[Browser Console log] [09:07:06.838] [SpriteLoader] Using bundled data for: player/idle
+[Browser Console log] [09:07:06.838] [SpriteLoader] Using bundled data for: player/idle_small
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: player/jump1
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: player/jump2
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: player/jump_small1
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: player/jump_small2
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: terrain/spring
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: terrain/goal_flag
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: enemies/bat_hang
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: enemies/bat_fly1
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: enemies/bat_fly2
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: enemies/spider/spider_idle
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: enemies/spider/spider_walk1
+[Browser Console log] [09:07:06.839] [SpriteLoader] Using bundled data for: enemies/spider/spider_walk2
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: enemies/spider/spider_thread
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: enemies/slime_idle1
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: enemies/slime_idle2
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: enemies/armor_knight_idle
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: enemies/armor_knight_move
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: environment/cloud1
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: environment/cloud2
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: environment/tree1
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: tiles/ground
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: tiles/grass_ground
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: powerups/shield_stone
+[Browser Console log] [09:07:06.840] [SpriteLoader] Using bundled data for: powerups/power_glove
+[Browser Console log] [09:07:06.841] [SpriteLoader] Using bundled data for: projectiles/energy_bullet
+[Browser Console log] [09:07:06.841] [SpriteLoader] Using bundled data for: effects/shield_left
+[Browser Console log] [09:07:06.841] [SpriteLoader] Using bundled data for: effects/shield_right
+[Browser Console log] [09:07:06.841] [SpriteLoader] Using bundled data for: player/walk1
+[Browser Console log] [09:07:06.842] [SpriteLoader] Using bundled data for: player/walk_small1
+[Browser Console log] [09:07:06.842] [SpriteLoader] Using bundled data for: items/coin_spin1
+[Browser Console log] [09:07:06.842] [SpriteLoader] Using bundled data for: enemies/bird_fly1
+[Browser Console log] [09:07:06.842] Game started successfully
+[Browser Console log] [09:07:06.843] [AssetLoader] Loaded sprite player/idle in 4.80ms
+[Browser Console log] [09:07:06.843] [AssetLoader] Loaded sprite player/idle_small in 4.90ms
+[Browser Console log] [09:07:06.844] [AssetLoader] Loaded sprite player/jump1 in 5.10ms
+[Browser Console log] [09:07:06.845] [AssetLoader] Loaded sprite player/jump2 in 5.80ms
+[Browser Console log] [09:07:06.845] [AssetLoader] Loaded sprite player/jump_small1 in 6.10ms
+[Browser Console log] [09:07:06.845] [AssetLoader] Loaded sprite player/jump_small2 in 6.30ms
+[Browser Console log] [09:07:06.845] [AssetLoader] Loaded sprite terrain/spring in 6.50ms
+[Browser Console log] [09:07:06.846] [AssetLoader] Loaded sprite terrain/goal_flag in 6.70ms
+[Browser Console log] [09:07:06.846] [AssetLoader] Loaded sprite enemies/bat_hang in 6.90ms
+[Browser Console log] [09:07:06.846] [AssetLoader] Loaded sprite enemies/bat_fly1 in 7.20ms
+[Browser Console log] [09:07:06.846] [AssetLoader] Loaded sprite enemies/bat_fly2 in 7.10ms
+[Browser Console log] [09:07:06.847] [AssetLoader] Loaded sprite enemies/spider/spider_idle in 7.40ms
+[Browser Console log] [09:07:06.847] [AssetLoader] Loaded sprite enemies/spider/spider_walk1 in 7.50ms
+[Browser Console log] [09:07:06.847] [AssetLoader] Loaded sprite enemies/spider/spider_walk2 in 7.90ms
+[Browser Console log] [09:07:06.848] [AssetLoader] Loaded sprite enemies/spider/spider_thread in 8.10ms
+[Browser Console log] [09:07:06.848] [AssetLoader] Loaded sprite enemies/slime_idle1 in 8.30ms
+[Browser Console log] [09:07:06.848] [AssetLoader] Loaded sprite enemies/slime_idle2 in 8.50ms
+[Browser Console log] [09:07:06.849] [AssetLoader] Loaded sprite enemies/armor_knight_idle in 8.80ms
+[Browser Console log] [09:07:06.849] [AssetLoader] Loaded sprite enemies/armor_knight_move in 8.90ms
+[Browser Console log] [09:07:06.849] [AssetLoader] Loaded sprite environment/cloud1 in 9.30ms
+[Browser Console log] [09:07:06.850] [AssetLoader] Loaded sprite environment/cloud2 in 9.70ms
+[Browser Console log] [09:07:06.850] [AssetLoader] Loaded sprite environment/tree1 in 10.50ms
+[Browser Console log] [09:07:06.851] [AssetLoader] Loaded sprite tiles/ground in 10.70ms
+[Browser Console log] [09:07:06.851] [AssetLoader] Loaded sprite tiles/grass_ground in 10.90ms
+[Browser Console log] [09:07:06.851] [AssetLoader] Loaded sprite powerups/shield_stone in 11.00ms
+[Browser Console log] [09:07:06.852] [AssetLoader] Loaded sprite powerups/power_glove in 11.20ms
+[Browser Console log] [09:07:06.852] [AssetLoader] Loaded sprite projectiles/energy_bullet in 11.40ms
+[Browser Console log] [09:07:06.852] [AssetLoader] Loaded sprite effects/shield_left in 11.60ms
+[Browser Console log] [09:07:06.852] [AssetLoader] Loaded sprite effects/shield_right in 11.30ms
+[Browser Console log] [09:07:06.852] [SpriteLoader] Using bundled data for: player/walk2
+[Browser Console log] [09:07:06.853] [SpriteLoader] Using bundled data for: player/walk_small2
+[Browser Console log] [09:07:06.853] [SpriteLoader] Using bundled data for: items/coin_spin2
+[Browser Console log] [09:07:06.853] [SpriteLoader] Using bundled data for: enemies/bird_fly2
+[Browser Console log] [09:07:06.853] [SpriteLoader] Using bundled data for: player/walk3
+[Browser Console log] [09:07:06.853] [SpriteLoader] Using bundled data for: player/walk_small3
+[Browser Console log] [09:07:06.853] [SpriteLoader] Using bundled data for: items/coin_spin3
+[Browser Console log] [09:07:06.853] [AssetLoader] Loaded animation enemies/slime_idle (2 frames) in 11.50ms
+[Browser Console log] [09:07:06.854] [AssetLoader] Loaded animation enemies/spider/spider_walk (2 frames) in 12.00ms
+[Browser Console log] [09:07:06.854] [AssetLoader] Loaded animation enemies/bat_fly (2 frames) in 12.30ms
+[Browser Console log] [09:07:06.855] [AssetLoader] Loaded animation enemies/bird_fly (2 frames) in 12.70ms
+[Browser Console log] [09:07:06.855] [SpriteLoader] Using bundled data for: player/walk4
+[Browser Console log] [09:07:06.855] [SpriteLoader] Using bundled data for: player/walk_small4
+[Browser Console log] [09:07:06.855] [SpriteLoader] Using bundled data for: items/coin_spin4
+[Browser Console log] [09:07:06.856] [AssetLoader] Loaded animation player/walk (4 frames) in 14.30ms
+[Browser Console log] [09:07:06.856] [AssetLoader] Loaded animation player/walk_small (4 frames) in 14.60ms
+[Browser Console log] [09:07:06.857] [AssetLoader] Loaded animation items/coin_spin (4 frames) in 15.00ms
+[Browser Console log] [09:07:06.857] [PlayState] Sprites loaded successfully in 19.20ms
+[Browser Console log] [09:07:06.857] [AssetLoader] Stage type set to: cave
+[Browser Console log] [09:07:06.857] [LevelLoader] Using bundled data for: /src/levels/data/stages.json
+[Browser Console log] [09:07:06.872] InputSystemAdapter: update called
+[Browser Console warn] [09:07:06.873] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:06.873] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:06.922] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:06.922] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:06.923] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:06.923] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:06.923] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:06.923] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:06.939] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:06.939] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:06.939] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:06.939] [CameraController] update called but no target is set
+✅ Page loaded
+Waiting for game initialization...
+Game object exists: true
+✅ Game initialized
+[Browser Console log] [TestFramework] Player not found. Debug info: JSHandle@object
+✅ Assert: Current state is 'play'
+Clicking at: (100, 100)
+[Browser Console warn] [09:07:06.954] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:06.954] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:06.971] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:06.971] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:06.988] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:06.988] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.004] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.004] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.021] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.021] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.038] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.038] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.054] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.055] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.071] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.071] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.088] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.088] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.104] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.105] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.121] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.121] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.138] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.138] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.154] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.154] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.171] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.171] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.188] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.188] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.204] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.204] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.221] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.221] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.238] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.238] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.254] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.254] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.271] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.271] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.288] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.288] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.304] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.304] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.321] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.321] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.338] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.338] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.354] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.354] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.371] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.371] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.388] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.388] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.404] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.405] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.421] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.421] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.438] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.438] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.454] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.454] [CameraController] update called but no target is set
+Checking player existence...
+[Browser Console log] [TestFramework] Player not found. Debug info: JSHandle@object
+Game state: {"hasState":true,"hasPlayer":false,"currentState":"play"}
+[Browser Console log] [TestFramework] Player not found. Debug info: JSHandle@object
+
+❌ TEST FAILED
+
+Error: Player entity not found
+    at GameTestHelpers.assertPlayerExists (/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/utils/TestFramework.cjs:447:19)
+    at async GameTestHelpers.quickStart (/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/utils/GameTestHelpers.cjs:505:9)
+    at async /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/test-stage2-2.cjs:33:9
+    at async GameTestHelpers.runTest (/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/utils/TestFramework.cjs:421:13)
+    at async runTest (/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/test-stage2-2.cjs:21:5)
+[Browser Console warn] [09:07:07.472] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.472] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.488] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.488] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.504] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.505] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.521] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.521] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.538] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.538] [CameraController] update called but no target is set
+[Browser Console warn] [09:07:07.554] [EntityManager] checkItemCollisions called but player is not set
+[Browser Console warn] [09:07:07.554] [CameraController] update called but no target is set
+📸 Screenshot saved: Stage 2-2 Visibility Test-test-failure-2025-07-26_09-07-07-JST.png
+
+==================================================
+Test completed in: 7.33s
+==================================================
+
+Test failed: Error: Player entity not found
+    at GameTestHelpers.assertPlayerExists (/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/utils/TestFramework.cjs:447:19)
+    at async GameTestHelpers.quickStart (/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/utils/GameTestHelpers.cjs:505:9)
+    at async /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/test-stage2-2.cjs:33:9
+    at async GameTestHelpers.runTest (/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/utils/TestFramework.cjs:421:13)
+    at async runTest (/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/tests/e2e/test-stage2-2.cjs:21:5)

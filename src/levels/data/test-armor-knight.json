@@ -1,6 +1,7 @@
 {
   "id": "test-armor-knight",
   "name": "ARMOR KNIGHT TEST",
+  "stageType": "grassland",
   "width": 30,
   "height": 15,
   "tileSize": 16,

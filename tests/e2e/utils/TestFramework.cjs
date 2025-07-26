@@ -29,6 +29,7 @@ class TestFramework {
         this.originalConsoleError = console.error;
         this.originalConsoleWarn = console.warn;
         this.isClosing = false;  // 終了処理中フラグ
+        this.errorCount = 0;  // エラーカウント
     }
 
     async init(testName) {
@@ -75,13 +76,70 @@ class TestFramework {
         this.page.setDefaultTimeout(this.options.timeout);
         console.log(`Test timeout set to: ${this.options.timeout}ms`);
 
-        // Setup console logging
-        this.page.on('console', msg => {
+        // Setup console logging with detailed error handling
+        this.page.on('console', async msg => {
             const type = msg.type();
             const text = msg.text();
             
             if (type === 'error') {
-                console.error(`[Browser Console ERROR] ${text}`);
+                // For errors, try to get more detailed information
+                try {
+                    const args = msg.args();
+                    if (args.length > 0 && this.errorCount < 5) {  // 最初の5個だけ詳細を取得
+                        this.errorCount++;
+                        
+                        // Use executionContext().evaluate() to properly serialize error objects
+                        // まず、argsの内容を確認
+                        console.log(`[DEBUG] Error #${this.errorCount} args count: ${args.length}`);
+                        console.log(`[DEBUG] Error text: ${text}`);
+                        
+                        // 全てのargの情報を収集
+                        const argDetails = [];
+                        for (let i = 0; i < args.length; i++) {
+                            const arg = args[i];
+                            const detail = {
+                                index: i,
+                                type: arg.constructor.name
+                            };
+                            
+                            try {
+                                // jsonValue()メソッドを試す
+                                detail.jsonValue = await arg.jsonValue().catch(err => `jsonValue failed: ${err.message}`);
+                                
+                                // evaluate()メソッドを試す
+                                detail.evaluated = await arg.evaluate(obj => {
+                                    if (obj instanceof Error) {
+                                        return {
+                                            isError: true,
+                                            name: obj.name,
+                                            message: obj.message,
+                                            stack: obj.stack
+                                        };
+                                    }
+                                    return {
+                                        isError: false,
+                                        type: typeof obj,
+                                        value: String(obj)
+                                    };
+                                }).catch(err => `evaluate failed: ${err.message}`);
+                                
+                            } catch (e) {
+                                detail.error = e.message;
+                            }
+                            
+                            argDetails.push(detail);
+                        }
+                        
+                        console.log(`[DEBUG] All args details:`, JSON.stringify(argDetails, null, 2));
+                        
+                        console.error(`[Browser Console ERROR] ${text}`);
+                    } else {
+                        console.error(`[Browser Console ERROR] ${text}`);
+                    }
+                } catch (e) {
+                    // Fallback to simple text
+                    console.error(`[Browser Console ERROR] ${text}`);
+                }
             } else if (type === 'warning') {
                 console.warn(`[Browser Console WARN] ${text}`);
             } else {

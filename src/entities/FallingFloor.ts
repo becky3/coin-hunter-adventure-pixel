@@ -199,8 +199,6 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addPlatform(this);
         this.physicsLayer = manager.getPhysicsSystem().layers.PLATFORM;
-        
-        Logger.log(`[FallingFloor] Initialized at (${this.x}, ${this.y}), layer: ${this.physicsLayer}, active: ${this.active}, collidable: ${this.collidable}, solid: ${this.solid}`);
     }
     
     /**
@@ -210,22 +208,22 @@ export class FallingFloor extends Entity implements EntityInitializer {
         return [
             {
                 id: 'normal',
-                sprites: ['terrain/falling_floor_normal.json'],
+                sprites: ['terrain/falling_floor_normal'],
                 frameDuration: 0,
                 loop: false
             },
             {
                 id: 'shaking',
                 sprites: [
-                    'terrain/falling_floor_crack1.json',
-                    'terrain/falling_floor_crack2.json'
+                    'terrain/falling_floor_crack1',
+                    'terrain/falling_floor_crack2'
                 ],
                 frameDuration: 100,
                 loop: true
             },
             {
                 id: 'broken',
-                sprites: ['terrain/falling_floor_broken.json'],
+                sprites: ['terrain/falling_floor_broken'],
                 frameDuration: 0,
                 loop: false
             }

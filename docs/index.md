@@ -48,6 +48,8 @@ npm run dev
 
 - [はじめに]({{ site.baseurl }}/getting-started/) - 初めての方はこちらから
 - [開発者向けガイド]({{ site.baseurl }}/development/) - 開発に参加する方向け
+  - [ステージ作成ガイド]({{ site.baseurl }}/development/stage-creation.html) - 新しいステージの作成方法
+  - [レベルデザインガイド]({{ site.baseurl }}/development/level-design-guide.html) - ステージ設計のベストプラクティス
 - [ゲーム仕様]({{ site.baseurl }}/specifications/) - 詳細な仕様書
 - [リソース]({{ site.baseurl }}/resources/) - アセットやデザインガイド
 

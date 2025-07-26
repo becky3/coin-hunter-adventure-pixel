@@ -97,7 +97,16 @@ const slime = await t.getEntity('Slime', { single: true });
 | test-dash-movement.cjs | ダッシュ移動機能（SHIFT+移動） | ~15秒 |
 | test-falling-floor.cjs | 落ちる床ギミック（振動→落下） | ~15秒 |
 | test-fall-damage.cjs | 落下ダメージテスト | ~27秒 |
+| test-stage-validation.cjs | ステージデータのバリデーション | ~2秒 |
 | その他多数 | 各種機能テスト | - |
+
+### 手動実行専用テスト
+
+以下のテストは `npm test` に含まれません：
+
+| ファイル名 | 内容 | 実行時間 |
+|-----------|------|----------|
+| stage2-2-check.cjs | Stage 2-2の動作確認（FallingFloor、Spider） | ~9秒 |
 
 ## 新しいテストを追加する手順
 
@@ -134,3 +143,5 @@ npm run test:claude  # タイムアウト10分で実行
 
 - [GameTestHelpers.cjs](../../tests/e2e/utils/GameTestHelpers.cjs) - ヘルパーメソッドの実装
 - [test-simple-quickstart.cjs](../../tests/e2e/test-simple-quickstart.cjs) - 推奨参考実装
+- [ステージ作成ガイド]({{ site.baseurl }}/development/stage-creation.html) - ステージ作成とバリデーション
+- [レベルデザインガイド]({{ site.baseurl }}/development/level-design-guide.html) - ステージ設計のベストプラクティス

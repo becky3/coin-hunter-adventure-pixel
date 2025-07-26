@@ -33,6 +33,8 @@ import stage1_1 from '../levels/data/stage1-1.json';
 import stage1_2 from '../levels/data/stage1-2.json';
 import stage1_3 from '../levels/data/stage1-3.json';
 import stage2_1 from '../levels/data/stage2-1.json';
+import stage2_2 from '../levels/data/stage2-2.json';
+import stage2_3 from '../levels/data/stage2-3.json';
 import level1 from '../levels/data/level1.json';
 import performanceTest from '../levels/data/performance-test.json';
 import stageBulletTest from '../levels/data/stage-bullet-test.json';
@@ -79,6 +81,8 @@ export const bundledStageData: Record<string, unknown> = {
     '/src/levels/data/stage1-2.json': stage1_2,
     '/src/levels/data/stage1-3.json': stage1_3,
     '/src/levels/data/stage2-1.json': stage2_1,
+    '/src/levels/data/stage2-2.json': stage2_2,
+    '/src/levels/data/stage2-3.json': stage2_3,
     '/src/levels/data/level1.json': level1,
     '/src/levels/data/performance-test.json': performanceTest,
     '/src/levels/data/stage-bullet-test.json': stageBulletTest,

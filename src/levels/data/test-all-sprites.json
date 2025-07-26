@@ -1,6 +1,7 @@
 {
   "id": "test-all-sprites",
   "name": "SPRITE TEST",
+  "stageType": "grassland",
   "width": 40,
   "height": 15,
   "tileSize": 16,

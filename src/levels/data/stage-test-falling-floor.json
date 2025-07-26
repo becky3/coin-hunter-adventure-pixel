@@ -1,6 +1,7 @@
 {
   "id": "stage-test-falling-floor",
   "name": "FALLING TEST",
+  "stageType": "grassland",
   "width": 60,
   "height": 15,
   "tileSize": 16,
