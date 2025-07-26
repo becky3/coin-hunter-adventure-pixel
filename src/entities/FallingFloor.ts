@@ -199,8 +199,6 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addPlatform(this);
         this.physicsLayer = manager.getPhysicsSystem().layers.PLATFORM;
-        
-        Logger.log(`[FallingFloor] Initialized at (${this.x}, ${this.y}), layer: ${this.physicsLayer}, active: ${this.active}, collidable: ${this.collidable}, solid: ${this.solid}`);
     }
     
     /**

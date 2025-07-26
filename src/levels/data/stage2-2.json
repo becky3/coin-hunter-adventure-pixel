@@ -1,17 +1,17 @@
 {
   "id": "stage2-2",
-  "name": "STAGE 2-2 UNSTABLE GROUND",
+  "name": "STAGE 2-2",
   "width": 200,
   "height": 15,
   "tileSize": 16,
   "backgroundColor": 1,
   "playerSpawn": {
     "x": 2,
-    "y": 12
+    "y": 10
   },
   "goal": {
     "x": 197,
-    "y": 12
+    "y": 10
   },
   "timeLimit": 350,
   "tilemap": [
@@ -3055,30 +3055,30 @@
     {
       "type": "coin",
       "x": 5,
-      "y": 11
+      "y": 10
     },
     {
       "type": "coin",
       "x": 6,
-      "y": 11
+      "y": 10
     },
     {
       "type": "coin",
       "x": 7,
-      "y": 11
+      "y": 10
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 10,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 11,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 12,
       "y": 11
     },
@@ -3098,32 +3098,32 @@
       "y": 12
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 18,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 19,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 20,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 22,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 23,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 24,
       "y": 11
     },
@@ -3143,27 +3143,27 @@
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 26,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 27,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 28,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 30,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 31,
       "y": 11
     },
@@ -3173,22 +3173,22 @@
       "y": 1
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 33,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 34,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 35,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 36,
       "y": 11
     },
@@ -3208,82 +3208,82 @@
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 38,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 39,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 40,
       "y": 11
     },
     {
-      "type": "powerglove",
+      "type": "power_glove",
       "x": 42,
       "y": 12
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 44,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 45,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 46,
       "y": 11
     },
     {
       "type": "coin",
       "x": 48,
-      "y": 12
+      "y": 10
     },
     {
       "type": "coin",
       "x": 49,
-      "y": 12
+      "y": 10
     },
     {
       "type": "coin",
       "x": 50,
-      "y": 12
+      "y": 10
     },
     {
       "type": "coin",
       "x": 51,
-      "y": 12
+      "y": 10
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 52,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 53,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 54,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 55,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 56,
       "y": 11
     },
@@ -3293,17 +3293,17 @@
       "y": 1
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 58,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 59,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 60,
       "y": 11
     },
@@ -3313,17 +3313,17 @@
       "y": 1
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 62,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 63,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 64,
       "y": 11
     },
@@ -3343,42 +3343,42 @@
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 66,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 67,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 68,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 69,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 71,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 72,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 73,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 74,
       "y": 11
     },
@@ -3393,27 +3393,27 @@
       "y": 1
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 76,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 77,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 78,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 79,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 80,
       "y": 11
     },
@@ -3448,37 +3448,37 @@
       "y": 12
     },
     {
-      "type": "shieldstone",
+      "type": "shield_stone",
       "x": 92,
       "y": 12
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 94,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 95,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 96,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 97,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 98,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 99,
       "y": 11
     },
@@ -3493,32 +3493,32 @@
       "y": 1
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 101,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 102,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 103,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 105,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 106,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 107,
       "y": 11
     },
@@ -3553,22 +3553,22 @@
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 109,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 110,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 111,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 112,
       "y": 11
     },
@@ -3583,52 +3583,52 @@
       "y": 1
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 114,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 115,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 116,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 117,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 118,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 120,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 121,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 122,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 123,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 124,
       "y": 11
     },
@@ -3658,17 +3658,17 @@
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 126,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 127,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 128,
       "y": 11
     },
@@ -3693,22 +3693,22 @@
       "y": 12
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 137,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 138,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 139,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 140,
       "y": 11
     },
@@ -3718,42 +3718,42 @@
       "y": 1
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 142,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 143,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 144,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 145,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 147,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 148,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 149,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 150,
       "y": 11
     },
@@ -3778,27 +3778,27 @@
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 152,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 153,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 154,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 155,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 156,
       "y": 11
     },
@@ -3808,42 +3808,42 @@
       "y": 1
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 158,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 159,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 160,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 161,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 163,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 164,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 165,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 166,
       "y": 11
     },
@@ -3853,57 +3853,57 @@
       "y": 1
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 168,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 169,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 170,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 171,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 172,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 174,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 175,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 176,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 177,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 178,
       "y": 11
     },
     {
-      "type": "fallingfloor",
+      "type": "falling_floor",
       "x": 179,
       "y": 11
     },

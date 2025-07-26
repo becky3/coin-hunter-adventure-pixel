@@ -21,7 +21,7 @@ async function runTest() {
         const stagesDir = path.join(__dirname, '../../src/levels/data');
         const validatedStages = [
             'stage1-1.json', 'stage1-2.json', 'stage1-3.json',
-            'stage2-1.json'  // stage2-2.json, stage2-3.json は一時的に除外
+            'stage2-1.json', 'stage2-2.json'  // stage2-3.json は一時的に除外
         ];
         const stageFiles = fs.readdirSync(stagesDir)
             .filter(file => validatedStages.includes(file));
@@ -36,6 +36,7 @@ async function runTest() {
             const stageData = JSON.parse(fs.readFileSync(stagePath, 'utf8'));
             
             console.log(`\n=== Validating ${stageData.id} (${stageData.name}) ===`);
+            console.log(`Total entities: ${stageData.entities.length}`);
             
             const issues = {
                 coinCollisions: [],
@@ -43,8 +44,16 @@ async function runTest() {
                 unreachableItems: [],
                 embeddedEntities: [],
                 spawnCollisions: [],
-                goalCollisions: []
+                goalCollisions: [],
+                invalidEntityTypes: []
             };
+            
+            // 1. エンティティタイプの検証
+            const entityTypeIssues = checkEntityTypes(stageData);
+            issues.invalidEntityTypes = entityTypeIssues;
+            if (entityTypeIssues.length > 0) {
+                console.log(`Found ${entityTypeIssues.length} invalid entity types`);
+            }
             
             // 2. コイン配置チェック（ブロックとの衝突）
             const coinIssues = checkCoinPlacements(stageData);
@@ -72,6 +81,7 @@ async function runTest() {
             
             // エラーと警告を分類
             const errors = {
+                invalidEntityTypes: issues.invalidEntityTypes,
                 coinCollisions: issues.coinCollisions,
                 embeddedEntities: issues.embeddedEntities,
                 spawnCollisions: issues.spawnCollisions,
@@ -85,6 +95,7 @@ async function runTest() {
             
             // 結果を集計
             const errorCount = 
+                errors.invalidEntityTypes.length +
                 errors.coinCollisions.length + 
                 errors.embeddedEntities.length +
                 errors.spawnCollisions.length +
@@ -120,6 +131,13 @@ async function runTest() {
                 }
                 
                 // エラーを表示
+                if (errors.invalidEntityTypes.length > 0) {
+                    console.log('\n  ❌ Invalid Entity Type Errors:');
+                    errors.invalidEntityTypes.forEach(entity => {
+                        console.log(`    - Entity at (${entity.x}, ${entity.y}) has invalid type: "${entity.type}" (should be "${entity.expected}")`);
+                    });
+                }
+                
                 if (errors.coinCollisions.length > 0) {
                     console.log('\n  ❌ Coin Collision Errors:');
                     errors.coinCollisions.forEach(coin => {
@@ -212,6 +230,42 @@ async function runTest() {
     });
 }
 
+/**
+ * エンティティタイプの妥当性をチェック
+ */
+function checkEntityTypes(stageData) {
+    const issues = [];
+    
+    // EntityFactoryで認識される有効なエンティティタイプ
+    const validTypes = [
+        'coin', 'spring', 'falling_floor', 'goal', 
+        'slime', 'bat', 'spider', 'armor_knight', 
+        'shield_stone', 'power_glove'
+    ];
+    
+    // 間違いやすいタイプのマッピング
+    const typeMapping = {
+        'fallingfloor': 'falling_floor',
+        'shieldstone': 'shield_stone',
+        'powerglove': 'power_glove',
+        'armorKnight': 'armor_knight',
+        'armor-knight': 'armor_knight'
+    };
+    
+    for (const entity of stageData.entities) {
+        if (!validTypes.includes(entity.type)) {
+            const expected = typeMapping[entity.type] || 'unknown';
+            issues.push({
+                type: entity.type,
+                expected: expected,
+                x: entity.x,
+                y: entity.y
+            });
+        }
+    }
+    
+    return issues;
+}
 
 /**
  * コインがブロックと重なっていないかチェック

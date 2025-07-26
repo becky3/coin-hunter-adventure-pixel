@@ -1,6 +1,6 @@
 {
   "id": "stage2-1",
-  "name": "STAGE 2-1 CAVE ENTRANCE",
+  "name": "STAGE 2-1",
   "width": 180,
   "height": 15,
   "tileSize": 16,
@@ -2818,7 +2818,7 @@
       "y": 1
     },
     {
-      "type": "powerglove",
+      "type": "power_glove",
       "x": 58,
       "y": 11
     },
@@ -2938,7 +2938,7 @@
       "y": 1
     },
     {
-      "type": "shieldstone",
+      "type": "shield_stone",
       "x": 128,
       "y": 11
     },

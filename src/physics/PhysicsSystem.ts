@@ -165,9 +165,6 @@ export class PhysicsSystem {
     applyGravity(entity: PhysicsEntity, deltaTime: number): void {
         if (!entity.gravity || entity.grounded) return;
         
-        if (entity.constructor.name === 'FallingFloor') {
-            Logger.log(`[PhysicsSystem] Applying gravity to FallingFloor: gravity=${entity.gravity}, grounded=${entity.grounded}, vy=${entity.vy}`);
-        }
         
         const effectiveGravity = this.gravity * (entity.gravityScale || 1.0);
         entity.vy += effectiveGravity * deltaTime * 60 * GAME_CONSTANTS.GLOBAL_SPEED_MULTIPLIER;
@@ -199,8 +196,6 @@ export class PhysicsSystem {
         if (this.tileMap && entity.physicsLayer !== this.layers.TILE) {
             if (!('ignoreTileCollisions' in entity) || !entity.ignoreTileCollisions) {
                 this.checkTileCollisions(entity, axis);
-            } else if (entity.constructor.name === 'FallingFloor' && axis === 'vertical') {
-                Logger.log(`[PhysicsSystem] FallingFloor skipping tile collision: y=${entity.y}, vy=${entity.vy}, ignoreTileCollisions=${entity.ignoreTileCollisions}`);
             }
         }
     }

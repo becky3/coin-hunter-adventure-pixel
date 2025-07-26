@@ -44,8 +44,6 @@ export class EntityFactory {
      * Create an entity of the specified type
      */
     static create(type: string, x: number, y: number): Entity | null {
-        Logger.log(`[EntityFactory] Attempting to create entity: ${type} at (${x}, ${y})`);
-        Logger.log('[EntityFactory] Registered types:', EntityFactory.getRegisteredTypes());
         
         const factory = EntityFactory.factories.get(type);
         if (!factory) {
@@ -56,7 +54,6 @@ export class EntityFactory {
         
         try {
             const entity = factory(x, y);
-            Logger.log(`[EntityFactory] Created ${type} at (${x}, ${y})`);
             return entity;
         } catch (error) {
             Logger.error(`[EntityFactory] Failed to create ${type}:`, error);

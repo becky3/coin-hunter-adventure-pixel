@@ -180,8 +180,6 @@ export class EntityManager {
         
         this.eventBus.emit('player:created', { player: this.player });
         
-        Logger.log(`[EntityManager] Player created: ${this.player ? 'success' : 'failed'}`);
-        
         return this.player;
     }
 
@@ -192,7 +190,6 @@ export class EntityManager {
     }
 
     createEntity(config: EntityConfig): Entity | null {
-        Logger.log(`[EntityManager] Creating entity: type=${config.type}, tile=(${config.x}, ${config.y})`);
         
         const tileMap = this.physicsSystem.tileMap;
         if (tileMap && tileMap[config.y] && tileMap[config.y][config.x] === 1) {
@@ -202,7 +199,6 @@ export class EntityManager {
         const pixelX = config.x * TILE_SIZE;
         const pixelY = config.y * TILE_SIZE;
         
-        Logger.log(`[EntityManager] Entity pixel position: (${pixelX}, ${pixelY})`);
         
         const entity = EntityFactory.create(config.type, pixelX, pixelY);
         if (!entity) {
@@ -210,7 +206,6 @@ export class EntityManager {
             return null;
         }
         
-        Logger.log(`[EntityManager] Entity created successfully: ${config.type}`);
         this.postProcessEntity(entity, config.type);
         
         return entity;
