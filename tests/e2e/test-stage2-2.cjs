@@ -21,17 +21,9 @@ async function runTest() {
     await test.runTest(async (t) => {
         await t.init('Stage 2-2 Visibility Test');
         
-        // コンソールエラーを収集
+        // コンソールエラーを収集（TestFrameworkの詳細エラーハンドリングを利用）
         const consoleErrors = [];
         const uniqueErrors = new Set();
-        t.page.on('console', msg => {
-            if (msg.type() === 'error') {
-                const errorText = msg.text();
-                consoleErrors.push(errorText);
-                // ユニークなエラーのみ記録
-                uniqueErrors.add(errorText);
-            }
-        });
         
         // Stage 2-2をロード
         await t.quickStart('stage2-2');
