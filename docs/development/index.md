@@ -9,15 +9,24 @@ Coin Hunter Adventure Pixelの開発に参加する方向けのドキュメン�
 
 ## 目次
 
+### 基本ガイド
 1. [開発ガイドライン]({{ site.baseurl }}/development/guidelines.html) - コーディング規約とベストプラクティス
 2. [コメントルール]({{ site.baseurl }}/development/comment-rules.html) - ESLintによるコメント規約
 3. [アーキテクチャ]({{ site.baseurl }}/development/architecture.html) - システム設計と構造
-4. [アニメーションシステム]({{ site.baseurl }}/development/animation-system.html) - 統一アニメーションシステム
-5. [物理システム]({{ site.baseurl }}/development/physics-system.html) - 物理演算とパラメータ設定
-6. [マネージャーAPI]({{ site.baseurl }}/development/managers.html) - 主要マネージャークラスのAPI
-7. [テストガイド]({{ site.baseurl }}/development/testing.html) - テストの書き方と実行方法、既存テスト一覧
+4. [テストガイド]({{ site.baseurl }}/development/testing.html) - テストの書き方と実行方法、既存テスト一覧
+
+### システム実装
+5. [アニメーションシステム]({{ site.baseurl }}/development/animation-system.html) - 統一アニメーションシステム
+6. [物理システム]({{ site.baseurl }}/development/physics-system.html) - 物理演算とパラメータ設定
+7. [マネージャーAPI]({{ site.baseurl }}/development/managers.html) - 主要マネージャークラスのAPI
+
+### ゲーム要素実装
 8. [敵キャラクター実装]({{ site.baseurl }}/development/enemies.html) - 敵の実装方法と仕様
 9. [パワーアップシステム]({{ site.baseurl }}/development/powerup-system.html) - パワーアップの実装方法と既存のパワーアップ
+
+### ステージ開発
+10. [ステージ作成ガイド]({{ site.baseurl }}/development/stage-creation.html) - 新しいステージを作成する手順
+11. [レベルデザインガイド]({{ site.baseurl }}/development/level-design-guide.html) - ステージ設計のベストプラクティス
 
 ## 開発の流れ
 
