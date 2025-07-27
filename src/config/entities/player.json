@@ -2,6 +2,7 @@
   "physics": {
     "width": 14,
     "height": 32,
+    "physicsLayer": "player",
     "smallWidth": 14,
     "smallHeight": 16,
     "speed": 1.755,

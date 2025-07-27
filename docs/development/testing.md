@@ -14,7 +14,7 @@ E2Eテストを書く最も簡単な方法は、`test-simple-quickstart.cjs` を
 
 ```bash
 # Claudeでの実行（タイムアウト10分設定）
-npm run test:claude
+npm run test:claude  # 古いログとスクリーンショットを自動削除
 
 # ローカルでの実行
 npm test  # 全テストを並列実行（約80秒）
@@ -80,7 +80,7 @@ const slime = await t.getEntity('Slime', { single: true });
 - `getLives()` - ライフ数取得
 - `getStageInfo()` - ステージ情報取得
 
-## テストファイル一覧
+## E2Eテストファイル一覧
 
 | ファイル名 | 内容 | 実行時間 |
 |-----------|------|----------|
@@ -134,6 +134,10 @@ const slime = await t.getEntity('Slime', { single: true });
 ```bash
 npm run test:claude  # タイムアウト10分で実行
 ```
+
+**注意**: `test:claude`コマンドは以下の機能を含みます：
+- `tests/logs/`ディレクトリの古いログファイルを自動削除
+- `tests/screenshots/`ディレクトリの古いスクリーンショットを自動削除
 
 ### よくある問題
 - **タイムアウト**: 個別テストで原因を特定

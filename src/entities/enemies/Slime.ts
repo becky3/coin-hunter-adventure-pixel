@@ -31,10 +31,7 @@ export class Slime extends Enemy implements EntityInitializer {
             throw new Error('Failed to load slime configuration');
         }
         
-        const width = slimeConfig.physics.width;
-        const height = slimeConfig.physics.height;
-        
-        super(x, y, width, height);
+        super(x, y, slimeConfig);
         
         this.maxHealth = slimeConfig.stats.maxHealth;
         this.health = this.maxHealth;
@@ -93,7 +90,6 @@ export class Slime extends Enemy implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         this.setEventBus(manager.getEventBus());
         manager.addEnemy(this);
-        this.physicsLayer = manager.getPhysicsSystem().layers.ENEMY;
     }
     
     /**

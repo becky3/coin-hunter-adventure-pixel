@@ -26,8 +26,7 @@ export class ShieldStone extends PowerUpItem {
         super(
             x, 
             y, 
-            config.physics.width, 
-            config.physics.height, 
+            config,
             PowerUpType.SHIELD_STONE,
             config.properties.floatSpeed,
             config.properties.floatAmplitude

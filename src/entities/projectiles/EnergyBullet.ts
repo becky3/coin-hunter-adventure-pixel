@@ -5,6 +5,7 @@ import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PowerGloveConfig } from '../../config/PowerGloveConfig';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import type { BaseEntityConfig } from '../../config/ResourceConfig';
 
 /**
  * Energy bullet projectile for ranged attacks
@@ -19,7 +20,20 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     private originY: number;
 
     constructor(x: number, y: number, direction: number, speed: number) {
-        super(x, y, PowerGloveConfig.bulletWidth, PowerGloveConfig.bulletHeight);
+        const config: BaseEntityConfig = {
+            type: 'projectile',
+            animations: {},
+            physics: {
+                width: PowerGloveConfig.bulletWidth,
+                height: PowerGloveConfig.bulletHeight,
+                solid: false,
+                physicsLayer: 'projectile'
+            },
+            properties: {},
+            stats: {}
+        };
+        
+        super(x, y, config);
         
         this.vx = direction * speed;
         this.vy = 0;
@@ -118,13 +132,6 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         Logger.log('[EnergyBullet] Initializing in EntityManager');
         manager.addProjectile(this);
-        const physicsSystem = manager.getPhysicsSystem();
-        if (physicsSystem) {
-            Logger.log('[EnergyBullet] Setting physics layer');
-            this.physicsLayer = physicsSystem.layers.PROJECTILE || physicsSystem.layers.TILE;
-        } else {
-            Logger.warn('[EnergyBullet] No physics system available');
-        }
     }
     
     /**

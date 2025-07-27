@@ -38,10 +38,7 @@ export class Coin extends Entity implements EntityInitializer {
             throw new Error('Failed to load coin configuration');
         }
         
-        const width = coinConfig.physics.width;
-        const height = coinConfig.physics.height;
-        
-        super(x, y, width, height);
+        super(x, y, coinConfig);
         
         this.gravity = false;
         this.physicsEnabled = false;

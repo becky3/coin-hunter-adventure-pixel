@@ -2,6 +2,7 @@
   "physics": {
     "width": 16,
     "height": 16,
+    "physicsLayer": "enemy",
     "moveSpeed": 0.25,
     "jumpHeight": 5,
     "jumpInterval": 1000,

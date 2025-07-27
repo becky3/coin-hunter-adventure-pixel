@@ -2,6 +2,8 @@ import type { PixelRenderer } from '../rendering/PixelRenderer';
 import type { AnimationDefinition, EntityPaletteDefinition, SpriteData } from '../types/animationTypes';
 import { EntityAnimationManager } from '../animation/EntityAnimationManager';
 import { EventBus } from '../services/EventBus';
+import { PhysicsLayer, stringToPhysicsLayer } from '../physics/PhysicsSystem';
+import type { BaseEntityConfig } from '../config/ResourceConfig';
 
 export interface Bounds {
     left: number;
@@ -48,6 +50,7 @@ export abstract class Entity {
     public maxFallSpeed: number;
     public friction: number;
     public physicsEnabled: boolean;
+    public physicsLayer: PhysicsLayer;
     
     public active: boolean;
     public visible: boolean;
@@ -72,14 +75,16 @@ export abstract class Entity {
     
     protected eventBus: EventBus | null = null;
 
-    constructor(x = 0, y = 0, width = 16, height = 16) {
+    constructor(x: number, y: number, config: BaseEntityConfig) {
         this.id = ++entityIdCounter;
         
         this.x = x;
         this.y = y;
         
-        this.width = width;
-        this.height = height;
+        this.width = config.physics.width;
+        this.height = config.physics.height;
+        
+        this.physicsLayer = stringToPhysicsLayer(config.physics.physicsLayer);
         
         this.vx = 0;
         this.vy = 0;

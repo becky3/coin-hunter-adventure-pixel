@@ -1,3 +1,19 @@
+import { PhysicsLayer } from '../physics/PhysicsSystem';
+
+export interface BasePhysicsConfig {
+  width: number;
+  height: number;
+  physicsLayer: PhysicsLayer;
+}
+
+export interface BaseStatsConfig {
+  [key: string]: unknown;
+}
+
+export interface BaseEntityConfig {
+  physics: BasePhysicsConfig;
+}
+
 export interface SpriteConfig {
   name: string;
   type: string;
@@ -21,19 +37,10 @@ export interface SpritesConfig {
   };
 }
 
-export interface CharacterPhysicsConfig {
-  width: number;
-  height: number;
-  speed?: number;
-  jumpPower?: number;
-  minJumpTime?: number;
-  maxJumpTime?: number;
-  moveSpeed?: number;
-  jumpHeight?: number;
-  jumpInterval?: number;
-  airResistance?: number;
-  gravityScale?: number;
-  maxFallSpeed?: number;
+export interface CharacterPhysicsConfig extends BasePhysicsConfig {
+  airResistance: number;
+  gravityScale: number;
+  maxFallSpeed: number;
 }
 
 export interface CharacterStatsConfig {
@@ -48,7 +55,7 @@ export interface CharacterAnimationConfig {
   frameCount: number;
 }
 
-export interface CharacterConfig {
+export interface CharacterConfig extends BaseEntityConfig {
   physics: CharacterPhysicsConfig;
   stats: CharacterStatsConfig;
   spawn?: {
@@ -97,9 +104,7 @@ export interface ObjectConfig {
   };
 }
 
-export interface PlayerPhysicsConfig {
-  width: number;
-  height: number;
+export interface PlayerPhysicsConfig extends CharacterPhysicsConfig {
   smallWidth: number;
   smallHeight: number;
   speed: number;
@@ -108,15 +113,12 @@ export interface PlayerPhysicsConfig {
   variableJumpBoostMultiplier: number;
   minJumpTime: number;
   maxJumpTime: number;
-  airResistance: number;
-  gravityScale: number;
-  maxFallSpeed: number;
   dashSpeedMultiplier: number;
   dashAccelerationTime: number;
   dashAnimationSpeed: number;
 }
 
-export interface PlayerConfig {
+export interface PlayerConfig extends CharacterConfig {
   physics: PlayerPhysicsConfig;
   stats: {
     maxHealth: number;
@@ -140,17 +142,13 @@ export interface PlayerConfig {
   };
 }
 
-export interface EnemyPhysicsConfig {
-  width: number;
-  height: number;
+export interface EnemyPhysicsConfig extends CharacterPhysicsConfig {
   moveSpeed: number;
-  jumpHeight?: number;
-  jumpInterval?: number;
-  airResistance: number;
-  gravityScale: number;
+  jumpHeight: number;
+  jumpInterval: number;
 }
 
-export interface EnemyConfig {
+export interface EnemyConfig extends CharacterConfig {
   physics: EnemyPhysicsConfig;
   stats: {
     maxHealth: number;
@@ -179,13 +177,11 @@ export interface EnemyConfig {
   };
 }
 
-export interface ItemPhysicsConfig {
-  width: number;
-  height: number;
+export interface ItemPhysicsConfig extends BasePhysicsConfig {
   solid: boolean;
 }
 
-export interface BaseItemConfig {
+export interface BaseItemConfig extends BaseEntityConfig {
   physics: ItemPhysicsConfig;
   sprites: {
     category: string;

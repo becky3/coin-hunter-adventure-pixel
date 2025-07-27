@@ -16,12 +16,37 @@
 
 ### Entity
 - **役割**: 物理演算の対象となる基本クラス
+- **必須プロパティ**:
+  ```typescript
+  physicsLayer: PhysicsLayer;  // 物理レイヤー（衝突判定用）
+  ```
 - **物理パラメータ**:
   ```typescript
   airResistance?: number;    // 空気抵抗 (0.0～1.0)
   gravityScale?: number;     // 重力倍率 (デフォルト: 1.0)
   maxFallSpeed?: number;     // 最大落下速度
   ```
+
+## PhysicsLayer（物理レイヤー）
+
+衝突判定のグループ分けに使用されるenumです。
+
+```typescript
+export enum PhysicsLayer {
+  PLAYER = 'player',
+  ENEMY = 'enemy',
+  ITEM = 'item',
+  TERRAIN = 'terrain',
+  PROJECTILE = 'projectile'
+}
+```
+
+### レイヤーごとの衝突ルール
+- **PLAYER**: ENEMYと衝突（ダメージ判定）、ITEMと衝突（アイテム取得）
+- **ENEMY**: PLAYERと衝突、PROJECTILEと衝突（ダメージ判定）
+- **ITEM**: PLAYERと衝突時に効果発動
+- **TERRAIN**: すべてのレイヤーと衝突（地形判定）
+- **PROJECTILE**: ENEMYと衝突（攻撃判定）
 
 ## 物理パラメータ詳細
 
@@ -67,10 +92,12 @@ if (jumpButtonHeld && canVariableJump) {
 
 ### パラメータ
 - **minJumpTime**: 0ms（いつでも中断可能）
-- **maxJumpTime**: 400ms（最大保持時間）
+- **maxJumpTime**: 400ms（最大保持時間） - `playerConfig.physics.maxJumpTime`で設定
 - **variableJumpBoost**: 2.3（現在の設定値）
 - **variableJumpBoostMultiplier**: 0.4（ブースト係数）
 - **効果**: ボタンを離すタイミングでジャンプ高さを調整可能
+
+**注意**: maxJumpTimeは`player.json`の`physics`セクション内に定義されています。
 
 ### スプリングとの相互作用
 - スプリングでバウンス後は可変ジャンプ無効（無限ジャンプ防止）

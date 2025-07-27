@@ -99,6 +99,9 @@ async function runTest() {
         });
         console.log('Before second collision:', beforeSecondCollision);
         
+        // Wait for invulnerability to end
+        await t.wait(2500);
+        
         // Move to collide with enemy again (should die this time)
         let playerDied = false;
         const initialLives = beforeSecondCollision.lives;
