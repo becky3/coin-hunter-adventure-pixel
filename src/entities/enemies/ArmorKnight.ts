@@ -32,23 +32,22 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     }
 
     constructor(x: number, y: number) {
-        let config = null;
-        try {
-            const resourceLoader = ResourceLoader.getInstance();
-            config = resourceLoader.getCharacterConfig('enemies', 'armor_knight');
-        } catch (error) {
-            Logger.warn('Failed to load armor_knight config:', error);
+        const resourceLoader = ResourceLoader.getInstance();
+        const config = resourceLoader.getCharacterConfig('enemies', 'armor_knight');
+        
+        if (!config) {
+            throw new Error('Failed to load armor_knight configuration');
         }
         
-        const width = config?.physics.width || 16;
-        const height = config?.physics.height || 16;
+        const width = config.physics.width;
+        const height = config.physics.height;
         
         super(x, y, width, height);
         
-        this.maxHealth = config?.stats.maxHealth || 3;
+        this.maxHealth = config.stats.maxHealth;
         this.health = this.maxHealth;
-        this.damage = config?.stats.damage || 2;
-        this.normalSpeed = config?.physics.moveSpeed || 0.15;
+        this.damage = config.stats.damage;
+        this.normalSpeed = config.physics.moveSpeed;
         this.moveSpeed = this.normalSpeed;
         this.chargeSpeed = this.normalSpeed * ArmorKnight.CHARGE_SPEED_MULTIPLIER;
         
@@ -60,13 +59,11 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         
         this.stompBounceVelocity = ArmorKnight.DEFAULT_STOMP_BOUNCE_VELOCITY;
         
-        if (config?.ai) {
-            this.aiType = (config.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
-            this.detectRange = config.ai.detectRange || 84;
-            this.detectRangeWidth = config.ai.detectRangeWidth || 84;
-            this.detectRangeHeight = config.ai.detectRangeHeight || 128;
-            this.attackRange = config.ai.attackRange || 20;
-        }
+        this.aiType = config.ai.type as 'patrol' | 'chase' | 'idle';
+        this.detectRange = config.ai.detectRange;
+        this.detectRangeWidth = config.ai.detectRangeWidth;
+        this.detectRangeHeight = config.ai.detectRangeHeight;
+        this.attackRange = config.ai.attackRange;
         
         this.setAnimation('idle');
     }

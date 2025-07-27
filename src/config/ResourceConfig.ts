@@ -48,6 +48,12 @@ export interface CharacterAnimationConfig {
   frameCount: number;
 }
 
+export enum AIType {
+  PATROL = 'patrol',
+  CHASE = 'chase',
+  IDLE = 'idle'
+}
+
 export interface CharacterConfig {
   physics: CharacterPhysicsConfig;
   stats: CharacterStatsConfig;
@@ -59,9 +65,12 @@ export interface CharacterConfig {
     [key: string]: CharacterAnimationConfig;
   };
   ai?: {
-    type: string;
+    type: AIType;
     detectRange: number;
     attackRange: number;
+    detectRangeWidth?: number;
+    detectRangeHeight?: number;
+    chargeSpeedMultiplier?: number;
   };
 }
 

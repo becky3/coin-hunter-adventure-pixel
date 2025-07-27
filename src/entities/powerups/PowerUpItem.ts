@@ -21,7 +21,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     declare animationTime: number;
     protected musicSystem?: MusicSystem;
 
-    constructor(x: number, y: number, width: number, height: number, powerUpType: PowerUpType) {
+    constructor(x: number, y: number, width: number, height: number, powerUpType: PowerUpType, floatSpeed: number = 0.03, floatAmplitude: number = 0.15) {
         super(x, y, width, height);
         
         this.gravity = false;
@@ -32,8 +32,8 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
         this.powerUpType = powerUpType;
         
         this.floatOffset = 0;
-        this.floatSpeed = 0.03;
-        this.floatAmplitude = 0.15;
+        this.floatSpeed = floatSpeed;
+        this.floatAmplitude = floatAmplitude;
         this.baseY = y;
         this.animationTime = 0;
         

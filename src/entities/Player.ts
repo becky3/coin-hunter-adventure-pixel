@@ -13,35 +13,6 @@ import { ShieldEffectVisual } from '../effects/ShieldEffect';
 import { SpritePaletteIndex } from '../utils/pixelArtPalette';
 
 
-const DEFAULT_PLAYER_CONFIG = {
-    width: 14,
-    height: 32,
-    smallWidth: 14,
-    smallHeight: 16,
-    speed: 1.17,
-    jumpPower: 10,
-    minJumpTime: 0,
-    maxJumpTime: 400,
-    maxHealth: 3,
-    invulnerabilityTime: 2000,
-    spawnX: 100,
-    spawnY: 300
-} as const;
-
-const DEFAULT_ANIMATION_CONFIG = {
-    speed: {
-        idle: 500,
-        walk: 100,
-        jump: 200,
-        fall: 200
-    },
-    frameCount: {
-        idle: 2,
-        walk: 4,
-        jump: 1,
-        fall: 1
-    }
-} as const;
 
 
 type AnimationState = 'idle' | 'walk' | 'jump' | 'fall';
@@ -117,18 +88,21 @@ export class Player extends Entity {
         const resourceLoader = ResourceLoader.getInstance();
         const playerConfig = resourceLoader.getCharacterConfig('player', 'main');
         
+        if (!playerConfig) {
+            throw new Error('Failed to load player configuration');
+        }
+        
         const config = {
-            ...DEFAULT_PLAYER_CONFIG,
             width: playerConfig.physics.width,
             height: playerConfig.physics.height,
-            speed: playerConfig.physics.speed ?? DEFAULT_PLAYER_CONFIG.speed,
-            jumpPower: playerConfig.physics.jumpPower ?? DEFAULT_PLAYER_CONFIG.jumpPower,
-            minJumpTime: playerConfig.physics.minJumpTime ?? DEFAULT_PLAYER_CONFIG.minJumpTime,
-            maxJumpTime: playerConfig.physics.maxJumpTime ?? DEFAULT_PLAYER_CONFIG.maxJumpTime,
+            speed: playerConfig.physics.speed,
+            jumpPower: playerConfig.physics.jumpPower,
+            minJumpTime: playerConfig.physics.minJumpTime,
+            maxJumpTime: playerConfig.physics.maxJumpTime,
             maxHealth: playerConfig.stats.maxHealth,
-            invulnerabilityTime: playerConfig.stats.invulnerabilityTime ?? DEFAULT_PLAYER_CONFIG.invulnerabilityTime,
-            spawnX: playerConfig.spawn?.x ?? DEFAULT_PLAYER_CONFIG.spawnX,
-            spawnY: playerConfig.spawn?.y ?? DEFAULT_PLAYER_CONFIG.spawnY
+            invulnerabilityTime: playerConfig.stats.invulnerabilityTime,
+            spawnX: playerConfig.spawn?.x,
+            spawnY: playerConfig.spawn?.y
         };
         
         super(x ?? config.spawnX, (y ?? config.spawnY) - config.height, config.width, config.height);
@@ -196,10 +170,10 @@ export class Player extends Entity {
         
         this.eventBus = null;
         
-        this.animationConfig = playerConfig?.animations ? {
-            speed: { ...DEFAULT_ANIMATION_CONFIG.speed, ...playerConfig.animations.speed },
-            frameCount: { ...DEFAULT_ANIMATION_CONFIG.frameCount, ...playerConfig.animations.frameCount }
-        } : DEFAULT_ANIMATION_CONFIG;
+        if (!playerConfig.animations) {
+            throw new Error('Player animations configuration is missing');
+        }
+        this.animationConfig = playerConfig.animations;
         
         this.gravityStrength = 1.0;
         this.frameCount = 0;
@@ -380,7 +354,7 @@ export class Player extends Entity {
                 this.canVariableJump = false;
             }
             else if (input.jump && this.canVariableJump) {
-                if (this.jumpTime < (this.playerConfig.maxJumpTime || DEFAULT_PLAYER_CONFIG.maxJumpTime)) {
+                if (this.jumpTime < this.playerConfig.maxJumpTime) {
                     const boost = this.variableJumpBoostMultiplier * this.variableJumpBoost * deltaTime * 60;
                     this.vy -= boost;
                 } else {
@@ -442,7 +416,11 @@ export class Player extends Entity {
     private updateAnimationFrame(deltaTime: number): void {
         this.animTimer += deltaTime * 1000;
         
-        let speed = (this.animationConfig.speed && this.animationConfig.speed[this._animState]) || DEFAULT_ANIMATION_CONFIG.speed[this._animState] || 200;
+        const animConfig = this.animationConfig[this._animState];
+        if (!animConfig) {
+            throw new Error(`Animation config not defined for state: ${this._animState}`);
+        }
+        let speed = animConfig.speed;
         
         if (this.isDashing && this._animState === 'walk') {
             speed *= this.dashAnimationSpeed;
@@ -451,8 +429,11 @@ export class Player extends Entity {
         if (this.animTimer >= speed) {
             this.animTimer = 0;
             
-            const frames = (this.animationConfig.frameCount && this.animationConfig.frameCount[this._animState]) || DEFAULT_ANIMATION_CONFIG.frameCount[this._animState] || 1;
-            this.animFrame = (this.animFrame + 1) % frames;
+            const animConfig = this.animationConfig[this._animState];
+            if (!animConfig) {
+                throw new Error(`Animation config not defined for state: ${this._animState}`);
+            }
+            this.animFrame = (this.animFrame + 1) % animConfig.frameCount;
         }
     }
     
@@ -518,6 +499,9 @@ export class Player extends Entity {
         }
         
         const playerConfig = ResourceLoader.getInstance().getCharacterConfig('player', 'main');
+        if (!playerConfig) {
+            throw new Error('Failed to load player configuration');
+        }
         this.isSmall = true;
         this.width = playerConfig.physics.smallWidth;
         this.height = playerConfig.physics.smallHeight;

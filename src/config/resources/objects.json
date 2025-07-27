@@ -45,6 +45,22 @@
         "category": "terrain",
         "name": "goal_flag"
       }
+    },
+    "fallingFloor": {
+      "physics": {
+        "width": 16,
+        "height": 16,
+        "solid": true
+      },
+      "properties": {
+        "shakeAmplitude": 2,
+        "shakeFrequency": 0.5,
+        "shakeTime": 1.0
+      },
+      "sprite": {
+        "category": "terrain",
+        "name": "falling_floor"
+      }
     }
   },
   "hazards": {
@@ -57,6 +73,45 @@
       "properties": {
         "damage": 1,
         "knockback": true
+      }
+    }
+  },
+  "powerups": {
+    "powerGlove": {
+      "physics": {
+        "width": 16,
+        "height": 16,
+        "solid": false
+      },
+      "properties": {
+        "floatSpeed": 0.03,
+        "floatAmplitude": 0.15,
+        "permanent": true,
+        "stackable": false,
+        "bulletSpeed": 5,
+        "fireRate": 500
+      },
+      "sprite": {
+        "category": "powerups",
+        "name": "power_glove"
+      }
+    },
+    "shieldStone": {
+      "physics": {
+        "width": 16,
+        "height": 16,
+        "solid": false
+      },
+      "properties": {
+        "floatSpeed": 0.03,
+        "floatAmplitude": 0.15,
+        "permanent": true,
+        "stackable": false,
+        "charges": 1
+      },
+      "sprite": {
+        "category": "powerups",
+        "name": "shield_stone"
       }
     }
   }

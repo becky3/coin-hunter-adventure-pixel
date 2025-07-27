@@ -31,27 +31,26 @@ export class Spring extends Entity implements EntityInitializer {
     }
 
     constructor(x: number, y: number) {
-        let springConfig = null;
-        try {
-            const resourceLoader = ResourceLoader.getInstance();
-            springConfig = resourceLoader.getObjectConfig('items', 'spring');
-        } catch (error) {
-            Logger.warn('Failed to load spring config:', error);
+        const resourceLoader = ResourceLoader.getInstance();
+        const springConfig = resourceLoader.getObjectConfig('items', 'spring');
+        
+        if (!springConfig) {
+            throw new Error('Failed to load spring configuration');
         }
         
-        const width = springConfig?.physics.width || 16;
-        const height = springConfig?.physics.height || 16;
+        const width = springConfig.physics.width;
+        const height = springConfig.physics.height;
         
         super(x, y, width, height);
         
         this.gravity = false;
         this.physicsEnabled = false;
-        this.solid = springConfig?.physics.solid ?? true;
+        this.solid = springConfig.physics.solid;
         
         this.baseBounceMultiplier = 3.5;
         this.compression = 0;
         this.triggered = false;
-        this.animationSpeed = springConfig?.properties.expansionSpeed || 0.2;
+        this.animationSpeed = springConfig.properties.expansionSpeed;
         
         this.animationTime = 0;
         this.physicsSystem = null;
@@ -87,7 +86,7 @@ export class Spring extends Entity implements EntityInitializer {
         
         player.y = this.y - player.height;
         
-        const playerJumpPower = player.jumpPower || 10;
+        const playerJumpPower = player.jumpPower;
         const bounceVelocity = -(playerJumpPower * this.baseBounceMultiplier);
         
         const inputManager = (window as Window & { game?: { inputManager?: InputSystem } }).game?.inputManager;

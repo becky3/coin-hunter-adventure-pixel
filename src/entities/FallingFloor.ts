@@ -4,6 +4,7 @@ import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
 import { Logger } from '../utils/Logger';
+import { ResourceLoader } from '../config/ResourceLoader';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 
 /**
@@ -32,8 +33,15 @@ export class FallingFloor extends Entity implements EntityInitializer {
     }
     
     constructor(x: number, y: number) {
-        const width = 16;
-        const height = 16;
+        const resourceLoader = ResourceLoader.getInstance();
+        const config = resourceLoader.getObjectConfig('items', 'fallingFloor');
+        
+        if (!config) {
+            throw new Error('Failed to load falling floor configuration');
+        }
+        
+        const width = config.physics.width;
+        const height = config.physics.height;
         
         super(x, y, width, height);
         
@@ -45,13 +53,13 @@ export class FallingFloor extends Entity implements EntityInitializer {
         
         this.gravity = false;
         this.physicsEnabled = true;
-        this.solid = true;
+        this.solid = config.physics.solid;
         this.collidable = true;
         this.ignoreTileCollisions = true;
         this.notifyTileCollision = false;
         
-        this.shakeAmplitude = 2;
-        this.shakeFrequency = 0.5;
+        this.shakeAmplitude = config.properties.shakeAmplitude;
+        this.shakeFrequency = config.properties.shakeFrequency;
         this.shakeOffset = 0;
         
         this.physicsSystem = null;

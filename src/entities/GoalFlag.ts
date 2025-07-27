@@ -2,7 +2,6 @@
 import { Entity, CollisionInfo } from './Entity';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
-import { Logger } from '../utils/Logger';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
@@ -21,22 +20,21 @@ export class GoalFlag extends Entity implements EntityInitializer {
     }
 
     constructor(x: number, y: number) {
-        let goalConfig = null;
-        try {
-            const resourceLoader = ResourceLoader.getInstance();
-            goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
-        } catch (error) {
-            Logger.warn('Failed to load goal flag config:', error);
+        const resourceLoader = ResourceLoader.getInstance();
+        const goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
+        
+        if (!goalConfig) {
+            throw new Error('Failed to load goal flag configuration');
         }
         
-        const width = goalConfig?.physics.width || 32;
-        const height = goalConfig?.physics.height || 32;
+        const width = goalConfig.physics.width;
+        const height = goalConfig.physics.height;
         
         super(x, y, width, height);
         
         this.gravity = false;
         this.physicsEnabled = false;
-        this.solid = goalConfig?.physics.solid || false;
+        this.solid = goalConfig.physics.solid;
         
         this.cleared = false;
         

@@ -42,29 +42,28 @@ export class Bat extends Enemy implements EntityInitializer {
     }
 
     constructor(x: number, y: number) {
-        let batConfig = null;
-        try {
-            const resourceLoader = ResourceLoader.getInstance();
-            batConfig = resourceLoader.getCharacterConfig('enemies', 'bat');
-        } catch (error) {
-            Logger.warn('Failed to load bat config, using defaults:', error);
+        const resourceLoader = ResourceLoader.getInstance();
+        const batConfig = resourceLoader.getCharacterConfig('enemies', 'bat');
+        
+        if (!batConfig) {
+            throw new Error('Failed to load bat configuration');
         }
         
-        const width = batConfig?.physics.width || 8;
-        const height = batConfig?.physics.height || 8;
+        const width = batConfig.physics.width;
+        const height = batConfig.physics.height;
         
         super(x, y, width, height);
         
-        this.maxHealth = batConfig?.stats.maxHealth || 1;
+        this.maxHealth = batConfig.stats.maxHealth;
         this.health = this.maxHealth;
-        this.damage = batConfig?.stats.damage || 1;
-        this.moveSpeed = batConfig?.physics.moveSpeed || 0.5;
+        this.damage = batConfig.stats.damage;
+        this.moveSpeed = batConfig.physics.moveSpeed;
         
         this.spriteKey = 'enemies/bat';
         this.animState = 'hang';
         this.batState = 'hanging';
         
-        this.detectionRange = batConfig?.ai?.detectRange || 80;
+        this.detectionRange = batConfig.ai.detectRange;
         this.waveSpeed = 2;
         this.waveAmplitude = 20;
         this.initialY = y;
@@ -81,10 +80,8 @@ export class Bat extends Enemy implements EntityInitializer {
         this.gravity = false;
         this.physicsEnabled = false;
         
-        if (batConfig?.ai) {
-            this.aiType = (batConfig.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
-            this.attackRange = batConfig.ai.attackRange || 20;
-        }
+        this.aiType = batConfig.ai.type as 'patrol' | 'chase' | 'idle';
+        this.attackRange = batConfig.ai.attackRange;
         
         this.setAnimation('hang');
     }
