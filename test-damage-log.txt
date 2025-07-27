@@ -1,0 +1,528 @@
+Log file created: /home/becky/claude/coin-hunter-adventure-pixel/tests/logs/enemy-damage-test-2025-07-27_19-17-02-JST.log
+
+==================================================
+Starting test: Enemy Damage Test
+Time: 2025-07-27_19-17-02-JST (JST)
+==================================================
+
+Test timeout set to: 60000ms
+🚀 Quick starting game with stage: 0-2
+💉 Error tracking injected
+Navigating to: http://localhost:3000?s=0-2&skip_title=true&test=true
+[Browser Console log] [Performance] Page start: 198.10ms
+[Browser Console log] [Performance] Loading screen visible
+[Browser Console debug] [vite] connecting...
+[Browser Console log] [Performance] Module script started: 209.60ms
+[Browser Console log] [Performance] Time from page start to module start: 11.50ms
+[Browser Console debug] [vite] connected.
+[Browser Console log] [19:17:03.201] [EntityFactory] Registered entity type: coin
+[Browser Console log] [19:17:03.201] [EntityFactory] Registered entity type: spring
+[Browser Console log] [19:17:03.202] [EntityFactory] Registered entity type: falling_floor
+[Browser Console log] [19:17:03.202] [EntityFactory] Registered entity type: goal
+[Browser Console log] [19:17:03.202] [EntityFactory] Registered entity type: slime
+[Browser Console log] [19:17:03.202] [EntityFactory] Registered entity type: bat
+[Browser Console log] [19:17:03.202] [EntityFactory] Registered entity type: spider
+[Browser Console log] [19:17:03.202] [EntityFactory] Registered entity type: armor_knight
+[Browser Console log] [19:17:03.202] [EntityFactory] Registered entity type: shield_stone
+[Browser Console log] [19:17:03.202] [EntityFactory] Registered entity type: power_glove
+[Browser Console log] [19:17:03.202] [Performance] index.ts loaded: 394.00ms
+[Browser Console log] [19:17:03.202] [Performance] Document already loaded, starting immediately
+[Browser Console log] [19:17:03.203] [Performance] startGame() called: 394.40ms
+[Browser Console log] [19:17:03.203] Starting game initialization...
+[Browser Console log] [19:17:03.203] [Performance] GameCore constructor: 0.10ms (394.60ms - 394.70ms)
+[Browser Console log] [19:17:03.203] Initializing GameCore...
+[Browser Console log] [19:17:03.203] [Performance] Before gameCore.init(): 395.00ms
+[Browser Console log] [19:17:03.203] [Performance] GameCore.init() started: 395.20ms
+[Browser Console log] [19:17:03.203] GameCore: init() started
+[Browser Console log] [19:17:03.203] GameCore: Initializing ResourceLoader...
+[Browser Console log] [19:17:03.204] [Performance] Before ResourceLoader.initialize(): 395.40ms
+[Browser Console log] [19:17:03.204] [Performance] ResourceLoader.initialize() started: 395.60ms
+[Browser Console log] [19:17:03.204] [ResourceLoader] Using bundled data for: /src/config/resources/index.json
+[Browser Console log] [19:17:03.204] [Performance] ResourceLoader.loadIndex: 0.20ms
+[Browser Console log] [19:17:03.204] [Performance] Starting parallel resource loading: 396.10ms
+[Browser Console log] [19:17:03.204] [ResourceLoader] Using bundled data for: /src/config/resources/sprites.json
+[Browser Console log] [19:17:03.204] [ResourceLoader] Using bundled data for: /src/config/resources/audio.json
+[Browser Console log] [19:17:03.205] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/title.json
+[Browser Console log] [19:17:03.205] [ResourceLoader] Using bundled data for: /src/config/resources/physics.json
+[Browser Console log] [19:17:03.205] [Performance] loadSprites completed in 0.60ms
+[Browser Console log] [19:17:03.205] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/game.json
+[Browser Console log] [19:17:03.205] [Performance] ResourceLoader.loadSprites: 0.80ms
+[Browser Console log] [19:17:03.205] [Performance] ResourceLoader.loadAudio: 0.70ms
+[Browser Console log] [19:17:03.205] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/victory.json
+[Browser Console log] [19:17:03.205] [Performance] ResourceLoader.loadPhysics: 0.50ms
+[Browser Console log] [19:17:03.205] [ResourceLoader] Using bundled data for: /src/config/resources/bgm/gameover.json
+[Browser Console log] [19:17:03.205] [ResourceLoader] Using bundled data for: /src/config/resources/se/coin.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/resources/se/jump.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/resources/se/damage.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/resources/se/button.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/resources/se/powerup.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/resources/se/gameStart.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/resources/se/goal.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/resources/se/enemyDefeat.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/resources/se/projectile.json
+[Browser Console log] [19:17:03.206] [Performance] ResourceLoader.loadMusicPatterns: 1.50ms
+[Browser Console log] [19:17:03.206] [Performance] ResourceLoader.parallelLoading: 1.70ms
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/entities/player.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/entities/enemies/slime.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/entities/enemies/bat.json
+[Browser Console log] [19:17:03.206] [ResourceLoader] Using bundled data for: /src/config/entities/enemies/spider.json
+[Browser Console log] [19:17:03.207] [ResourceLoader] Using bundled data for: /src/config/entities/enemies/armor_knight.json
+[Browser Console log] [19:17:03.207] [ResourceLoader] Using bundled data for: /src/config/entities/items/coin.json
+[Browser Console log] [19:17:03.207] [ResourceLoader] Using bundled data for: /src/config/entities/terrain/spring.json
+[Browser Console log] [19:17:03.207] [ResourceLoader] Using bundled data for: /src/config/entities/terrain/goal_flag.json
+[Browser Console log] [19:17:03.207] [ResourceLoader] Using bundled data for: /src/config/entities/terrain/falling_floor.json
+[Browser Console log] [19:17:03.207] [ResourceLoader] Using bundled data for: /src/config/entities/powerups/power_glove.json
+[Browser Console log] [19:17:03.207] [ResourceLoader] Using bundled data for: /src/config/entities/powerups/shield_stone.json
+[Browser Console log] [19:17:03.207] [Performance] ResourceLoader.preloadEntityConfigs: 1.00ms
+[Browser Console log] [19:17:03.207] [Performance] ResourceLoader.initialize() completed: 399.00ms (took 3.40ms)
+[Browser Console log] [19:17:03.207] [Performance] After ResourceLoader.initialize(): 399.10ms (took 3.70ms)
+[Browser Console log] [19:17:03.207] [Performance] ResourceLoader.initialize(): 3.70ms
+[Browser Console log] [19:17:03.207] GameCore: Registering core services...
+[Browser Console log] [19:17:03.207] [Performance] Before registerCoreServices(): 399.40ms
+[Browser Console log] [19:17:03.208] [PhysicsSystem] Initialized with:
+[Browser Console log] [19:17:03.208]   - Gravity: 0.65
+[Browser Console log] [19:17:03.209]   - Max fall speed: 15
+[Browser Console log] [19:17:03.209]   - Friction: 0.8
+[Browser Console log] [19:17:03.209] [Performance] After registerCoreServices(): 400.70ms (took 1.30ms)
+[Browser Console log] [19:17:03.209] [Performance] registerCoreServices(): 1.30ms
+[Browser Console log] [19:17:03.209] GameCore: Registering systems...
+[Browser Console log] [19:17:03.209] [Performance] Before registerSystems(): 400.90ms
+[Browser Console log] [19:17:03.209] [Performance] Before systemManager.initSystems(): 401.20ms
+[Browser Console log] [19:17:03.209] [Performance] After systemManager.initSystems(): 401.40ms (took 0.20ms)
+[Browser Console log] [19:17:03.210] [Performance] Before MusicSystem.init(): 401.50ms
+[Browser Console log] [19:17:03.210] GameCore: Initializing MusicSystem...
+[Browser Console log] [19:17:03.210] [Performance] MusicSystem.init() entered at: 401.70ms
+[Browser Console log] [19:17:03.210] MusicSystem: init() called
+[Browser Console log] [19:17:03.210] MusicSystem: Skipping AudioContext initialization
+[Browser Console log] [19:17:03.210] [Performance] After MusicSystem.init(): 402.10ms (took 0.60ms)
+[Browser Console log] [19:17:03.210] GameCore: MusicSystem initialized
+[Browser Console log] [19:17:03.210] [Performance] After registerSystems(): 402.20ms (took 1.30ms)
+[Browser Console log] [19:17:03.210] [Performance] registerSystems(): 1.30ms
+[Browser Console log] [19:17:03.210] GameCore: Registering states...
+[Browser Console log] [19:17:03.211] [Performance] Before registerStates(): 402.40ms
+[Browser Console log] [19:17:03.211] Initialized optimized background: 40 clouds, 30 trees
+[Browser Console log] [19:17:03.211] [PlayState] Using optimized background renderer
+[Browser Console log] [19:17:03.212] [Performance] After registerStates(): 403.50ms (took 1.10ms)
+[Browser Console log] [19:17:03.212] [Performance] registerStates(): 1.10ms
+[Browser Console log] [19:17:03.212] GameCore: Initializing debug overlay...
+[Browser Console log] [19:17:03.213] [PerformanceMonitor] Initialized
+[Browser Console log] [19:17:03.213] [LevelLoader] Using bundled data for: /src/levels/data/stages.json
+[Browser Console log] [19:17:03.214] DebugOverlay Loaded 19 stages from stages.json
+[Browser Console log] [19:17:03.215] EnemySpawnDialog Initialized
+[Browser Console log] [19:17:03.215] DebugOverlay Initialized with stage: stage0-2 (index: 1)
+[Browser Console log] [19:17:03.215] [Performance] Debug overlay init: 3.40ms
+[Browser Console log] [19:17:03.215] GameCore: Hiding loading screen...
+[Browser Console log] [19:17:03.215] [Performance] Hiding loading screen at: 407.20ms
+[Browser Console log] [19:17:03.215] [Performance] GameCore.init() completed: 407.30ms (total init took 12.10ms)
+[Browser Console log] [19:17:03.215] GameCore: init() completed
+[Browser Console log] [19:17:03.215] [Performance] After gameCore.init(): 407.40ms (took 12.40ms)
+[Browser Console log] [19:17:03.216] [Performance] GameCore.init(): 12.40ms (395.00ms - 407.40ms)
+[Browser Console log] [19:17:03.216] Starting game loop...
+[Browser Console log] [19:17:03.216] [Performance] Before gameCore.start(): 407.60ms
+[Browser Console log] [19:17:03.216] GameCore: Starting game loop...
+[Browser Console log] [19:17:03.216] GameCore: Game loop started, running: true
+[Browser Console log] [19:17:03.216] GameCore: Skipping title, starting directly with stage: stage0-2
+[Browser Console log] [19:17:03.216] [PlayState] enter() called with params: JSHandle@object
+[Browser Console log] [19:17:03.217] [PlayState] Starting initialization...
+[Browser Console log] [19:17:03.217] [PlayState] Checking/loading sprites...
+[Browser Console log] [19:17:03.217] [SpriteLoader] Using bundled data for: player/idle
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: player/idle_small
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: player/jump1
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: player/jump2
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: player/jump_small1
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: player/jump_small2
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: terrain/spring
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: terrain/goal_flag
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: enemies/bat_hang
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: enemies/bat_fly1
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: enemies/bat_fly2
+[Browser Console log] [19:17:03.218] [SpriteLoader] Using bundled data for: enemies/spider/spider_idle
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: enemies/spider/spider_walk1
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: enemies/spider/spider_walk2
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: enemies/spider/spider_thread
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: enemies/slime_idle1
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: enemies/slime_idle2
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: enemies/armor_knight_idle
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: enemies/armor_knight_move
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: environment/cloud1
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: environment/cloud2
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: environment/tree1
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: tiles/ground
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: tiles/grass_ground
+[Browser Console log] [19:17:03.219] [SpriteLoader] Using bundled data for: powerups/shield_stone
+[Browser Console log] [19:17:03.220] [SpriteLoader] Using bundled data for: powerups/power_glove
+[Browser Console log] [19:17:03.220] [SpriteLoader] Using bundled data for: projectiles/energy_bullet
+[Browser Console log] [19:17:03.220] [SpriteLoader] Using bundled data for: effects/shield_left
+[Browser Console log] [19:17:03.220] [SpriteLoader] Using bundled data for: effects/shield_right
+[Browser Console log] [19:17:03.220] [SpriteLoader] Using bundled data for: player/walk1
+[Browser Console log] [19:17:03.220] [SpriteLoader] Using bundled data for: player/walk_small1
+[Browser Console log] [19:17:03.220] [SpriteLoader] Using bundled data for: items/coin_spin1
+[Browser Console log] [19:17:03.220] [SpriteLoader] Using bundled data for: enemies/bird_fly1
+[Browser Console log] [19:17:03.221] [Performance] GameCore.start(): 4.90ms (407.60ms - 412.50ms)
+[Browser Console log] [19:17:03.221] Game started successfully
+[Browser Console log] [19:17:03.221] [Performance] Total initialization time: 18.20ms
+[Browser Console log] [19:17:03.221] [Performance] Summary:
+[Browser Console log] [19:17:03.221]   GameCore constructor: 0.10ms
+[Browser Console log] [19:17:03.221]   ResourceLoader.loadIndex: 0.20ms
+[Browser Console log] [19:17:03.221]   ResourceLoader.loadSprites: 0.80ms
+[Browser Console log] [19:17:03.221]   ResourceLoader.loadAudio: 0.70ms
+[Browser Console log] [19:17:03.221]   ResourceLoader.loadPhysics: 0.50ms
+[Browser Console log] [19:17:03.221]   ResourceLoader.loadMusicPatterns: 1.50ms
+[Browser Console log] [19:17:03.221]   ResourceLoader.parallelLoading: 1.70ms
+[Browser Console log] [19:17:03.221]   ResourceLoader.preloadEntityConfigs: 1.00ms
+[Browser Console log] [19:17:03.221]   ResourceLoader.initialize(): 3.70ms
+[Browser Console log] [19:17:03.221]   registerCoreServices(): 1.30ms
+[Browser Console log] [19:17:03.221]   registerSystems(): 1.30ms
+[Browser Console log] [19:17:03.221]   registerStates(): 1.10ms
+[Browser Console log] [19:17:03.221]   Debug overlay init: 3.40ms
+[Browser Console log] [19:17:03.221]   GameCore.init(): 12.40ms
+[Browser Console log] [19:17:03.221]   GameCore.start(): 4.90ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/idle as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/idle in 4.30ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/idle_small as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/idle_small in 4.10ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/jump1 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/jump1 in 4.10ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/jump2 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/jump2 in 4.00ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/jump_small1 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/jump_small1 in 4.10ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/jump_small2 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite player/jump_small2 in 4.00ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite terrain/spring as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite terrain/spring in 3.90ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite terrain/goal_flag as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite terrain/goal_flag in 4.00ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/bat_hang as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/bat_hang in 3.90ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/bat_fly1 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/bat_fly1 in 3.90ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/bat_fly2 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/bat_fly2 in 3.80ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/spider/spider_idle as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/spider/spider_idle in 3.90ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/spider/spider_walk1 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/spider/spider_walk1 in 3.70ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/spider/spider_walk2 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/spider/spider_walk2 in 3.80ms
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/spider/spider_thread as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.222] [AssetLoader] Loaded sprite enemies/spider/spider_thread in 3.80ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite enemies/slime_idle1 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite enemies/slime_idle1 in 3.80ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite enemies/slime_idle2 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite enemies/slime_idle2 in 3.70ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite enemies/armor_knight_idle as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite enemies/armor_knight_idle in 3.70ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite enemies/armor_knight_move as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite enemies/armor_knight_move in 3.70ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite environment/cloud1 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite environment/cloud1 in 3.70ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite environment/cloud2 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite environment/cloud2 in 3.60ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite environment/tree1 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite environment/tree1 in 3.50ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite tiles/ground as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite tiles/ground in 3.50ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite tiles/grass_ground as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite tiles/grass_ground in 3.60ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite powerups/shield_stone as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite powerups/shield_stone in 3.70ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite powerups/power_glove as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite powerups/power_glove in 3.50ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite projectiles/energy_bullet as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite projectiles/energy_bullet in 3.60ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite effects/shield_left as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite effects/shield_left in 3.50ms
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite effects/shield_right as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.223] [AssetLoader] Loaded sprite effects/shield_right in 3.40ms
+[Browser Console log] [19:17:03.223] [SpriteLoader] Using bundled data for: player/walk2
+[Browser Console log] [19:17:03.223] [SpriteLoader] Using bundled data for: player/walk_small2
+[Browser Console log] [19:17:03.223] [SpriteLoader] Using bundled data for: items/coin_spin2
+[Browser Console log] [19:17:03.223] [SpriteLoader] Using bundled data for: enemies/bird_fly2
+[Browser Console log] [19:17:03.223] [SpriteLoader] Using bundled data for: player/walk3
+[Browser Console log] [19:17:03.224] [SpriteLoader] Using bundled data for: player/walk_small3
+[Browser Console log] [19:17:03.224] [SpriteLoader] Using bundled data for: items/coin_spin3
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation enemies/slime_idle as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation enemies/slime_idle (2 frames) in 3.30ms
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation enemies/spider/spider_walk as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation enemies/spider/spider_walk (2 frames) in 3.40ms
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation enemies/bat_fly as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation enemies/bat_fly (2 frames) in 3.40ms
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation enemies/bird_fly as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation enemies/bird_fly (2 frames) in 3.50ms
+[Browser Console log] [19:17:03.224] [SpriteLoader] Using bundled data for: player/walk4
+[Browser Console log] [19:17:03.224] [SpriteLoader] Using bundled data for: player/walk_small4
+[Browser Console log] [19:17:03.224] [SpriteLoader] Using bundled data for: items/coin_spin4
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation player/walk as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation player/walk (4 frames) in 4.00ms
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation player/walk_small as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation player/walk_small (4 frames) in 3.90ms
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation items/coin_spin as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.224] [AssetLoader] Loaded animation items/coin_spin (4 frames) in 3.80ms
+[Browser Console log] [19:17:03.224] [PlayState] Sprites loaded successfully in 7.20ms
+[Browser Console log] [19:17:03.224] [LevelLoader] Using bundled data for: /src/levels/data/stages.json
+[Browser Console log] [19:17:03.225] [LevelLoader] Using bundled data for: /src/levels/data/stage0-2.json
+[Browser Console log] [19:17:03.225] [EntityManager] Creating player at (32, 192)
+[Browser Console log] [19:17:03.226] Enemy Created at x=128, y=192
+[Browser Console log] [19:17:03.226] Enemy Created at x=240, y=192
+[Browser Console log] [19:17:03.227] Enemy Created at x=352, y=192
+[Browser Console log] [19:17:03.227] Enemy Created at x=480, y=192
+[Browser Console log] [19:17:03.227] Enemy Created at x=608, y=192
+[Browser Console log] [19:17:03.227] Enemy Created at x=736, y=192
+[Browser Console log] [19:17:03.227] Enemy Created at x=864, y=192
+[Browser Console log] [19:17:03.228] [AssetLoader] Stage type set to: grassland
+[Browser Console log] [19:17:03.228] [PlayState] Power-up effects initialized
+[Browser Console log] [19:17:03.228] [PlayState] levelData: JSHandle@object
+[Browser Console log] [19:17:03.228] [PlayState] levelData.name: STAGE 0-2
+[Browser Console log] [19:17:03.228] [PlayState] Stage name set to: STAGE 0-2
+[Browser Console log] [19:17:03.228] [PlayState] MusicSystem status: JSHandle@object
+[Browser Console log] [19:17:03.229] [PlayState] Playing game BGM...
+[Browser Console log] [19:17:03.229] [PlayState] After initializeLevel, player = exists
+[Browser Console log] [19:17:03.229] [PlayState] Player created successfully
+[Browser Console log] [19:17:03.229] [PlayState] Player position: (32, 160)
+[Browser Console log] [19:17:03.229] [PlayState] enter() completed in 12.50ms
+[Browser Console log] [Performance] Window load event: 421.50ms
+[Browser Console log] [19:17:03.243] InputSystemAdapter: update called
+[Browser Console log] [19:17:03.278] [AssetLoader] Loaded sprite player/walk1 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk1 in 0.20ms
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk2 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk2 in 0.10ms
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk3 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk3 in 0.20ms
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk4 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk4 in 0.10ms
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk_small1 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk_small1 in 0.10ms
+[Browser Console log] [19:17:03.279] [AssetLoader] Loaded sprite player/walk_small2 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.280] [AssetLoader] Loaded sprite player/walk_small2 in 0.10ms
+[Browser Console log] [19:17:03.280] [AssetLoader] Loaded sprite player/walk_small3 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.280] [AssetLoader] Loaded sprite player/walk_small3 in 0.10ms
+[Browser Console log] [19:17:03.280] [AssetLoader] Loaded sprite player/walk_small4 as stage-dependent for stage type: grassland
+[Browser Console log] [19:17:03.280] [AssetLoader] Loaded sprite player/walk_small4 in 0.00ms
+✅ Page loaded
+Waiting for game initialization...
+Game object exists: true
+✅ Game initialized
+✅ Assert: Current state is 'play'
+Clicking at: (100, 100)
+Waiting for player creation...
+[Browser Console log] Player already exists
+✅ Assert: Player exists
+✅ Game ready! You can now control the player.
+Initial player stats: {
+  position: { x: 32, y: 176 },
+  health: 3,
+  isSmall: false,
+  grounded: true
+}
+Initial lives: 3
+
+--- Test 1: First Enemy Damage (Large -> Small) ---
+Entity info: {
+  enemyCount: 7,
+  enemies: [
+    { x: 119, y: 192, type: 'Slime' },
+    { x: 231, y: 192, type: 'Slime' },
+    { x: 343, y: 192, type: 'Slime' },
+    { x: 471, y: 192, type: 'Slime' },
+    { x: 599, y: 192, type: 'Slime' },
+    { x: 727, y: 192, type: 'Slime' },
+    { x: 855, y: 192, type: 'Slime' }
+  ]
+}
+Detailed enemy info: {
+  enemies: 7,
+  items: 1,
+  enemyTypes: [
+    'Slime', 'Slime',
+    'Slime', 'Slime',
+    'Slime', 'Slime',
+    'Slime'
+  ],
+  levelEntities: [
+    { type: 'slime', x: 8, y: 12 },
+    { type: 'slime', x: 15, y: 12 },
+    { type: 'slime', x: 22, y: 12 },
+    { type: 'slime', x: 30, y: 12 },
+    { type: 'slime', x: 38, y: 12 },
+    { type: 'slime', x: 46, y: 12 },
+    { type: 'slime', x: 54, y: 12 }
+  ],
+  enemyDetails: [
+    {
+      type: 'Slime',
+      position: [Object],
+      size: [Object],
+      velocity: [Object],
+      alive: true,
+      visible: true
+    },
+    {
+      type: 'Slime',
+      position: [Object],
+      size: [Object],
+      velocity: [Object],
+      alive: true,
+      visible: true
+    },
+    {
+      type: 'Slime',
+      position: [Object],
+      size: [Object],
+      velocity: [Object],
+      alive: true,
+      visible: true
+    },
+    {
+      type: 'Slime',
+      position: [Object],
+      size: [Object],
+      velocity: [Object],
+      alive: true,
+      visible: true
+    },
+    {
+      type: 'Slime',
+      position: [Object],
+      size: [Object],
+      velocity: [Object],
+      alive: true,
+      visible: true
+    },
+    {
+      type: 'Slime',
+      position: [Object],
+      size: [Object],
+      velocity: [Object],
+      alive: true,
+      visible: true
+    },
+    {
+      type: 'Slime',
+      position: [Object],
+      size: [Object],
+      velocity: [Object],
+      alive: true,
+      visible: true
+    }
+  ]
+}
+✅ Assert: Enemies should be found in level - stage should load correctly (test-enemy-damage.cjs:67)
+Enemy positions:
+  Enemy 1 (Slime): x=119, y=192, alive=true
+  Enemy 2 (Slime): x=231, y=192, alive=true
+  Enemy 3 (Slime): x=343, y=192, alive=true
+  Enemy 4 (Slime): x=471, y=192, alive=true
+  Enemy 5 (Slime): x=599, y=192, alive=true
+  Enemy 6 (Slime): x=727, y=192, alive=true
+  Enemy 7 (Slime): x=855, y=192, alive=true
+Level entities from stage data: [
+  { type: 'slime', x: 8, y: 12 },
+  { type: 'slime', x: 15, y: 12 },
+  { type: 'slime', x: 22, y: 12 },
+  { type: 'slime', x: 30, y: 12 },
+  { type: 'slime', x: 38, y: 12 },
+  { type: 'slime', x: 46, y: 12 },
+  { type: 'slime', x: 54, y: 12 }
+]
+Level dimensions: { width: 960, height: 240 }
+Expected enemy Y in pixels: 192
+Tile check at enemy spawn: {
+  tileMapHeight: 15,
+  tileAtSpawn: 0,
+  tileBelowSpawn: 1,
+  row12: '0000000000',
+  row13: '1111111111'
+}
+Physics system state: {
+  entityCount: 0,
+  hasTileMap: true,
+  tileMapRows: 15,
+  gravity: 0.65,
+  tileSize: 16,
+  entities: 9
+}
+Enemy positions after physics update:
+  Enemy 1: x=117, y=192, vy=0, grounded=true
+  Enemy 2: x=229, y=192, vy=0, grounded=true
+  Enemy 3: x=341, y=192, vy=0, grounded=true
+  Enemy 4: x=469, y=192, vy=0, grounded=true
+  Enemy 5: x=597, y=192, vy=0, grounded=true
+  Enemy 6: x=725, y=192, vy=0, grounded=true
+  Enemy 7: x=853, y=192, vy=0, grounded=true
+Player size before damage: { width: 14, height: 32, isSmall: false }
+Moving player towards enemy...
+Moving player right for 1000ms
+Holding key: ArrowRight for 1000ms
+[Browser Console log] [19:17:04.576] [PhysicsSystem] Player-Enemy collision detected!
+[Browser Console log] [19:17:04.576]   - EntityA: Player (player)
+[Browser Console log] [19:17:04.577]   - EntityB: Slime (enemy)
+[Browser Console log] [19:17:04.577] [Player] onCollision called
+[Browser Console log] [19:17:04.577]   - Other entity: Slime
+[Browser Console log] [19:17:04.577]   - Other physicsLayer: enemy
+[Browser Console log] [19:17:04.577]   - Has onCollisionWithPlayer: true
+[Browser Console log] [19:17:04.577] [Player] Calling onCollisionWithPlayer on other entity
+[Browser Console log] [19:17:04.577] [Enemy] onCollisionWithPlayer called
+[Browser Console log] [19:17:04.577]   - Enemy state: idle
+[Browser Console log] [19:17:04.577]   - Player invulnerable: false
+[Browser Console log] [19:17:04.577] [Enemy] Collision details:
+[Browser Console log] [19:17:04.577]   - Player center Y: 192, Enemy center Y: 200
+[Browser Console log] [19:17:04.578]   - Is player above: true
+[Browser Console log] [19:17:04.578]   - Player vy: 0 (falling: false)
+[Browser Console log] [19:17:04.578] [Enemy] Player taking damage from enemy
+[Browser Console warn] [19:17:04.578] [MusicSystem] Cannot play SE 'damage' - system not initialized or no AudioContext
+[Browser Console log] [19:17:04.578] [Enemy] onCollision called
+[Browser Console log] [19:17:04.578]   - Other entity: Player
+[Browser Console log] [19:17:04.578]   - Has takeDamage: true
+[Browser Console log] [19:17:04.578]   - Has jumpPower: true
+[Browser Console log] [19:17:04.578] [Enemy] Detected collision with Player, calling onCollisionWithPlayer
+[Browser Console log] [19:17:04.578] [Enemy] onCollisionWithPlayer called
+[Browser Console log] [19:17:04.579]   - Enemy state: idle
+[Browser Console log] [19:17:04.579]   - Player invulnerable: true
+[Browser Console log] [19:17:04.579] [Enemy] Skipping damage - enemy dead or player invulnerable
+Player after first damage: { width: 14, height: 16, isSmall: true, isDead: false }
+✅ Assert: Player should become small after first damage (test-enemy-damage.cjs:178)
+✅ Player became small after first damage
+Lives after first damage: 3
+✅ Assert: Lives should not change after first damage. Expected: 3, Got: 3 (test-enemy-damage.cjs:189)
+
+--- Test 2: Second Enemy Damage (Small -> Death) ---
+Moving player left for 500ms
+Holding key: ArrowLeft for 500ms
+Moving player right for 1000ms
+Holding key: ArrowRight for 1000ms
+[Browser Console log] [19:17:08.385] [PhysicsSystem] Player-Enemy collision detected!
+[Browser Console log] [19:17:08.386]   - EntityA: Player (player)
+[Browser Console log] [19:17:08.386]   - EntityB: Slime (enemy)
+[Browser Console log] [19:17:08.386] [Player] onCollision called
+[Browser Console log] [19:17:08.386]   - Other entity: Slime
+[Browser Console log] [19:17:08.386]   - Other physicsLayer: enemy
+[Browser Console log] [19:17:08.386]   - Has onCollisionWithPlayer: true
+[Browser Console log] [19:17:08.386] [Player] Calling onCollisionWithPlayer on other entity
+[Browser Console log] [19:17:08.386] [Enemy] onCollisionWithPlayer called
+[Browser Console log] [19:17:08.386]   - Enemy state: idle
+[Browser Console log] [19:17:08.386]   - Player invulnerable: true
+[Browser Console log] [19:17:08.386] [Enemy] Skipping damage - enemy dead or player invulnerable
+[Browser Console log] [19:17:08.386] [Enemy] onCollision called
+[Browser Console log] [19:17:08.386]   - Other entity: Player
+[Browser Console log] [19:17:08.386]   - Has takeDamage: true
+[Browser Console log] [19:17:08.386]   - Has jumpPower: true
+[Browser Console log] [19:17:08.387] [Enemy] Detected collision with Player, calling onCollisionWithPlayer
+[Browser Console log] [19:17:08.387] [Enemy] onCollisionWithPlayer called
+[Browser Console log] [19:17:08.387]   - Enemy state: idle
+[Browser Console log] [19:17:08.387]   - Player invulnerable: true
+[Browser Console log] [19:17:08.387] [Enemy] Skipping damage - enemy dead or player invulnerable
+Player after second damage: {
+  position: { x: 192.8555952325834, y: 192 },
+  isSmall: true,
+  isDead: false,
+  invulnerable: true,
+  invulnerabilityTime: null
+}
+Lives after second damage: 3
+📸 Screenshot saved: Enemy Damage Test-test-failure-2025-07-27_19-17-09-JST.png
+
+==================================================
+Test completed in: 7.22s
+==================================================
+

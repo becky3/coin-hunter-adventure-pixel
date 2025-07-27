@@ -419,6 +419,17 @@ export class PhysicsSystem {
             other: entityA,
             side: this.getCollisionSide(entityB, entityA)
         };
+        
+        const isPlayerEnemyCollision = 
+            (entityA.physicsLayer === PhysicsLayer.PLAYER && entityB.physicsLayer === PhysicsLayer.ENEMY) ||
+            (entityA.physicsLayer === PhysicsLayer.ENEMY && entityB.physicsLayer === PhysicsLayer.PLAYER);
+            
+        if (isPlayerEnemyCollision) {
+            Logger.log('[PhysicsSystem] Player-Enemy collision detected!');
+            Logger.log(`  - EntityA: ${entityA.constructor.name} (${entityA.physicsLayer})`);
+            Logger.log(`  - EntityB: ${entityB.constructor.name} (${entityB.physicsLayer})`);
+        }
+        
         if (entityA.onCollision) {
             entityA.onCollision(collisionInfoA);
         }

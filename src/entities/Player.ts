@@ -628,7 +628,13 @@ export class Player extends Entity {
             return;
         }
         
+        Logger.log('[Player] onCollision called');
+        Logger.log(`  - Other entity: ${collisionInfo.other.constructor.name}`);
+        Logger.log(`  - Other physicsLayer: ${collisionInfo.other.physicsLayer}`);
+        Logger.log(`  - Has onCollisionWithPlayer: ${'onCollisionWithPlayer' in collisionInfo.other}`);
+        
         if ('onCollisionWithPlayer' in collisionInfo.other && typeof collisionInfo.other.onCollisionWithPlayer === 'function') {
+            Logger.log('[Player] Calling onCollisionWithPlayer on other entity');
             type EntityWithPlayerCollision = { onCollisionWithPlayer: (player: Player) => void };
             (collisionInfo.other as unknown as EntityWithPlayerCollision).onCollisionWithPlayer(this);
         }

@@ -131,7 +131,14 @@ export class Enemy extends Entity {
     }
 
     onCollisionWithPlayer(player: Player): void {
-        if (this.state === 'dead' || player.invulnerable) return;
+        Logger.log('[Enemy] onCollisionWithPlayer called');
+        Logger.log(`  - Enemy state: ${this.state}`);
+        Logger.log(`  - Player invulnerable: ${player.invulnerable}`);
+        
+        if (this.state === 'dead' || player.invulnerable) {
+            Logger.log('[Enemy] Skipping damage - enemy dead or player invulnerable');
+            return;
+        }
         
         const enemyCenter = this.y + this.height / 2;
         
@@ -140,6 +147,10 @@ export class Enemy extends Entity {
         const isFalling = player.vy > 0;
         const wasJustBounced = player.vy < 0;
         
+        Logger.log('[Enemy] Collision details:');
+        Logger.log(`  - Player center Y: ${playerCenter}, Enemy center Y: ${enemyCenter}`);
+        Logger.log(`  - Is player above: ${isAboveEnemy}`);
+        Logger.log(`  - Player vy: ${player.vy} (falling: ${isFalling})`);
         
         if (isAboveEnemy && (isFalling || wasJustBounced)) {
             const playerLeft = player.x;
@@ -151,6 +162,7 @@ export class Enemy extends Entity {
             if (!hasHorizontalOverlap) return;
             
             if (this.canBeStomped()) {
+                Logger.log('[Enemy] Player stomped enemy!');
                 this.takeDamage(1);
                 const scoreGained = 100;
                 player.addScore(scoreGained);
@@ -168,6 +180,7 @@ export class Enemy extends Entity {
             player.grounded = false;
             return;
         } else {
+            Logger.log('[Enemy] Player taking damage from enemy');
             if (player.takeDamage) {
                 player.takeDamage();
             }
@@ -182,7 +195,13 @@ export class Enemy extends Entity {
     onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo || !collisionInfo.other) return;
         
+        Logger.log('[Enemy] onCollision called');
+        Logger.log(`  - Other entity: ${collisionInfo.other.constructor.name}`);
+        Logger.log(`  - Has takeDamage: ${'takeDamage' in collisionInfo.other}`);
+        Logger.log(`  - Has jumpPower: ${'jumpPower' in collisionInfo.other}`);
+        
         if ('takeDamage' in collisionInfo.other && 'jumpPower' in collisionInfo.other) {
+            Logger.log('[Enemy] Detected collision with Player, calling onCollisionWithPlayer');
             this.onCollisionWithPlayer(collisionInfo.other as unknown as Player);
         }
     }
