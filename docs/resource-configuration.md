@@ -6,15 +6,32 @@
 
 ## 構造
 
-すべてのリソース設定は `/src/config/resources/` に配置されています：
+すべてのリソース設定は `/src/config/` に配置されています：
 
 ```
-/src/config/resources/
-├── index.json       # メイン設定インデックス
-├── sprites.json     # スプライトとアニメーション定義
-├── characters.json  # キャラクターのステータスと物理設定
-├── audio.json       # 効果音と音楽の定義
-└── objects.json     # ゲームオブジェクトの設定
+/src/config/
+├── resources/
+│   ├── index.json       # メイン設定インデックス
+│   ├── sprites.json     # スプライトとアニメーション定義
+│   ├── characters.json  # キャラクターのステータスと物理設定（非推奨）
+│   ├── audio.json       # 効果音と音楽の定義
+│   └── objects.json     # ゲームオブジェクトの設定（非推奨）
+└── entities/            # 個別エンティティ設定（推奨）
+    ├── player.json
+    ├── enemies/
+    │   ├── slime.json
+    │   ├── bat.json
+    │   ├── spider.json
+    │   └── armor_knight.json
+    ├── items/
+    │   └── coin.json
+    ├── terrain/
+    │   ├── spring.json
+    │   ├── goal_flag.json
+    │   └── falling_floor.json
+    └── powerups/
+        ├── power_glove.json
+        └── shield_stone.json
 ```
 
 ## 設定ファイル
@@ -162,9 +179,12 @@ const resourceLoader = ResourceLoader.getInstance();
 // 初期化（すべての設定を読み込み）
 await resourceLoader.initialize();
 
-// 特定の設定を取得
-const playerConfig = resourceLoader.getCharacterConfig('player', 'main');
-const coinConfig = resourceLoader.getObjectConfig('items', 'coin');
+// 新しい個別エンティティ設定を取得（推奨）
+const playerConfig = resourceLoader.getEntityConfigSync('player');
+const coinConfig = resourceLoader.getEntityConfigSync('items', 'coin');
+const slimeConfig = resourceLoader.getEntityConfigSync('enemies', 'slime');
+
+// 音声設定を取得
 const jumpSound = resourceLoader.getAudioConfig('sfx', 'jump');
 ```
 
@@ -175,19 +195,27 @@ const jumpSound = resourceLoader.getAudioConfig('sfx', 'jump');
 ```typescript
 // プレイヤーはコンストラクタで設定を読み込む
 const player = new Player(x, y);
-// characters.jsonの値を自動的に使用
+// src/config/entities/player.jsonの値を自動的に使用
 
 // コインはコンストラクタで設定を読み込む  
 const coin = new Coin(x, y);
-// objects.jsonの値を自動的に使用
+// src/config/entities/items/coin.jsonの値を自動的に使用
+
+// 敵キャラクターも同様
+const slime = new Slime(x, y);
+// src/config/entities/enemies/slime.jsonの値を自動的に使用
 ```
 
 ## 新しいリソースの追加
 
-1. **スプライトファイルを追加** `/src/assets/sprites/[category]/` へ
-2. **sprites.jsonを更新** スプライト/アニメーション定義を追加
-3. **関連する設定ファイルを更新** (characters.json、objects.jsonなど)
-4. **コード変更は不要** - エンティティは自動的に新しい値を使用
+### 新しいエンティティを追加する場合（推奨）
+
+1. **エンティティ設定ファイルを作成** `/src/config/entities/[type]/[name].json`
+2. **スプライトファイルを追加** `/src/assets/sprites/[category]/` へ
+3. **sprites.jsonを更新** スプライト/アニメーション定義を追加
+4. **ResourceLoaderのpreloadEntityConfigs()に追加** 新しいエンティティタイプを登録
+5. **bundledData.tsを更新** 新しい設定ファイルをインポート
+6. **エンティティクラスを作成** 設定を読み込むコンストラクタを実装
 
 ## メリット
 

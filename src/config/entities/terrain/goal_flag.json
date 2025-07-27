@@ -1,0 +1,15 @@
+{
+  "physics": {
+    "width": 32,
+    "height": 32,
+    "solid": false
+  },
+  "properties": {
+    "waveAmplitude": 5,
+    "waveSpeed": 0.1
+  },
+  "sprites": {
+    "category": "terrain",
+    "name": "goal_flag"
+  }
+}

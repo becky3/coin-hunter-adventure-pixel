@@ -1,0 +1,21 @@
+{
+  "physics": {
+    "width": 16,
+    "height": 16,
+    "solid": true
+  },
+  "properties": {
+    "shakeAmplitude": 2,
+    "shakeFrequency": 0.5,
+    "shakeTime": 1.0
+  },
+  "sprites": {
+    "category": "terrain",
+    "sprites": {
+      "normal": "falling_floor_normal",
+      "crack1": "falling_floor_crack1",
+      "crack2": "falling_floor_crack2",
+      "broken": "falling_floor_broken"
+    }
+  }
+}

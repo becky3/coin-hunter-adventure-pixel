@@ -174,9 +174,9 @@ export class AssetLoader {
             throw new Error(`Failed to load sprite data for ${category}/${name}`);
         }
         
+        const spriteKey = `${category}/${name}`;
+        
         if (this.renderer) {
-            const spriteKey = `${category}/${name}`;
-            
             this.renderer.addStageDependentSprite(spriteKey, spriteData.data);
             Logger.log(`[AssetLoader] Loaded sprite ${spriteKey} as stage-dependent for stage type: ${this.currentStageType}`);
             
@@ -202,9 +202,9 @@ export class AssetLoader {
             frames.push(spriteData.data);
         }
         
+        const animKey = `${category}/${baseName}`;
+        
         if (this.renderer) {
-            const animKey = `${category}/${baseName}`;
-            
             this.renderer.addStageDependentAnimation(animKey, frames, frameDuration);
             Logger.log(`[AssetLoader] Loaded animation ${animKey} as stage-dependent for stage type: ${this.currentStageType}`);
             

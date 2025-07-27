@@ -1,0 +1,31 @@
+{
+  "physics": {
+    "width": 8,
+    "height": 8,
+    "moveSpeed": 0.5,
+    "airResistance": 0.0,
+    "gravityScale": 0.0
+  },
+  "stats": {
+    "maxHealth": 1,
+    "damage": 1,
+    "scoreValue": 100
+  },
+  "ai": {
+    "detectRange": 80,
+    "attackRange": 20
+  },
+  "sprites": {
+    "category": "enemies",
+    "sprites": ["bat_hang", "bat_fly1", "bat_fly2"],
+    "animations": {
+      "hang": {
+        "sprite": "bat_hang"
+      },
+      "fly": {
+        "sprites": ["bat_fly1", "bat_fly2"],
+        "frameDuration": 200
+      }
+    }
+  }
+}

@@ -17,7 +17,7 @@ export class ShieldStone extends PowerUpItem {
 
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const config = resourceLoader.getObjectConfig('powerups', 'shieldStone');
+        const config = resourceLoader.getEntityConfigSync('powerups', 'shield_stone');
         
         if (!config) {
             throw new Error('Failed to load shield stone configuration');

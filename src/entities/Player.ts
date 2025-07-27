@@ -86,9 +86,9 @@ export class Player extends Entity {
 
     constructor(x?: number, y?: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const playerConfig = resourceLoader.getCharacterConfig('player', 'main');
+        const playerConfig = resourceLoader.getEntityConfigSync('player');
         
-        if (!playerConfig) {
+        if (!playerConfig || !playerConfig.stats) {
             throw new Error('Failed to load player configuration');
         }
         
@@ -120,17 +120,6 @@ export class Player extends Entity {
         this.variableJumpBoostMultiplier = playerConfig.physics.variableJumpBoostMultiplier;
         
         this.playerConfig = config;
-        
-        Logger.log('[Player] Jump Configuration Debug:');
-        Logger.log('  - Config source:', 'characters.json');
-        Logger.log('  - jumpPower:', this.jumpPower);
-        Logger.log('  - variableJumpBoost:', this.variableJumpBoost);
-        Logger.log('  - variableJumpBoostMultiplier:', this.variableJumpBoostMultiplier);
-        Logger.log('  - minJumpTime:', this.playerConfig.minJumpTime);
-        Logger.log('  - maxJumpTime:', this.playerConfig.maxJumpTime);
-        Logger.log('  - airResistance:', this.airResistance);
-        Logger.log('  - gravityScale:', this.gravityScale);
-        Logger.log('  - maxFallSpeed:', this.maxFallSpeed);
         
         this.spriteKey = null;
         
@@ -498,7 +487,7 @@ export class Player extends Entity {
             return true;
         }
         
-        const playerConfig = ResourceLoader.getInstance().getCharacterConfig('player', 'main');
+        const playerConfig = ResourceLoader.getInstance().getEntityConfigSync('player');
         if (!playerConfig) {
             throw new Error('Failed to load player configuration');
         }

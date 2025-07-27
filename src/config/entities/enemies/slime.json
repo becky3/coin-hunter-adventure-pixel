@@ -1,0 +1,41 @@
+{
+  "physics": {
+    "width": 16,
+    "height": 16,
+    "moveSpeed": 0.25,
+    "jumpHeight": 5,
+    "jumpInterval": 1000,
+    "airResistance": 0.0,
+    "gravityScale": 1.0
+  },
+  "stats": {
+    "maxHealth": 1,
+    "damage": 1,
+    "scoreValue": 100
+  },
+  "ai": {
+    "detectRange": 100,
+    "attackRange": 20
+  },
+  "sprites": {
+    "category": "enemies",
+    "sprites": ["slime", "slime_idle1", "slime_idle2"],
+    "animations": {
+      "idle": {
+        "name": "slime_idle",
+        "frameCount": 2,
+        "frameDuration": 500
+      },
+      "move": {
+        "name": "slime_move",
+        "frameCount": 2,
+        "frameDuration": 300
+      },
+      "jump": {
+        "name": "slime_jump",
+        "frameCount": 3,
+        "frameDuration": 150
+      }
+    }
+  }
+}

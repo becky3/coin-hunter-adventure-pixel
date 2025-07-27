@@ -1,0 +1,21 @@
+{
+  "physics": {
+    "width": 16,
+    "height": 16,
+    "solid": false
+  },
+  "properties": {
+    "scoreValue": 10,
+    "animationSpeed": 100,
+    "floatAmplitude": 0.1,
+    "floatSpeed": 0.03
+  },
+  "sprites": {
+    "category": "items",
+    "animation": {
+      "name": "coin_spin",
+      "frameCount": 4,
+      "frameDuration": 100
+    }
+  }
+}

@@ -3,9 +3,7 @@
   "description": "Resource configuration for Coin Hunter Adventure Pixel",
   "configs": {
     "sprites": "./sprites.json",
-    "characters": "./characters.json",
-    "audio": "./audio.json",
-    "objects": "./objects.json"
+    "audio": "./audio.json"
   },
   "paths": {
     "sprites": "/src/assets/sprites/",

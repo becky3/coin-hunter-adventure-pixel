@@ -1,9 +1,15 @@
 import {
     ResourceIndexConfig,
     SpritesConfig,
-    CharacterConfig,
     AudioConfig,
-    ObjectConfig
+    EntityConfig,
+    PlayerConfig,
+    EnemyConfig,
+    CoinConfig,
+    SpringConfig,
+    FallingFloorConfig,
+    PowerUpConfig,
+    GoalFlagConfig
 } from './ResourceConfig';
 import { MusicPatternConfig, MusicConfig } from './MusicPatternConfig';
 import { bundledResourceData, bundledMusicData } from '../data/bundledData';
@@ -16,11 +22,10 @@ export class ResourceLoader {
     private static instance: ResourceLoader;
     private resourceIndex: ResourceIndexConfig | null = null;
     private sprites: SpritesConfig | null = null;
-    private characters: { [key: string]: { [key: string]: CharacterConfig } } | null = null;
     private audio: { [key: string]: { [key: string]: AudioConfig } } | null = null;
-    private objects: { [key: string]: { [key: string]: ObjectConfig } } | null = null;
     private musicPatterns: MusicPatternConfig | null = null;
     private physics: { [key: string]: unknown } | null = null;
+    private entityConfigCache: Map<string, EntityConfig> = new Map();
   
     private constructor() {}
   
@@ -70,23 +75,9 @@ export class ResourceLoader {
             })(),
             (() => {
                 const startTime = performance.now();
-                return this.loadCharacters().then(() => {
-                    const endTime = performance.now();
-                    recordPhase('loadCharacters', startTime, endTime);
-                });
-            })(),
-            (() => {
-                const startTime = performance.now();
                 return this.loadAudio().then(() => {
                     const endTime = performance.now();
                     recordPhase('loadAudio', startTime, endTime);
-                });
-            })(),
-            (() => {
-                const startTime = performance.now();
-                return this.loadObjects().then(() => {
-                    const endTime = performance.now();
-                    recordPhase('loadObjects', startTime, endTime);
                 });
             })(),
             (() => {
@@ -109,6 +100,11 @@ export class ResourceLoader {
         const parallelEndTime = performance.now();
         recordPhase('parallelLoading', parallelStartTime, parallelEndTime);
         
+        const preloadStartTime = performance.now();
+        await this.preloadEntityConfigs();
+        const preloadEndTime = performance.now();
+        recordPhase('preloadEntityConfigs', preloadStartTime, preloadEndTime);
+        
         const endTime = performance.now();
         Logger.log('[Performance] ResourceLoader.initialize() completed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
   
@@ -118,7 +114,7 @@ export class ResourceLoader {
         const allBundled = { ...bundledResourceData, ...bundledMusicData };
         if (allBundled[path]) {
             Logger.log(`[ResourceLoader] Using bundled data for: ${path}`);
-            return allBundled[path];
+            return allBundled[path] as T;
         }
         
         try {
@@ -147,12 +143,6 @@ export class ResourceLoader {
         Logger.log('[Performance] loadSprites completed in', (performance.now() - startTime).toFixed(2) + 'ms');
     }
   
-    private async loadCharacters(): Promise<void> {
-        if (!this.resourceIndex) return;
-    
-        const charactersPath = '/src/config/resources/characters.json';
-        this.characters = await this.loadJSON(charactersPath);
-    }
   
     private async loadAudio(): Promise<void> {
         if (!this.resourceIndex) return;
@@ -161,12 +151,6 @@ export class ResourceLoader {
         this.audio = await this.loadJSON(audioPath);
     }
   
-    private async loadObjects(): Promise<void> {
-        if (!this.resourceIndex) return;
-    
-        const objectsPath = '/src/config/resources/objects.json';
-        this.objects = await this.loadJSON(objectsPath);
-    }
     
     private async loadMusicPatterns(): Promise<void> {
         if (!this.resourceIndex) return;
@@ -181,7 +165,7 @@ export class ResourceLoader {
         
         for (const file of bgmFiles) {
             const bgmPath = `/src/config/resources/bgm/${file}.json`;
-            const bgmData = await this.loadJSON(bgmPath);
+            const bgmData = await this.loadJSON<MusicConfig>(bgmPath);
             if (bgmData) {
                 this.musicPatterns.bgm[file] = bgmData;
             }
@@ -189,7 +173,7 @@ export class ResourceLoader {
         
         for (const file of seFiles) {
             const sePath = `/src/config/resources/se/${file}.json`;
-            const seData = await this.loadJSON(sePath);
+            const seData = await this.loadJSON<MusicConfig>(sePath);
             if (seData) {
                 this.musicPatterns.se[file] = seData;
             }
@@ -207,19 +191,6 @@ export class ResourceLoader {
         return this.sprites;
     }
   
-    getCharacterConfig(type: string, name: string): CharacterConfig | null {
-        if (!this.characters) {
-            return null;
-        }
-        
-        if (type === 'player' && name === 'main') {
-            return (this.characters as Record<string, CharacterConfig>).player || null;
-        }
-        if (!this.characters[type]) {
-            return null;
-        }
-        return this.characters[type][name] || null;
-    }
   
     getAudioConfig(type: string, name: string): AudioConfig | null {
         if (!this.audio || !this.audio[type]) {
@@ -228,12 +199,6 @@ export class ResourceLoader {
         return this.audio[type][name] || null;
     }
   
-    getObjectConfig(type: string, name: string): ObjectConfig | null {
-        if (!this.objects || !this.objects[type]) {
-            return null;
-        }
-        return this.objects[type][name] || null;
-    }
   
     getResourcePaths(): { sprites: string; levels: string; fonts: string } | null {
         return this.resourceIndex?.paths || null;
@@ -289,5 +254,72 @@ export class ResourceLoader {
             return this.physics[category] || null;
         }
         return this.physics;
+    }
+    
+    async getEntityConfig(type: string, name?: string): Promise<EntityConfig> {
+        const cacheKey = name ? `${type}/${name}` : type;
+        
+        if (this.entityConfigCache.has(cacheKey)) {
+            const config = this.entityConfigCache.get(cacheKey);
+            if (!config) {
+                throw new Error(`Entity config not found in cache: ${cacheKey}`);
+            }
+            return config;
+        }
+        
+        const path = name 
+            ? `/src/config/entities/${type}/${name}.json`
+            : `/src/config/entities/${type}.json`;
+            
+        const config = await this.loadJSON<EntityConfig>(path);
+        
+        if (!config) {
+            throw new Error(`Failed to load entity config: ${path}`);
+        }
+        
+        this.entityConfigCache.set(cacheKey, config);
+        return config;
+    }
+    
+    getEntityConfigSync(type: 'player'): PlayerConfig;
+    getEntityConfigSync(type: 'enemies', name: string): EnemyConfig;
+    getEntityConfigSync(type: 'items', name: 'coin'): CoinConfig;
+    getEntityConfigSync(type: 'terrain', name: 'spring'): SpringConfig;
+    getEntityConfigSync(type: 'terrain', name: 'falling_floor'): FallingFloorConfig;
+    getEntityConfigSync(type: 'terrain', name: 'goal_flag'): GoalFlagConfig;
+    getEntityConfigSync(type: 'powerups', name: string): PowerUpConfig;
+    getEntityConfigSync(type: string, name?: string): EntityConfig {
+        const cacheKey = name ? `${type}/${name}` : type;
+        
+        if (!this.entityConfigCache.has(cacheKey)) {
+            throw new Error(`Entity config not loaded yet: ${cacheKey}. Call preloadEntityConfigs() first.`);
+        }
+        
+        const config = this.entityConfigCache.get(cacheKey);
+        if (!config) {
+            throw new Error(`Entity config not found: ${cacheKey}`);
+        }
+        
+        return config;
+    }
+    
+    async preloadEntityConfigs(): Promise<void> {
+        const entities = [
+            { type: 'player' },
+            { type: 'enemies', name: 'slime' },
+            { type: 'enemies', name: 'bat' },
+            { type: 'enemies', name: 'spider' },
+            { type: 'enemies', name: 'armor_knight' },
+            { type: 'items', name: 'coin' },
+            { type: 'terrain', name: 'spring' },
+            { type: 'terrain', name: 'goal_flag' },
+            { type: 'terrain', name: 'falling_floor' },
+            { type: 'powerups', name: 'power_glove' },
+            { type: 'powerups', name: 'shield_stone' }
+        ];
+        
+        await Promise.all(
+            entities.map(({ type, name }) => this.getEntityConfig(type, name))
+        );
     }
 }
