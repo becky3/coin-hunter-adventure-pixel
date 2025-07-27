@@ -155,40 +155,39 @@ export class PerformanceMonitor {
             originalDrawLine: this.renderer.drawLine.bind(this.renderer)
         };
 
-        this.renderer.drawSprite = (...args: Parameters<typeof PixelRenderer.prototype.drawSprite>) => {
-            if (this.enabled) {
-                this.currentDrawCalls.drawSprite++;
-                this.trackPixelMetrics('sprite', args[1], args[2], 16, 16);
-            }
-            if (this.drawCallHooks) {
-                return this.drawCallHooks.originalDrawSprite.apply(this.renderer, args);
-            }
-            return undefined;
-        };
+        this.renderer.drawSprite = ((original => {
+            return (...args: Parameters<typeof original>) => {
+                if (this.enabled) {
+                    this.currentDrawCalls.drawSprite++;
+                    this.trackPixelMetrics('sprite', args[1], args[2], 16, 16);
+                }
+                return original.apply(this.renderer, args);
+            };
+        })(this.drawCallHooks.originalDrawSprite));
 
-        this.renderer.drawRect = (...args: Parameters<typeof PixelRenderer.prototype.drawRect>) => {
-            if (this.enabled) {
-                this.currentDrawCalls.drawRect++;
-                this.trackPixelMetrics('rect', args[0], args[1], args[2], args[3]);
-            }
-            if (this.drawCallHooks) {
-                return this.drawCallHooks.originalDrawRect.apply(this.renderer, args);
-            }
-        };
+        this.renderer.drawRect = ((original => {
+            return (...args: Parameters<typeof original>) => {
+                if (this.enabled) {
+                    this.currentDrawCalls.drawRect++;
+                    this.trackPixelMetrics('rect', args[0], args[1], args[2], args[3]);
+                }
+                return original.apply(this.renderer, args);
+            };
+        })(this.drawCallHooks.originalDrawRect));
 
-        this.renderer.drawText = (...args: Parameters<typeof PixelRenderer.prototype.drawText>) => {
-            if (this.enabled) this.currentDrawCalls.drawText++;
-            if (this.drawCallHooks) {
-                return this.drawCallHooks.originalDrawText.apply(this.renderer, args);
-            }
-        };
+        this.renderer.drawText = ((original => {
+            return (...args: Parameters<typeof original>) => {
+                if (this.enabled) this.currentDrawCalls.drawText++;
+                return original.apply(this.renderer, args);
+            };
+        })(this.drawCallHooks.originalDrawText));
 
-        this.renderer.drawLine = (...args: Parameters<typeof PixelRenderer.prototype.drawLine>) => {
-            if (this.enabled) this.currentDrawCalls.drawLine++;
-            if (this.drawCallHooks) {
-                return this.drawCallHooks.originalDrawLine.apply(this.renderer, args);
-            }
-        };
+        this.renderer.drawLine = ((original => {
+            return (...args: Parameters<typeof original>) => {
+                if (this.enabled) this.currentDrawCalls.drawLine++;
+                return original.apply(this.renderer, args);
+            };
+        })(this.drawCallHooks.originalDrawLine));
     }
     
     private installCanvasOperationHooks(): void {
@@ -207,59 +206,85 @@ export class PerformanceMonitor {
             originalDrawImage: ctx.drawImage.bind(ctx)
         };
         
-        ctx.save = () => {
-            if (this.enabled) {
-                this.currentCanvasOperations.save++;
-                this.globalAlphaStack.push(ctx.globalAlpha);
-            }
-            return this.canvasOperationHooks.originalSave.call(ctx);
-        };
+        ctx.save = (() => {
+            const original = this.canvasOperationHooks.originalSave;
+            return function (this: CanvasRenderingContext2D) {
+                if (PerformanceMonitor.getInstance().enabled) {
+                    PerformanceMonitor.getInstance().currentCanvasOperations.save++;
+                    PerformanceMonitor.getInstance().globalAlphaStack.push(ctx.globalAlpha);
+                }
+                return original.call(this);
+            };
+        })();
         
-        ctx.restore = () => {
-            if (this.enabled) {
-                this.currentCanvasOperations.restore++;
-                this.globalAlphaStack.pop();
-            }
-            return this.canvasOperationHooks.originalRestore.call(ctx);
-        };
+        ctx.restore = (() => {
+            const original = this.canvasOperationHooks.originalRestore;
+            return function (this: CanvasRenderingContext2D) {
+                if (PerformanceMonitor.getInstance().enabled) {
+                    PerformanceMonitor.getInstance().currentCanvasOperations.restore++;
+                    PerformanceMonitor.getInstance().globalAlphaStack.pop();
+                }
+                return original.call(this);
+            };
+        })();
         
-        ctx.setTransform = (...args) => {
-            if (this.enabled) this.currentCanvasOperations.setTransform++;
-            return this.canvasOperationHooks.originalSetTransform.apply(ctx, args);
-        };
+        ctx.setTransform = ((original => {
+            return function (this: CanvasRenderingContext2D, ...args: Parameters<typeof original>) {
+                if (PerformanceMonitor.getInstance().enabled) {
+                    PerformanceMonitor.getInstance().currentCanvasOperations.setTransform++;
+                }
+                return original.apply(this, args);
+            } as typeof original;
+        })(this.canvasOperationHooks.originalSetTransform));
         
-        ctx.scale = (...args) => {
-            if (this.enabled) this.currentCanvasOperations.scale++;
-            return this.canvasOperationHooks.originalScale.apply(ctx, args);
-        };
+        ctx.scale = ((original => {
+            return function (this: CanvasRenderingContext2D, ...args: Parameters<typeof original>) {
+                if (PerformanceMonitor.getInstance().enabled) {
+                    PerformanceMonitor.getInstance().currentCanvasOperations.scale++;
+                }
+                return original.apply(this, args);
+            } as typeof original;
+        })(this.canvasOperationHooks.originalScale));
         
-        ctx.translate = (...args) => {
-            if (this.enabled) this.currentCanvasOperations.translate++;
-            return this.canvasOperationHooks.originalTranslate.apply(ctx, args);
-        };
+        ctx.translate = ((original => {
+            return function (this: CanvasRenderingContext2D, ...args: Parameters<typeof original>) {
+                if (PerformanceMonitor.getInstance().enabled) {
+                    PerformanceMonitor.getInstance().currentCanvasOperations.translate++;
+                }
+                return original.apply(this, args);
+            } as typeof original;
+        })(this.canvasOperationHooks.originalTranslate));
         
-        ctx.fillRect = (...args) => {
-            if (this.enabled) {
-                this.currentCanvasOperations.fillRect++;
-                const [_x, _y, width, height] = args;
-                this.currentPixelMetrics.fillRectArea += width * height;
-            }
-            return this.canvasOperationHooks.originalFillRect.apply(ctx, args);
-        };
+        ctx.fillRect = ((original => {
+            return function (this: CanvasRenderingContext2D, ...args: Parameters<typeof original>) {
+                if (PerformanceMonitor.getInstance().enabled) {
+                    PerformanceMonitor.getInstance().currentCanvasOperations.fillRect++;
+                    const [_x, _y, width, height] = args;
+                    PerformanceMonitor.getInstance().currentPixelMetrics.fillRectArea += width * height;
+                }
+                return original.apply(this, args);
+            } as typeof original;
+        })(this.canvasOperationHooks.originalFillRect));
         
-        ctx.clearRect = (...args) => {
-            if (this.enabled) {
-                this.currentCanvasOperations.clearRect++;
-                const [_x, _y, width, height] = args;
-                this.currentPixelMetrics.clearRectArea += width * height;
-            }
-            return this.canvasOperationHooks.originalClearRect.apply(ctx, args);
-        };
+        ctx.clearRect = ((original => {
+            return function (this: CanvasRenderingContext2D, ...args: Parameters<typeof original>) {
+                if (PerformanceMonitor.getInstance().enabled) {
+                    PerformanceMonitor.getInstance().currentCanvasOperations.clearRect++;
+                    const [_x, _y, width, height] = args;
+                    PerformanceMonitor.getInstance().currentPixelMetrics.clearRectArea += width * height;
+                }
+                return original.apply(this, args);
+            } as typeof original;
+        })(this.canvasOperationHooks.originalClearRect));
         
-        ctx.drawImage = (...args) => {
-            if (this.enabled) this.currentCanvasOperations.drawImage++;
-            return this.canvasOperationHooks.originalDrawImage.apply(ctx, args);
-        };
+        ctx.drawImage = ((original => {
+            return function (this: CanvasRenderingContext2D, ...args: Parameters<typeof original>) {
+                if (PerformanceMonitor.getInstance().enabled) {
+                    PerformanceMonitor.getInstance().currentCanvasOperations.drawImage++;
+                }
+                return original.apply(this, args);
+            } as typeof original;
+        })(this.canvasOperationHooks.originalDrawImage));
         
     }
     
