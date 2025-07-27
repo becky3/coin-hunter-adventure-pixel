@@ -29,7 +29,7 @@ export class AnimatedSprite {
 
     render(renderer: PixelRenderer, x: number, y: number, flipX: boolean = false): void {
         const screenPos = renderer.worldToScreen(x, y);
-        renderer.drawRect(screenPos.x, screenPos.y, 16, 16, '#FF00FF');
+        renderer.drawRect(screenPos.x, screenPos.y, 16, 16, 0x21);
         
         if (!flipX) {
             void 0;

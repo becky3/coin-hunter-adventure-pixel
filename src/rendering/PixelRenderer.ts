@@ -2,7 +2,7 @@ import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants';
 import { PixelArtRenderer, PixelArtSprite } from '../utils/pixelArt';
 import { Logger } from '../utils/Logger';
 import { AssetLoader } from '../assets/AssetLoader';
-import { SpriteData } from '../types/assetTypes';
+import { SpriteData } from '../types/animationTypes';
 import { paletteSystem } from '../utils/pixelArtPalette';
 
 

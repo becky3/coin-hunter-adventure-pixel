@@ -1,7 +1,7 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { GameState, GameStateManager } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { InputSystem } from '../core/InputSystem';
+import { InputSystem, InputEvent } from '../core/InputSystem';
 import { URLParams } from '../utils/urlParams';
 import { Logger } from '../utils/Logger';
 import { MusicSystem } from '../audio/MusicSystem';

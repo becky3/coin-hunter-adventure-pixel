@@ -209,9 +209,9 @@ export class Enemy extends Entity {
         const barX = this.x + (this.width - barWidth) / 2;
         const barY = this.y - 8;
         
-        renderer.drawRect(barX, barY, barWidth, barHeight, '#000000');
+        renderer.drawRect(barX, barY, barWidth, barHeight, 0x00);
         
         const hpWidth = (this.health / this.maxHealth) * barWidth;
-        renderer.drawRect(barX, barY, hpWidth, barHeight, '#FF0000');
+        renderer.drawRect(barX, barY, hpWidth, barHeight, 0x31);
     }
 }

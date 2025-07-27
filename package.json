@@ -14,6 +14,9 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint 'src/**/*.{js,ts}'",
     "lint:fix": "eslint 'src/**/*.{js,ts}' --fix",
+    "typecheck": "tsc --noEmit",
+    "typecheck:strict": "tsc --noEmit --strict",
+    "check:deps": "npx depcheck",
     "test:claude": "./scripts/claude-test.sh",
     "test:before-push": "npm run lint && node tests/e2e/run-tests-parallel.cjs"
   },

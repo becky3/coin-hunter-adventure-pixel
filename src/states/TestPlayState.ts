@@ -111,7 +111,7 @@ export class TestPlayState implements GameState {
         for (let y = 0; y < this.tileMap.length; y++) {
             for (let x = 0; x < this.tileMap[y].length; x++) {
                 if (this.tileMap[y][x] === 1) {
-                    renderer.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, '#00AA00');
+                    renderer.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, 0x61);
                 }
             }
         }
@@ -122,7 +122,7 @@ export class TestPlayState implements GameState {
                 Math.floor(this.player.y),
                 this.player.width,
                 this.player.height,
-                '#FF0000'
+                0x31
             );
         }
 
