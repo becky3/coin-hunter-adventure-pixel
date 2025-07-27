@@ -1,6 +1,6 @@
 import { GameState, GameStateManager } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { InputSystem } from '../core/InputSystem';
+import { InputSystem, InputEvent } from '../core/InputSystem';
 import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
 import { CameraController } from '../controllers/CameraController';

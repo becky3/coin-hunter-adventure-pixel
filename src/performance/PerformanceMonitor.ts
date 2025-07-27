@@ -511,7 +511,7 @@ export class PerformanceMonitor {
         const bgWidth = 200;
         const bgHeight = 150;
 
-        renderer.drawRect(x - 2, y - 2, bgWidth, bgHeight, 'rgba(0, 0, 0, 0.8)', true);
+        renderer.drawRect(x - 2, y - 2, bgWidth, bgHeight, 0x00, true);
 
         renderer.drawText(`FPS: ${latest.fps.toFixed(1)}`, x, y, '#00FF00', 1, true);
         y += lineHeight;
@@ -544,8 +544,8 @@ export class PerformanceMonitor {
     }
 
     private renderGraph(renderer: PixelRenderer, x: number, y: number, width: number, height: number): void {
-        renderer.drawRect(x, y, width, height, 'rgba(0, 0, 0, 0.5)', true);
-        renderer.drawRect(x, y, width, height, '#00FF00', false);
+        renderer.drawRect(x, y, width, height, 0x00, true);
+        renderer.drawRect(x, y, width, height, 0x62, false);
 
         if (this.metrics.length < 2) return;
 

@@ -1,8 +1,7 @@
 import type { PixelRenderer } from '../rendering/PixelRenderer';
-import type { SpriteData } from '../types/assetTypes';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import type { AnimationDefinition, EntityPaletteDefinition, SpriteData } from '../types/animationTypes';
 import { EntityAnimationManager } from '../animation/EntityAnimationManager';
-import { EventBus } from '../events/EventBus';
+import { EventBus } from '../services/EventBus';
 
 export interface Bounds {
     left: number;
@@ -206,7 +205,7 @@ export abstract class Entity {
             this.y,
             this.width,
             this.height,
-            '#00FF00',
+            0x62,
             false
         );
         
