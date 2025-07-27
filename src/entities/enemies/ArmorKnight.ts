@@ -59,7 +59,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         
         this.stompBounceVelocity = ArmorKnight.DEFAULT_STOMP_BOUNCE_VELOCITY;
         
-        this.aiType = config.ai.type as 'patrol' | 'chase' | 'idle';
         this.detectRange = config.ai.detectRange;
         this.detectRangeWidth = config.ai.detectRangeWidth;
         this.detectRangeHeight = config.ai.detectRangeHeight;

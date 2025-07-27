@@ -87,7 +87,6 @@ export class Spider extends Enemy implements EntityInitializer {
         this.gravity = false;
         this.physicsEnabled = false;
         
-        this.aiType = spiderConfig.ai.type as 'patrol' | 'chase' | 'idle';
         this.attackRange = spiderConfig.ai.attackRange;
         
         this.setAnimation('idle');

@@ -80,7 +80,6 @@ export class Bat extends Enemy implements EntityInitializer {
         this.gravity = false;
         this.physicsEnabled = false;
         
-        this.aiType = batConfig.ai.type as 'patrol' | 'chase' | 'idle';
         this.attackRange = batConfig.ai.attackRange;
         
         this.setAnimation('hang');

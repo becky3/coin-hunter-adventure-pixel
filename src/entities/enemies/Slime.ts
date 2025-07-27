@@ -48,7 +48,6 @@ export class Slime extends Enemy implements EntityInitializer {
         this.bounceHeight = 0.3;
         this.friction = 0.8;
         
-        this.aiType = slimeConfig.ai.type as 'patrol' | 'chase' | 'idle';
         this.detectRange = slimeConfig.ai.detectRange;
         this.attackRange = slimeConfig.ai.attackRange;
         
