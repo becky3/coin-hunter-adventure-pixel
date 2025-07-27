@@ -201,7 +201,10 @@ export class PixelRenderer {
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
-        const color = paletteSystem.masterPalette[colorIndex] || '#FFFFFF';
+        const color = paletteSystem.masterPalette[colorIndex];
+        if (!color) {
+            throw new Error(`Invalid color index: ${colorIndex}. Color not found in master palette.`);
+        }
         this.ctx.fillStyle = color;
         this.ctx.strokeStyle = color;
         
@@ -231,7 +234,10 @@ export class PixelRenderer {
         
         this.ctx.save();
         this.ctx.globalAlpha = alpha;
-        const color = paletteSystem.masterPalette[colorIndex] || '#FFFFFF';
+        const color = paletteSystem.masterPalette[colorIndex];
+        if (!color) {
+            throw new Error(`Invalid color index: ${colorIndex}. Color not found in master palette.`);
+        }
         this.ctx.fillStyle = color;
         this.ctx.font = `${scaledSize}px ${FONT.FAMILY}`;
         this.ctx.textAlign = 'left';

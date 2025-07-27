@@ -1,7 +1,7 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../services/EventBus';
-import { UI_PALETTE_INDICES } from '../utils/pixelArtPalette';
+import { UI_PALETTE_INDICES, paletteSystem } from '../utils/pixelArtPalette';
 
 
 export interface HUDData {
@@ -228,7 +228,8 @@ export class HUDManager {
         return pattern;
     }
 
-    private drawPatternTile(renderer: PixelRenderer, x: number, y: number, pattern: number[][], color: string): void {
+    private drawPatternTile(renderer: PixelRenderer, x: number, y: number, pattern: number[][], colorIndex: number): void {
+        const color = paletteSystem.masterPalette[colorIndex] || '#000000';
         const cacheKey = `${JSON.stringify(pattern)}_${color}`;
         let tileCanvas = this.patternTileCache.get(cacheKey);
         
@@ -243,7 +244,7 @@ export class HUDManager {
             const imageData = new ImageData(tileSize, tileSize);
             const data = imageData.data;
 
-            let r = 255, g = 255, b = 255;
+            let r = 0, g = 0, b = 0;
             if (color && color.startsWith('#')) {
                 const hex = color.slice(1);
                 r = parseInt(hex.substr(0, 2), 16);
@@ -302,9 +303,9 @@ export class HUDManager {
         const bgX = centerX - bgWidth / 2;
         const bgY = centerY - bgHeight / 2;
         
-        renderer.drawRect(bgX, bgY, bgWidth, bgHeight, UI_PALETTE_INDICES.black);
+        renderer.drawRect(bgX, bgY, bgWidth, bgHeight, UI_PALETTE_INDICES.background);
         renderer.drawRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4, UI_PALETTE_INDICES.highlight);
-        renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, UI_PALETTE_INDICES.black);
+        renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, UI_PALETTE_INDICES.background);
         
         if (lines.length > 0) {
             const textStartY = centerY - ((lines.length - 1) * lineHeight) / 2;

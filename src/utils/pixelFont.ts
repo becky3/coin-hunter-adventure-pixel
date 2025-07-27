@@ -1,5 +1,5 @@
 
-import { UI_PALETTE_INDICES, getMasterColor } from './pixelArtPalette';
+import { UI_PALETTE_INDICES, paletteSystem } from './pixelArtPalette';
 
 export type FontData = { [key: string]: number[][] };
 
@@ -453,7 +453,7 @@ export class PixelFont {
         x: number, 
         y: number, 
         scale: number = 1, 
-        color: string = getMasterColor(UI_PALETTE_INDICES.white), 
+        color: string = paletteSystem.masterPalette[UI_PALETTE_INDICES.primaryText] || '#FFFFFF', 
         spacing: number | null = null
     ): void {
 
@@ -515,7 +515,7 @@ export class PixelFont {
         centerX: number, 
         y: number, 
         scale: number = 1, 
-        color: string = getMasterColor(UI_PALETTE_INDICES.white), 
+        color: string = paletteSystem.masterPalette[UI_PALETTE_INDICES.primaryText] || '#FFFFFF', 
         spacing: number | null = null
     ): void {
         const textWidth = this.getTextWidth(text, scale, spacing);
@@ -529,7 +529,7 @@ export class PixelFont {
         rightX: number, 
         y: number, 
         scale: number = 1, 
-        color: string = getMasterColor(UI_PALETTE_INDICES.white), 
+        color: string = paletteSystem.masterPalette[UI_PALETTE_INDICES.primaryText] || '#FFFFFF', 
         spacing: number | null = null
     ): void {
         const textWidth = this.getTextWidth(text, scale, spacing);
@@ -547,7 +547,7 @@ export class PixelFont {
         colorIndex: number = 0, 
         spacing: number | null = null
     ): void {
-        const color = palette[colorIndex] || getMasterColor(UI_PALETTE_INDICES.white);
+        const color = palette[colorIndex] || paletteSystem.masterPalette[UI_PALETTE_INDICES.primaryText] || '#FFFFFF';
         this.drawText(ctx, text, x, y, scale, color, spacing);
     }
 
@@ -557,8 +557,8 @@ export class PixelFont {
         x: number, 
         y: number, 
         scale: number = 1, 
-        color: string = getMasterColor(UI_PALETTE_INDICES.white), 
-        shadowColor: string = getMasterColor(UI_PALETTE_INDICES.black), 
+        color: string = paletteSystem.masterPalette[UI_PALETTE_INDICES.primaryText] || '#FFFFFF', 
+        shadowColor: string = paletteSystem.masterPalette[UI_PALETTE_INDICES.background] || '#000000', 
         shadowOffset: number = 1
     ): void {
 
