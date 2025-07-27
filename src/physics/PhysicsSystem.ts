@@ -1,5 +1,4 @@
 import { Entity, Bounds, CollisionInfo } from '../entities/Entity';
-import { Player } from '../entities/Player';
 import { GAME_CONSTANTS } from '../config/GameConstants';
 import { Logger } from '../utils/Logger';
 import { ResourceLoader } from '../config/ResourceLoader';
@@ -285,7 +284,7 @@ export class PhysicsSystem {
         const bounds = entity.getBounds();
         let startCol, endCol;
         
-        if (axis === 'vertical' && entity.vy >= 0 && entity instanceof Player) {
+        if (axis === 'vertical' && entity.vy >= 0 && (entity as unknown as { type?: string }).type === 'player') {
             const centerX = entity.x + entity.width / 2;
             startCol = endCol = Math.floor(centerX / this.tileSize);
         } else {
@@ -343,7 +342,7 @@ export class PhysicsSystem {
             if (entity.vy > 0) {
                 entity.y = tileBounds.top - entity.height;
                 entity.vy = 0;
-                if (!(entity instanceof Player)) {
+                if ((entity as unknown as { type?: string }).type !== 'player') {
                     entity.grounded = true;
                 }
             } else if (entity.vy < 0) {

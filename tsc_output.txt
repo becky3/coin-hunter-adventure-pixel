@@ -1,0 +1,47 @@
+src/controllers/GameController.ts(100,66): error TS2345: Argument of type 'LevelData' is not assignable to parameter of type 'StageData'.
+  Property 'tilemap' is missing in type 'LevelData' but required in type 'StageData'.
+src/entities/Enemy.ts(12,14): error TS2654: Non-abstract class 'Enemy' is missing implementations for the following members of 'Entity': 'getAnimationDefinitions', 'getPaletteDefinition'.
+src/entities/enemies/Spider.ts(18,14): error TS2415: Class 'Spider' incorrectly extends base class 'Enemy'.
+  Property 'stateTimer' is private in type 'Spider' but not in type 'Enemy'.
+src/entities/enemies/Spider.ts(338,26): error TS2345: Argument of type 'this' is not assignable to parameter of type 'Enemy'.
+  Type 'Spider' is not assignable to type 'Enemy'.
+    Property 'stateTimer' is private in type 'Spider' but not in type 'Enemy'.
+src/entities/projectiles/EnergyBullet.ts(13,14): error TS2415: Class 'EnergyBullet' incorrectly extends base class 'Entity'.
+  Property 'animationTime' is private in type 'EnergyBullet' but not in type 'Entity'.
+src/entities/projectiles/EnergyBullet.ts(30,17): error TS2322: Type '"projectile"' is not assignable to type 'PhysicsLayer'.
+src/entities/projectiles/EnergyBullet.ts(134,31): error TS2345: Argument of type 'this' is not assignable to parameter of type 'Entity'.
+  Type 'EnergyBullet' is not assignable to type 'Entity'.
+    Property 'animationTime' is private in type 'EnergyBullet' but not in type 'Entity'.
+src/managers/EntityManager.ts(192,44): error TS2341: Property 'tileMap' is private and only accessible within class 'PhysicsSystem'.
+src/managers/EntityManager.ts(300,29): error TS2353: Object literal may only specify known properties, and 'normal' does not exist in type 'CollisionInfo'.
+src/managers/EntityManager.ts(355,25): error TS2353: Object literal may only specify known properties, and 'normal' does not exist in type 'CollisionInfo'.
+src/performance/PerformanceMonitor.ts(517,66): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/performance/PerformanceMonitor.ts(520,81): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/performance/PerformanceMonitor.ts(524,82): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/performance/PerformanceMonitor.ts(529,48): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/performance/PerformanceMonitor.ts(532,78): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/performance/PerformanceMonitor.ts(535,74): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/performance/PerformanceMonitor.ts(538,73): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/performance/PerformanceMonitor.ts(541,71): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/performance/PerformanceMonitor.ts(569,48): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/performance/PerformanceMonitor.ts(570,56): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/physics/PhysicsSystem.ts(48,11): error TS2430: Interface 'PhysicsEntity' incorrectly extends interface 'Entity'.
+  Property 'airResistance' is optional in type 'PhysicsEntity' but required in type 'Entity'.
+src/physics/PhysicsSystem.ts(251,41): error TS2322: Type 'PhysicsEntity' is not assignable to type 'Entity'.
+  Property 'airResistance' is optional in type 'PhysicsEntity' but required in type 'Entity'.
+src/physics/PhysicsSystem.ts(326,32): error TS2345: Argument of type '{ other: null; }' is not assignable to parameter of type 'CollisionInfo'.
+  Property 'side' is missing in type '{ other: null; }' but required in type 'CollisionInfo'.
+src/physics/PhysicsSystem.ts(410,13): error TS2322: Type 'PhysicsEntity' is not assignable to type 'Entity'.
+  Property 'airResistance' is optional in type 'PhysicsEntity' but required in type 'Entity'.
+src/physics/PhysicsSystem.ts(415,13): error TS2322: Type 'PhysicsEntity' is not assignable to type 'Entity'.
+  Property 'airResistance' is optional in type 'PhysicsEntity' but required in type 'Entity'.
+src/states/PlayState.ts(84,9): error TS2741: Property 'offscreenChunks' is missing in type '{ activeClouds: number; }' but required in type '{ activeClouds: number; offscreenChunks: number; }'.
+src/states/PlayState.ts(103,13): error TS2322: Type 'Game & { eventBus: EventBus; }' is not assignable to type 'GameServices'.
+  Property 'renderer' is optional in type 'Game & { eventBus: EventBus; }' but required in type 'GameServices'.
+src/states/PlayState.ts(437,37): error TS2341: Property 'tileMap' is private and only accessible within class 'PhysicsSystem'.
+src/states/PlayState.ts(569,41): error TS2304: Cannot find name 'Player'.
+src/states/TestPlayState.ts(129,46): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/states/TestPlayState.ts(131,103): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/states/TestPlayState.ts(132,74): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+src/systems/adapters/PhysicsSystemAdapter.ts(18,28): error TS2554: Expected 2 arguments, but got 1.
+src/ui/HUDManager.ts(118,9): error TS2322: Type 'number' is not assignable to type 'string | CanvasGradient | CanvasPattern'.
