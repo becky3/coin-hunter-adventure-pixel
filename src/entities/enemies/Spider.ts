@@ -27,7 +27,7 @@ export class Spider extends Enemy implements EntityInitializer {
     private initialY: number;
     private threadY: number;
     private waitTime: number;
-    private stateTimer: number;
+    declare stateTimer: number;
     private patrolRange: number;
     private lastPlayerCheck: number;
     private detectionCooldown: number;

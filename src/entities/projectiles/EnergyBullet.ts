@@ -15,7 +15,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     private lifeTime: number;
     private maxLifeTime: number;
     private damage: number;
-    private animationTime: number;
+    declare animationTime: number;
     private destroyed: boolean = false;
     private originX: number;
     private originY: number;
