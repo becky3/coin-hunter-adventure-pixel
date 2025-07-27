@@ -237,14 +237,7 @@ export class Enemy extends Entity {
      * Override in derived classes for specific enemy animations
      */
     protected getAnimationDefinitions(): AnimationDefinition[] {
-        return [
-            {
-                id: 'idle',
-                sprites: ['enemies/generic_enemy.json'],
-                frameDuration: 0,
-                loop: false
-            }
-        ];
+        return [];
     }
     
     /**
