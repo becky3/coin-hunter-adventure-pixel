@@ -99,6 +99,7 @@ export class PlayState implements GameState {
         this.cameraController = new CameraController(extendedGame);
         this.hudManager = new HUDManager(extendedGame);
         
+        // TODO: Ensure renderer is always available or make it required in Game interface (Issue #242)
         this.gameController = new GameController({
             services: extendedGame as GameServices,
             entityManager: this.entityManager,

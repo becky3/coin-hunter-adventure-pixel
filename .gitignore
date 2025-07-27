@@ -44,3 +44,6 @@ dev.log
 
 # OS
 Thumbs.db
+
+# TypeScript
+typecheck-results.txt

@@ -98,6 +98,7 @@ export class GameController {
             
             const levelLoader = this.levelManager.getLevelLoader();
             if (levelLoader) {
+                // TODO: Fix type mismatch between LevelData and StageData (Issue #242)
                 const goalPosition = levelLoader.getGoalPosition(levelData as unknown as StageData);
                 if (goalPosition) {
                     this.entityManager.createEntity({
