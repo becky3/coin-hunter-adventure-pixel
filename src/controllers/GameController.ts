@@ -1,7 +1,7 @@
 import { EntityManager } from '../managers/EntityManager';
 import { CameraController } from './CameraController';
 import { LevelManager, LevelData } from '../managers/LevelManager';
-import type { StageData } from '../levels/LevelLoader';
+import { StageData } from '../levels/LevelLoader';
 import { HUDManager } from '../ui/HUDManager';
 import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
