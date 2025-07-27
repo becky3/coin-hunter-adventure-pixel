@@ -6,6 +6,50 @@ parent: 開発者向け
 
 # テストガイド
 
+## TypeScript型チェック
+
+### 基本コマンド
+
+```bash
+# 型チェックを実行
+npm run typecheck
+
+# 特定のエラータイプを検索
+npm run typecheck 2>&1 | grep "TS2339"  # プロパティアクセスエラー
+npm run typecheck 2>&1 | grep "TS2345"  # 型の不一致エラー
+
+# エラーをファイルに保存
+npm run typecheck > typecheck-errors.txt 2>&1
+```
+
+### よく使うエラーコード
+
+- **TS2339**: Property 'X' does not exist on type 'Y' - プロパティアクセスエラー
+- **TS2345**: Argument of type 'X' is not assignable to parameter of type 'Y' - 引数の型エラー
+- **TS2322**: Type 'X' is not assignable to type 'Y' - 代入の型エラー
+- **TS2341**: Property 'X' is private and only accessible within class 'Y' - privateアクセスエラー
+
+### 型チェック手順
+
+1. **全体の型チェック実行**
+   ```bash
+   npm run typecheck
+   ```
+
+2. **特定のエラータイプを確認**
+   ```bash
+   npm run typecheck 2>&1 | grep "TS2339" | head -20
+   ```
+
+3. **エラーの詳細を確認**
+   ```bash
+   npm run typecheck 2>&1 | head -50
+   ```
+
+4. **進捗の確認**
+   - エラー数の変化を記録
+   - 特定のエラータイプが解消されたか確認
+
 ## クイックスタート
 
 E2Eテストを書く最も簡単な方法は、`test-simple-quickstart.cjs` を参考にすることです。
