@@ -59,9 +59,11 @@ export interface CharacterConfig {
     [key: string]: CharacterAnimationConfig;
   };
   ai?: {
-    type: string;
     detectRange: number;
     attackRange: number;
+    detectRangeWidth?: number;
+    detectRangeHeight?: number;
+    chargeSpeedMultiplier?: number;
   };
 }
 

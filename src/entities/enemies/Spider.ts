@@ -46,30 +46,29 @@ export class Spider extends Enemy implements EntityInitializer {
     }
 
     constructor(x: number, y: number) {
-        let spiderConfig = null;
-        try {
-            const resourceLoader = ResourceLoader.getInstance();
-            spiderConfig = resourceLoader.getCharacterConfig('enemies', 'spider');
-        } catch (error) {
-            Logger.warn('Failed to load spider config, using defaults:', error);
+        const resourceLoader = ResourceLoader.getInstance();
+        const spiderConfig = resourceLoader.getCharacterConfig('enemies', 'spider');
+        
+        if (!spiderConfig) {
+            throw new Error('Failed to load spider configuration');
         }
         
-        const width = spiderConfig?.physics.width || 16;
-        const height = spiderConfig?.physics.height || 16;
+        const width = spiderConfig.physics.width;
+        const height = spiderConfig.physics.height;
         
         super(x, y, width, height);
         
-        this.maxHealth = spiderConfig?.stats.maxHealth || 1;
+        this.maxHealth = spiderConfig.stats.maxHealth;
         this.health = this.maxHealth;
-        this.damage = spiderConfig?.stats.damage || 1;
-        this.moveSpeed = spiderConfig?.physics.moveSpeed || 0.3;
+        this.damage = spiderConfig.stats.damage;
+        this.moveSpeed = spiderConfig.physics.moveSpeed;
         
         this.spriteKey = 'enemies/spider';
         this.animState = 'idle';
         this._spiderState = 'crawling';
         this.currentSurface = 'ceiling';
         
-        this.detectionRange = spiderConfig?.ai?.detectRange || 100;
+        this.detectionRange = spiderConfig.ai.detectRange;
         this.threadLength = 80;
         this.threadSpeed = 3.0;
         this.crawlSpeed = this.moveSpeed * 240;
@@ -88,10 +87,7 @@ export class Spider extends Enemy implements EntityInitializer {
         this.gravity = false;
         this.physicsEnabled = false;
         
-        if (spiderConfig?.ai) {
-            this.aiType = (spiderConfig.ai.type as 'patrol' | 'chase' | 'idle') || 'patrol';
-            this.attackRange = spiderConfig.ai.attackRange || 20;
-        }
+        this.attackRange = spiderConfig.ai.attackRange;
         
         this.setAnimation('idle');
     }

@@ -277,7 +277,12 @@ export class EntityManager {
                 return true;
             });
         } catch (error) {
-            Logger.error('Error during entity update:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const errorStack = error instanceof Error ? error.stack : '';
+            Logger.error('Error during entity update:', errorMessage);
+            if (errorStack) {
+                Logger.error('Stack trace:', errorStack);
+            }
             this.eventBus.emit('entity:update-error', { error });
         }
     }

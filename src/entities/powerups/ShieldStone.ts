@@ -1,6 +1,7 @@
 import { PowerUpItem } from './PowerUpItem';
 import { PowerUpType, PowerUpConfig } from '../../types/PowerUpTypes';
 import { Logger } from '../../utils/Logger';
+import { ResourceLoader } from '../../config/ResourceLoader';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 
 /**
@@ -15,7 +16,22 @@ export class ShieldStone extends PowerUpItem {
     }
 
     constructor(x: number, y: number) {
-        super(x, y, 16, 16, PowerUpType.SHIELD_STONE);
+        const resourceLoader = ResourceLoader.getInstance();
+        const config = resourceLoader.getObjectConfig('powerups', 'shieldStone');
+        
+        if (!config) {
+            throw new Error('Failed to load shield stone configuration');
+        }
+        
+        super(
+            x, 
+            y, 
+            config.physics.width, 
+            config.physics.height, 
+            PowerUpType.SHIELD_STONE,
+            config.properties.floatSpeed,
+            config.properties.floatAmplitude
+        );
         
         Logger.log('[ShieldStone] Created at', x, y);
         

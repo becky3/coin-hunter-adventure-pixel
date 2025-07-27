@@ -31,33 +31,32 @@ export class Coin extends Entity implements EntityInitializer {
     }
 
     constructor(x: number, y: number) {
-        let coinConfig = null;
-        try {
-            const resourceLoader = ResourceLoader.getInstance();
-            coinConfig = resourceLoader.getObjectConfig('items', 'coin');
-        } catch (error) {
-            Logger.warn('Failed to load coin config:', error);
+        const resourceLoader = ResourceLoader.getInstance();
+        const coinConfig = resourceLoader.getObjectConfig('items', 'coin');
+        
+        if (!coinConfig) {
+            throw new Error('Failed to load coin configuration');
         }
         
-        const width = coinConfig?.physics.width || 16;
-        const height = coinConfig?.physics.height || 16;
+        const width = coinConfig.physics.width;
+        const height = coinConfig.physics.height;
         
         super(x, y, width, height);
         
         this.gravity = false;
         this.physicsEnabled = false;
-        this.solid = coinConfig?.physics.solid || false;
+        this.solid = coinConfig.physics.solid;
         
         this.collected = false;
         this.animationTime = 0;
         this.flipX = false;
         
         this.floatOffset = 0;
-        this.floatSpeed = coinConfig?.properties.floatSpeed || 0.03;
-        this.floatAmplitude = coinConfig?.properties.floatAmplitude || 0.1;
+        this.floatSpeed = coinConfig.properties.floatSpeed;
+        this.floatAmplitude = coinConfig.properties.floatAmplitude;
         this.baseY = y;
         
-        this.scoreValue = coinConfig?.properties.scoreValue || 10;
+        this.scoreValue = coinConfig.properties.scoreValue;
         
         this.setAnimation('idle');
     }

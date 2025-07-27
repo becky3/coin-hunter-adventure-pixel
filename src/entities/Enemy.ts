@@ -3,8 +3,6 @@ import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
-
-export type AIType = 'patrol' | 'chase' | 'idle';
 export type EnemyState = 'idle' | 'walk' | 'hurt' | 'dead';
 
 /**
@@ -16,7 +14,6 @@ export class Enemy extends Entity {
     public damage: number;
     public moveSpeed: number;
     public direction: number;
-    public aiType: AIType;
     public detectRange: number;
     public attackRange: number;
     public state: EnemyState;
@@ -38,7 +35,6 @@ export class Enemy extends Entity {
         
         this.isProjectileTarget = true;
         
-        this.aiType = 'patrol';
         this.detectRange = 100;
         this.attackRange = 20;
         
