@@ -37,9 +37,7 @@ npm run typecheck:strict
 npm run typecheck:safe
 grep "TS2339" typecheck-output.log  # プロパティアクセスエラー
 grep "TS2345" typecheck-output.log  # 型の不一致エラー
-
-# または直接tscを使用
-npx tsc --noEmit 2>&1 | grep "TS2339"
+grep "TS2322" typecheck-output.log  # 代入の型エラー
 ```
 
 ### よく使うエラーコード
