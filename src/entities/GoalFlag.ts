@@ -21,7 +21,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
 
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const goalConfig = resourceLoader.getObjectConfig('items', 'goalFlag');
+        const goalConfig = resourceLoader.getEntityConfigSync('terrain', 'goal_flag');
         
         if (!goalConfig) {
             throw new Error('Failed to load goal flag configuration');

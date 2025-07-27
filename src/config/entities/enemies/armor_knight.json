@@ -1,0 +1,22 @@
+{
+  "physics": {
+    "width": 16,
+    "height": 16,
+    "moveSpeed": 0.15
+  },
+  "stats": {
+    "maxHealth": 3,
+    "damage": 1,
+    "scoreValue": 300
+  },
+  "ai": {
+    "detectRange": 84,
+    "detectRangeWidth": 84,
+    "detectRangeHeight": 128,
+    "attackRange": 20
+  },
+  "sprites": {
+    "category": "enemies",
+    "name": "armor_knight"
+  }
+}

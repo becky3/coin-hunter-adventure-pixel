@@ -1,0 +1,14 @@
+{
+  "physics": {
+    "width": 16,
+    "height": 16,
+    "solid": true
+  },
+  "properties": {
+    "expansionSpeed": 0.2
+  },
+  "sprites": {
+    "category": "terrain",
+    "name": "spring"
+  }
+}

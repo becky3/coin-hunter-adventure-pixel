@@ -47,7 +47,7 @@ export class Spider extends Enemy implements EntityInitializer {
 
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const spiderConfig = resourceLoader.getCharacterConfig('enemies', 'spider');
+        const spiderConfig = resourceLoader.getEntityConfigSync('enemies', 'spider');
         
         if (!spiderConfig) {
             throw new Error('Failed to load spider configuration');

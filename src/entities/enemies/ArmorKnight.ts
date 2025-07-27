@@ -33,7 +33,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
 
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const config = resourceLoader.getCharacterConfig('enemies', 'armor_knight');
+        const config = resourceLoader.getEntityConfigSync('enemies', 'armor_knight');
         
         if (!config) {
             throw new Error('Failed to load armor_knight configuration');

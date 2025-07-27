@@ -17,7 +17,7 @@ export class PowerGlove extends PowerUpItem {
 
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const config = resourceLoader.getObjectConfig('powerups', 'powerGlove');
+        const config = resourceLoader.getEntityConfigSync('powerups', 'power_glove');
         
         if (!config) {
             throw new Error('Failed to load power glove configuration');

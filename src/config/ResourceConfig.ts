@@ -97,6 +97,113 @@ export interface ObjectConfig {
   };
 }
 
+export interface PlayerPhysicsConfig {
+  width: number;
+  height: number;
+  smallWidth: number;
+  smallHeight: number;
+  speed: number;
+  jumpPower: number;
+  variableJumpBoost: number;
+  variableJumpBoostMultiplier: number;
+  minJumpTime: number;
+  maxJumpTime: number;
+  airResistance: number;
+  gravityScale: number;
+  maxFallSpeed: number;
+  dashSpeedMultiplier: number;
+  dashAccelerationTime: number;
+  dashAnimationSpeed: number;
+}
+
+export interface PlayerConfig {
+  physics: PlayerPhysicsConfig;
+  stats: {
+    maxHealth: number;
+    invulnerabilityTime: number;
+  };
+  spawn: {
+    x: number;
+    y: number;
+  };
+  animations: {
+    [key: string]: CharacterAnimationConfig;
+  };
+  sprites: {
+    category: string;
+    animations: {
+      [key: string]: {
+        frameCount: number;
+        frameDuration: number;
+      };
+    };
+  };
+}
+
+export interface EnemyPhysicsConfig {
+  width: number;
+  height: number;
+  moveSpeed: number;
+  jumpHeight?: number;
+  jumpInterval?: number;
+}
+
+export interface EnemyConfig {
+  physics: EnemyPhysicsConfig;
+  stats: {
+    maxHealth: number;
+    damage: number;
+    scoreValue: number;
+  };
+  ai: {
+    detectRange: number;
+    attackRange: number;
+    detectRangeWidth?: number;
+    detectRangeHeight?: number;
+  };
+  sprites: {
+    category: string;
+    name?: string;
+    sprites?: string[];
+    animations?: {
+      [key: string]: {
+        name?: string;
+        sprite?: string;
+        sprites?: string[];
+        frameCount?: number;
+        frameDuration?: number;
+      };
+    };
+  };
+}
+
+export interface ItemPhysicsConfig {
+  width: number;
+  height: number;
+  solid: boolean;
+}
+
+export interface ItemConfig {
+  physics: ItemPhysicsConfig;
+  properties: {
+    [key: string]: unknown;
+  };
+  sprites: {
+    category: string;
+    name?: string;
+    animation?: {
+      name: string;
+      frameCount: number;
+      frameDuration: number;
+    };
+    sprites?: {
+      [key: string]: string;
+    };
+  };
+}
+
+export type EntityConfig = PlayerConfig | EnemyConfig | ItemConfig;
+
 export interface ResourceIndexConfig {
   version: string;
   description: string;

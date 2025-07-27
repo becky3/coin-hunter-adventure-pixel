@@ -34,7 +34,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
     
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const config = resourceLoader.getObjectConfig('items', 'fallingFloor');
+        const config = resourceLoader.getEntityConfigSync('terrain', 'falling_floor');
         
         if (!config) {
             throw new Error('Failed to load falling floor configuration');

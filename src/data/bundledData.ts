@@ -6,6 +6,18 @@ import resourceAudio from '../config/resources/audio.json';
 import resourceObjects from '../config/resources/objects.json';
 import resourcePhysics from '../config/resources/physics.json';
 
+import entityPlayer from '../config/entities/player.json';
+import entitySlime from '../config/entities/enemies/slime.json';
+import entityBat from '../config/entities/enemies/bat.json';
+import entitySpider from '../config/entities/enemies/spider.json';
+import entityArmorKnight from '../config/entities/enemies/armor_knight.json';
+import entityCoin from '../config/entities/items/coin.json';
+import entitySpring from '../config/entities/terrain/spring.json';
+import entityGoalFlag from '../config/entities/terrain/goal_flag.json';
+import entityFallingFloor from '../config/entities/terrain/falling_floor.json';
+import entityPowerGlove from '../config/entities/powerups/power_glove.json';
+import entityShieldStone from '../config/entities/powerups/shield_stone.json';
+
 import bgmTitle from '../config/resources/bgm/title.json';
 import bgmGame from '../config/resources/bgm/game.json';
 import bgmVictory from '../config/resources/bgm/victory.json';
@@ -50,6 +62,17 @@ export const bundledResourceData: Record<string, unknown> = {
     '/src/config/resources/audio.json': resourceAudio,
     '/src/config/resources/objects.json': resourceObjects,
     '/src/config/resources/physics.json': resourcePhysics,
+    '/src/config/entities/player.json': entityPlayer,
+    '/src/config/entities/enemies/slime.json': entitySlime,
+    '/src/config/entities/enemies/bat.json': entityBat,
+    '/src/config/entities/enemies/spider.json': entitySpider,
+    '/src/config/entities/enemies/armor_knight.json': entityArmorKnight,
+    '/src/config/entities/items/coin.json': entityCoin,
+    '/src/config/entities/terrain/spring.json': entitySpring,
+    '/src/config/entities/terrain/goal_flag.json': entityGoalFlag,
+    '/src/config/entities/terrain/falling_floor.json': entityFallingFloor,
+    '/src/config/entities/powerups/power_glove.json': entityPowerGlove,
+    '/src/config/entities/powerups/shield_stone.json': entityShieldStone,
 };
 
 export const bundledMusicData: Record<string, unknown> = {

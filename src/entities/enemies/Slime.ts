@@ -25,7 +25,7 @@ export class Slime extends Enemy implements EntityInitializer {
 
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const slimeConfig = resourceLoader.getCharacterConfig('enemies', 'slime');
+        const slimeConfig = resourceLoader.getEntityConfigSync('enemies', 'slime');
         
         if (!slimeConfig) {
             throw new Error('Failed to load slime configuration');

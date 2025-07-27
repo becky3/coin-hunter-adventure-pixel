@@ -1,0 +1,19 @@
+{
+  "physics": {
+    "width": 16,
+    "height": 16,
+    "solid": false
+  },
+  "properties": {
+    "floatSpeed": 0.03,
+    "floatAmplitude": 0.15,
+    "permanent": true,
+    "stackable": false,
+    "bulletSpeed": 5,
+    "fireRate": 500
+  },
+  "sprites": {
+    "category": "powerups",
+    "name": "power_glove"
+  }
+}

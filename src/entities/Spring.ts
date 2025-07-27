@@ -32,7 +32,7 @@ export class Spring extends Entity implements EntityInitializer {
 
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const springConfig = resourceLoader.getObjectConfig('items', 'spring');
+        const springConfig = resourceLoader.getEntityConfigSync('terrain', 'spring');
         
         if (!springConfig) {
             throw new Error('Failed to load spring configuration');

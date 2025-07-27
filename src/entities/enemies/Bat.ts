@@ -43,7 +43,7 @@ export class Bat extends Enemy implements EntityInitializer {
 
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const batConfig = resourceLoader.getCharacterConfig('enemies', 'bat');
+        const batConfig = resourceLoader.getEntityConfigSync('enemies', 'bat');
         
         if (!batConfig) {
             throw new Error('Failed to load bat configuration');

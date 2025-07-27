@@ -3,7 +3,11 @@ import {
     SpritesConfig,
     CharacterConfig,
     AudioConfig,
-    ObjectConfig
+    ObjectConfig,
+    EntityConfig,
+    PlayerConfig,
+    EnemyConfig,
+    ItemConfig
 } from './ResourceConfig';
 import { MusicPatternConfig, MusicConfig } from './MusicPatternConfig';
 import { bundledResourceData, bundledMusicData } from '../data/bundledData';
@@ -21,6 +25,7 @@ export class ResourceLoader {
     private objects: { [key: string]: { [key: string]: ObjectConfig } } | null = null;
     private musicPatterns: MusicPatternConfig | null = null;
     private physics: { [key: string]: unknown } | null = null;
+    private entityConfigCache: Map<string, EntityConfig> = new Map();
   
     private constructor() {}
   
@@ -108,6 +113,11 @@ export class ResourceLoader {
         await Promise.all(loadingPromises);
         const parallelEndTime = performance.now();
         recordPhase('parallelLoading', parallelStartTime, parallelEndTime);
+        
+        const preloadStartTime = performance.now();
+        await this.preloadEntityConfigs();
+        const preloadEndTime = performance.now();
+        recordPhase('preloadEntityConfigs', preloadStartTime, preloadEndTime);
         
         const endTime = performance.now();
         Logger.log('[Performance] ResourceLoader.initialize() completed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
@@ -289,5 +299,68 @@ export class ResourceLoader {
             return this.physics[category] || null;
         }
         return this.physics;
+    }
+    
+    async getEntityConfig(type: string, name?: string): Promise<EntityConfig> {
+        const cacheKey = name ? `${type}/${name}` : type;
+        
+        if (this.entityConfigCache.has(cacheKey)) {
+            const config = this.entityConfigCache.get(cacheKey);
+            if (!config) {
+                throw new Error(`Entity config not found in cache: ${cacheKey}`);
+            }
+            return config;
+        }
+        
+        const path = name 
+            ? `/src/config/entities/${type}/${name}.json`
+            : `/src/config/entities/${type}.json`;
+            
+        const config = await this.loadJSON<EntityConfig>(path);
+        
+        if (!config) {
+            throw new Error(`Failed to load entity config: ${path}`);
+        }
+        
+        this.entityConfigCache.set(cacheKey, config);
+        return config;
+    }
+    
+    getEntityConfigSync(type: 'player'): PlayerConfig;
+    getEntityConfigSync(type: 'enemies', name: string): EnemyConfig;
+    getEntityConfigSync(type: 'items' | 'terrain' | 'powerups', name: string): ItemConfig;
+    getEntityConfigSync(type: string, name?: string): EntityConfig {
+        const cacheKey = name ? `${type}/${name}` : type;
+        
+        if (!this.entityConfigCache.has(cacheKey)) {
+            throw new Error(`Entity config not loaded yet: ${cacheKey}. Call preloadEntityConfigs() first.`);
+        }
+        
+        const config = this.entityConfigCache.get(cacheKey);
+        if (!config) {
+            throw new Error(`Entity config not found: ${cacheKey}`);
+        }
+        
+        return config;
+    }
+    
+    async preloadEntityConfigs(): Promise<void> {
+        const entities = [
+            { type: 'player' },
+            { type: 'enemies', name: 'slime' },
+            { type: 'enemies', name: 'bat' },
+            { type: 'enemies', name: 'spider' },
+            { type: 'enemies', name: 'armor_knight' },
+            { type: 'items', name: 'coin' },
+            { type: 'terrain', name: 'spring' },
+            { type: 'terrain', name: 'goal_flag' },
+            { type: 'terrain', name: 'falling_floor' },
+            { type: 'powerups', name: 'power_glove' },
+            { type: 'powerups', name: 'shield_stone' }
+        ];
+        
+        await Promise.all(
+            entities.map(({ type, name }) => this.getEntityConfig(type, name))
+        );
     }
 }

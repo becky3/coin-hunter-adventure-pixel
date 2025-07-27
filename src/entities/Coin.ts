@@ -32,7 +32,7 @@ export class Coin extends Entity implements EntityInitializer {
 
     constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
-        const coinConfig = resourceLoader.getObjectConfig('items', 'coin');
+        const coinConfig = resourceLoader.getEntityConfigSync('items', 'coin');
         
         if (!coinConfig) {
             throw new Error('Failed to load coin configuration');
