@@ -330,7 +330,7 @@ export class Player extends Entity {
                 this.canVariableJump = false;
             }
             else if (input.jump && this.canVariableJump) {
-                if (this.jumpTime < this.playerConfig.maxJumpTime) {
+                if (this.jumpTime < this.playerConfig.physics.maxJumpTime) {
                     const boost = this.variableJumpBoostMultiplier * this.variableJumpBoost * deltaTime * 60;
                     this.vy -= boost;
                 } else {
