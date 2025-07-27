@@ -3,11 +3,5 @@
     "gravity": 0.65,
     "maxFallSpeed": 15,
     "friction": 0.8
-  },
-  "enemies": {
-    "default": {
-      "airResistance": 0.0,
-      "gravityScale": 1.0
-    }
   }
 }

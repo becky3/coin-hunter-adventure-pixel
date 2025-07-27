@@ -1,9 +1,7 @@
 import {
     ResourceIndexConfig,
     SpritesConfig,
-    CharacterConfig,
     AudioConfig,
-    ObjectConfig,
     EntityConfig,
     PlayerConfig,
     EnemyConfig,
@@ -20,9 +18,7 @@ export class ResourceLoader {
     private static instance: ResourceLoader;
     private resourceIndex: ResourceIndexConfig | null = null;
     private sprites: SpritesConfig | null = null;
-    private characters: { [key: string]: { [key: string]: CharacterConfig } } | null = null;
     private audio: { [key: string]: { [key: string]: AudioConfig } } | null = null;
-    private objects: { [key: string]: { [key: string]: ObjectConfig } } | null = null;
     private musicPatterns: MusicPatternConfig | null = null;
     private physics: { [key: string]: unknown } | null = null;
     private entityConfigCache: Map<string, EntityConfig> = new Map();
@@ -158,10 +154,7 @@ export class ResourceLoader {
     }
   
     private async loadCharacters(): Promise<void> {
-        if (!this.resourceIndex) return;
-    
-        const charactersPath = '/src/config/resources/characters.json';
-        this.characters = await this.loadJSON(charactersPath);
+        // Deprecated - use entity configs instead
     }
   
     private async loadAudio(): Promise<void> {
@@ -172,10 +165,7 @@ export class ResourceLoader {
     }
   
     private async loadObjects(): Promise<void> {
-        if (!this.resourceIndex) return;
-    
-        const objectsPath = '/src/config/resources/objects.json';
-        this.objects = await this.loadJSON(objectsPath);
+        // Deprecated - use entity configs instead
     }
     
     private async loadMusicPatterns(): Promise<void> {
@@ -217,19 +207,6 @@ export class ResourceLoader {
         return this.sprites;
     }
   
-    getCharacterConfig(type: string, name: string): CharacterConfig | null {
-        if (!this.characters) {
-            return null;
-        }
-        
-        if (type === 'player' && name === 'main') {
-            return (this.characters as Record<string, CharacterConfig>).player || null;
-        }
-        if (!this.characters[type]) {
-            return null;
-        }
-        return this.characters[type][name] || null;
-    }
   
     getAudioConfig(type: string, name: string): AudioConfig | null {
         if (!this.audio || !this.audio[type]) {
@@ -238,12 +215,6 @@ export class ResourceLoader {
         return this.audio[type][name] || null;
     }
   
-    getObjectConfig(type: string, name: string): ObjectConfig | null {
-        if (!this.objects || !this.objects[type]) {
-            return null;
-        }
-        return this.objects[type][name] || null;
-    }
   
     getResourcePaths(): { sprites: string; levels: string; fonts: string } | null {
         return this.resourceIndex?.paths || null;

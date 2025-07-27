@@ -487,7 +487,7 @@ export class Player extends Entity {
             return true;
         }
         
-        const playerConfig = ResourceLoader.getInstance().getCharacterConfig('player', 'main');
+        const playerConfig = ResourceLoader.getInstance().getEntityConfigSync('player');
         if (!playerConfig) {
             throw new Error('Failed to load player configuration');
         }
