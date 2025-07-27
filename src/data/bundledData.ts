@@ -1,9 +1,7 @@
 
 import resourceIndex from '../config/resources/index.json';
 import resourceSprites from '../config/resources/sprites.json';
-import resourceCharacters from '../config/resources/characters.json';
 import resourceAudio from '../config/resources/audio.json';
-import resourceObjects from '../config/resources/objects.json';
 import resourcePhysics from '../config/resources/physics.json';
 
 import entityPlayer from '../config/entities/player.json';
@@ -58,9 +56,7 @@ import stageTestFallingFloor from '../levels/data/stage-test-falling-floor.json'
 export const bundledResourceData: Record<string, unknown> = {
     '/src/config/resources/index.json': resourceIndex,
     '/src/config/resources/sprites.json': resourceSprites,
-    '/src/config/resources/characters.json': resourceCharacters,
     '/src/config/resources/audio.json': resourceAudio,
-    '/src/config/resources/objects.json': resourceObjects,
     '/src/config/resources/physics.json': resourcePhysics,
     '/src/config/entities/player.json': entityPlayer,
     '/src/config/entities/enemies/slime.json': entitySlime,
