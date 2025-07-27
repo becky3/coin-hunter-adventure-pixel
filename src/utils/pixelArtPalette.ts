@@ -1,5 +1,34 @@
 import { SpriteLoader, SPRITE_DEFINITIONS } from './spriteLoader';
 
+/**
+ * Sprite palette indices enum for better readability
+ */
+export enum SpritePaletteIndex {
+    CHARACTER = 0,
+    ENEMY_BASIC = 1,
+    ENEMY_SPECIAL = 2,
+    ITEMS = 3,
+    TILES_GROUND = 4,
+    TILES_HAZARD = 5,
+    TERRAIN_OBJECTS = 6,
+    ENVIRONMENT_NATURE = 7,
+    ENVIRONMENT_SKY = 8,
+    UI_ELEMENTS = 9,
+    EFFECTS = 10,
+    POWERUPS = 11,
+    CHARACTER_POWERGLOVE = 12
+}
+
+/**
+ * Background palette indices enum
+ */
+export enum BackgroundPaletteIndex {
+    SKY = 0,
+    GROUND = 1,
+    DECORATIONS = 2,
+    SPECIAL = 3
+}
+
 type ColorIndex = number;
 type ColorHex = string | null;
 type Palette = ColorHex[];
@@ -135,10 +164,19 @@ const STAGE_PALETTES: Record<string, PaletteConfig> = {
             [0x12, 0x32, 0x31, 0x30]
         ],
         sprite: [
-            [0, 0x11, 0x43, 0x50],
+            [0, 0x11, 0x33, 0x50],
             [0, 0x61, 0x62, 0x60],
-            [0, 0x21, 0x22, 0x03],
-            [0, 0x52, 0x53, 0x51]
+            [0, 0x01, 0x02, 0x03],
+            [0, 0x52, 0x53, 0x51],
+            [0, 0x62, 0x61, 0x60],
+            [0, 0x41, 0x42, 0x43],
+            [0, 0x50, 0x51, 0x52],
+            [0, 0x50, 0x51, 0x61],
+            [0, 0x12, 0x13, 0x03],
+            [0, 0x41, 0x03, 0x00],
+            [0, 0x11, 0x12, 0x13],
+            [0, 0x11, 0x12, 0x13],
+            [0, 0x62, 0x61, 0x13]
         ]
     },
     
@@ -150,92 +188,39 @@ const STAGE_PALETTES: Record<string, PaletteConfig> = {
             [0x00, 0x30, 0x31, 0x20]
         ],
         sprite: [
-            [0, 0x11, 0x43, 0x50],
+            [0, 0x11, 0x80, 0x50],
             [0, 0x90, 0x91, 0x20],
+            [0, 0x70, 0x71, 0x01],
+            [0, 0x52, 0x53, 0x51],
+            [0, 0x20, 0x70, 0x01],
             [0, 0x30, 0x31, 0x32],
-            [0, 0x52, 0x53, 0x51]
-        ]
-    },
-    
-    snow: {
-        background: [
-            [0x13, 0x03, 0x02, 0x12],
-            [0x13, 0x03, 0x81, 0x11],
-            [0x13, 0x60, 0x61, 0x71],
-            [0x13, 0x10, 0x11, 0x12]
-        ],
-        sprite: [
-            [0, 0x31, 0x43, 0x50],
-            [0, 0x03, 0x02, 0x12],
-            [0, 0x00, 0x03, 0x41],
-            [0, 0x52, 0x53, 0x51]
+            [0, 0x01, 0x02, 0x10],
+            [0, 0x60, 0x70, 0x71],
+            [0, 0x01, 0x02, 0x00],
+            [0, 0x41, 0x03, 0x00],
+            [0, 0x80, 0x81, 0x90],
+            [0, 0x80, 0x81, 0x91],
+            [0, 0x91, 0x90, 0x81]
         ]
     }
 } as const;
 
 const paletteSystem = new PaletteSystem();
 
-const PALETTE_NAME_TO_MASTER_PALETTE: Record<string, number[]> = {
-    character: [0, 0x11, 0x33, 0x50],
-    characterPowerGlove: [0, 0x41, 0x53, 0x50],
-    enemy: [0, 0x61, 0x62, 0x60],
-    enemySpider: [0, 0x01, 0x02, 0x03],
-    items: [0, 0x52, 0x53, 0x51],
-    itemsPowerUp: [0, 0x11, 0x12, 0x13],
-    grassland: [0, 0x50, 0x51, 0x61],
-    cave: [0, 0x01, 0x02, 0x10],
-    snow: [0, 0x03, 0x02, 0x12],
-    ui: [0, 0x41, 0x03, 0x00],
-    sky: [0, 0x12, 0x13, 0x03],
-    nature: [0, 0x50, 0x51, 0x61],
-    shield: [0, 0x11, 0x12, 0x13],
-    effect: [0, 0x11, 0x12, 0x13]
-};
 
 const UI_PALETTE_INDICES = {
-    black: 0x00,
-    white: 0x03,
-    gold: 0x52,
-    red: 0x41,
-    lightRed: 0x32,
-    gray: 0x02,
-    darkGray: 0x01,
-    cyan: 0x12,
-    brightRed: 0x40,
-    green: 0x61,
-    skyBlue: 0x12
+    background: 0x00,
+    primaryText: 0x03,
+    highlight: 0x52,
+    danger: 0x41,
+    warning: 0x32,
+    secondaryText: 0x02,
+    mutedText: 0x01,
+    accentText: 0x12,
+    criticalDanger: 0x40,
+    success: 0x61,
+    info: 0x12
 } as const;
 
-/**
- * Returns color palette for the specified palette name
- */
-function getColorPalette(paletteName: string): ColorPalette {
-    const masterIndices = PALETTE_NAME_TO_MASTER_PALETTE[paletteName];
-    if (!masterIndices) {
-        throw new Error(`[getColorPalette] Palette not found: ${paletteName}`);
-    }
-    
-    const palette: ColorPalette = {};
-    
-    for (let i = 0; i < masterIndices.length; i++) {
-        const colorIndex = masterIndices[i];
-        if (colorIndex === 0) {
-            palette[i] = null;
-        } else {
-            const color = paletteSystem.masterPalette[colorIndex];
-            if (!color) {
-                throw new Error(`[getColorPalette] Color not found in master palette: 0x${colorIndex.toString(16).padStart(2, '0')} (palette: ${paletteName}, index: ${i})`);
-            }
-            palette[i] = color;
-        }
-    }
-    
-    return palette;
-}
-
-function getMasterColor(colorIndex: number): string {
-    return paletteSystem.masterPalette[colorIndex] || '#000000';
-}
-
-export { PaletteSystem, STAGE_PALETTES, SPRITE_DEFINITIONS, getColorPalette, paletteSystem, UI_PALETTE_INDICES, getMasterColor };
+export { PaletteSystem, STAGE_PALETTES, SPRITE_DEFINITIONS, paletteSystem, UI_PALETTE_INDICES };
 export type { ColorHex, Palette, PaletteConfig, StagePalette, ColorPalette, SpriteData };

@@ -130,6 +130,7 @@ export class GameCore {
 
         const assetLoader = new AssetLoader();
         assetLoader.setRenderer(pixelArtRenderer);
+        assetLoader.setPixelRenderer(renderer);
         renderer.assetLoader = assetLoader;
         this._serviceLocator.register(ServiceNames.ASSET_LOADER, assetLoader);
 

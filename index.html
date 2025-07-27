@@ -215,6 +215,17 @@
     <script>
         console.log('[Performance] Page start:', performance.now().toFixed(2) + 'ms');
         console.log('[Performance] Loading screen visible');
+        window.pageStartTime = performance.now();
+        
+        // モジュールロード時間を計測
+        const moduleLoadStart = performance.now();
+        window.addEventListener('load', () => {
+            console.log('[Performance] Window load event:', performance.now().toFixed(2) + 'ms');
+        });
+    </script>
+    <script type="module">
+        console.log('[Performance] Module script started:', performance.now().toFixed(2) + 'ms');
+        console.log('[Performance] Time from page start to module start:', (performance.now() - window.pageStartTime).toFixed(2) + 'ms');
     </script>
     <script type="module" src="/src/index.ts"></script>
 </body>

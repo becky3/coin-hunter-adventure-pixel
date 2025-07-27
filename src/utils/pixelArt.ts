@@ -1,3 +1,5 @@
+import { paletteSystem } from './pixelArtPalette';
+
 type PixelData = number[][];
 type ColorMap = { [key: number]: string | null };
 
@@ -119,6 +121,8 @@ class PixelArtRenderer {
     private ctx: CanvasRenderingContext2D;
     public sprites: Map<string, PixelArtSprite>;
     public animations: Map<string, PixelArtAnimation>;
+    public stageDependentSprites: Map<string, PixelData>;
+    public stageDependentAnimations: Map<string, { frames: PixelData[]; frameDuration: number }>;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
@@ -130,6 +134,8 @@ class PixelArtRenderer {
         this.ctx.imageSmoothingEnabled = false;
         this.sprites = new Map();
         this.animations = new Map();
+        this.stageDependentSprites = new Map();
+        this.stageDependentAnimations = new Map();
     }
 
     addSprite(name: string, pixelData: PixelData, colors: ColorMap): void {
@@ -138,6 +144,14 @@ class PixelArtRenderer {
 
     addAnimation(name: string, frames: PixelData[], colors: ColorMap, frameDuration = 100): void {
         this.animations.set(name, new PixelArtAnimation(frames, colors, frameDuration));
+    }
+
+    addStageDependentSprite(name: string, pixelData: PixelData): void {
+        this.stageDependentSprites.set(name, pixelData);
+    }
+
+    addStageDependentAnimation(name: string, frames: PixelData[], frameDuration = 100): void {
+        this.stageDependentAnimations.set(name, { frames, frameDuration });
     }
 
     drawSprite(name: string, x: number, y: number, flipped = false): void {
@@ -153,6 +167,33 @@ class PixelArtRenderer {
             animation.update(currentTime);
             animation.draw(this.ctx, x, y, flipped);
         }
+    }
+
+    drawStageDependentSprite(name: string, x: number, y: number, flipped = false, paletteIndex: number = 0): void {
+        const pixelData = this.stageDependentSprites.get(name);
+        if (!pixelData) return;
+
+        const colors: ColorMap = {};
+        for (let i = 0; i < 4; i++) {
+            colors[i] = paletteSystem.getColor('sprite', paletteIndex, i);
+        }
+
+        const sprite = new PixelArtSprite(pixelData, colors);
+        sprite.draw(this.ctx, x, y, flipped);
+    }
+
+    drawStageDependentAnimation(name: string, x: number, y: number, currentTime: number, flipped = false, paletteIndex: number = 0): void {
+        const animData = this.stageDependentAnimations.get(name);
+        if (!animData) return;
+
+        const colors: ColorMap = {};
+        for (let i = 0; i < 4; i++) {
+            colors[i] = paletteSystem.getColor('sprite', paletteIndex, i);
+        }
+
+        const animation = new PixelArtAnimation(animData.frames, colors, animData.frameDuration);
+        animation.update(currentTime);
+        animation.draw(this.ctx, x, y, flipped);
     }
 
     clear(): void {

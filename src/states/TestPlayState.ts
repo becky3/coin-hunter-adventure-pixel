@@ -106,7 +106,7 @@ export class TestPlayState implements GameState {
     
     render(renderer: PixelRenderer): void {
 
-        renderer.clear('#5C94FC');
+        renderer.clear(0, 0);
 
         for (let y = 0; y < this.tileMap.length; y++) {
             for (let x = 0; x < this.tileMap[y].length; x++) {

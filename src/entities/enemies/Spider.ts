@@ -7,6 +7,7 @@ import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PhysicsSystem } from '../../physics/PhysicsSystem';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
 
 type SpiderState = 'crawling' | 'descending' | 'ascending' | 'waiting';
 type SpiderSurface = 'ceiling' | 'wall_left' | 'wall_right' | 'floor';
@@ -386,5 +387,9 @@ export class Spider extends Enemy implements EntityInitializer {
                 ]
             }
         };
+    }
+    
+    protected getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.ENEMY_SPECIAL;
     }
 }

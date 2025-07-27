@@ -6,6 +6,7 @@ import { Logger } from '../utils/Logger';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import { SpritePaletteIndex } from '../utils/pixelArtPalette';
 
 const FLOAT_SPEED_MULTIPLIER = 0.1;
 const PIXELS_PER_UNIT = 16;
@@ -144,5 +145,9 @@ export class Coin extends Entity implements EntityInitializer {
                 ]
             }
         };
+    }
+    
+    protected getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.ITEMS;
     }
 }

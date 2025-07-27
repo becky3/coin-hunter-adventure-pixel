@@ -14,7 +14,7 @@ async function runTest() {
         await t.init('Performance Test');
         
         // Use quickStart for simplified initialization
-        await t.quickStart('0-1');
+        await t.quickStart('test-all-sprites');
         await t.wait(1000); // Wait for game state to stabilize
         
         console.log('\n--- Starting Performance Monitoring ---\n');

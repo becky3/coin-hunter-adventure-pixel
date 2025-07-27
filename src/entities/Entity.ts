@@ -179,7 +179,8 @@ export abstract class Entity {
                 this.sprite,
                 this.x,
                 this.y,
-                this.flipX
+                this.flipX,
+                this.getSpritePaletteIndex()
             );
         } else {
             throw new Error(`[Entity] ${this.constructor.name} has no way to render - neither entityAnimationManager nor sprite is available. Ensure that getAnimationDefinitions() and getPaletteDefinition() methods are implemented if required.`);
@@ -188,6 +189,14 @@ export abstract class Entity {
         if (renderer.debug) {
             this.renderDebug(renderer);
         }
+    }
+    
+    /**
+     * Returns the sprite palette index for this entity
+     * Override in subclasses to use different palettes
+     */
+    protected getSpritePaletteIndex(): number {
+        return 0;
     }
 
 

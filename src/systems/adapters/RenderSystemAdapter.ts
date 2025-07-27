@@ -19,7 +19,7 @@ export class RenderSystemAdapter implements ISystem {
     
     render(renderer: PixelRenderer): void {
 
-        renderer.clear('#000000');
+        renderer.clear(-1);
 
         this.stateManager.render(renderer);
     }

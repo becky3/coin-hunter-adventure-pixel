@@ -1,8 +1,9 @@
 import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants';
-import { PixelArtRenderer } from '../utils/pixelArt';
+import { PixelArtRenderer, PixelArtSprite } from '../utils/pixelArt';
 import { Logger } from '../utils/Logger';
 import { AssetLoader } from '../assets/AssetLoader';
 import { SpriteData } from '../types/assetTypes';
+import { paletteSystem } from '../utils/pixelArtPalette';
 
 
 /**
@@ -24,6 +25,8 @@ export class PixelRenderer {
     private cameraX: number;
     private cameraY: number;
     private spriteCache: Map<string, HTMLCanvasElement>;
+    public stageDependentSpriteCache: Map<string, PixelArtSprite>;
+    public currentStageType: string;
     public debug: boolean;
     public pixelArtRenderer?: PixelArtRenderer;
     public assetLoader?: AssetLoader;
@@ -53,15 +56,18 @@ export class PixelRenderer {
         this.cameraX = 0;
         this.cameraY = 0;
         this.spriteCache = new Map();
+        this.stageDependentSpriteCache = new Map();
+        this.currentStageType = '';
         this.debug = false;
     }
     
-    clear(color: string | null = null): void {
+    clear(backgroundPaletteIndex: number = 0, colorIndex: number = 0): void {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         
-        if (color) {
-            this.ctx.fillStyle = color;
+        if (backgroundPaletteIndex >= 0) {
+            const color = paletteSystem.getColor('background', backgroundPaletteIndex, colorIndex);
+            this.ctx.fillStyle = color || '#000000';
             this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
         } else {
             this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -79,16 +85,38 @@ export class PixelRenderer {
         this.cameraY = Math.floor(y);
     }
     
-    drawSprite(sprite: string | SpriteData | HTMLCanvasElement | ImageData, x: number, y: number, flipX: boolean = false): void {
+    setStageType(stageType: string): void {
+        if (this.currentStageType !== stageType) {
+            this.currentStageType = stageType;
+            this.stageDependentSpriteCache.clear();
+        }
+    }
+    
+    drawSprite(sprite: string | SpriteData | HTMLCanvasElement | ImageData, x: number, y: number, flipX: boolean = false, paletteIndex: number = 0): void {
         let finalSprite: SpriteData | HTMLCanvasElement | ImageData | null = null;
 
         if (typeof sprite === 'string') {
             if (this.pixelArtRenderer) {
-                const pixelSprite = this.pixelArtRenderer.sprites.get(sprite);
-                if (pixelSprite) {
-                    const canvas = flipX ? pixelSprite.flippedCanvas : pixelSprite.canvas;
-                    finalSprite = canvas;
+                const cacheKey = `${sprite}_${paletteIndex}`;
+                let cachedSprite = this.stageDependentSpriteCache.get(cacheKey);
+                
+                if (!cachedSprite) {
+                    const pixelData = this.pixelArtRenderer.stageDependentSprites.get(sprite);
+                    if (!pixelData) {
+                        throw new Error(`[PixelRenderer] Sprite '${sprite}' not loaded`);
+                    }
+                    
+                    const colors: { [key: number]: string | null } = {};
+                    for (let i = 0; i < 4; i++) {
+                        colors[i] = paletteSystem.getColor('sprite', paletteIndex, i);
+                    }
+                    
+                    cachedSprite = new PixelArtSprite(pixelData, colors);
+                    this.stageDependentSpriteCache.set(cacheKey, cachedSprite);
                 }
+                
+                const canvas = flipX ? cachedSprite.flippedCanvas : cachedSprite.canvas;
+                finalSprite = canvas;
             }
             else if (this.assetLoader) {
                 const loadedSprite = this.assetLoader.loadedAssets.get(sprite);
@@ -169,10 +197,14 @@ export class PixelRenderer {
         this.ctx.fillRect(drawX, drawY, this.scale, this.scale);
     }
     
-    drawRect(x: number, y: number, width: number, height: number, color: string, fill: boolean = true): void {
+    drawRect(x: number, y: number, width: number, height: number, colorIndex: number, fill: boolean = true): void {
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
+        const color = paletteSystem.masterPalette[colorIndex];
+        if (!color) {
+            throw new Error(`Invalid color index: ${colorIndex}. Color not found in master palette.`);
+        }
         this.ctx.fillStyle = color;
         this.ctx.strokeStyle = color;
         
@@ -183,7 +215,7 @@ export class PixelRenderer {
         }
     }
     
-    drawText(text: string, x: number, y: number, color: string = '#FFFFFF', alpha: number = 1, suppressWarning: boolean = false): void {
+    drawText(text: string, x: number, y: number, colorIndex: number = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
         const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
         const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
         
@@ -202,6 +234,10 @@ export class PixelRenderer {
         
         this.ctx.save();
         this.ctx.globalAlpha = alpha;
+        const color = paletteSystem.masterPalette[colorIndex];
+        if (!color) {
+            throw new Error(`Invalid color index: ${colorIndex}. Color not found in master palette.`);
+        }
         this.ctx.fillStyle = color;
         this.ctx.font = `${scaledSize}px ${FONT.FAMILY}`;
         this.ctx.textAlign = 'left';
@@ -210,10 +246,10 @@ export class PixelRenderer {
         this.ctx.restore();
     }
     
-    drawTextCentered(text: string, centerX: number, y: number, color: string = '#FFFFFF', alpha: number = 1, suppressWarning: boolean = false): void {
+    drawTextCentered(text: string, centerX: number, y: number, colorIndex: number = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
         const textWidth = text.length * FONT.GRID;
         const x = centerX - Math.floor(textWidth / 2);
-        this.drawText(text, x, y, color, alpha, suppressWarning);
+        this.drawText(text, x, y, colorIndex, alpha, suppressWarning);
     }
     
     drawLine(x1: number, y1: number, x2: number, y2: number, color: string = '#FFFFFF', width: number = 1): void {

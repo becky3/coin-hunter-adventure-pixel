@@ -1,5 +1,6 @@
 import { PixelRenderer } from './PixelRenderer';
 import { GAME_RESOLUTION } from '../constants/gameConstants';
+import { SpritePaletteIndex } from '../utils/pixelArtPalette';
 import { BackgroundElementPool } from './BackgroundElementPool';
 import { BackgroundChunkManager } from './BackgroundChunkManager';
 import { Logger } from '../utils/Logger';
@@ -11,15 +12,8 @@ export interface BackgroundElement {
     spriteKey: string;
 }
 
-interface OffscreenChunk {
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    startX: number;
-    endX: number;
-}
-
 /**
- * Optimized background renderer with dynamic element generation and offscreen rendering
+ * Optimized background renderer with dynamic element generation
  */
 export class BackgroundRenderer {
     private cloudPool: BackgroundElementPool;
@@ -29,14 +23,11 @@ export class BackgroundRenderer {
     private lastCameraX: number = 0;
     private activeCloudElements: Map<string, BackgroundElement> = new Map();
     private isFirstRender: boolean = true;
-    private offscreenChunks: Map<number, OffscreenChunk> = new Map();
-    private chunkSize: number = 512;
-    private chunkHeight: number = GAME_RESOLUTION.HEIGHT;
     
     constructor() {
         this.cloudPool = new BackgroundElementPool('cloud');
-        this.cloudChunks = new BackgroundChunkManager(this.chunkSize);
-        this.treeChunks = new BackgroundChunkManager(this.chunkSize);
+        this.cloudChunks = new BackgroundChunkManager(512);
+        this.treeChunks = new BackgroundChunkManager(512);
         
         this.initializeElementPositions();
     }
@@ -61,7 +52,10 @@ export class BackgroundRenderer {
         const viewportStart = camera.x - this.viewportMargin;
         const viewportEnd = camera.x + GAME_RESOLUTION.WIDTH + this.viewportMargin;
         
-        this.renderStaticLayer(renderer, camera, viewportStart, viewportEnd);
+        const trees = this.treeChunks.getElementsInRange(viewportStart, viewportEnd);
+        trees.forEach(tree => {
+            renderer.drawSprite(tree.spriteKey, tree.x, tree.y, false, SpritePaletteIndex.ENVIRONMENT_NATURE);
+        });
         
         if (this.isFirstRender || Math.abs(camera.x - this.lastCameraX) > 50) {
             this.updateActiveCloudElements(viewportStart, viewportEnd);
@@ -71,81 +65,9 @@ export class BackgroundRenderer {
         
         this.activeCloudElements.forEach(element => {
             if (element.x > camera.x - 100 && element.x < camera.x + GAME_RESOLUTION.WIDTH + 100) {
-                renderer.drawSprite(element.spriteKey, element.x, element.y);
+                renderer.drawSprite(element.spriteKey, element.x, element.y, false, SpritePaletteIndex.ENVIRONMENT_SKY);
             }
         });
-    }
-    
-    private renderStaticLayer(renderer: PixelRenderer, camera: { x: number, y: number }, viewportStart: number, viewportEnd: number): void {
-        const startChunk = Math.floor(viewportStart / this.chunkSize);
-        const endChunk = Math.floor(viewportEnd / this.chunkSize);
-        
-        for (let chunkIndex = startChunk; chunkIndex <= endChunk; chunkIndex++) {
-            let chunk = this.offscreenChunks.get(chunkIndex);
-            
-            if (!chunk) {
-                chunk = this.createOffscreenChunk(chunkIndex, renderer);
-                if (chunk) {
-                    this.offscreenChunks.set(chunkIndex, chunk);
-                }
-            }
-            
-            if (chunk && chunk.ctx.canvas.width > 0) {
-                const destX = chunk.startX - camera.x;
-                const destY = 0;
-                
-                if (destX < GAME_RESOLUTION.WIDTH && destX + chunk.ctx.canvas.width > 0) {
-                    renderer.ctx.drawImage(
-                        chunk.canvas,
-                        0, 0, chunk.canvas.width, chunk.canvas.height,
-                        destX * renderer.scale, destY * renderer.scale, 
-                        chunk.canvas.width * renderer.scale, chunk.canvas.height * renderer.scale
-                    );
-                }
-            }
-        }
-        
-        this.cleanupDistantChunks(camera.x);
-    }
-    
-    private createOffscreenChunk(chunkIndex: number, mainRenderer?: PixelRenderer): OffscreenChunk | null {
-        const startX = chunkIndex * this.chunkSize;
-        const endX = startX + this.chunkSize;
-        
-        const trees = this.treeChunks.getElementsInRange(startX, endX);
-        if (trees.length === 0) {
-            return null;
-        }
-        
-        const canvas = document.createElement('canvas');
-        canvas.width = this.chunkSize;
-        canvas.height = this.chunkHeight;
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            return null;
-        }
-        
-        ctx.imageSmoothingEnabled = false;
-        
-        const tempRenderer = new PixelRenderer(canvas);
-        tempRenderer.scale = 1;
-        tempRenderer.setCamera(startX, 0);
-        
-        if (mainRenderer && mainRenderer.pixelArtRenderer) {
-            tempRenderer.pixelArtRenderer = mainRenderer.pixelArtRenderer;
-        }
-        
-        trees.forEach(tree => {
-            tempRenderer.drawSprite(tree.spriteKey, tree.x, tree.y);
-        });
-        
-        return {
-            canvas,
-            ctx,
-            startX,
-            endX
-        };
     }
     
     private updateActiveCloudElements(viewportStart: number, viewportEnd: number): void {
@@ -172,29 +94,11 @@ export class BackgroundRenderer {
         });
     }
     
-    private cleanupDistantChunks(cameraX: number): void {
-        const maxDistance = this.chunkSize * 3;
-        
-        const toDelete: number[] = [];
-        this.offscreenChunks.forEach((chunk, index) => {
-            const chunkCenter = chunk.startX + this.chunkSize / 2;
-            if (Math.abs(chunkCenter - cameraX) > maxDistance) {
-                toDelete.push(index);
-            }
-        });
-        
-        toDelete.forEach(index => {
-            this.offscreenChunks.delete(index);
-        });
-    }
-    
     getDebugInfo(): { 
         activeClouds: number; 
-        offscreenChunks: number;
         } {
         return {
-            activeClouds: this.activeCloudElements.size,
-            offscreenChunks: this.offscreenChunks.size
+            activeClouds: this.activeCloudElements.size
         };
     }
 }

@@ -1,0 +1,504 @@
+
+> coin-hunter-adventure-pixel@0.1.0 dev
+> vite
+
+2025-07-26T22:28:43.111Z vite:config bundled config file loaded in 159.97ms
+2025-07-26T22:28:43.146Z vite:config using resolved config: {
+  root: '/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel',
+  resolve: {
+    mainFields: [ 'module', 'jsnext:main', 'jsnext' ],
+    browserField: true,
+    conditions: [],
+    extensions: [ '.ts', '.js', '.json' ],
+    dedupe: [],
+    preserveSymlinks: false,
+    alias: [ [Object], [Object] ]
+  },
+  build: {
+    target: [ 'es2020', 'edge88', 'firefox78', 'chrome87', 'safari14' ],
+    cssTarget: [ 'es2020', 'edge88', 'firefox78', 'chrome87', 'safari14' ],
+    outDir: 'dist',
+    assetsDir: 'assets',
+    assetsInlineLimit: 4096,
+    cssCodeSplit: true,
+    sourcemap: true,
+    rollupOptions: {},
+    minify: 'esbuild',
+    terserOptions: {},
+    write: true,
+    emptyOutDir: null,
+    copyPublicDir: true,
+    manifest: false,
+    lib: false,
+    ssr: false,
+    ssrManifest: false,
+    ssrEmitAssets: false,
+    reportCompressedSize: true,
+    chunkSizeWarningLimit: 500,
+    watch: null,
+    commonjsOptions: { include: [Array], extensions: [Array] },
+    dynamicImportVarsOptions: { warnOnError: true, exclude: [Array] },
+    modulePreload: { polyfill: true },
+    cssMinify: true
+  },
+  server: {
+    preTransformRequests: true,
+    port: 3000,
+    open: true,
+    hmr: { overlay: true },
+    watch: { usePolling: true, interval: 100 },
+    sourcemapIgnoreList: [Function: isInNodeModules],
+    middlewareMode: false,
+    fs: { strict: true, allow: [Array], deny: [Array] }
+  },
+  optimizeDeps: {
+    disabled: 'build',
+    include: [ 'playwright' ],
+    exclude: [],
+    esbuildOptions: { preserveSymlinks: false }
+  },
+  esbuild: { jsxDev: true, target: 'es2022' },
+  configFile: '/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/vite.config.js',
+  configFileDependencies: [
+    '/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/vite.config.js'
+  ],
+  inlineConfig: {
+    root: undefined,
+    base: undefined,
+    mode: undefined,
+    configFile: undefined,
+    logLevel: undefined,
+    clearScreen: undefined,
+    optimizeDeps: { force: undefined },
+    server: {}
+  },
+  base: '/',
+  rawBase: '/',
+  publicDir: '/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/public',
+  cacheDir: '/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/node_modules/.vite',
+  command: 'serve',
+  mode: 'development',
+  ssr: {
+    format: 'esm',
+    target: 'node',
+    optimizeDeps: { disabled: true, esbuildOptions: [Object] }
+  },
+  isWorker: false,
+  mainConfig: null,
+  isProduction: false,
+  plugins: [
+    'vite:optimized-deps',
+    'vite:watch-package-data',
+    'vite:pre-alias',
+    'alias',
+    'vite:modulepreload-polyfill',
+    'vite:resolve',
+    'vite:html-inline-proxy',
+    'vite:css',
+    'vite:esbuild',
+    'vite:json',
+    'vite:wasm-helper',
+    'vite:worker',
+    'vite:asset',
+    'vite:wasm-fallback',
+    'vite:define',
+    'vite:css-post',
+    'vite:worker-import-meta-url',
+    'vite:asset-import-meta-url',
+    'vite:dynamic-import-vars',
+    'vite:import-glob',
+    'vite:client-inject',
+    'vite:import-analysis'
+  ],
+  css: undefined,
+  preview: {
+    port: undefined,
+    strictPort: undefined,
+    host: undefined,
+    allowedHosts: undefined,
+    https: undefined,
+    open: true,
+    proxy: undefined,
+    cors: undefined,
+    headers: undefined
+  },
+  envDir: '/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel',
+  env: { BASE_URL: '/', MODE: 'development', DEV: true, PROD: false },
+  assetsInclude: [Function: assetsInclude],
+  logger: {
+    hasWarned: false,
+    info: [Function: info],
+    warn: [Function: warn],
+    warnOnce: [Function: warnOnce],
+    error: [Function: error],
+    clearScreen: [Function: clearScreen],
+    hasErrorLogged: [Function: hasErrorLogged]
+  },
+  packageCache: Map(1) {
+    'fnpd_/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel' => {
+      dir: '/mnt/d/claude/pixelAction/coin-hunter-adventure-pixel',
+      data: [Object],
+      hasSideEffects: [Function: hasSideEffects],
+      webResolvedImports: {},
+      nodeResolvedImports: {},
+      setResolvedCache: [Function: setResolvedCache],
+      getResolvedCache: [Function: getResolvedCache]
+    },
+    set: [Function (anonymous)]
+  },
+  createResolver: [Function: createResolver],
+  worker: {
+    format: 'iife',
+    plugins: [
+      'vite:optimized-deps',
+      'vite:watch-package-data',
+      'vite:pre-alias',
+      'alias',
+      'vite:modulepreload-polyfill',
+      'vite:resolve',
+      'vite:html-inline-proxy',
+      'vite:css',
+      'vite:esbuild',
+      'vite:json',
+      'vite:wasm-helper',
+      'vite:worker',
+      'vite:asset',
+      'vite:wasm-fallback',
+      'vite:define',
+      'vite:css-post',
+      'vite:worker-import-meta-url',
+      'vite:asset-import-meta-url',
+      'vite:dynamic-import-vars',
+      'vite:import-glob',
+      'vite:client-inject',
+      'vite:import-analysis'
+    ],
+    rollupOptions: {},
+    getSortedPlugins: [Function: getSortedPlugins],
+    getSortedPluginHooks: [Function: getSortedPluginHooks]
+  },
+  appType: 'spa',
+  experimental: { importGlobRestoreExtension: false, hmrPartialAccept: false },
+  webSocketToken: 'sD6Q2asbz2vk',
+  additionalAllowedHosts: [],
+  getSortedPlugins: [Function: getSortedPlugins],
+  getSortedPluginHooks: [Function: getSortedPluginHooks]
+}
+2025-07-26T22:28:43.222Z vite:deps Hash is consistent. Skipping. Use --force to override.
+2025-07-26T22:28:43.223Z vite:esbuild 80.11ms tsconfck init /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel
+
+  VITE v4.5.14  ready in 674 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: use --host to expose
+2025-07-26T22:28:43.397Z vite:html-fallback Rewriting GET / to /index.html
+2025-07-26T22:28:43.464Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:43.465Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:43.642Z vite:resolve 8.96ms /index.html?html-proxy&index=0.js -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/index.html?html-proxy&index=0.js
+2025-07-26T22:28:43.643Z vite:resolve 7.83ms /src/index.ts -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/index.ts
+2025-07-26T22:28:43.643Z vite:resolve 7.58ms /index.html?html-proxy&direct&index=0.css -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/index.html?html-proxy&direct&index=0.css
+2025-07-26T22:28:43.650Z vite:load 0.54ms [plugin] /index.html?html-proxy&index=0.js
+2025-07-26T22:28:43.653Z vite:import-analysis 0.45ms [no imports] index.html?html-proxy&index=0.js
+2025-07-26T22:28:43.653Z vite:transform 3.52ms /index.html?html-proxy&index=0.js
+2025-07-26T22:28:44.518Z vite:html-fallback Rewriting GET / to /index.html
+2025-07-26T22:28:44.809Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:44.809Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:46.070Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:46.070Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:48.420Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:48.420Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:49.526Z vite:load 5876.79ms [fs] /src/index.ts
+2025-07-26T22:28:49.604Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:49.604Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:50.792Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:50.792Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:51.976Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:51.976Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:53.173Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:53.173Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:54.094Z vite:resolve 18.15ms ./core/GameCore -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/core/GameCore.ts
+2025-07-26T22:28:54.095Z vite:resolve 18.17ms ./utils/Logger -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/Logger.ts
+2025-07-26T22:28:54.096Z vite:import-analysis 20.26ms [2 imports rewritten] src/index.ts
+2025-07-26T22:28:54.096Z vite:transform 4569.27ms /src/index.ts
+2025-07-26T22:28:54.373Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:54.374Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:55.567Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:55.567Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:56.763Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:56.763Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:57.985Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:57.985Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:28:58.620Z vite:load 4524.53ms [fs] /src/utils/Logger.ts
+2025-07-26T22:28:58.621Z vite:load 4526.18ms [fs] /src/core/GameCore.ts
+2025-07-26T22:28:58.623Z vite:import-analysis 0.42ms [no imports] src/utils/Logger.ts
+2025-07-26T22:28:58.623Z vite:transform 3.38ms /src/utils/Logger.ts
+2025-07-26T22:28:58.843Z vite:resolve 217.32ms ../services/ServiceLocator -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/services/ServiceLocator.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.45ms ../services/ServiceNames -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/services/ServiceNames.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.47ms ../services/EventBus -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/services/EventBus.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.46ms ../services/SystemManager -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/services/SystemManager.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.48ms ./GameLoop -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/core/GameLoop.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.49ms ../debug/DebugOverlay -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/debug/DebugOverlay.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.49ms ./InputSystem -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/core/InputSystem.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.50ms ../physics/PhysicsSystem -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/physics/PhysicsSystem.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.50ms ../rendering/PixelRenderer -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/rendering/PixelRenderer.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.51ms ../utils/pixelArt -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/pixelArt.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.52ms ../assets/AssetLoader -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/assets/AssetLoader.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.53ms ../audio/MusicSystem -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/audio/MusicSystem.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.53ms ../states/GameStateManager -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/states/GameStateManager.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.54ms ../states/MenuState -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/states/MenuState.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.55ms ../states/PlayState -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/states/PlayState.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.56ms ../states/SoundTestState -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/states/SoundTestState.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.56ms ../utils/Logger -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/Logger.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.57ms ../config/ResourceLoader -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/ResourceLoader.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.57ms ../utils/urlParams -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/urlParams.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.56ms ../systems/adapters/InputSystemAdapter -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/systems/adapters/InputSystemAdapter.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.57ms ../systems/adapters/StateSystemAdapter -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/systems/adapters/StateSystemAdapter.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.58ms ../systems/adapters/RenderSystemAdapter -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/systems/adapters/RenderSystemAdapter.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.58ms ../systems/adapters/DebugSystemAdapter -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/systems/adapters/DebugSystemAdapter.ts
+2025-07-26T22:28:58.844Z vite:resolve 217.59ms ../performance/PerformanceMonitor -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/performance/PerformanceMonitor.ts
+2025-07-26T22:28:58.845Z vite:import-analysis 220.04ms [24 imports rewritten] src/core/GameCore.ts
+2025-07-26T22:28:58.846Z vite:transform 224.17ms /src/core/GameCore.ts
+2025-07-26T22:28:59.221Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:28:59.221Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:00.425Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:00.426Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:01.647Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:01.647Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:02.762Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:02.763Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:03.419Z vite:load 4574.30ms [fs] /src/services/EventBus.ts
+2025-07-26T22:29:03.420Z vite:load 4575.07ms [fs] /src/services/SystemManager.ts
+2025-07-26T22:29:03.421Z vite:load 4575.50ms [fs] /src/services/ServiceLocator.ts
+2025-07-26T22:29:03.421Z vite:load 4575.78ms [fs] /src/core/GameLoop.ts
+2025-07-26T22:29:03.421Z vite:load 4576.23ms [fs] /src/services/ServiceNames.ts
+2025-07-26T22:29:03.422Z vite:load 4576.55ms [fs] /src/debug/DebugOverlay.ts
+2025-07-26T22:29:03.423Z vite:load 4577.35ms [fs] /src/core/InputSystem.ts
+2025-07-26T22:29:03.423Z vite:load 4577.71ms [fs] /src/physics/PhysicsSystem.ts
+2025-07-26T22:29:03.423Z vite:load 4578.15ms [fs] /src/rendering/PixelRenderer.ts
+2025-07-26T22:29:03.424Z vite:load 4578.45ms [fs] /src/utils/pixelArt.ts
+2025-07-26T22:29:03.424Z vite:load 4578.70ms [fs] /src/states/GameStateManager.ts
+2025-07-26T22:29:03.424Z vite:load 4579.01ms [fs] /src/states/SoundTestState.ts
+2025-07-26T22:29:03.425Z vite:load 4579.33ms [fs] /src/assets/AssetLoader.ts
+2025-07-26T22:29:03.425Z vite:load 4579.61ms [fs] /src/audio/MusicSystem.ts
+2025-07-26T22:29:03.425Z vite:load 4580.12ms [fs] /src/states/MenuState.ts
+2025-07-26T22:29:03.426Z vite:load 4580.44ms [fs] /src/states/PlayState.ts
+2025-07-26T22:29:03.426Z vite:load 4580.80ms [fs] /src/utils/urlParams.ts
+2025-07-26T22:29:03.426Z vite:load 4581.01ms [fs] /src/systems/adapters/RenderSystemAdapter.ts
+2025-07-26T22:29:03.426Z vite:load 4581.20ms [fs] /src/config/ResourceLoader.ts
+2025-07-26T22:29:03.427Z vite:load 4581.49ms [fs] /src/systems/adapters/DebugSystemAdapter.ts
+2025-07-26T22:29:03.427Z vite:load 4581.72ms [fs] /src/systems/adapters/InputSystemAdapter.ts
+2025-07-26T22:29:03.427Z vite:load 4581.96ms [fs] /src/performance/PerformanceMonitor.ts
+2025-07-26T22:29:03.428Z vite:load 4582.41ms [fs] /src/systems/adapters/StateSystemAdapter.ts
+2025-07-26T22:29:03.430Z vite:import-analysis 0.24ms [no imports] src/services/SystemManager.ts
+2025-07-26T22:29:03.430Z vite:import-analysis 0.32ms [no imports] src/services/ServiceNames.ts
+2025-07-26T22:29:03.430Z vite:import-analysis 0.52ms [no imports] src/services/ServiceLocator.ts
+2025-07-26T22:29:03.430Z vite:transform 9.95ms /src/services/SystemManager.ts
+2025-07-26T22:29:03.430Z vite:transform 8.89ms /src/services/ServiceNames.ts
+2025-07-26T22:29:03.430Z vite:transform 9.64ms /src/services/ServiceLocator.ts
+2025-07-26T22:29:03.446Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:03.446Z vite:import-analysis 16.50ms [1 imports rewritten] src/services/EventBus.ts
+2025-07-26T22:29:03.446Z vite:import-analysis 16.56ms [1 imports rewritten] src/core/GameLoop.ts
+2025-07-26T22:29:03.446Z vite:transform 26.44ms /src/services/EventBus.ts
+2025-07-26T22:29:03.446Z vite:transform 25.29ms /src/core/GameLoop.ts
+2025-07-26T22:29:03.447Z vite:import-analysis 0.05ms [no imports] src/utils/urlParams.ts
+2025-07-26T22:29:03.448Z vite:transform 21.67ms /src/utils/urlParams.ts
+2025-07-26T22:29:03.525Z vite:resolve 77.13ms ../config/GameConstants -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/GameConstants.ts
+2025-07-26T22:29:03.525Z vite:resolve 77.23ms ./EnemySpawnDialog -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/debug/EnemySpawnDialog.ts
+2025-07-26T22:29:03.525Z vite:resolve 77.26ms ../levels/LevelLoader -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/LevelLoader.ts
+2025-07-26T22:29:03.525Z vite:resolve 77.17ms ../constants/gameConstants -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/constants/gameConstants.ts
+2025-07-26T22:29:03.525Z vite:resolve 77.18ms ../utils/pixelArtPalette -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/pixelArtPalette.ts
+2025-07-26T22:29:03.525Z vite:resolve 77.16ms ../../services/SystemPriorities -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/services/SystemPriorities.ts
+2025-07-26T22:29:03.525Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:03.526Z vite:import-analysis 78.40ms [6 imports rewritten] src/debug/DebugOverlay.ts
+2025-07-26T22:29:03.526Z vite:import-analysis 78.47ms [3 imports rewritten] src/states/SoundTestState.ts
+2025-07-26T22:29:03.526Z vite:import-analysis 78.70ms [1 imports rewritten] src/systems/adapters/RenderSystemAdapter.ts
+2025-07-26T22:29:03.526Z vite:transform 103.87ms /src/debug/DebugOverlay.ts
+2025-07-26T22:29:03.526Z vite:transform 101.60ms /src/states/SoundTestState.ts
+2025-07-26T22:29:03.526Z vite:transform 99.68ms /src/systems/adapters/RenderSystemAdapter.ts
+2025-07-26T22:29:03.527Z vite:import-analysis 0.09ms [no imports] src/states/GameStateManager.ts
+2025-07-26T22:29:03.527Z vite:import-analysis 0.48ms [no imports] src/utils/pixelArt.ts
+2025-07-26T22:29:03.527Z vite:transform 103.26ms /src/states/GameStateManager.ts
+2025-07-26T22:29:03.527Z vite:transform 103.57ms /src/utils/pixelArt.ts
+2025-07-26T22:29:03.568Z vite:resolve 41.20ms ../../utils/Logger -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/Logger.ts
+2025-07-26T22:29:03.569Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:03.569Z vite:import-analysis 42.04ms [1 imports rewritten] src/systems/adapters/DebugSystemAdapter.ts
+2025-07-26T22:29:03.569Z vite:import-analysis 42.07ms [1 imports rewritten] src/core/InputSystem.ts
+2025-07-26T22:29:03.569Z vite:import-analysis 42.09ms [2 imports rewritten] src/systems/adapters/InputSystemAdapter.ts
+2025-07-26T22:29:03.569Z vite:import-analysis 42.10ms [1 imports rewritten] src/systems/adapters/StateSystemAdapter.ts
+2025-07-26T22:29:03.569Z vite:transform 142.02ms /src/systems/adapters/DebugSystemAdapter.ts
+2025-07-26T22:29:03.569Z vite:transform 146.17ms /src/core/InputSystem.ts
+2025-07-26T22:29:03.569Z vite:transform 141.86ms /src/systems/adapters/InputSystemAdapter.ts
+2025-07-26T22:29:03.569Z vite:transform 141.16ms /src/systems/adapters/StateSystemAdapter.ts
+2025-07-26T22:29:03.640Z vite:resolve 68.86ms ../utils/spriteLoader -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/spriteLoader.ts
+2025-07-26T22:29:03.640Z vite:resolve 68.97ms ../utils/paletteResolver -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/paletteResolver.ts
+2025-07-26T22:29:03.640Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:03.640Z vite:import-analysis 70.64ms [3 imports rewritten] src/physics/PhysicsSystem.ts
+2025-07-26T22:29:03.640Z vite:import-analysis 70.68ms [5 imports rewritten] src/assets/AssetLoader.ts
+2025-07-26T22:29:03.640Z vite:transform 216.97ms /src/physics/PhysicsSystem.ts
+2025-07-26T22:29:03.640Z vite:transform 215.48ms /src/assets/AssetLoader.ts
+2025-07-26T22:29:03.693Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:03.693Z vite:import-analysis 52.19ms [4 imports rewritten] src/states/MenuState.ts
+2025-07-26T22:29:03.693Z vite:import-analysis 52.22ms [2 imports rewritten] src/rendering/PixelRenderer.ts
+2025-07-26T22:29:03.693Z vite:transform 267.59ms /src/states/MenuState.ts
+2025-07-26T22:29:03.693Z vite:transform 269.65ms /src/rendering/PixelRenderer.ts
+2025-07-26T22:29:03.732Z vite:resolve 36.73ms ../data/bundledData -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/data/bundledData.ts
+2025-07-26T22:29:03.732Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:03.732Z vite:import-analysis 37.53ms [2 imports rewritten] src/audio/MusicSystem.ts
+2025-07-26T22:29:03.732Z vite:import-analysis 37.57ms [2 imports rewritten] src/config/ResourceLoader.ts
+2025-07-26T22:29:03.732Z vite:transform 307.36ms /src/audio/MusicSystem.ts
+2025-07-26T22:29:03.733Z vite:transform 306.02ms /src/config/ResourceLoader.ts
+2025-07-26T22:29:03.856Z vite:resolve 122.88ms ../managers/EntityManager -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/managers/EntityManager.ts
+2025-07-26T22:29:03.856Z vite:resolve 123.01ms ../managers/LevelManager -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/managers/LevelManager.ts
+2025-07-26T22:29:03.856Z vite:resolve 123.05ms ../controllers/CameraController -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/controllers/CameraController.ts
+2025-07-26T22:29:03.856Z vite:resolve 123.06ms ../ui/HUDManager -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/ui/HUDManager.ts
+2025-07-26T22:29:03.856Z vite:resolve 123.08ms ../controllers/GameController -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/controllers/GameController.ts
+2025-07-26T22:29:03.856Z vite:resolve 123.10ms ../controllers/EventCoordinator -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/controllers/EventCoordinator.ts
+2025-07-26T22:29:03.857Z vite:resolve 123.10ms ../rendering/BackgroundRenderer -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/rendering/BackgroundRenderer.ts
+2025-07-26T22:29:03.857Z vite:resolve 123.11ms ../rendering/TileRenderer -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/rendering/TileRenderer.ts
+2025-07-26T22:29:03.857Z vite:resolve 123.15ms ../powerups/ShieldEffect -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/powerups/ShieldEffect.ts
+2025-07-26T22:29:03.857Z vite:resolve 123.16ms ../powerups/PowerGloveEffect -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/powerups/PowerGloveEffect.ts
+2025-07-26T22:29:03.857Z vite:resolve 123.17ms ../types/PowerUpTypes -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/types/PowerUpTypes.ts
+2025-07-26T22:29:03.857Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:03.857Z vite:import-analysis 124.11ms [15 imports rewritten] src/states/PlayState.ts
+2025-07-26T22:29:03.857Z vite:transform 431.40ms /src/states/PlayState.ts
+2025-07-26T22:29:03.863Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:03.863Z vite:import-analysis 5.50ms [1 imports rewritten] src/performance/PerformanceMonitor.ts
+2025-07-26T22:29:03.863Z vite:transform 436.05ms /src/performance/PerformanceMonitor.ts
+2025-07-26T22:29:03.932Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:03.932Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:04.953Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:04.953Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:06.135Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:06.135Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:07.348Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:07.348Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:08.213Z vite:load 4687.70ms [fs] /src/config/GameConstants.ts
+2025-07-26T22:29:08.214Z vite:load 4688.24ms [fs] /src/debug/EnemySpawnDialog.ts
+2025-07-26T22:29:08.215Z vite:load 4689.17ms [fs] /src/services/SystemPriorities.ts
+2025-07-26T22:29:08.215Z vite:load 4689.48ms [fs] /src/levels/LevelLoader.ts
+2025-07-26T22:29:08.216Z vite:import-analysis 0.02ms [no imports] src/config/GameConstants.ts
+2025-07-26T22:29:08.216Z vite:transform 2.62ms /src/config/GameConstants.ts
+2025-07-26T22:29:08.217Z vite:load 4691.28ms [fs] /src/constants/gameConstants.ts
+2025-07-26T22:29:08.217Z vite:load 4691.59ms [fs] /src/utils/pixelArtPalette.ts
+2025-07-26T22:29:08.217Z vite:load 4577.31ms [fs] /src/utils/spriteLoader.ts
+2025-07-26T22:29:08.218Z vite:load 4577.54ms [fs] /src/utils/paletteResolver.ts
+2025-07-26T22:29:08.218Z vite:load 4360.76ms [fs] /src/managers/EntityManager.ts
+2025-07-26T22:29:08.218Z vite:load 4485.79ms [fs] /src/data/bundledData.ts
+2025-07-26T22:29:08.219Z vite:load 4361.48ms [fs] /src/managers/LevelManager.ts
+2025-07-26T22:29:08.219Z vite:load 4361.72ms [fs] /src/controllers/CameraController.ts
+2025-07-26T22:29:08.219Z vite:import-analysis 0.02ms [no imports] src/services/SystemPriorities.ts
+2025-07-26T22:29:08.219Z vite:transform 4.52ms /src/services/SystemPriorities.ts
+2025-07-26T22:29:08.219Z vite:load 4362.27ms [fs] /src/ui/HUDManager.ts
+2025-07-26T22:29:08.220Z vite:load 4362.53ms [fs] /src/controllers/EventCoordinator.ts
+2025-07-26T22:29:08.220Z vite:load 4362.74ms [fs] /src/powerups/ShieldEffect.ts
+2025-07-26T22:29:08.220Z vite:load 4362.96ms [fs] /src/controllers/GameController.ts
+2025-07-26T22:29:08.255Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:08.255Z vite:import-analysis 34.56ms [1 imports rewritten] src/debug/EnemySpawnDialog.ts
+2025-07-26T22:29:08.255Z vite:import-analysis 34.61ms [3 imports rewritten] src/levels/LevelLoader.ts
+2025-07-26T22:29:08.255Z vite:transform 41.37ms /src/debug/EnemySpawnDialog.ts
+2025-07-26T22:29:08.255Z vite:transform 40.16ms /src/levels/LevelLoader.ts
+2025-07-26T22:29:08.255Z vite:load 4398.34ms [fs] /src/rendering/BackgroundRenderer.ts
+2025-07-26T22:29:08.256Z vite:load 4398.69ms [fs] /src/rendering/TileRenderer.ts
+2025-07-26T22:29:08.256Z vite:load 4399.02ms [fs] /src/powerups/PowerGloveEffect.ts
+2025-07-26T22:29:08.256Z vite:load 4399.28ms [fs] /src/types/PowerUpTypes.ts
+2025-07-26T22:29:08.257Z vite:import-analysis 0.07ms [no imports] src/constants/gameConstants.ts
+2025-07-26T22:29:08.257Z vite:import-analysis 0.29ms [no imports] src/utils/paletteResolver.ts
+2025-07-26T22:29:08.258Z vite:transform 41.47ms /src/constants/gameConstants.ts
+2025-07-26T22:29:08.258Z vite:transform 40.80ms /src/utils/paletteResolver.ts
+2025-07-26T22:29:08.681Z vite:resolve 423.80ms ../assets/sprites/spriteData -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/assets/sprites/spriteData.ts
+2025-07-26T22:29:08.681Z vite:resolve 423.90ms ./Logger -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/Logger.ts
+2025-07-26T22:29:08.681Z vite:resolve 423.75ms ../effects/ShieldEffect -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/effects/ShieldEffect.ts
+2025-07-26T22:29:08.681Z vite:resolve 423.45ms ../config/resources/index.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/index.json
+2025-07-26T22:29:08.681Z vite:resolve 423.45ms ../config/resources/sprites.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/sprites.json
+2025-07-26T22:29:08.681Z vite:resolve 423.46ms ../config/resources/characters.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/characters.json
+2025-07-26T22:29:08.681Z vite:resolve 423.47ms ../config/resources/audio.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/audio.json
+2025-07-26T22:29:08.681Z vite:resolve 423.48ms ../config/resources/objects.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/objects.json
+2025-07-26T22:29:08.681Z vite:resolve 423.49ms ../config/resources/physics.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/physics.json
+2025-07-26T22:29:08.681Z vite:resolve 423.50ms ../config/resources/bgm/title.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/bgm/title.json
+2025-07-26T22:29:08.681Z vite:resolve 423.50ms ../config/resources/bgm/game.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/bgm/game.json
+2025-07-26T22:29:08.682Z vite:resolve 423.51ms ../config/resources/bgm/victory.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/bgm/victory.json
+2025-07-26T22:29:08.682Z vite:resolve 423.52ms ../config/resources/bgm/gameover.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/bgm/gameover.json
+2025-07-26T22:29:08.682Z vite:resolve 423.53ms ../config/resources/se/button.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/se/button.json
+2025-07-26T22:29:08.682Z vite:resolve 423.54ms ../config/resources/se/coin.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/se/coin.json
+2025-07-26T22:29:08.682Z vite:resolve 423.55ms ../config/resources/se/damage.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/se/damage.json
+2025-07-26T22:29:08.682Z vite:resolve 423.55ms ../config/resources/se/enemyDefeat.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/se/enemyDefeat.json
+2025-07-26T22:29:08.682Z vite:resolve 423.56ms ../config/resources/se/gameStart.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/se/gameStart.json
+2025-07-26T22:29:08.682Z vite:resolve 423.57ms ../config/resources/se/goal.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/se/goal.json
+2025-07-26T22:29:08.682Z vite:resolve 423.58ms ../config/resources/se/jump.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/se/jump.json
+2025-07-26T22:29:08.682Z vite:resolve 423.59ms ../config/resources/se/powerup.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/se/powerup.json
+2025-07-26T22:29:08.682Z vite:resolve 423.58ms ../config/resources/se/projectile.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/resources/se/projectile.json
+2025-07-26T22:29:08.682Z vite:resolve 423.59ms ../levels/data/stages.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stages.json
+2025-07-26T22:29:08.682Z vite:resolve 423.60ms ../levels/data/stage0-1.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage0-1.json
+2025-07-26T22:29:08.682Z vite:resolve 423.61ms ../levels/data/stage0-2.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage0-2.json
+2025-07-26T22:29:08.682Z vite:resolve 423.62ms ../levels/data/stage0-3.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage0-3.json
+2025-07-26T22:29:08.682Z vite:resolve 423.63ms ../levels/data/stage0-4.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage0-4.json
+2025-07-26T22:29:08.682Z vite:resolve 423.63ms ../levels/data/stage0-5.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage0-5.json
+2025-07-26T22:29:08.682Z vite:resolve 423.64ms ../levels/data/stage0-6.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage0-6.json
+2025-07-26T22:29:08.682Z vite:resolve 423.65ms ../levels/data/stage0-7.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage0-7.json
+2025-07-26T22:29:08.682Z vite:resolve 423.66ms ../levels/data/stage1-1.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage1-1.json
+2025-07-26T22:29:08.682Z vite:resolve 423.67ms ../levels/data/stage1-2.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage1-2.json
+2025-07-26T22:29:08.682Z vite:resolve 423.67ms ../levels/data/stage1-3.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage1-3.json
+2025-07-26T22:29:08.682Z vite:resolve 423.68ms ../levels/data/stage2-1.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage2-1.json
+2025-07-26T22:29:08.682Z vite:resolve 423.69ms ../levels/data/stage2-2.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage2-2.json
+2025-07-26T22:29:08.682Z vite:resolve 423.71ms ../levels/data/stage2-3.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage2-3.json
+2025-07-26T22:29:08.682Z vite:resolve 423.71ms ../levels/data/level1.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/level1.json
+2025-07-26T22:29:08.682Z vite:resolve 423.72ms ../levels/data/performance-test.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/performance-test.json
+2025-07-26T22:29:08.682Z vite:resolve 423.73ms ../levels/data/stage-bullet-test.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage-bullet-test.json
+2025-07-26T22:29:08.682Z vite:resolve 423.74ms ../levels/data/test-all-sprites.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/test-all-sprites.json
+2025-07-26T22:29:08.682Z vite:resolve 423.74ms ../levels/data/test-armor-knight.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/test-armor-knight.json
+2025-07-26T22:29:08.682Z vite:resolve 423.75ms ../levels/data/test-armor-knight-stomp.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/test-armor-knight-stomp.json
+2025-07-26T22:29:08.682Z vite:resolve 423.76ms ../levels/data/stage-test-falling-floor.json -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/levels/data/stage-test-falling-floor.json
+2025-07-26T22:29:08.683Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:08.683Z vite:cache [memory] /src/services/EventBus.ts
+2025-07-26T22:29:08.684Z vite:import-analysis 426.60ms [1 imports rewritten] src/controllers/EventCoordinator.ts
+2025-07-26T22:29:08.684Z vite:import-analysis 426.68ms [3 imports rewritten] src/controllers/CameraController.ts
+2025-07-26T22:29:08.684Z vite:import-analysis 426.76ms [2 imports rewritten] src/utils/spriteLoader.ts
+2025-07-26T22:29:08.684Z vite:import-analysis 426.76ms [3 imports rewritten] src/powerups/ShieldEffect.ts
+2025-07-26T22:29:08.684Z vite:import-analysis 426.80ms [40 imports rewritten] src/data/bundledData.ts
+2025-07-26T22:29:08.684Z vite:transform 464.44ms /src/controllers/EventCoordinator.ts
+2025-07-26T22:29:08.684Z vite:transform 465.28ms /src/controllers/CameraController.ts
+2025-07-26T22:29:08.684Z vite:transform 466.82ms /src/utils/spriteLoader.ts
+2025-07-26T22:29:08.684Z vite:transform 464.34ms /src/powerups/ShieldEffect.ts
+2025-07-26T22:29:08.684Z vite:transform 466.03ms /src/data/bundledData.ts
+2025-07-26T22:29:08.772Z vite:resolve 86.54ms ./spriteLoader -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/utils/spriteLoader.ts
+2025-07-26T22:29:08.772Z vite:resolve 86.42ms ../entities/Enemy -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/entities/Enemy.ts
+2025-07-26T22:29:08.772Z vite:resolve 86.44ms ../entities/Player -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/entities/Player.ts
+2025-07-26T22:29:08.772Z vite:resolve 86.45ms ../factories/EntityFactory -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/factories/EntityFactory.ts
+2025-07-26T22:29:08.772Z vite:resolve 86.46ms ../interfaces/EntityInitializer -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/interfaces/EntityInitializer.ts
+2025-07-26T22:29:08.773Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:08.773Z vite:cache [memory] /src/services/EventBus.ts
+2025-07-26T22:29:08.773Z vite:import-analysis 87.25ms [1 imports rewritten] src/utils/pixelArtPalette.ts
+2025-07-26T22:29:08.773Z vite:import-analysis 87.24ms [2 imports rewritten] src/controllers/GameController.ts
+2025-07-26T22:29:08.773Z vite:import-analysis 87.25ms [7 imports rewritten] src/managers/EntityManager.ts
+2025-07-26T22:29:08.773Z vite:transform 555.64ms /src/utils/pixelArtPalette.ts
+2025-07-26T22:29:08.773Z vite:transform 552.80ms /src/controllers/GameController.ts
+2025-07-26T22:29:08.773Z vite:transform 554.99ms /src/managers/EntityManager.ts
+2025-07-26T22:29:08.774Z vite:import-analysis 0.26ms [no imports] src/rendering/TileRenderer.ts
+2025-07-26T22:29:08.774Z vite:import-analysis 0.35ms [no imports] src/types/PowerUpTypes.ts
+2025-07-26T22:29:08.774Z vite:transform 518.28ms /src/rendering/TileRenderer.ts
+2025-07-26T22:29:08.774Z vite:transform 517.79ms /src/types/PowerUpTypes.ts
+2025-07-26T22:29:08.921Z vite:resolve 147.10ms ./PixelRenderer -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/rendering/PixelRenderer.ts
+2025-07-26T22:29:08.921Z vite:resolve 147.22ms ./BackgroundElementPool -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/rendering/BackgroundElementPool.ts
+2025-07-26T22:29:08.921Z vite:resolve 147.25ms ./BackgroundChunkManager -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/rendering/BackgroundChunkManager.ts
+2025-07-26T22:29:08.921Z vite:resolve 147.21ms ../entities/projectiles/EnergyBullet -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/entities/projectiles/EnergyBullet.ts
+2025-07-26T22:29:08.921Z vite:resolve 147.23ms ../config/PowerGloveConfig -> /mnt/d/claude/pixelAction/coin-hunter-adventure-pixel/src/config/PowerGloveConfig.ts
+2025-07-26T22:29:08.922Z vite:cache [memory] /src/services/EventBus.ts
+2025-07-26T22:29:08.922Z vite:cache [memory] /src/utils/Logger.ts
+2025-07-26T22:29:08.922Z vite:cache [memory] /src/rendering/PixelRenderer.ts
+2025-07-26T22:29:08.922Z vite:cache [memory] /src/services/ServiceLocator.ts
+2025-07-26T22:29:08.922Z vite:import-analysis 148.45ms [5 imports rewritten] src/managers/LevelManager.ts
+2025-07-26T22:29:08.922Z vite:import-analysis 148.47ms [3 imports rewritten] src/ui/HUDManager.ts
+2025-07-26T22:29:08.922Z vite:import-analysis 148.47ms [5 imports rewritten] src/rendering/BackgroundRenderer.ts
+2025-07-26T22:29:08.922Z vite:import-analysis 148.48ms [5 imports rewritten] src/powerups/PowerGloveEffect.ts
+2025-07-26T22:29:08.922Z vite:transform 703.40ms /src/managers/LevelManager.ts
+2025-07-26T22:29:08.922Z vite:transform 702.66ms /src/ui/HUDManager.ts
+2025-07-26T22:29:08.922Z vite:transform 666.63ms /src/rendering/BackgroundRenderer.ts
+2025-07-26T22:29:08.922Z vite:transform 665.95ms /src/powerups/PowerGloveEffect.ts
+2025-07-26T22:29:08.923Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:08.923Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:09.701Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:09.701Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:10.995Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:10.995Z vite:hmr [no modules matched] vite-debug.log
+2025-07-26T22:29:12.322Z vite:hmr [file change] vite-debug.log
+2025-07-26T22:29:12.322Z vite:hmr [no modules matched] vite-debug.log
