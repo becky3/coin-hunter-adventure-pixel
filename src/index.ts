@@ -4,6 +4,28 @@ import { Logger } from './utils/Logger';
 
 Logger.log('[Performance] index.ts loaded:', performance.now().toFixed(2) + 'ms');
 
+interface PerformanceMetrics {
+    scriptStart: number;
+    phases: Array<{name: string, start: number, end: number, duration: number}>;
+}
+
+declare global {
+    interface Window {
+        performanceMetrics: PerformanceMetrics;
+    }
+}
+
+window.performanceMetrics = {
+    scriptStart: performance.now(),
+    phases: []
+};
+
+function recordPhase(name: string, start: number, end: number): void {
+    const duration = end - start;
+    window.performanceMetrics.phases.push({ name, start, end, duration });
+    Logger.log(`[Performance] ${name}: ${duration.toFixed(2)}ms (${start.toFixed(2)}ms - ${end.toFixed(2)}ms)`);
+}
+
 window.addEventListener('error', (event) => {
     Logger.error('Global error:', event.error);
 });
@@ -17,7 +39,11 @@ async function startGame() {
         const startTime = performance.now();
         Logger.log('[Performance] startGame() called:', startTime.toFixed(2) + 'ms');
         Logger.log('Starting game initialization...');
+        
+        const gameCoreCreateStart = performance.now();
         const gameCore = new GameCore();
+        const gameCoreCreateEnd = performance.now();
+        recordPhase('GameCore constructor', gameCoreCreateStart, gameCoreCreateEnd);
 
         (window as Window & { game?: GameCore }).game = gameCore;
         
@@ -27,13 +53,24 @@ async function startGame() {
         await gameCore.init();
         const initEndTime = performance.now();
         Logger.log('[Performance] After gameCore.init():', initEndTime.toFixed(2) + 'ms', '(took', (initEndTime - initStartTime).toFixed(2) + 'ms)');
+        recordPhase('GameCore.init()', initStartTime, initEndTime);
         
         Logger.log('Starting game loop...');
         const gameStartTime = performance.now();
         Logger.log('[Performance] Before gameCore.start():', gameStartTime.toFixed(2) + 'ms');
         gameCore.start();
+        const gameStartEndTime = performance.now();
+        recordPhase('GameCore.start()', gameStartTime, gameStartEndTime);
         
         Logger.log('Game started successfully');
+        
+        const totalTime = gameStartEndTime - window.performanceMetrics.scriptStart;
+        Logger.log(`[Performance] Total initialization time: ${totalTime.toFixed(2)}ms`);
+        
+        Logger.log('[Performance] Summary:');
+        window.performanceMetrics.phases.forEach((phase) => {
+            Logger.log(`  ${phase.name}: ${phase.duration.toFixed(2)}ms`);
+        });
     } catch (error) {
         Logger.error('Failed to start game:', error);
         const loadingScreen = document.getElementById('loadingScreen');

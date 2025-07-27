@@ -44,6 +44,14 @@ export class GameCore {
         Logger.log('[Performance] GameCore.init() started:', initStartTime.toFixed(2) + 'ms');
         Logger.log('GameCore: init() started');
         
+        const recordPhase = (name: string, start: number, end: number): void => {
+            const duration = end - start;
+            if ((window as unknown as { performanceMetrics?: { phases: Array<{ name: string; start: number; end: number; duration: number }> } }).performanceMetrics) {
+                (window as unknown as { performanceMetrics: { phases: Array<{ name: string; start: number; end: number; duration: number }> } }).performanceMetrics.phases.push({ name, start, end, duration });
+            }
+            Logger.log(`[Performance] ${name}: ${duration.toFixed(2)}ms`);
+        };
+        
         Logger.log('GameCore: Initializing ResourceLoader...');
         const resourceLoaderStartTime = performance.now();
         Logger.log('[Performance] Before ResourceLoader.initialize():', resourceLoaderStartTime.toFixed(2) + 'ms');
@@ -51,26 +59,34 @@ export class GameCore {
         await resourceLoader.initialize();
         const resourceLoaderEndTime = performance.now();
         Logger.log('[Performance] After ResourceLoader.initialize():', resourceLoaderEndTime.toFixed(2) + 'ms', '(took', (resourceLoaderEndTime - resourceLoaderStartTime).toFixed(2) + 'ms)');
+        recordPhase('ResourceLoader.initialize()', resourceLoaderStartTime, resourceLoaderEndTime);
 
         Logger.log('GameCore: Registering core services...');
         const coreServicesStartTime = performance.now();
         Logger.log('[Performance] Before registerCoreServices():', coreServicesStartTime.toFixed(2) + 'ms');
         this.registerCoreServices();
-        Logger.log('[Performance] After registerCoreServices():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - coreServicesStartTime).toFixed(2) + 'ms)');
+        const coreServicesEndTime = performance.now();
+        Logger.log('[Performance] After registerCoreServices():', coreServicesEndTime.toFixed(2) + 'ms', '(took', (coreServicesEndTime - coreServicesStartTime).toFixed(2) + 'ms)');
+        recordPhase('registerCoreServices()', coreServicesStartTime, coreServicesEndTime);
 
         Logger.log('GameCore: Registering systems...');
         const systemsStartTime = performance.now();
         Logger.log('[Performance] Before registerSystems():', systemsStartTime.toFixed(2) + 'ms');
         await this.registerSystems();
-        Logger.log('[Performance] After registerSystems():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - systemsStartTime).toFixed(2) + 'ms)');
+        const systemsEndTime = performance.now();
+        Logger.log('[Performance] After registerSystems():', systemsEndTime.toFixed(2) + 'ms', '(took', (systemsEndTime - systemsStartTime).toFixed(2) + 'ms)');
+        recordPhase('registerSystems()', systemsStartTime, systemsEndTime);
 
         Logger.log('GameCore: Registering states...');
         const statesStartTime = performance.now();
         Logger.log('[Performance] Before registerStates():', statesStartTime.toFixed(2) + 'ms');
         this.registerStates();
-        Logger.log('[Performance] After registerStates():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - statesStartTime).toFixed(2) + 'ms)');
+        const statesEndTime = performance.now();
+        Logger.log('[Performance] After registerStates():', statesEndTime.toFixed(2) + 'ms', '(took', (statesEndTime - statesStartTime).toFixed(2) + 'ms)');
+        recordPhase('registerStates()', statesStartTime, statesEndTime);
 
         Logger.log('GameCore: Initializing debug overlay...');
+        const debugOverlayStartTime = performance.now();
         const renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
         const performanceMonitor = PerformanceMonitor.getInstance();
         performanceMonitor.initialize(renderer);
@@ -79,6 +95,8 @@ export class GameCore {
         
         this.debugOverlay = new DebugOverlay(this._serviceLocator);
         await this.debugOverlay.init();
+        const debugOverlayEndTime = performance.now();
+        recordPhase('Debug overlay init', debugOverlayStartTime, debugOverlayEndTime);
 
         Logger.log('GameCore: Hiding loading screen...');
         const hideLoadingTime = performance.now();
