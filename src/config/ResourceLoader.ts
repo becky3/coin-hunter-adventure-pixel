@@ -61,30 +61,48 @@ export class ResourceLoader {
         const parallelStartTime = performance.now();
         
         const loadingPromises = [
-            this.loadSprites().then(() => {
-                const now = performance.now();
-                recordPhase('loadSprites', parallelStartTime, now);
-            }),
-            this.loadCharacters().then(() => {
-                const now = performance.now();
-                recordPhase('loadCharacters', parallelStartTime, now);
-            }),
-            this.loadAudio().then(() => {
-                const now = performance.now();
-                recordPhase('loadAudio', parallelStartTime, now);
-            }),
-            this.loadObjects().then(() => {
-                const now = performance.now();
-                recordPhase('loadObjects', parallelStartTime, now);
-            }),
-            this.loadMusicPatterns().then(() => {
-                const now = performance.now();
-                recordPhase('loadMusicPatterns', parallelStartTime, now);
-            }),
-            this.loadPhysics().then(() => {
-                const now = performance.now();
-                recordPhase('loadPhysics', parallelStartTime, now);
-            })
+            (() => {
+                const startTime = performance.now();
+                return this.loadSprites().then(() => {
+                    const endTime = performance.now();
+                    recordPhase('loadSprites', startTime, endTime);
+                });
+            })(),
+            (() => {
+                const startTime = performance.now();
+                return this.loadCharacters().then(() => {
+                    const endTime = performance.now();
+                    recordPhase('loadCharacters', startTime, endTime);
+                });
+            })(),
+            (() => {
+                const startTime = performance.now();
+                return this.loadAudio().then(() => {
+                    const endTime = performance.now();
+                    recordPhase('loadAudio', startTime, endTime);
+                });
+            })(),
+            (() => {
+                const startTime = performance.now();
+                return this.loadObjects().then(() => {
+                    const endTime = performance.now();
+                    recordPhase('loadObjects', startTime, endTime);
+                });
+            })(),
+            (() => {
+                const startTime = performance.now();
+                return this.loadMusicPatterns().then(() => {
+                    const endTime = performance.now();
+                    recordPhase('loadMusicPatterns', startTime, endTime);
+                });
+            })(),
+            (() => {
+                const startTime = performance.now();
+                return this.loadPhysics().then(() => {
+                    const endTime = performance.now();
+                    recordPhase('loadPhysics', startTime, endTime);
+                });
+            })()
         ];
         
         await Promise.all(loadingPromises);
