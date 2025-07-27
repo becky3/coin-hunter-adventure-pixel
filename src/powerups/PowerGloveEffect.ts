@@ -19,18 +19,8 @@ export class PowerGloveEffect implements PowerUpEffect<Player> {
     onApply(target: Player): void {
         Logger.log('[PowerGloveEffect] Applying power glove to player');
         
-        const playerWithSize = target as Player & { 
-            isSmall: boolean;
-            width: number;
-            height: number;
-            y: number;
-        };
-        
-        if (playerWithSize.isSmall) {
-            playerWithSize.isSmall = false;
-            playerWithSize.width = 16;
-            playerWithSize.height = 32;
-            playerWithSize.y -= 16;
+        if (target.getIsSmall()) {
+            target.setNormalSize();
         }
         
         target.setHasPowerGlove(true);

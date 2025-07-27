@@ -1,5 +1,11 @@
 import { PhysicsLayer } from '../physics/PhysicsSystem';
 
+export interface GlobalPhysicsConfig {
+  gravity: number;
+  maxFallSpeed: number;
+  friction: number;
+}
+
 export interface BasePhysicsConfig {
   width: number;
   height: number;

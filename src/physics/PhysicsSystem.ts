@@ -72,11 +72,7 @@ export class PhysicsSystem {
 
     constructor() {
         const resourceLoader = ResourceLoader.getInstance();
-        const physicsConfig = resourceLoader.getPhysicsConfig('global');
-        
-        if (!physicsConfig) {
-            throw new Error('[PhysicsSystem] Physics configuration not found. Please ensure physics.json is loaded.');
-        }
+        const physicsConfig = resourceLoader.getPhysicsConfig();
         
         this._gravity = physicsConfig.gravity;
         this._maxFallSpeed = physicsConfig.maxFallSpeed;

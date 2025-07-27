@@ -647,7 +647,7 @@ export class MusicSystem {
         
         let maxDuration = 0;
         config.tracks.forEach(track => {
-            const duration = track.pattern.repeatEvery || track.pattern.duration || 
+            const duration = track.pattern.duration || 
                             (track.pattern.durations ? track.pattern.durations.reduce((a, b) => a + b, 0) : 4);
             maxDuration = Math.max(maxDuration, duration);
         });
@@ -689,17 +689,12 @@ export class MusicSystem {
         if (!this.audioContext) return;
         
         const pattern = track.pattern;
-        let startTime = baseStartTime;
+        const startTime = baseStartTime;
         
-        if (pattern.startAt) {
-            startTime += pattern.startAt * beatLength;
-        }
-        
-        const repeatEvery = pattern.repeatEvery || loopDuration;
-        const numRepeats = Math.floor(loopDuration / repeatEvery);
+        const numRepeats = 1;
         
         for (let repeat = 0; repeat < numRepeats; repeat++) {
-            const repeatStartTime = startTime + (repeat * repeatEvery * beatLength);
+            const repeatStartTime = startTime + (repeat * loopDuration * beatLength);
             
             if (pattern.beats && track.instrument.type === 'drums') {
                 pattern.beats.forEach(beat => {

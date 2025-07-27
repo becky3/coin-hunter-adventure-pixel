@@ -496,7 +496,8 @@ export class PerformanceMonitor {
 
     private getMemoryUsage(): number {
         if ('memory' in performance && performance.memory) {
-            return performance.memory.usedJSHeapSize / (1024 * 1024);
+            const memory = performance.memory as { usedJSHeapSize: number };
+            return memory.usedJSHeapSize / (1024 * 1024);
         }
         return 0;
     }

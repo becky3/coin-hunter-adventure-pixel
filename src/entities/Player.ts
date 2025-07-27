@@ -6,7 +6,7 @@ import { AssetLoader } from '../assets/AssetLoader';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
-import type { CharacterConfig, CharacterAnimationConfig } from '../config/ResourceConfig';
+import type { CharacterAnimationConfig, PlayerConfig } from '../config/ResourceConfig';
 import { PowerUpManager } from '../managers/PowerUpManager';
 import { PowerUpConfig, PowerUpType } from '../types/PowerUpTypes';
 import { ShieldEffectVisual } from '../effects/ShieldEffect';
@@ -40,7 +40,7 @@ interface PlayerState {
  * Player character entity with movement and interaction capabilities
  */
 export class Player extends Entity {
-    private playerConfig: CharacterConfig | null;
+    private playerConfig: PlayerConfig;
     private animationConfig: { [key: string]: CharacterAnimationConfig } | null;
     private speed: number;
     public jumpPower: number;
@@ -151,7 +151,6 @@ export class Player extends Entity {
         }
         this.animationConfig = playerConfig.animations;
         
-        this.gravityStrength = 1.0;
         this.frameCount = 0;
         
         this.powerUpManager = new PowerUpManager(this);
@@ -671,6 +670,26 @@ export class Player extends Entity {
     
     getHasPowerGlove(): boolean {
         return this.hasPowerGlove;
+    }
+    
+    getIsSmall(): boolean {
+        return this.isSmall;
+    }
+    
+    setNormalSize(): void {
+        if (this.isSmall) {
+            this.isSmall = false;
+            this.width = this.originalWidth;
+            this.height = this.originalHeight;
+            this.y -= (this.originalHeight - this.height);
+            this.updateAnimationState();
+        }
+    }
+    
+    setInvulnerable(duration: number, skipBlink: boolean = false): void {
+        this._invulnerable = true;
+        this.invulnerabilityTime = duration;
+        this.skipBlinkEffect = skipBlink;
     }
     
     /**
