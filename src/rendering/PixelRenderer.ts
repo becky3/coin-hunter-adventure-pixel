@@ -168,10 +168,9 @@ export class PixelRenderer {
                 0, 0, spriteWidth, spriteHeight,
                 drawX, drawY, spriteWidth * this.scale, spriteHeight * this.scale
             );
-        } else if (finalSprite instanceof HTMLCanvasElement || (finalSprite && 'canvas' in finalSprite)) {
-            const canvas = finalSprite instanceof HTMLCanvasElement ? finalSprite : (finalSprite as SpriteData).canvas;
+        } else if (finalSprite instanceof HTMLCanvasElement) {
             this.ctx.drawImage(
-                canvas,
+                finalSprite,
                 0, 0, spriteWidth, spriteHeight,
                 drawX, drawY, spriteWidth * this.scale, spriteHeight * this.scale
             );

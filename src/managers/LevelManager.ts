@@ -3,6 +3,7 @@ import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { Logger } from '../utils/Logger';
+import { StageType } from '../assets/AssetLoader';
 
 export interface LevelData {
     name?: string;
@@ -14,6 +15,7 @@ export interface LevelData {
     backgroundColor: number;
     timeLimit: number;
     goal: { x: number; y: number };
+    stageType: StageType;
 }
 
 interface GameServices {
