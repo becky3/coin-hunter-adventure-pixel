@@ -227,6 +227,10 @@ export class LevelLoader {
     
     getBackgroundColor(levelData: StageData): string {
         const colorIndex = levelData.backgroundColor;
-        return paletteSystem.masterPalette[colorIndex] || '#000000';
+        const color = paletteSystem.masterPalette[colorIndex];
+        if (!color) {
+            throw new Error(`Invalid background color index: ${colorIndex}. Color not found in master palette.`);
+        }
+        return color;
     }
 }
