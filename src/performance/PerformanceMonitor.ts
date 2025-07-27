@@ -514,31 +514,31 @@ export class PerformanceMonitor {
 
         renderer.drawRect(x - 2, y - 2, bgWidth, bgHeight, 0x00, true);
 
-        renderer.drawText(`FPS: ${latest.fps.toFixed(1)}`, x, y, '#00FF00', 1, true);
+        renderer.drawText(`FPS: ${latest.fps.toFixed(1)}`, x, y, 0x62, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`FRAME TIME: ${latest.frameTime.toFixed(2)}MS`, x, y, '#00FF00', 1, true);
+        renderer.drawText(`FRAME TIME: ${latest.frameTime.toFixed(2)}MS`, x, y, 0x62, 1, true);
         y += lineHeight;
         
         if (latest.memoryUsed > 0) {
-            renderer.drawText(`MEMORY: ${latest.memoryUsed.toFixed(1)}MB`, x, y, '#00FF00', 1, true);
+            renderer.drawText(`MEMORY: ${latest.memoryUsed.toFixed(1)}MB`, x, y, 0x62, 1, true);
             y += lineHeight;
         }
 
         y += lineHeight;
-        renderer.drawText('DRAW CALLS:', x, y, '#00FF00', 1, true);
+        renderer.drawText('DRAW CALLS:', x, y, 0x62, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`  SPRITES: ${latest.drawCalls.drawSprite}`, x, y, '#00FF00', 1, true);
+        renderer.drawText(`  SPRITES: ${latest.drawCalls.drawSprite}`, x, y, 0x62, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`  RECTS: ${latest.drawCalls.drawRect}`, x, y, '#00FF00', 1, true);
+        renderer.drawText(`  RECTS: ${latest.drawCalls.drawRect}`, x, y, 0x62, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`  TEXT: ${latest.drawCalls.drawText}`, x, y, '#00FF00', 1, true);
+        renderer.drawText(`  TEXT: ${latest.drawCalls.drawText}`, x, y, 0x62, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`  TOTAL: ${latest.drawCalls.total}`, x, y, '#00FF00', 1, true);
+        renderer.drawText(`  TOTAL: ${latest.drawCalls.total}`, x, y, 0x62, 1, true);
         y += lineHeight;
 
         this.renderGraph(renderer, x, y + 10, 190, 40);
@@ -566,8 +566,8 @@ export class PerformanceMonitor {
             renderer.drawLine(x1, y1, x2, y2, color, 1);
         }
 
-        renderer.drawText('60', x - 20, y - 4, '#00FF00', 1, true);
-        renderer.drawText('0', x - 15, y + height - 4, '#00FF00', 1, true);
+        renderer.drawText('60', x - 20, y - 4, 0x62, 1, true);
+        renderer.drawText('0', x - 15, y + height - 4, 0x62, 1, true);
     }
 
     toggle(): void {

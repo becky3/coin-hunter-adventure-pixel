@@ -6,7 +6,7 @@ import { LevelManager } from '../managers/LevelManager';
 import { CameraController } from '../controllers/CameraController';
 import { HUDManager } from '../ui/HUDManager';
 import { EventBus } from '../services/EventBus';
-import { GameController } from '../controllers/GameController';
+import { GameController, GameServices } from '../controllers/GameController';
 import { EventCoordinator } from '../controllers/EventCoordinator';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { Logger } from '../utils/Logger';
@@ -80,7 +80,7 @@ export class PlayState implements GameState {
         return this.hudManager;
     }
     
-    public getBackgroundDebugInfo(): { activeClouds: number; offscreenChunks: number } | null {
+    public getBackgroundDebugInfo(): { activeClouds: number } | null {
         return this.backgroundRenderer.getDebugInfo();
     }
 
@@ -100,7 +100,7 @@ export class PlayState implements GameState {
         this.hudManager = new HUDManager(extendedGame);
         
         this.gameController = new GameController({
-            services: extendedGame,
+            services: extendedGame as GameServices,
             entityManager: this.entityManager,
             cameraController: this.cameraController,
             levelManager: this.levelManager,
@@ -434,7 +434,7 @@ export class PlayState implements GameState {
 
         if (this.game.physicsSystem) {
             this.game.physicsSystem.clearCollisionPairs();
-            this.game.physicsSystem.tileMap = null;
+            this.game.physicsSystem.setTileMap(null);
         }
 
         this.entityManager.clear();
@@ -566,7 +566,7 @@ export class PlayState implements GameState {
                     score: this.hudManager.getHUDData().score,
                     lives: this.lives,
                     powerUps: player.getPowerUpManager().getActivePowerUps(),
-                    isSmall: (player as Player & { isSmall: boolean }).isSmall
+                    isSmall: player.getIsSmall()
                 } : null;
                 
                 this.game.stateManager.setState('play', { 

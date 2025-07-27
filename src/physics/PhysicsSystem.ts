@@ -317,7 +317,7 @@ export class PhysicsSystem {
     
     resolveTileCollision(entity: PhysicsEntity, tileBounds: Bounds, axis: 'horizontal' | 'vertical'): void {
         if (entity.notifyTileCollision && entity.onCollision) {
-            entity.onCollision({ other: null });
+            entity.onCollision({ other: null, side: axis === 'horizontal' ? (entity.vx > 0 ? 'right' : 'left') : (entity.vy > 0 ? 'bottom' : 'top') });
             return;
         }
         

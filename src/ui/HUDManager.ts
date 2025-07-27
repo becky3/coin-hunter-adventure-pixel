@@ -114,7 +114,7 @@ export class HUDManager {
         if (!ctx) return;
         
         ctx.imageSmoothingEnabled = false;
-        const blackColor = UI_PALETTE_INDICES.background;
+        const blackColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.background];
         ctx.fillStyle = blackColor;
         ctx.fillRect(0, 0, menuWidth, menuHeight);
     }
