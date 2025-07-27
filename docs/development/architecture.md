@@ -33,6 +33,8 @@ Coin Hunter Adventure Pixelは、HTML5 Canvas APIを使用したブラウザベ�
 - **GameStateManager**: ゲーム状態の管理（メニュー、プレイ、サウンドテスト、ゲームオーバー）
 - **PixelRenderer**: 8ビットスタイルの描画システム
 - **PhysicsSystem**: 物理演算（重力、衝突判定）
+  - PhysicsLayer enumによる衝突グループ管理
+  - Entity基底クラスにphysicsLayerプロパティを必須化
 - **MusicSystem**: Web Audio APIによる音声管理（統一インターフェース実装）
 - **InputSystem**: キーボード入力の統合管理
 - **EntityAnimationManager**: エンティティベースのアニメーション管理
@@ -83,6 +85,8 @@ src/
 - **重力定数**: 0.433
 - **最大落下速度**: 10
 - **衝突判定**: AABB（Axis-Aligned Bounding Box）
+- **PhysicsLayer**: 衝突グループの分離（player, enemy, item, terrain, projectile）
+- **Variable Jump**: ボタン長押しでジャンプ高さ調整（maxJumpTime: 400ms）
 
 ### Canvas設定
 - **imageSmoothingEnabled**: false（ピクセルアート用）
