@@ -185,24 +185,75 @@ export interface ItemPhysicsConfig {
   solid: boolean;
 }
 
-export interface ItemConfig {
+export interface BaseItemConfig {
   physics: ItemPhysicsConfig;
-  properties: {
-    [key: string]: unknown;
-  };
   sprites: {
     category: string;
-    name?: string;
-    animation?: {
+  };
+}
+
+export interface CoinConfig extends BaseItemConfig {
+  properties: {
+    scoreValue: number;
+    animationSpeed: number;
+    floatAmplitude: number;
+    floatSpeed: number;
+  };
+  sprites: BaseItemConfig['sprites'] & {
+    animation: {
       name: string;
       frameCount: number;
       frameDuration: number;
     };
-    sprites?: {
-      [key: string]: string;
+  };
+}
+
+export interface SpringConfig extends BaseItemConfig {
+  properties: {
+    expansionSpeed: number;
+  };
+  sprites: BaseItemConfig['sprites'] & {
+    name: string;
+  };
+}
+
+export interface FallingFloorConfig extends BaseItemConfig {
+  properties: {
+    shakeAmplitude: number;
+    shakeFrequency: number;
+    shakeTime: number;
+  };
+  sprites: BaseItemConfig['sprites'] & {
+    sprites: {
+      normal: string;
+      crack1: string;
+      crack2: string;
+      broken: string;
     };
   };
 }
+
+export interface PowerUpConfig extends BaseItemConfig {
+  properties: {
+    floatSpeed: number;
+    floatAmplitude: number;
+  };
+  sprites: BaseItemConfig['sprites'] & {
+    name: string;
+  };
+}
+
+export interface GoalFlagConfig extends BaseItemConfig {
+  properties: {
+    waveAmplitude: number;
+    waveSpeed: number;
+  };
+  sprites: BaseItemConfig['sprites'] & {
+    name: string;
+  };
+}
+
+export type ItemConfig = CoinConfig | SpringConfig | FallingFloorConfig | PowerUpConfig | GoalFlagConfig;
 
 export type EntityConfig = PlayerConfig | EnemyConfig | ItemConfig;
 

@@ -5,7 +5,11 @@ import {
     EntityConfig,
     PlayerConfig,
     EnemyConfig,
-    ItemConfig
+    CoinConfig,
+    SpringConfig,
+    FallingFloorConfig,
+    PowerUpConfig,
+    GoalFlagConfig
 } from './ResourceConfig';
 import { MusicPatternConfig, MusicConfig } from './MusicPatternConfig';
 import { bundledResourceData, bundledMusicData } from '../data/bundledData';
@@ -71,23 +75,9 @@ export class ResourceLoader {
             })(),
             (() => {
                 const startTime = performance.now();
-                return this.loadCharacters().then(() => {
-                    const endTime = performance.now();
-                    recordPhase('loadCharacters', startTime, endTime);
-                });
-            })(),
-            (() => {
-                const startTime = performance.now();
                 return this.loadAudio().then(() => {
                     const endTime = performance.now();
                     recordPhase('loadAudio', startTime, endTime);
-                });
-            })(),
-            (() => {
-                const startTime = performance.now();
-                return this.loadObjects().then(() => {
-                    const endTime = performance.now();
-                    recordPhase('loadObjects', startTime, endTime);
                 });
             })(),
             (() => {
@@ -124,7 +114,7 @@ export class ResourceLoader {
         const allBundled = { ...bundledResourceData, ...bundledMusicData };
         if (allBundled[path]) {
             Logger.log(`[ResourceLoader] Using bundled data for: ${path}`);
-            return allBundled[path];
+            return allBundled[path] as T;
         }
         
         try {
@@ -153,9 +143,6 @@ export class ResourceLoader {
         Logger.log('[Performance] loadSprites completed in', (performance.now() - startTime).toFixed(2) + 'ms');
     }
   
-    private async loadCharacters(): Promise<void> {
-        // Deprecated - use entity configs instead
-    }
   
     private async loadAudio(): Promise<void> {
         if (!this.resourceIndex) return;
@@ -164,9 +151,6 @@ export class ResourceLoader {
         this.audio = await this.loadJSON(audioPath);
     }
   
-    private async loadObjects(): Promise<void> {
-        // Deprecated - use entity configs instead
-    }
     
     private async loadMusicPatterns(): Promise<void> {
         if (!this.resourceIndex) return;
@@ -181,7 +165,7 @@ export class ResourceLoader {
         
         for (const file of bgmFiles) {
             const bgmPath = `/src/config/resources/bgm/${file}.json`;
-            const bgmData = await this.loadJSON(bgmPath);
+            const bgmData = await this.loadJSON<MusicConfig>(bgmPath);
             if (bgmData) {
                 this.musicPatterns.bgm[file] = bgmData;
             }
@@ -189,7 +173,7 @@ export class ResourceLoader {
         
         for (const file of seFiles) {
             const sePath = `/src/config/resources/se/${file}.json`;
-            const seData = await this.loadJSON(sePath);
+            const seData = await this.loadJSON<MusicConfig>(sePath);
             if (seData) {
                 this.musicPatterns.se[file] = seData;
             }
@@ -299,7 +283,11 @@ export class ResourceLoader {
     
     getEntityConfigSync(type: 'player'): PlayerConfig;
     getEntityConfigSync(type: 'enemies', name: string): EnemyConfig;
-    getEntityConfigSync(type: 'items' | 'terrain' | 'powerups', name: string): ItemConfig;
+    getEntityConfigSync(type: 'items', name: 'coin'): CoinConfig;
+    getEntityConfigSync(type: 'terrain', name: 'spring'): SpringConfig;
+    getEntityConfigSync(type: 'terrain', name: 'falling_floor'): FallingFloorConfig;
+    getEntityConfigSync(type: 'terrain', name: 'goal_flag'): GoalFlagConfig;
+    getEntityConfigSync(type: 'powerups', name: string): PowerUpConfig;
     getEntityConfigSync(type: string, name?: string): EntityConfig {
         const cacheKey = name ? `${type}/${name}` : type;
         
