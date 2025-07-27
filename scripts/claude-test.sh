@@ -24,6 +24,18 @@ fi
 echo "✅ 開発サーバーが稼働中です"
 echo ""
 
+# ログディレクトリのクリーンアップ
+echo "🧹 古いログファイルとスクリーンショットをクリーンアップ中..."
+if [ -d "tests/logs" ]; then
+    rm -rf tests/logs/*
+    echo "✅ ログディレクトリをクリーンアップしました"
+fi
+if [ -d "tests/screenshots" ]; then
+    rm -rf tests/screenshots/*
+    echo "✅ スクリーンショットディレクトリをクリーンアップしました"
+fi
+echo ""
+
 # 2. 並列E2Eテスト
 echo "2️⃣ 並列E2Eテストを実行中..."
 echo "💡 3つのワーカーで並列実行します（約80秒）"
