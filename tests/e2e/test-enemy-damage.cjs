@@ -193,9 +193,8 @@ async function runTest() {
         // Test 2: Second damage while small should kill player
         console.log('\n--- Test 2: Second Enemy Damage (Small -> Death) ---');
         
-        // Wait for invulnerability to end (2000ms + buffer)
-        console.log('Waiting for invulnerability to end...');
-        await t.wait(3000);
+        // Wait for invulnerability to end
+        await t.wait(2500);
         
         // Move back and then into enemy again
         await t.movePlayer('left', 500);

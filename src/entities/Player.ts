@@ -432,7 +432,7 @@ export class Player extends Entity {
         this.vy = 0;
         this._isDead = false;
         this._invulnerable = true;
-        this.invulnerabilityTime = this.playerConfig.invulnerabilityTime;
+        this.invulnerabilityTime = this.playerConfig.stats.invulnerabilityTime;
         this._animState = 'idle';
         this.animFrame = 0;
         this.animTimer = 0;
@@ -489,7 +489,7 @@ export class Player extends Entity {
         }
         
         this._invulnerable = true;
-        this.invulnerabilityTime = this.playerConfig.invulnerabilityTime;
+        this.invulnerabilityTime = this.playerConfig.stats.invulnerabilityTime;
         
         if (this.musicSystem) {
             this.musicSystem.playSE('damage');
