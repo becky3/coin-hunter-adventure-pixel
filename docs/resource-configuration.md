@@ -13,10 +13,9 @@
 ├── resources/
 │   ├── index.json       # メイン設定インデックス
 │   ├── sprites.json     # スプライトとアニメーション定義
-│   ├── characters.json  # キャラクターのステータスと物理設定（非推奨）
 │   ├── audio.json       # 効果音と音楽の定義
-│   └── objects.json     # ゲームオブジェクトの設定（非推奨）
-└── entities/            # 個別エンティティ設定（推奨）
+│   └── physics.json     # システムレベルの物理設定
+└── entities/            # 個別エンティティ設定
     ├── player.json
     ├── enemies/
     │   ├── slime.json
@@ -34,6 +33,8 @@
         └── shield_stone.json
 ```
 
+> **注意**: `characters.json`と`objects.json`は廃止されました。すべてのエンティティ設定は`/src/config/entities/`以下の個別ファイルで管理されます。
+
 ## 設定ファイル
 
 ### index.json
@@ -44,13 +45,12 @@
   "version": "1.0.0",
   "configs": {
     "sprites": "./sprites.json",
-    "characters": "./characters.json",
-    "audio": "./audio.json",
-    "objects": "./objects.json"
+    "audio": "./audio.json"
   },
   "paths": {
     "sprites": "/src/assets/sprites/",
-    "levels": "/src/levels/data/"
+    "levels": "/src/levels/data/",
+    "fonts": "/src/assets/fonts/"
   },
   "settings": {
     "defaultPalette": "default",
@@ -79,41 +79,18 @@
 }
 ```
 
-### characters.json
-すべてのキャラクターの物理プロパティ、ステータス、動作設定を含む。
+### エンティティ設定ファイル
+各エンティティの物理プロパティ、ステータス、動作設定を個別ファイルで管理。
 
-```json
-{
-  "player": {
-    "main": {
-      "physics": {
-        "width": 16,
-        "height": 16,
-        "speed": 1.17,
-        "jumpPower": 10
-      },
-      "stats": {
-        "maxHealth": 3,
-        "invulnerabilityTime": 2000
-      }
-    }
-  },
-  "enemies": {
-    "slime": {
-      "physics": {
-        "width": 16,
-        "height": 16,
-        "moveSpeed": 0.25,
-        "jumpHeight": 5
-      },
-      "stats": {
-        "maxHealth": 1,
-        "damage": 1
-      }
-    }
-  }
-}
-```
+- **player.json** - プレイヤーキャラクターの設定
+- **enemies/** - 敵キャラクターの設定ディレクトリ
+  - slime.json, bat.json, spider.json, armor_knight.json
+- **items/** - アイテムの設定ディレクトリ
+  - coin.json
+- **terrain/** - 地形オブジェクトの設定ディレクトリ
+  - spring.json, goal_flag.json, falling_floor.json
+- **powerups/** - パワーアップアイテムの設定ディレクトリ
+  - power_glove.json, shield_stone.json
 
 ### audio.json
 BGMと効果音をそのプロパティとともに定義。
@@ -142,27 +119,6 @@ BGMと効果音をそのプロパティとともに定義。
 }
 ```
 
-### objects.json
-コイン、スプリング、ゴールなどのインタラクティブなゲームオブジェクトの設定。
-
-```json
-{
-  "items": {
-    "coin": {
-      "physics": {
-        "width": 16,
-        "height": 16,
-        "solid": false
-      },
-      "properties": {
-        "scoreValue": 10,
-        "floatSpeed": 0.03,
-        "floatAmplitude": 0.1
-      }
-    }
-  }
-}
-```
 
 ## 使用方法
 
@@ -208,14 +164,41 @@ const slime = new Slime(x, y);
 
 ## 新しいリソースの追加
 
-### 新しいエンティティを追加する場合（推奨）
+### 新しいエンティティを追加する場合
 
 1. **エンティティ設定ファイルを作成** `/src/config/entities/[type]/[name].json`
 2. **スプライトファイルを追加** `/src/assets/sprites/[category]/` へ
 3. **sprites.jsonを更新** スプライト/アニメーション定義を追加
 4. **ResourceLoaderのpreloadEntityConfigs()に追加** 新しいエンティティタイプを登録
 5. **bundledData.tsを更新** 新しい設定ファイルをインポート
-6. **エンティティクラスを作成** 設定を読み込むコンストラクタを実装
+6. **TypeScript型定義を追加** `ResourceConfig.ts`に必要に応じて新しいインターフェースを追加
+7. **エンティティクラスを作成** 設定を読み込むコンストラクタを実装
+
+### 型安全性
+
+エンティティ設定は型安全に管理されています：
+
+```typescript
+// BaseItemConfigを継承して新しいアイテムタイプを定義
+export interface NewItemConfig extends BaseItemConfig {
+  properties: {
+    // 具体的なプロパティを定義
+    customValue: number;
+    specialFlag: boolean;
+  };
+  sprites: BaseItemConfig['sprites'] & {
+    // スプライト固有の設定
+    animation?: {
+      name: string;
+      frameCount: number;
+      frameDuration: number;
+    };
+  };
+}
+
+// ItemConfig型に追加
+export type ItemConfig = CoinConfig | SpringConfig | ... | NewItemConfig;
+```
 
 ## メリット
 
