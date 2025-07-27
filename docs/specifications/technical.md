@@ -95,9 +95,24 @@ Entity {
 各エンティティが自身のアニメーション定義とパレット情報を所有します。
 
 ### パレットシステム
-- **マスターパレット**: 52色の事前定義パレット
+- **マスターパレット**: 52色の事前定義パレット（0x00～0x91）
 - **4色制限**: 各スプライトは透明色を含む最大4色まで
-- **パレットバリアント**: パワーアップ時の色変更に対応
+- **ステージ依存パレット**: すべてのスプライトがステージごとに異なる色で表示
+- **動的パレット切り替え**: PowerGlove取得時などに実行時でパレットを変更
+- **パレットインデックス**: `SpritePaletteIndex` enumで管理
+  - CHARACTER (0)
+  - ENEMY_BASIC (1)
+  - ENEMY_SPECIAL (2)
+  - ITEMS (3)
+  - TILES_GROUND (4)
+  - TILES_HAZARD (5)
+  - TERRAIN_OBJECTS (6)
+  - ENVIRONMENT_NATURE (7)
+  - ENVIRONMENT_SKY (8)
+  - UI_ELEMENTS (9)
+  - EFFECTS (10)
+  - POWERUPS (11)
+  - CHARACTER_POWERGLOVE (12)
 
 ### アニメーション例
 - **プレイヤー**: idle, walk(4F), jump, fall
