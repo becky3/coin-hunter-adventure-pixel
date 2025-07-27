@@ -9,7 +9,8 @@ import {
     SpringConfig,
     FallingFloorConfig,
     PowerUpConfig,
-    GoalFlagConfig
+    GoalFlagConfig,
+    GlobalPhysicsConfig
 } from './ResourceConfig';
 import { MusicPatternConfig, MusicConfig } from './MusicPatternConfig';
 import { bundledResourceData, bundledMusicData } from '../data/bundledData';
@@ -24,7 +25,7 @@ export class ResourceLoader {
     private sprites: SpritesConfig | null = null;
     private audio: { [key: string]: { [key: string]: AudioConfig } } | null = null;
     private musicPatterns: MusicPatternConfig | null = null;
-    private physics: { [key: string]: unknown } | null = null;
+    private physics: { global: GlobalPhysicsConfig } | null = null;
     private entityConfigCache: Map<string, EntityConfig> = new Map();
   
     private constructor() {}
@@ -248,12 +249,11 @@ export class ResourceLoader {
         return this.musicPatterns;
     }
     
-    getPhysicsConfig(category?: string): unknown {
-        if (!this.physics) return null;
-        if (category) {
-            return this.physics[category] || null;
+    getPhysicsConfig(): GlobalPhysicsConfig {
+        if (!this.physics) {
+            throw new Error('[ResourceLoader] Physics configuration not loaded');
         }
-        return this.physics;
+        return this.physics.global;
     }
     
     async getEntityConfig(type: string, name?: string): Promise<EntityConfig> {

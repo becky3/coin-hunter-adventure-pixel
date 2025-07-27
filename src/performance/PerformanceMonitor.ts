@@ -266,7 +266,7 @@ export class PerformanceMonitor {
     private detectGPUCapabilities(): void {
         try {
             const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') as WebGLRenderingContext | null;
             
             this.gpuInfo.webglAvailable = !!gl;
             
@@ -496,7 +496,8 @@ export class PerformanceMonitor {
 
     private getMemoryUsage(): number {
         if ('memory' in performance && performance.memory) {
-            return performance.memory.usedJSHeapSize / (1024 * 1024);
+            const memory = performance.memory as { usedJSHeapSize: number };
+            return memory.usedJSHeapSize / (1024 * 1024);
         }
         return 0;
     }

@@ -35,14 +35,7 @@ export class ShieldEffect implements PowerUpEffect<Player> {
                 Logger.log('[ShieldEffect] Shield absorbed damage!');
                 this.shieldActive = false;
                 
-                const playerWithInvulnerable = target as Player & { 
-                    _invulnerable: boolean; 
-                    invulnerabilityTime: number;
-                    skipBlinkEffect?: boolean;
-                };
-                playerWithInvulnerable._invulnerable = true;
-                playerWithInvulnerable.invulnerabilityTime = 1000;
-                playerWithInvulnerable.skipBlinkEffect = true;
+                target.setInvulnerable(2000, true);
                 
                 const musicSystem = this.entityManager.getMusicSystem();
                 if (musicSystem) {
@@ -78,14 +71,6 @@ export class ShieldEffect implements PowerUpEffect<Player> {
             Logger.log(`[ShieldEffect] Breaking countdown: ${this.breakingTime.toFixed(3)}s remaining (deltaTime: ${deltaTime})`);
             if (this.breakingTime <= 0) {
                 this.isBreaking = false;
-                
-                const playerWithInvulnerable = target as Player & {
-                    _invulnerable: boolean;
-                    invulnerabilityTime: number;
-                };
-                playerWithInvulnerable._invulnerable = true;
-                playerWithInvulnerable.invulnerabilityTime = 1000;
-                
                 target.getPowerUpManager().removePowerUp(PowerUpType.SHIELD_STONE);
             }
         }

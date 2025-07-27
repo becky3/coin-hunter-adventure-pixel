@@ -39,37 +39,37 @@ export interface ISystemManager {
  * Manages system functionality
  */
 export class SystemManager implements ISystemManager {
-    private _systems: Map<string, ISystem> = new Map();
-    private sortedSystems: ISystem[] = [];
+    private systemsMap: Map<string, ISystem> = new Map();
+    private sortedSystemsCache: ISystem[] = [];
     
     get systems(): ISystem[] {
-        return Array.from(this._systems.values());
+        return Array.from(this.systemsMap.values());
     }
     
     registerSystem(system: ISystem): void {
-        if (this._systems.has(system.name)) {
+        if (this.systemsMap.has(system.name)) {
             throw new Error(`System '${system.name}' is already registered`);
         }
         
-        this._systems.set(system.name, system);
+        this.systemsMap.set(system.name, system);
         this.updateSortedSystems();
     }
     
     unregisterSystem(name: string): void {
-        const system = this._systems.get(name);
+        const system = this.systemsMap.get(name);
         if (system) {
             system.destroy?.();
-            this._systems.delete(name);
+            this.systemsMap.delete(name);
             this.updateSortedSystems();
         }
     }
     
     getSystem<T extends ISystem>(name: string): T | undefined {
-        return this._systems.get(name) as T | undefined;
+        return this.systemsMap.get(name) as T | undefined;
     }
     
     async initSystems(): Promise<void> {
-        for (const system of this.sortedSystems) {
+        for (const system of this.sortedSystemsCache) {
             if (system.enabled && system.init) {
                 await system.init();
             }
@@ -77,7 +77,7 @@ export class SystemManager implements ISystemManager {
     }
     
     updateSystems(deltaTime: number): void {
-        for (const system of this.sortedSystems) {
+        for (const system of this.sortedSystemsCache) {
             if (system.enabled && system.update) {
                 system.update(deltaTime);
             }
@@ -85,7 +85,7 @@ export class SystemManager implements ISystemManager {
     }
     
     renderSystems(renderer: PixelRenderer): void {
-        for (const system of this.sortedSystems) {
+        for (const system of this.sortedSystemsCache) {
             if (system.enabled && system.render) {
                 system.render(renderer);
             }
@@ -94,17 +94,17 @@ export class SystemManager implements ISystemManager {
     
     destroySystems(): void {
 
-        for (let i = this.sortedSystems.length - 1; i >= 0; i--) {
-            const system = this.sortedSystems[i];
+        for (let i = this.sortedSystemsCache.length - 1; i >= 0; i--) {
+            const system = this.sortedSystemsCache[i];
             system.destroy?.();
         }
         
-        this.systems.clear();
-        this.sortedSystems = [];
+        this.systemsMap.clear();
+        this.sortedSystemsCache = [];
     }
     
     private updateSortedSystems(): void {
-        this.sortedSystems = Array.from(this.systems.values())
+        this.sortedSystemsCache = Array.from(this.systemsMap.values())
             .sort((a, b) => a.priority - b.priority);
     }
 }

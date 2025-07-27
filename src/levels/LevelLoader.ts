@@ -1,6 +1,7 @@
 import { bundledStageData } from '../data/bundledData';
 import { Logger } from '../utils/Logger';
 import { paletteSystem } from '../utils/pixelArtPalette';
+import { StageType } from '../assets/AssetLoader';
 
 interface StageInfo {
     id: string;
@@ -25,6 +26,7 @@ interface StageData {
     goal: { x: number; y: number };
     timeLimit: number;
     backgroundColor: number;
+    stageType: StageType;
 }
 
 interface EntityData {
