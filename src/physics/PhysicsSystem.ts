@@ -46,10 +46,10 @@ type CollisionMatrix = {
 };
 
 interface PhysicsEntity extends Entity {
-    physicsLayer?: PhysicsLayer;
-    airResistance?: number;
-    gravityScale?: number;
-    maxFallSpeed?: number;
+    physicsLayer: PhysicsLayer;
+    airResistance: number;
+    gravityScale: number;
+    maxFallSpeed: number;
 }
 
 interface IRenderer {

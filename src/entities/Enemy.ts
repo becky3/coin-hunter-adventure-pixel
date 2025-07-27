@@ -4,6 +4,7 @@ import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
 import type { BaseEntityConfig } from '../config/ResourceConfig';
+import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 export type EnemyState = 'idle' | 'walk' | 'hurt' | 'dead';
 
 /**
@@ -229,5 +230,30 @@ export class Enemy extends Entity {
         
         const hpWidth = (this.health / this.maxHealth) * barWidth;
         renderer.drawRect(barX, barY, hpWidth, barHeight, 0x31);
+    }
+    
+    /**
+     * Get animation definitions for enemy
+     * Override in derived classes for specific enemy animations
+     */
+    protected getAnimationDefinitions(): AnimationDefinition[] {
+        return [];
+    }
+    
+    /**
+     * Get palette definition for enemy
+     * Override in derived classes for specific enemy palettes
+     */
+    protected getPaletteDefinition(): EntityPaletteDefinition {
+        return {
+            default: {
+                colors: [
+                    null,
+                    0x00,
+                    0x10,
+                    0x30
+                ]
+            }
+        };
     }
 }
