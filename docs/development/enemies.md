@@ -19,7 +19,6 @@ export class Enemy extends Entity {
     public damage: number;
     public moveSpeed: number;
     public direction: number;
-    public aiType: AIType;
     // ...
 }
 ```
