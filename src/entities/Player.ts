@@ -10,6 +10,7 @@ import type { CharacterConfig, CharacterAnimationConfig } from '../config/Resour
 import { PowerUpManager } from '../managers/PowerUpManager';
 import { PowerUpConfig, PowerUpType } from '../types/PowerUpTypes';
 import { ShieldEffectVisual } from '../effects/ShieldEffect';
+import { SpritePaletteIndex } from '../utils/pixelArtPalette';
 
 
 const DEFAULT_PLAYER_CONFIG = {
@@ -788,4 +789,7 @@ export class Player extends Entity {
         };
     }
     
+    protected getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.CHARACTER;
+    }
 }

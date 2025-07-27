@@ -1,8 +1,9 @@
 import { GAME_RESOLUTION, DISPLAY, FONT } from '../constants/gameConstants';
-import { PixelArtRenderer } from '../utils/pixelArt';
+import { PixelArtRenderer, PixelArtSprite } from '../utils/pixelArt';
 import { Logger } from '../utils/Logger';
 import { AssetLoader } from '../assets/AssetLoader';
 import { SpriteData } from '../types/assetTypes';
+import { paletteSystem } from '../utils/pixelArtPalette';
 
 
 /**
@@ -24,6 +25,8 @@ export class PixelRenderer {
     private cameraX: number;
     private cameraY: number;
     private spriteCache: Map<string, HTMLCanvasElement>;
+    public stageDependentSpriteCache: Map<string, PixelArtSprite>;
+    public currentStageType: string;
     public debug: boolean;
     public pixelArtRenderer?: PixelArtRenderer;
     public assetLoader?: AssetLoader;
@@ -53,6 +56,8 @@ export class PixelRenderer {
         this.cameraX = 0;
         this.cameraY = 0;
         this.spriteCache = new Map();
+        this.stageDependentSpriteCache = new Map();
+        this.currentStageType = '';
         this.debug = false;
     }
     
@@ -79,16 +84,38 @@ export class PixelRenderer {
         this.cameraY = Math.floor(y);
     }
     
-    drawSprite(sprite: string | SpriteData | HTMLCanvasElement | ImageData, x: number, y: number, flipX: boolean = false): void {
+    setStageType(stageType: string): void {
+        if (this.currentStageType !== stageType) {
+            this.currentStageType = stageType;
+            this.stageDependentSpriteCache.clear();
+        }
+    }
+    
+    drawSprite(sprite: string | SpriteData | HTMLCanvasElement | ImageData, x: number, y: number, flipX: boolean = false, paletteIndex: number = 0): void {
         let finalSprite: SpriteData | HTMLCanvasElement | ImageData | null = null;
 
         if (typeof sprite === 'string') {
             if (this.pixelArtRenderer) {
-                const pixelSprite = this.pixelArtRenderer.sprites.get(sprite);
-                if (pixelSprite) {
-                    const canvas = flipX ? pixelSprite.flippedCanvas : pixelSprite.canvas;
-                    finalSprite = canvas;
+                const cacheKey = `${sprite}_${paletteIndex}`;
+                let cachedSprite = this.stageDependentSpriteCache.get(cacheKey);
+                
+                if (!cachedSprite) {
+                    const pixelData = this.pixelArtRenderer.stageDependentSprites.get(sprite);
+                    if (!pixelData) {
+                        throw new Error(`[PixelRenderer] Sprite '${sprite}' not loaded`);
+                    }
+                    
+                    const colors: { [key: number]: string | null } = {};
+                    for (let i = 0; i < 4; i++) {
+                        colors[i] = paletteSystem.getColor('sprite', paletteIndex, i);
+                    }
+                    
+                    cachedSprite = new PixelArtSprite(pixelData, colors);
+                    this.stageDependentSpriteCache.set(cacheKey, cachedSprite);
                 }
+                
+                const canvas = flipX ? cachedSprite.flippedCanvas : cachedSprite.canvas;
+                finalSprite = canvas;
             }
             else if (this.assetLoader) {
                 const loadedSprite = this.assetLoader.loadedAssets.get(sprite);

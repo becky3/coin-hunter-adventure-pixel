@@ -1,5 +1,33 @@
 import { SpriteLoader, SPRITE_DEFINITIONS } from './spriteLoader';
 
+/**
+ * Sprite palette indices enum for better readability
+ */
+export enum SpritePaletteIndex {
+    CHARACTER = 0,
+    ENEMY_BASIC = 1,
+    ENEMY_SPECIAL = 2,
+    ITEMS = 3,
+    TILES_GROUND = 4,
+    TILES_HAZARD = 5,
+    TERRAIN_OBJECTS = 6,
+    ENVIRONMENT_NATURE = 7,
+    ENVIRONMENT_SKY = 8,
+    UI_ELEMENTS = 9,
+    EFFECTS = 10,
+    POWERUPS = 11
+}
+
+/**
+ * Background palette indices enum
+ */
+export enum BackgroundPaletteIndex {
+    SKY = 0,
+    GROUND = 1,
+    DECORATIONS = 2,
+    SPECIAL = 3
+}
+
 type ColorIndex = number;
 type ColorHex = string | null;
 type Palette = ColorHex[];
@@ -126,51 +154,54 @@ class PaletteSystem {
     }
 }
 
+/* eslint-disable no-inline-comments -- パレット定義は視覚的な色の対応を示すコメントが必要 */
 const STAGE_PALETTES: Record<string, PaletteConfig> = {
     grassland: {
         background: [
-            [0x12, 0x03, 0x02, 0x01],
-            [0x12, 0x62, 0x61, 0x60],
-            [0x12, 0x53, 0x52, 0x51],
-            [0x12, 0x32, 0x31, 0x30]
+            [0x12, 0x03, 0x02, 0x01],     // SKY
+            [0x12, 0x62, 0x61, 0x60],     // GROUND
+            [0x12, 0x53, 0x52, 0x51],     // DECORATIONS
+            [0x12, 0x32, 0x31, 0x30]      // SPECIAL
         ],
         sprite: [
-            [0, 0x11, 0x43, 0x50],
-            [0, 0x61, 0x62, 0x60],
-            [0, 0x21, 0x22, 0x03],
-            [0, 0x52, 0x53, 0x51]
+            [0, 0x11, 0x33, 0x50],        // CHARACTER
+            [0, 0x61, 0x62, 0x60],        // ENEMY_BASIC
+            [0, 0x01, 0x02, 0x03],        // ENEMY_SPECIAL (spider)
+            [0, 0x52, 0x53, 0x51],        // ITEMS
+            [0, 0x62, 0x61, 0x60],        // TILES_GROUND (green grass)
+            [0, 0x41, 0x42, 0x43],        // TILES_HAZARD (red)
+            [0, 0x50, 0x51, 0x52],        // TERRAIN_OBJECTS (brown/yellow)
+            [0, 0x50, 0x51, 0x61],        // ENVIRONMENT_NATURE (nature colors)
+            [0, 0x12, 0x13, 0x03],        // ENVIRONMENT_SKY (sky colors)
+            [0, 0x41, 0x03, 0x00],        // UI_ELEMENTS
+            [0, 0x11, 0x12, 0x13],        // EFFECTS
+            [0, 0x11, 0x12, 0x13]         // POWERUPS
         ]
     },
     
     cave: {
         background: [
-            [0x00, 0x01, 0x02, 0x10],
-            [0x00, 0x50, 0x70, 0x01],
-            [0x00, 0x10, 0x11, 0x80],
-            [0x00, 0x30, 0x31, 0x20]
+            [0x00, 0x01, 0x02, 0x10],     // SKY (dark)
+            [0x00, 0x50, 0x70, 0x01],     // GROUND (dark brown)
+            [0x00, 0x10, 0x11, 0x80],     // DECORATIONS (dark blue)
+            [0x00, 0x30, 0x31, 0x20]      // SPECIAL
         ],
         sprite: [
-            [0, 0x11, 0x43, 0x50],
-            [0, 0x90, 0x91, 0x20],
-            [0, 0x30, 0x31, 0x32],
-            [0, 0x52, 0x53, 0x51]
-        ]
-    },
-    
-    snow: {
-        background: [
-            [0x13, 0x03, 0x02, 0x12],
-            [0x13, 0x03, 0x81, 0x11],
-            [0x13, 0x60, 0x61, 0x71],
-            [0x13, 0x10, 0x11, 0x12]
-        ],
-        sprite: [
-            [0, 0x31, 0x43, 0x50],
-            [0, 0x03, 0x02, 0x12],
-            [0, 0x00, 0x03, 0x41],
-            [0, 0x52, 0x53, 0x51]
+            [0, 0x11, 0x80, 0x50],        // CHARACTER (keep similar)
+            [0, 0x90, 0x91, 0x20],        // ENEMY_BASIC (purple)
+            [0, 0x70, 0x71, 0x01],        // ENEMY_SPECIAL (dark green)
+            [0, 0x52, 0x53, 0x51],        // ITEMS (keep gold)
+            [0, 0x20, 0x70, 0x01],        // TILES_GROUND (dark stone)
+            [0, 0x30, 0x31, 0x32],        // TILES_HAZARD (dark red)
+            [0, 0x01, 0x02, 0x10],        // TERRAIN_OBJECTS (gray/blue)
+            [0, 0x60, 0x70, 0x71],        // ENVIRONMENT_NATURE (dark green)
+            [0, 0x01, 0x02, 0x00],        // ENVIRONMENT_SKY (very dark)
+            [0, 0x41, 0x03, 0x00],        // UI_ELEMENTS
+            [0, 0x80, 0x81, 0x90],        // EFFECTS (blue/purple)
+            [0, 0x80, 0x81, 0x91]         // POWERUPS (blue/purple)
         ]
     }
+/* eslint-enable */
 } as const;
 
 const paletteSystem = new PaletteSystem();
@@ -182,9 +213,6 @@ const PALETTE_NAME_TO_MASTER_PALETTE: Record<string, number[]> = {
     enemySpider: [0, 0x01, 0x02, 0x03],
     items: [0, 0x52, 0x53, 0x51],
     itemsPowerUp: [0, 0x11, 0x12, 0x13],
-    grassland: [0, 0x50, 0x51, 0x61],
-    cave: [0, 0x01, 0x02, 0x10],
-    snow: [0, 0x03, 0x02, 0x12],
     ui: [0, 0x41, 0x03, 0x00],
     sky: [0, 0x12, 0x13, 0x03],
     nature: [0, 0x50, 0x51, 0x61],

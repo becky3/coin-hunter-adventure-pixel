@@ -1,9 +1,9 @@
 import { SpriteLoader } from '../utils/spriteLoader';
-import { getColorPalette, paletteSystem, STAGE_PALETTES } from '../utils/pixelArtPalette';
+import { paletteSystem, STAGE_PALETTES } from '../utils/pixelArtPalette';
 import { PixelArtRenderer } from '../utils/pixelArt';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
-import { getPaletteForCategory } from '../utils/paletteResolver';
+import { PixelRenderer } from '../rendering/PixelRenderer';
 
 export interface LoadedAsset {
     key: string;
@@ -41,6 +41,7 @@ export class AssetLoader {
     private totalAssets: number;
     private loadedCount: number;
     public renderer?: PixelArtRenderer;
+    private pixelRenderer?: PixelRenderer;
     private currentStageType: StageType = 'grassland';
 
     constructor() {
@@ -55,10 +56,18 @@ export class AssetLoader {
         this.renderer = renderer;
     }
     
+    setPixelRenderer(pixelRenderer: PixelRenderer): void {
+        this.pixelRenderer = pixelRenderer;
+    }
+    
     setStageType(stageType: StageType): void {
         this.currentStageType = stageType;
         paletteSystem.setStagePalette(paletteSystem.createStagePalette(STAGE_PALETTES[stageType]));
         Logger.log(`[AssetLoader] Stage type set to: ${stageType}`);
+        
+        if (this.pixelRenderer && this.pixelRenderer.setStageType) {
+            this.pixelRenderer.setStageType(stageType);
+        }
     }
     
     async loadSprite(category: string, name: string): Promise<LoadedAsset> {
@@ -166,14 +175,11 @@ export class AssetLoader {
         }
         
         if (this.renderer) {
-            const paletteName = getPaletteForCategory(category, name, this.currentStageType);
-            const colors = getColorPalette(paletteName);
             const spriteKey = `${category}/${name}`;
-            this.renderer.addSprite(
-                spriteKey,
-                spriteData.data,
-                colors
-            );
+            
+            this.renderer.addStageDependentSprite(spriteKey, spriteData.data);
+            Logger.log(`[AssetLoader] Loaded sprite ${spriteKey} as stage-dependent for stage type: ${this.currentStageType}`);
+            
             const endTime = performance.now();
             Logger.log(`[AssetLoader] Loaded sprite ${spriteKey} in ${(endTime - startTime).toFixed(2)}ms`);
         } else {
@@ -197,15 +203,11 @@ export class AssetLoader {
         }
         
         if (this.renderer) {
-            const paletteName = getPaletteForCategory(category, baseName, this.currentStageType);
-            const colors = getColorPalette(paletteName);
             const animKey = `${category}/${baseName}`;
-            this.renderer.addAnimation(
-                animKey,
-                frames,
-                colors,
-                frameDuration
-            );
+            
+            this.renderer.addStageDependentAnimation(animKey, frames, frameDuration);
+            Logger.log(`[AssetLoader] Loaded animation ${animKey} as stage-dependent for stage type: ${this.currentStageType}`);
+            
             const endTime = performance.now();
             Logger.log(`[AssetLoader] Loaded animation ${animKey} (${frameCount} frames) in ${(endTime - startTime).toFixed(2)}ms`);
         } else {

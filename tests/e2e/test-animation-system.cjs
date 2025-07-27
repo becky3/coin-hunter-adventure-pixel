@@ -47,9 +47,9 @@ async function runTest() {
                 const renderer = window.game.serviceLocator.get('renderer');
                 if (renderer && renderer.pixelArtRenderer) {
                     pixelArtRenderer = renderer.pixelArtRenderer;
-                    debugInfo.spritesCount = pixelArtRenderer.sprites.size;
-                    debugInfo.animationsCount = pixelArtRenderer.animations.size;
-                    debugInfo.loaded = pixelArtRenderer.sprites.size > 0 || pixelArtRenderer.animations.size > 0;
+                    debugInfo.spritesCount = pixelArtRenderer.stageDependentSprites.size;
+                    debugInfo.animationsCount = pixelArtRenderer.stageDependentAnimations.size;
+                    debugInfo.loaded = pixelArtRenderer.stageDependentSprites.size > 0 || pixelArtRenderer.stageDependentAnimations.size > 0;
                 }
             }
             

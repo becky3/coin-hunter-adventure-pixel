@@ -5,6 +5,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
 
 /**
  * Slime enemy that moves horizontally
@@ -140,5 +141,9 @@ export class Slime extends Enemy implements EntityInitializer {
                 ]
             }
         };
+    }
+    
+    protected getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.ENEMY_BASIC;
     }
 }

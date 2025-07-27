@@ -8,6 +8,7 @@ import { InputSystem } from '../core/InputSystem';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import { SpritePaletteIndex } from '../utils/pixelArtPalette';
 
 /**
  * Spring platform that bounces the player
@@ -198,5 +199,9 @@ export class Spring extends Entity implements EntityInitializer {
                 ]
             }
         };
+    }
+    
+    protected getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.TERRAIN_OBJECTS;
     }
 }

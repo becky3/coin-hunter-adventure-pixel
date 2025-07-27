@@ -1,22 +1,12 @@
 /**
  * Shared utility for resolving palette names based on category and sprite name
  */
-export function getPaletteForCategory(category: string, spriteName?: string, stageType?: string): string {
+export function getPaletteForCategory(category: string, spriteName?: string): string {
     if (category === 'enemies' && spriteName && spriteName.includes('spider')) {
         return 'enemySpider';
     }
-    if (category === 'environment' && spriteName) {
-        if (spriteName.includes('cloud')) {
-            return 'sky';
-        }
-        if (spriteName.includes('tree') || spriteName.includes('grass')) {
-            return 'nature';
-        }
-        return 'nature';
-    }
-    
-    if (category === 'tiles' || category === 'terrain') {
-        return stageType || 'grassland';
+    if (category === 'tiles' || category === 'terrain' || category === 'environment') {
+        throw new Error(`[getPaletteForCategory] Stage-dependent category '${category}' should not use fixed palettes. Use stage palette system instead.`);
     }
     
     if (category === 'player') {
@@ -47,5 +37,5 @@ export function getPaletteForCategory(category: string, spriteName?: string, sta
         return 'effect';
     }
     
-    return stageType || 'grassland';
+    throw new Error(`[getPaletteForCategory] Unknown category: ${category}`);
 }
