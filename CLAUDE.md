@@ -210,6 +210,20 @@ gh issue comment [Issue番号] --body "作業を開始します。
 - **production環境では自動的に無効化**
 - console.log の直接使用は避ける（Lint警告の原因）
 
+### エラーハンドリングの重要な原則
+
+- **フォールバック値を使用しない**
+  - 例: `paletteSystem.masterPalette[colorIndex] || '#FFFFFF'` ❌
+  - 正しい例: 存在しない場合はエラーを投げる ✅
+  ```typescript
+  const color = paletteSystem.masterPalette[colorIndex];
+  if (!color) {
+    throw new Error(`Invalid color index: ${colorIndex}`);
+  }
+  ```
+- **データが見つからない場合は必ずエラーを投げる**
+- **致命的な問題は無視せず、適切にエラーで落とす**
+
 ### テスト実行
 
 #### ローカルでのテスト実行

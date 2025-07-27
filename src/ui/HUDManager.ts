@@ -229,7 +229,10 @@ export class HUDManager {
     }
 
     private drawPatternTile(renderer: PixelRenderer, x: number, y: number, pattern: number[][], colorIndex: number): void {
-        const color = paletteSystem.masterPalette[colorIndex] || '#000000';
+        const color = paletteSystem.masterPalette[colorIndex];
+        if (!color) {
+            throw new Error(`Invalid color index: ${colorIndex}. Color not found in master palette.`);
+        }
         const cacheKey = `${JSON.stringify(pattern)}_${color}`;
         let tileCanvas = this.patternTileCache.get(cacheKey);
         
