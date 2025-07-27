@@ -282,15 +282,9 @@ export class PhysicsSystem {
         if (!this.tileMap) return;
         
         const bounds = entity.getBounds();
-        let startCol, endCol;
         
-        if (axis === 'vertical' && entity.vy >= 0 && (entity as unknown as { type?: string }).type === 'player') {
-            const centerX = entity.x + entity.width / 2;
-            startCol = endCol = Math.floor(centerX / this.tileSize);
-        } else {
-            startCol = Math.floor(bounds.left / this.tileSize);
-            endCol = Math.floor(bounds.right / this.tileSize);
-        }
+        const startCol = Math.floor(bounds.left / this.tileSize);
+        const endCol = Math.floor(bounds.right / this.tileSize);
         
         const startRow = Math.floor(bounds.top / this.tileSize);
         const endRow = Math.floor(bounds.bottom / this.tileSize);
@@ -342,9 +336,7 @@ export class PhysicsSystem {
             if (entity.vy > 0) {
                 entity.y = tileBounds.top - entity.height;
                 entity.vy = 0;
-                if ((entity as unknown as { type?: string }).type !== 'player') {
-                    entity.grounded = true;
-                }
+                entity.grounded = true;
             } else if (entity.vy < 0) {
                 entity.y = tileBounds.bottom;
                 entity.vy = 0;
