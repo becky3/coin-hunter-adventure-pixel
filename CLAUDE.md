@@ -101,6 +101,21 @@ npm run test:claude
 
 - Lintチェック（コメントルール含む）
 
+### TypeScript型チェック
+
+型エラーを確認する際は、以下のコマンドを使用：
+
+```bash
+# 推奨：安全な型チェックスクリプト
+npm run typecheck:safe
+
+# 結果はtypecheck-output.logに保存される
+# 特定のエラーを検索する場合：
+grep "TS2339" typecheck-output.log
+```
+
+**注意**: `npm run typecheck 2>&1`のようなリダイレクトは使用しないでください。
+
 ### GitHub Copilotレビューへの対応
 
 PRを作成すると、GitHub Copilotが自動的にコードレビューを行います。以下の点に注意：
