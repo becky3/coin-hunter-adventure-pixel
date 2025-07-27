@@ -35,21 +35,61 @@ export class ResourceLoader {
         const startTime = performance.now();
         Logger.log('[Performance] ResourceLoader.initialize() started:', startTime.toFixed(2) + 'ms');
         
+        const recordPhase = (name: string, start: number, end: number): void => {
+            const duration = end - start;
+            if ((window as unknown as { performanceMetrics?: { phases: Array<{ name: string; start: number; end: number; duration: number }> } }).performanceMetrics) {
+                (window as unknown as { performanceMetrics: { phases: Array<{ name: string; start: number; end: number; duration: number }> } }).performanceMetrics.phases.push({ 
+                    name: `ResourceLoader.${name}`, 
+                    start, 
+                    end, 
+                    duration 
+                });
+            }
+            Logger.log(`[Performance] ResourceLoader.${name}: ${duration.toFixed(2)}ms`);
+        };
+        
+        const indexStartTime = performance.now();
         this.resourceIndex = await this.loadJSON('/src/config/resources/index.json');
+        const indexEndTime = performance.now();
+        recordPhase('loadIndex', indexStartTime, indexEndTime);
   
         if (!this.resourceIndex) {
             throw new Error('Failed to load resource index');
         }
   
         Logger.log('[Performance] Starting parallel resource loading:', performance.now().toFixed(2) + 'ms');
-        await Promise.all([
-            this.loadSprites(),
-            this.loadCharacters(),
-            this.loadAudio(),
-            this.loadObjects(),
-            this.loadMusicPatterns(),
-            this.loadPhysics()
-        ]);
+        const parallelStartTime = performance.now();
+        
+        const loadingPromises = [
+            this.loadSprites().then(() => {
+                const now = performance.now();
+                recordPhase('loadSprites', parallelStartTime, now);
+            }),
+            this.loadCharacters().then(() => {
+                const now = performance.now();
+                recordPhase('loadCharacters', parallelStartTime, now);
+            }),
+            this.loadAudio().then(() => {
+                const now = performance.now();
+                recordPhase('loadAudio', parallelStartTime, now);
+            }),
+            this.loadObjects().then(() => {
+                const now = performance.now();
+                recordPhase('loadObjects', parallelStartTime, now);
+            }),
+            this.loadMusicPatterns().then(() => {
+                const now = performance.now();
+                recordPhase('loadMusicPatterns', parallelStartTime, now);
+            }),
+            this.loadPhysics().then(() => {
+                const now = performance.now();
+                recordPhase('loadPhysics', parallelStartTime, now);
+            })
+        ];
+        
+        await Promise.all(loadingPromises);
+        const parallelEndTime = performance.now();
+        recordPhase('parallelLoading', parallelStartTime, parallelEndTime);
         
         const endTime = performance.now();
         Logger.log('[Performance] ResourceLoader.initialize() completed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
