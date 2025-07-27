@@ -15,6 +15,6 @@ export class PhysicsSystemAdapter implements ISystem {
     constructor(private physicsSystem: PhysicsSystem) {}
     
     update(deltaTime: number): void {
-        this.physicsSystem.update(deltaTime);
+        this.physicsSystem.update(deltaTime, []);
     }
 }

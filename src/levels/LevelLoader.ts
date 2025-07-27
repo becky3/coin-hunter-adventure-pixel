@@ -15,7 +15,7 @@ interface StageList {
     stages: StageInfo[];
 }
 
-interface StageData {
+export interface StageData {
     name: string;
     width: number;
     height: number;

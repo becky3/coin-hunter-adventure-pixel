@@ -14,12 +14,30 @@ parent: 開発者向け
 # 型チェックを実行
 npm run typecheck
 
-# 特定のエラータイプを検索
-npm run typecheck 2>&1 | grep "TS2339"  # プロパティアクセスエラー
-npm run typecheck 2>&1 | grep "TS2345"  # 型の不一致エラー
+# 安全な型チェックスクリプト（推奨）
+npm run typecheck:safe
 
-# エラーをファイルに保存
-npm run typecheck > typecheck-errors.txt 2>&1
+# strictモードで型チェック
+npm run typecheck:strict
+```
+
+### 安全な型チェックスクリプト
+
+`npm run typecheck:safe`は以下の機能を提供します：
+
+- エラーの適切なキャプチャと表示
+- エラー数のカウント
+- 結果を`typecheck-output.log`に保存（.gitignoreに含まれる）
+- 終了コードの適切な処理
+
+### エラーの検索方法
+
+```bash
+# 特定のエラータイプを検索（typecheckの出力から）
+npm run typecheck:safe
+grep "TS2339" typecheck-output.log  # プロパティアクセスエラー
+grep "TS2345" typecheck-output.log  # 型の不一致エラー
+grep "TS2322" typecheck-output.log  # 代入の型エラー
 ```
 
 ### よく使うエラーコード

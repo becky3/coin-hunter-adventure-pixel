@@ -1,6 +1,7 @@
 import { EntityManager } from '../managers/EntityManager';
 import { CameraController } from './CameraController';
 import { LevelManager, LevelData } from '../managers/LevelManager';
+import { StageData } from '../levels/LevelLoader';
 import { HUDManager } from '../ui/HUDManager';
 import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
@@ -97,7 +98,8 @@ export class GameController {
             
             const levelLoader = this.levelManager.getLevelLoader();
             if (levelLoader) {
-                const goalPosition = levelLoader.getGoalPosition(levelData);
+                // TODO: Fix type mismatch between LevelData and StageData (Issue #242)
+                const goalPosition = levelLoader.getGoalPosition(levelData as unknown as StageData);
                 if (goalPosition) {
                     this.entityManager.createEntity({
                         type: 'goal',

@@ -126,10 +126,10 @@ export class TestPlayState implements GameState {
             );
         }
 
-        renderer.drawText('TEST MODE', 8, 8, '#FFFF00');
+        renderer.drawText('TEST MODE', 8, 8, 0x52);
         if (this.player) {
-            renderer.drawText(`X:${Math.floor(this.player.x)} Y:${Math.floor(this.player.y)}`, 8, 24, '#FFFFFF');
-            renderer.drawText(`GROUNDED:${this.player.grounded}`, 8, 40, '#FFFFFF');
+            renderer.drawText(`X:${Math.floor(this.player.x)} Y:${Math.floor(this.player.y)}`, 8, 24, 0x03);
+            renderer.drawText(`GROUNDED:${this.player.grounded}`, 8, 40, 0x03);
         }
     }
     

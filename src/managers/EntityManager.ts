@@ -189,10 +189,6 @@ export class EntityManager {
 
     createEntity(config: EntityConfig): Entity | null {
         
-        const tileMap = this.physicsSystem.tileMap;
-        if (tileMap && tileMap[config.y] && tileMap[config.y][config.x] === 1) {
-            Logger.warn(`[EntityManager] 警告: エンティティ(${config.type})のスポーン位置(${config.x}, ${config.y})が地面の中です！`);
-        }
         
         const pixelX = config.x * TILE_SIZE;
         const pixelY = config.y * TILE_SIZE;
@@ -297,8 +293,7 @@ export class EntityManager {
                     if (projectile.onCollision) {
                         projectile.onCollision({
                             other: enemy,
-                            normal: { x: 0, y: 0 },
-                            depth: 0
+                            side: 'none'
                         });
                     }
                     if (enemy.takeDamage) {
@@ -352,8 +347,7 @@ export class EntityManager {
                 if (item.onCollision) {
                     item.onCollision({
                         other: this.player,
-                        normal: { x: 0, y: 0 },
-                        depth: 0
+                        side: 'none'
                     });
                 }
             }

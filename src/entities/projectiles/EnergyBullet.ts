@@ -6,6 +6,7 @@ import { EntityManager } from '../../managers/EntityManager';
 import { PowerGloveConfig } from '../../config/PowerGloveConfig';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
 import type { BaseEntityConfig } from '../../config/ResourceConfig';
+import { PhysicsLayer } from '../../physics/PhysicsSystem';
 
 /**
  * Energy bullet projectile for ranged attacks
@@ -21,16 +22,11 @@ export class EnergyBullet extends Entity implements EntityInitializer {
 
     constructor(x: number, y: number, direction: number, speed: number) {
         const config: BaseEntityConfig = {
-            type: 'projectile',
-            animations: {},
             physics: {
                 width: PowerGloveConfig.bulletWidth,
                 height: PowerGloveConfig.bulletHeight,
-                solid: false,
-                physicsLayer: 'projectile'
-            },
-            properties: {},
-            stats: {}
+                physicsLayer: PhysicsLayer.PROJECTILE
+            }
         };
         
         super(x, y, config);
