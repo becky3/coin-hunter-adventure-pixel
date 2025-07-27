@@ -1,5 +1,6 @@
 const GameTestHelpers = require('./utils/GameTestHelpers.cjs');
 const testConfig = require('./utils/testConfig.cjs');
+const path = require('path');
 
 /**
  * パフォーマンスベースライン計測テスト
