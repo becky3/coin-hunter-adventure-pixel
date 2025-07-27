@@ -61,12 +61,13 @@ export class PixelRenderer {
         this.debug = false;
     }
     
-    clear(color: string | null = null): void {
+    clear(backgroundPaletteIndex: number = 0, colorIndex: number = 0): void {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         
-        if (color) {
-            this.ctx.fillStyle = color;
+        if (backgroundPaletteIndex >= 0) {
+            const color = paletteSystem.getColor('background', backgroundPaletteIndex, colorIndex);
+            this.ctx.fillStyle = color || '#000000';
             this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
         } else {
             this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -196,10 +197,11 @@ export class PixelRenderer {
         this.ctx.fillRect(drawX, drawY, this.scale, this.scale);
     }
     
-    drawRect(x: number, y: number, width: number, height: number, color: string, fill: boolean = true): void {
+    drawRect(x: number, y: number, width: number, height: number, colorIndex: number, fill: boolean = true): void {
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
+        const color = paletteSystem.masterPalette[colorIndex] || '#FFFFFF';
         this.ctx.fillStyle = color;
         this.ctx.strokeStyle = color;
         
@@ -210,7 +212,7 @@ export class PixelRenderer {
         }
     }
     
-    drawText(text: string, x: number, y: number, color: string = '#FFFFFF', alpha: number = 1, suppressWarning: boolean = false): void {
+    drawText(text: string, x: number, y: number, colorIndex: number = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
         const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
         const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
         
@@ -229,6 +231,7 @@ export class PixelRenderer {
         
         this.ctx.save();
         this.ctx.globalAlpha = alpha;
+        const color = paletteSystem.masterPalette[colorIndex] || '#FFFFFF';
         this.ctx.fillStyle = color;
         this.ctx.font = `${scaledSize}px ${FONT.FAMILY}`;
         this.ctx.textAlign = 'left';
@@ -237,10 +240,10 @@ export class PixelRenderer {
         this.ctx.restore();
     }
     
-    drawTextCentered(text: string, centerX: number, y: number, color: string = '#FFFFFF', alpha: number = 1, suppressWarning: boolean = false): void {
+    drawTextCentered(text: string, centerX: number, y: number, colorIndex: number = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
         const textWidth = text.length * FONT.GRID;
         const x = centerX - Math.floor(textWidth / 2);
-        this.drawText(text, x, y, color, alpha, suppressWarning);
+        this.drawText(text, x, y, colorIndex, alpha, suppressWarning);
     }
     
     drawLine(x1: number, y1: number, x2: number, y2: number, color: string = '#FFFFFF', width: number = 1): void {

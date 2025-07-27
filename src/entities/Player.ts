@@ -790,6 +790,6 @@ export class Player extends Entity {
     }
     
     protected getSpritePaletteIndex(): number {
-        return SpritePaletteIndex.CHARACTER;
+        return this.hasPowerGlove ? SpritePaletteIndex.CHARACTER_POWERGLOVE : SpritePaletteIndex.CHARACTER;
     }
 }

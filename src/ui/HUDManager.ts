@@ -1,7 +1,7 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../services/EventBus';
-import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
+import { UI_PALETTE_INDICES } from '../utils/pixelArtPalette';
 
 
 export interface HUDData {
@@ -114,7 +114,7 @@ export class HUDManager {
         if (!ctx) return;
         
         ctx.imageSmoothingEnabled = false;
-        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
+        const blackColor = UI_PALETTE_INDICES.background;
         ctx.fillStyle = blackColor;
         ctx.fillRect(0, 0, menuWidth, menuHeight);
     }
@@ -151,16 +151,16 @@ export class HUDManager {
 
     private renderHUD(renderer: PixelRenderer): void {
 
-        renderer.drawText(`SCORE: ${this.hudData.score}`, 8, 8, getMasterColor(UI_PALETTE_INDICES.white));
-        renderer.drawText(`LIVES: ${this.hudData.lives}`, 88, 8, getMasterColor(UI_PALETTE_INDICES.white));
+        renderer.drawText(`SCORE: ${this.hudData.score}`, 8, 8, UI_PALETTE_INDICES.primaryText);
+        renderer.drawText(`LIVES: ${this.hudData.lives}`, 88, 8, UI_PALETTE_INDICES.primaryText);
         
         const minutes = Math.floor(this.hudData.time / 60);
         const seconds = this.hudData.time % 60;
         const timeStr = `TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-        renderer.drawText(timeStr, 8, 16, getMasterColor(UI_PALETTE_INDICES.white));
+        renderer.drawText(timeStr, 8, 16, UI_PALETTE_INDICES.primaryText);
         
         if (this.hudData.stageName) {
-            renderer.drawText(this.hudData.stageName, 120, 16, getMasterColor(UI_PALETTE_INDICES.white));
+            renderer.drawText(this.hudData.stageName, 120, 16, UI_PALETTE_INDICES.primaryText);
         }
     }
 
@@ -174,7 +174,7 @@ export class HUDManager {
             renderer.drawSprite(this.pauseBackgroundCanvas, menuX, menuY, false);
         } else {
             const blackPattern = this.createSolidPattern(1);
-            const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
+            const blackColor = UI_PALETTE_INDICES.background;
             
             for (let y = menuY; y < menuY + menuHeight; y += 8) {
                 for (let x = menuX; x < menuX + menuWidth; x += 8) {
@@ -185,14 +185,14 @@ export class HUDManager {
         
         this.renderBoxBorder(renderer, menuX - 8, menuY - 8, menuWidth + 16, menuHeight + 16);
 
-        renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 32, getMasterColor(UI_PALETTE_INDICES.white));
-        renderer.drawTextCentered('PRESS ESC TO RESUME', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 8, getMasterColor(UI_PALETTE_INDICES.white));
-        renderer.drawTextCentered('PRESS Q TO QUIT', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 16, getMasterColor(UI_PALETTE_INDICES.white));
+        renderer.drawTextCentered('PAUSED', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 32, UI_PALETTE_INDICES.primaryText);
+        renderer.drawTextCentered('PRESS ESC TO RESUME', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 - 8, UI_PALETTE_INDICES.primaryText);
+        renderer.drawTextCentered('PRESS Q TO QUIT', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 16, UI_PALETTE_INDICES.primaryText);
     }
 
     private renderHorizontalBorder(renderer: PixelRenderer, y: number): void {
         const blackPattern = this.createSolidPattern(1);
-        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
+        const blackColor = UI_PALETTE_INDICES.background;
         
         for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
             this.drawPatternTile(renderer, x, y - 2, blackPattern, blackColor);
@@ -201,7 +201,7 @@ export class HUDManager {
 
     private renderBoxBorder(renderer: PixelRenderer, x: number, y: number, width: number, height: number): void {
         const blackPattern = this.createSolidPattern(1);
-        const blackColor = getMasterColor(UI_PALETTE_INDICES.black);
+        const blackColor = UI_PALETTE_INDICES.background;
 
         for (let i = x; i < x + width; i += 8) {
             this.drawPatternTile(renderer, i, y, blackPattern, blackColor);
@@ -302,14 +302,14 @@ export class HUDManager {
         const bgX = centerX - bgWidth / 2;
         const bgY = centerY - bgHeight / 2;
         
-        renderer.drawRect(bgX, bgY, bgWidth, bgHeight, getMasterColor(UI_PALETTE_INDICES.black));
-        renderer.drawRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4, getMasterColor(UI_PALETTE_INDICES.gold));
-        renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, getMasterColor(UI_PALETTE_INDICES.black));
+        renderer.drawRect(bgX, bgY, bgWidth, bgHeight, UI_PALETTE_INDICES.black);
+        renderer.drawRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4, UI_PALETTE_INDICES.highlight);
+        renderer.drawRect(bgX + 4, bgY + 4, bgWidth - 8, bgHeight - 8, UI_PALETTE_INDICES.black);
         
         if (lines.length > 0) {
             const textStartY = centerY - ((lines.length - 1) * lineHeight) / 2;
             lines.forEach((line, index) => {
-                renderer.drawTextCentered(line, centerX, textStartY + index * lineHeight - 4, getMasterColor(UI_PALETTE_INDICES.gold));
+                renderer.drawTextCentered(line, centerX, textStartY + index * lineHeight - 4, UI_PALETTE_INDICES.highlight);
             });
         }
     }

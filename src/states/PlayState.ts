@@ -143,6 +143,7 @@ export class PlayState implements GameState {
     }
 
     private setupEventListeners(): void {
+        this.removeInputListeners();
     }
 
     private async preloadSprites(): Promise<void> {
@@ -394,9 +395,7 @@ export class PlayState implements GameState {
     render(renderer: PixelRenderer): void {
         const performanceMonitor = PerformanceMonitor.getInstance();
         
-        const backgroundColor = this.levelManager.getBackgroundColor();
-        renderer.clear(backgroundColor);
-
+        renderer.clear(0, 0);
         const camera = this.cameraController.getCamera();
         renderer.setCamera(camera.x, camera.y);
         

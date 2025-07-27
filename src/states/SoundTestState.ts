@@ -3,7 +3,7 @@ import { GameState, GameStateManager } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputSystem } from '../core/InputSystem';
 import { MusicSystem } from '../audio/MusicSystem';
-import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
+import { UI_PALETTE_INDICES } from '../utils/pixelArtPalette';
 import { Logger } from '../utils/Logger';
 
 interface Game {
@@ -214,15 +214,16 @@ export class SoundTestState implements GameState {
     }
     
     render(renderer: PixelRenderer): void {
-        renderer.clear(getMasterColor(UI_PALETTE_INDICES.black));
+        renderer.clear(-1);
+        renderer.drawRect(0, 0, GAME_RESOLUTION.WIDTH, GAME_RESOLUTION.HEIGHT, UI_PALETTE_INDICES.background);
         
         const centerX = GAME_RESOLUTION.WIDTH / 2;
-        renderer.drawTextCentered('SOUND TEST', centerX, SoundTestState.UI_LAYOUT.TITLE_Y, getMasterColor(UI_PALETTE_INDICES.gold));
+        renderer.drawTextCentered('SOUND TEST', centerX, SoundTestState.UI_LAYOUT.TITLE_Y, UI_PALETTE_INDICES.highlight);
         
         let y = SoundTestState.UI_LAYOUT.MENU_START_Y;
         this.menuItems.forEach((item, index) => {
             const isSelected = index === this.selectedRow;
-            const color = isSelected ? getMasterColor(UI_PALETTE_INDICES.gold) : getMasterColor(UI_PALETTE_INDICES.white);
+            const color = isSelected ? UI_PALETTE_INDICES.highlight : UI_PALETTE_INDICES.primaryText;
             
             if (isSelected) {
                 renderer.drawText('>', SoundTestState.UI_LAYOUT.SELECTOR_X, y, color);
@@ -243,8 +244,8 @@ export class SoundTestState implements GameState {
             y += SoundTestState.UI_LAYOUT.MENU_LINE_HEIGHT;
         });
         
-        renderer.drawTextCentered('[UP/DN] SELECT [LT/RT] CHANGE', centerX, SoundTestState.UI_LAYOUT.INSTRUCTIONS_Y1, getMasterColor(UI_PALETTE_INDICES.gray));
-        renderer.drawTextCentered('[SPACE] PLAY/STOP', centerX, SoundTestState.UI_LAYOUT.INSTRUCTIONS_Y2, getMasterColor(UI_PALETTE_INDICES.gray));
+        renderer.drawTextCentered('[UP/DN] SELECT [LT/RT] CHANGE', centerX, SoundTestState.UI_LAYOUT.INSTRUCTIONS_Y1, UI_PALETTE_INDICES.mutedText);
+        renderer.drawTextCentered('[SPACE] PLAY/STOP', centerX, SoundTestState.UI_LAYOUT.INSTRUCTIONS_Y2, UI_PALETTE_INDICES.mutedText);
         
         this.drawMuteButton(renderer);
     }
@@ -252,13 +253,13 @@ export class SoundTestState implements GameState {
     private drawMuteButton(renderer: PixelRenderer): void {
         const muteState = this.game.musicSystem?.getMuteState() || false;
         const buttonText = muteState ? 'SOUND:OFF' : 'SOUND:ON';
-        const buttonColor = muteState ? getMasterColor(UI_PALETTE_INDICES.brightRed) : getMasterColor(UI_PALETTE_INDICES.green);
+        const buttonColor = muteState ? UI_PALETTE_INDICES.criticalDanger : UI_PALETTE_INDICES.success;
         
         const x = GAME_RESOLUTION.WIDTH - SoundTestState.UI_LAYOUT.MUTE_BUTTON_RIGHT_MARGIN;
         const y = SoundTestState.UI_LAYOUT.MUTE_BUTTON_Y;
         
         renderer.drawText(buttonText, x, y, buttonColor);
-        renderer.drawText('(M)', x + SoundTestState.UI_LAYOUT.MUTE_KEY_OFFSET_X, y + SoundTestState.UI_LAYOUT.MUTE_KEY_OFFSET_Y, getMasterColor(UI_PALETTE_INDICES.darkGray));
+        renderer.drawText('(M)', x + SoundTestState.UI_LAYOUT.MUTE_KEY_OFFSET_X, y + SoundTestState.UI_LAYOUT.MUTE_KEY_OFFSET_Y, UI_PALETTE_INDICES.mutedText);
     }
     
     exit(): void {

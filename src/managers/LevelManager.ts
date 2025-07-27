@@ -3,7 +3,6 @@ import { EventBus } from '../services/EventBus';
 import { TILE_SIZE } from '../constants/gameConstants';
 import { PhysicsSystem } from '../physics/PhysicsSystem';
 import { Logger } from '../utils/Logger';
-import { UI_PALETTE_INDICES, getMasterColor } from '../utils/pixelArtPalette';
 
 export interface LevelData {
     name?: string;
@@ -12,7 +11,7 @@ export interface LevelData {
     tileSize: number;
     playerSpawn: { x: number; y: number };
     entities?: Array<{ type: string; x: number; y: number }>;
-    backgroundColor: string;
+    backgroundColor: number;
     timeLimit: number;
     goal: { x: number; y: number };
 }
@@ -35,7 +34,7 @@ export class LevelManager {
     private tileMap: number[][] = [];
     private levelWidth: number = 0;
     private levelHeight: number = 0;
-    private backgroundColor: string = getMasterColor(UI_PALETTE_INDICES.skyBlue);
+    private backgroundColorIndex: number = 0x12;
     private timeLimit: number = 300;
     
     private static readonly MAX_AREAS_PER_STAGE = 3;
@@ -68,14 +67,14 @@ export class LevelManager {
             
             this.physicsSystem.setTileMap(this.tileMap, TILE_SIZE);
             
-            this.backgroundColor = this.levelLoader.getBackgroundColor(levelData);
+            this.backgroundColorIndex = levelData.backgroundColor;
             this.timeLimit = this.levelLoader.getTimeLimit(levelData);
             
             this.eventBus.emit('level:loaded', {
                 name: levelName,
                 width: this.levelWidth,
                 height: this.levelHeight,
-                backgroundColor: this.backgroundColor,
+                backgroundColor: this.backgroundColorIndex,
                 timeLimit: this.timeLimit,
                 playerSpawn: this.getPlayerSpawn(),
                 entities: levelData.entities || [],
@@ -113,8 +112,8 @@ export class LevelManager {
         };
     }
 
-    getBackgroundColor(): string {
-        return this.backgroundColor;
+    getBackgroundColorIndex(): number {
+        return this.backgroundColorIndex;
     }
 
     getTimeLimit(): number {
@@ -164,7 +163,7 @@ export class LevelManager {
         const areaNum = parseInt(match[2]);
         
         if (this.levelData && this.levelData.name) {
-            void 0;
+            Logger.log(`Level data has name: ${this.levelData.name}`);
         }
         
         if (areaNum < LevelManager.MAX_AREAS_PER_STAGE) {
@@ -188,7 +187,7 @@ export class LevelManager {
         this.tileMap = [];
         this.levelWidth = 0;
         this.levelHeight = 0;
-        this.backgroundColor = getMasterColor(0x12);
+        this.backgroundColorIndex = 0x12;
         this.timeLimit = 300;
     }
     
