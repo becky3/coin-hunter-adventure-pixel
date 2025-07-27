@@ -53,10 +53,7 @@ export class Spider extends Enemy implements EntityInitializer {
             throw new Error('Failed to load spider configuration');
         }
         
-        const width = spiderConfig.physics.width;
-        const height = spiderConfig.physics.height;
-        
-        super(x, y, width, height);
+        super(x, y, spiderConfig);
         
         this.maxHealth = spiderConfig.stats.maxHealth;
         this.health = this.maxHealth;
@@ -340,7 +337,6 @@ export class Spider extends Enemy implements EntityInitializer {
         this.setEventBus(manager.getEventBus());
         manager.addEnemy(this);
         this.physicsSystem = manager.getPhysicsSystem();
-        this.physicsLayer = this.physicsSystem.layers.ENEMY;
     }
     
     /**

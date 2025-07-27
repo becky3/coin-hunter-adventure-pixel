@@ -38,10 +38,7 @@ export class Spring extends Entity implements EntityInitializer {
             throw new Error('Failed to load spring configuration');
         }
         
-        const width = springConfig.physics.width;
-        const height = springConfig.physics.height;
-        
-        super(x, y, width, height);
+        super(x, y, springConfig);
         
         this.gravity = false;
         this.physicsEnabled = false;
@@ -161,7 +158,6 @@ export class Spring extends Entity implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addItem(this);
-        this.physicsLayer = manager.getPhysicsSystem().layers.ITEM;
     }
     
     /**

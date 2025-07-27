@@ -84,7 +84,7 @@ export class Player extends Entity {
     private isDashing: boolean = false;
     private dashTimer: number = 0;
 
-    constructor(x?: number, y?: number) {
+    constructor(x: number, y: number) {
         const resourceLoader = ResourceLoader.getInstance();
         const playerConfig = resourceLoader.getEntityConfigSync('player');
         
@@ -92,23 +92,10 @@ export class Player extends Entity {
             throw new Error('Failed to load player configuration');
         }
         
-        const config = {
-            width: playerConfig.physics.width,
-            height: playerConfig.physics.height,
-            speed: playerConfig.physics.speed,
-            jumpPower: playerConfig.physics.jumpPower,
-            minJumpTime: playerConfig.physics.minJumpTime,
-            maxJumpTime: playerConfig.physics.maxJumpTime,
-            maxHealth: playerConfig.stats.maxHealth,
-            invulnerabilityTime: playerConfig.stats.invulnerabilityTime,
-            spawnX: playerConfig.spawn?.x,
-            spawnY: playerConfig.spawn?.y
-        };
+        super(x, y - playerConfig.physics.height, playerConfig);
         
-        super(x ?? config.spawnX, (y ?? config.spawnY) - config.height, config.width, config.height);
-        
-        this.speed = config.speed;
-        this.jumpPower = config.jumpPower;
+        this.speed = playerConfig.physics.speed;
+        this.jumpPower = playerConfig.physics.jumpPower;
         
         this.airResistance = playerConfig.physics.airResistance;
         this.gravityScale = playerConfig.physics.gravityScale;
@@ -119,12 +106,12 @@ export class Player extends Entity {
         this.variableJumpBoost = playerConfig.physics.variableJumpBoost;
         this.variableJumpBoostMultiplier = playerConfig.physics.variableJumpBoostMultiplier;
         
-        this.playerConfig = config;
+        this.playerConfig = playerConfig;
         
         this.spriteKey = null;
         
-        this._health = config.maxHealth;
-        this._maxHealth = config.maxHealth;
+        this._health = playerConfig.stats.maxHealth;
+        this._maxHealth = playerConfig.stats.maxHealth;
         this._isDead = false;
         this._invulnerable = false;
         this.invulnerabilityTime = 0;
@@ -135,8 +122,8 @@ export class Player extends Entity {
         this.animFrame = 0;
         this.animTimer = 0;
         
-        this.originalWidth = config.width;
-        this.originalHeight = config.height;
+        this.originalWidth = playerConfig.physics.width;
+        this.originalHeight = playerConfig.physics.height;
         this.isSmall = false;
         
         this._isJumping = false;

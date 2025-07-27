@@ -40,10 +40,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
             throw new Error('Failed to load falling floor configuration');
         }
         
-        const width = config.physics.width;
-        const height = config.physics.height;
-        
-        super(x, y, width, height);
+        super(x, y, config);
         
         this.state = 'stable';
         this.stateTimer = 0;
@@ -206,7 +203,6 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.entityManager = manager;
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addPlatform(this);
-        this.physicsLayer = manager.getPhysicsSystem().layers.PLATFORM;
     }
     
     /**

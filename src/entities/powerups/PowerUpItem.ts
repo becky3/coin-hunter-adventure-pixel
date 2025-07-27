@@ -6,6 +6,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { MusicSystem } from '../../audio/MusicSystem';
+import type { BaseEntityConfig } from '../../config/ResourceConfig';
 
 /**
  * Base class for all power-up items
@@ -21,8 +22,8 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     declare animationTime: number;
     protected musicSystem?: MusicSystem;
 
-    constructor(x: number, y: number, width: number, height: number, powerUpType: PowerUpType, floatSpeed: number = 0.03, floatAmplitude: number = 0.15) {
-        super(x, y, width, height);
+    constructor(x: number, y: number, config: BaseEntityConfig, powerUpType: PowerUpType, floatSpeed: number = 0.03, floatAmplitude: number = 0.15) {
+        super(x, y, config);
         
         this.gravity = false;
         this.physicsEnabled = false;

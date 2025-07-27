@@ -26,8 +26,7 @@ export class PowerGlove extends PowerUpItem {
         super(
             x, 
             y, 
-            config.physics.width, 
-            config.physics.height, 
+            config,
             PowerUpType.POWER_GLOVE,
             config.properties.floatSpeed,
             config.properties.floatAmplitude

@@ -3,6 +3,7 @@ import { Entity, CollisionInfo } from './Entity';
 import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
+import type { BaseEntityConfig } from '../config/ResourceConfig';
 export type EnemyState = 'idle' | 'walk' | 'hurt' | 'dead';
 
 /**
@@ -24,8 +25,8 @@ export class Enemy extends Entity {
     public canJump: boolean;
     public stompBounceVelocity: number;
 
-    constructor(x: number, y: number, width: number = 16, height: number = 16) {
-        super(x, y, width, height);
+    constructor(x: number, y: number, config: BaseEntityConfig) {
+        super(x, y, config);
         
         this.maxHealth = 1;
         this.health = this.maxHealth;

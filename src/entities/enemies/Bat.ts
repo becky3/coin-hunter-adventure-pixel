@@ -49,10 +49,7 @@ export class Bat extends Enemy implements EntityInitializer {
             throw new Error('Failed to load bat configuration');
         }
         
-        const width = batConfig.physics.width;
-        const height = batConfig.physics.height;
-        
-        super(x, y, width, height);
+        super(x, y, batConfig);
         
         this.maxHealth = batConfig.stats.maxHealth;
         this.health = this.maxHealth;
@@ -231,7 +228,6 @@ export class Bat extends Enemy implements EntityInitializer {
     initializeInManager(manager: EntityManager): void {
         this.setEventBus(manager.getEventBus());
         manager.addEnemy(this);
-        this.physicsLayer = manager.getPhysicsSystem().layers.ENEMY;
     }
 
     /**

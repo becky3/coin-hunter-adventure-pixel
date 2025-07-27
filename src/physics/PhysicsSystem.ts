@@ -3,7 +3,28 @@ import { GAME_CONSTANTS } from '../config/GameConstants';
 import { Logger } from '../utils/Logger';
 import { ResourceLoader } from '../config/ResourceLoader';
 
-export type PhysicsLayer = 'tile' | 'player' | 'enemy' | 'item' | 'platform';
+export enum PhysicsLayer {
+    TILE = 'tile',
+    PLAYER = 'player',
+    ENEMY = 'enemy',
+    ITEM = 'item',
+    PLATFORM = 'platform',
+    PROJECTILE = 'projectile'
+}
+
+/**
+ * Convert string to PhysicsLayer enum value
+ * @param value - String value from JSON
+ * @returns PhysicsLayer enum value
+ * @throws Error if conversion fails
+ */
+export function stringToPhysicsLayer(value: string): PhysicsLayer {
+    const enumValues = Object.values(PhysicsLayer);
+    if (enumValues.includes(value as PhysicsLayer)) {
+        return value as PhysicsLayer;
+    }
+    throw new Error(`Invalid PhysicsLayer value: ${value}`);
+}
 
 export interface PhysicsLayers {
     TILE: PhysicsLayer;
@@ -66,12 +87,12 @@ export class PhysicsSystem {
         Logger.log('  - Max fall speed:', this._maxFallSpeed);
         Logger.log('  - Friction:', this._friction);
         this.layers = {
-            TILE: 'tile',
-            PLAYER: 'player',
-            ENEMY: 'enemy',
-            ITEM: 'item',
-            PLATFORM: 'platform',
-            PROJECTILE: 'projectile'
+            TILE: PhysicsLayer.TILE,
+            PLAYER: PhysicsLayer.PLAYER,
+            ENEMY: PhysicsLayer.ENEMY,
+            ITEM: PhysicsLayer.ITEM,
+            PLATFORM: PhysicsLayer.PLATFORM,
+            PROJECTILE: PhysicsLayer.PROJECTILE
         };
         this.collisionMatrix = {
             [this.layers.PLAYER]: [this.layers.TILE, this.layers.ENEMY, this.layers.ITEM, this.layers.PLATFORM],

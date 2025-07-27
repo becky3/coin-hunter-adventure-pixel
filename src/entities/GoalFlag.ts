@@ -27,10 +27,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
             throw new Error('Failed to load goal flag configuration');
         }
         
-        const width = goalConfig.physics.width;
-        const height = goalConfig.physics.height;
-        
-        super(x, y, width, height);
+        super(x, y, goalConfig);
         
         this.gravity = false;
         this.physicsEnabled = false;
@@ -77,7 +74,6 @@ export class GoalFlag extends Entity implements EntityInitializer {
      */
     initializeInManager(manager: EntityManager): void {
         manager.addItem(this);
-        this.physicsLayer = manager.getPhysicsSystem().layers.ITEM;
     }
     
     /**

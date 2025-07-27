@@ -176,8 +176,6 @@ export class EntityManager {
         this.player.setAssetLoader(this.assetLoader);
         this.player.setEventBus(this.eventBus);
         
-        this.player.physicsLayer = this.physicsSystem.layers.PLAYER;
-        
         this.eventBus.emit('player:created', { player: this.player });
         
         return this.player;

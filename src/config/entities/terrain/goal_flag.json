@@ -2,6 +2,7 @@
   "physics": {
     "width": 32,
     "height": 32,
+    "physicsLayer": "item",
     "solid": false
   },
   "properties": {
