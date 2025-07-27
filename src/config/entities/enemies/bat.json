@@ -2,7 +2,9 @@
   "physics": {
     "width": 8,
     "height": 8,
-    "moveSpeed": 0.5
+    "moveSpeed": 0.5,
+    "airResistance": 0.0,
+    "gravityScale": 0.0
   },
   "stats": {
     "maxHealth": 1,

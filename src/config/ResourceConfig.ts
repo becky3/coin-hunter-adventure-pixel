@@ -146,6 +146,8 @@ export interface EnemyPhysicsConfig {
   moveSpeed: number;
   jumpHeight?: number;
   jumpInterval?: number;
+  airResistance: number;
+  gravityScale: number;
 }
 
 export interface EnemyConfig {

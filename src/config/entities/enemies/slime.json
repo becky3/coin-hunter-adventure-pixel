@@ -4,7 +4,9 @@
     "height": 16,
     "moveSpeed": 0.25,
     "jumpHeight": 5,
-    "jumpInterval": 1000
+    "jumpInterval": 1000,
+    "airResistance": 0.0,
+    "gravityScale": 1.0
   },
   "stats": {
     "maxHealth": 1,
