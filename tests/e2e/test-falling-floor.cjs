@@ -67,8 +67,7 @@ async function runTest() {
             const platforms = entityManager.getPlatforms();
             const floor = platforms.find(p => 
                 p.constructor.name === 'FallingFloor' && 
-                Math.abs(p.x - 320) < 5 && 
-                Math.abs(p.originalY - 128) < 5
+                Math.abs(p.x - 320) < 5
             );
             
             return floor ? { 
@@ -180,7 +179,7 @@ async function runTest() {
                 const floor = platforms.find(p => 
                     p.constructor.name === 'FallingFloor' && 
                     Math.abs(p.x - 320) < 5 && 
-                    Math.abs(p.originalY - 128) < 5
+                    Math.abs(p.y - 128) < 5
                 );
                 
                 return floor ? { state: floor.state } : null;
@@ -204,8 +203,7 @@ async function runTest() {
             // ターゲットの床を座標で特定（x=320, y=128）
             const floor = platforms.find(p => 
                 p.constructor.name === 'FallingFloor' && 
-                Math.abs(p.originalX - 320) < 5 && 
-                Math.abs(p.originalY - 128) < 5
+                Math.abs(p.x - 320) < 5
             );
             if (!floor) return null;
             

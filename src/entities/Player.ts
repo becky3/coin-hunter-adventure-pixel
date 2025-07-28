@@ -2,7 +2,6 @@ import { Entity, CollisionInfo } from './Entity';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
 import { InputSystem } from '../core/InputSystem';
 import { MusicSystem } from '../audio/MusicSystem.js';
-import { AssetLoader } from '../assets/AssetLoader';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { Logger } from '../utils/Logger';
@@ -44,7 +43,6 @@ export class Player extends Entity {
     private animationConfig: { [key: string]: CharacterAnimationConfig };
     private speed: number;
     public jumpPower: number;
-    private spriteKey: string | null;
     private _health: number;
     private _maxHealth: number;
     private _isDead: boolean;
@@ -61,7 +59,6 @@ export class Player extends Entity {
     private originalHeight: number;
     private isSmall: boolean;
     private canVariableJump: boolean;
-    private jumpButtonHoldTime: number;
     private jumpMaxHeight: number;
     private jumpStartY: number;
     private _score: number;
@@ -69,7 +66,6 @@ export class Player extends Entity {
     private isSpringBounce: boolean;
     private inputManager: InputSystem | null;
     private musicSystem: MusicSystem | null;
-    private assetLoader: AssetLoader | null;
     public variableJumpBoost: number;
     private variableJumpBoostMultiplier: number;
     private frameCount: number;
@@ -108,8 +104,6 @@ export class Player extends Entity {
         
         this.playerConfig = playerConfig;
         
-        this.spriteKey = null;
-        
         this._health = playerConfig.stats.maxHealth;
         this._maxHealth = playerConfig.stats.maxHealth;
         this._isDead = false;
@@ -130,7 +124,6 @@ export class Player extends Entity {
         this.jumpButtonPressed = false;
         this.jumpTime = 0;
         this.canVariableJump = false;
-        this.jumpButtonHoldTime = 0;
         this.jumpMaxHeight = 0;
         this.jumpStartY = 0;
         
@@ -141,8 +134,6 @@ export class Player extends Entity {
         this.inputManager = null;
         
         this.musicSystem = null;
-        
-        this.assetLoader = null;
         
         this.eventBus = null;
         
@@ -166,10 +157,6 @@ export class Player extends Entity {
     
     setMusicSystem(musicSystem: MusicSystem): void {
         this.musicSystem = musicSystem;
-    }
-    
-    setAssetLoader(assetLoader: AssetLoader): void {
-        this.assetLoader = assetLoader;
     }
     
     
@@ -379,8 +366,6 @@ export class Player extends Entity {
         }
         
         if (prevState !== this._animState) {
-            this.updateSprite();
-            
             if (this.entityAnimationManager) {
                 const actualState = this.isSmall ? `${this._animState}_small` : this._animState;
                 this.entityAnimationManager.setState(actualState);
@@ -444,8 +429,6 @@ export class Player extends Entity {
         this.powerUpManager.clearAll();
         Logger.log('[Player] All power-ups cleared on respawn');
         
-        this.updateSprite();
-        
         if (this.eventBus) {
             this.eventBus.emit('player:respawned', { x, y });
         }
@@ -481,7 +464,6 @@ export class Player extends Entity {
         this.width = playerConfig.physics.smallWidth;
         this.height = playerConfig.physics.smallHeight;
         this.y += this.originalHeight - playerConfig.physics.smallHeight;
-        this.updateSprite();
         
         if (this.powerUpManager.hasPowerUp(PowerUpType.POWER_GLOVE)) {
             this.powerUpManager.removePowerUp(PowerUpType.POWER_GLOVE);
@@ -515,18 +497,6 @@ export class Player extends Entity {
             if (this.eventBus) {
                 this.eventBus.emit('player:coins-changed', { coins: this._coins });
             }
-        }
-    }
-    
-    private updateSprite(): void {
-        const sizePrefix = this.isSmall ? '_small' : '';
-        
-        if (this._animState === 'idle') {
-            this.spriteKey = `player/idle${sizePrefix}`;
-        } else if (this._animState === 'walk') {
-            this.spriteKey = `player/walk${sizePrefix}`;
-        } else if (this._animState === 'jump' || this._animState === 'fall') {
-            this.spriteKey = `player/jump${sizePrefix}`;
         }
     }
     

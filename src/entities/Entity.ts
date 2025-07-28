@@ -70,8 +70,6 @@ export abstract class Entity {
     public spriteScale: number;
     
     protected entityAnimationManager?: EntityAnimationManager;
-    private animationInitialized: boolean = false;
-    private animationInitializing: boolean = false;
     
     protected eventBus: EventBus | null = null;
 
@@ -116,8 +114,6 @@ export abstract class Entity {
         this.sprite = null;
         this.spriteScale = 1;
         
-        this.animationInitialized = false;
-        this.animationInitializing = false;
         
         this.initializeAnimations();
     }

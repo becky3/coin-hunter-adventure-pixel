@@ -52,7 +52,6 @@ export class PlayState implements GameState {
     private hudManager: HUDManager;
     
     private gameController: GameController;
-    private eventCoordinator: EventCoordinator;
     
     private backgroundRenderer: BackgroundRenderer;
     private tileRenderer: TileRenderer;
@@ -108,7 +107,7 @@ export class PlayState implements GameState {
             hudManager: this.hudManager
         });
         
-        this.eventCoordinator = new EventCoordinator({
+        new EventCoordinator({
             eventBus: this.eventBus,
             entityManager: this.entityManager,
             levelManager: this.levelManager,
@@ -143,9 +142,6 @@ export class PlayState implements GameState {
         Logger.log('[PlayState] Power-up effects initialized');
     }
 
-    private setupEventListeners(): void {
-        this.removeInputListeners();
-    }
 
     private async preloadSprites(): Promise<void> {
         if (!this.game.assetLoader) {

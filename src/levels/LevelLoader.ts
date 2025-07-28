@@ -50,14 +50,12 @@ export class LevelLoader {
     private currentStageData: StageData | null;
     private currentStageId: string | null;
     private basePath: string;
-    private stageList: StageList | null;
     
     constructor() {
         this.stages = null;
         this.currentStageData = null;
         this.currentStageId = null;
         this.basePath = '/src/levels/data/';
-        this.stageList = null;
     }
     
     async loadStageList(): Promise<StageList> {
@@ -68,7 +66,6 @@ export class LevelLoader {
                 Logger.log(`[LevelLoader] Using bundled data for: ${url}`);
                 const data = bundledStageData[url] as StageList;
                 this.stages = data.stages;
-                this.stageList = data;
                 return data;
             }
             
@@ -83,7 +80,6 @@ export class LevelLoader {
             
             const data = await response.json() as StageList;
             this.stages = data.stages;
-            this.stageList = data;
             
             return data;
         } catch (error) {

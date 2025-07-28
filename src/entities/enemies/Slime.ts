@@ -11,7 +11,6 @@ import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
  */
 export class Slime extends Enemy implements EntityInitializer {
     public spriteKey: string;
-    private bounceHeight: number;
     declare friction: number;
 
     /**
@@ -42,7 +41,6 @@ export class Slime extends Enemy implements EntityInitializer {
         this.spriteKey = 'enemies/slime';
         this.animState = 'idle';
         
-        this.bounceHeight = 0.3;
         this.friction = 0.8;
         
         this.detectRange = slimeConfig.ai.detectRange;

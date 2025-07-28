@@ -206,7 +206,7 @@ class PixelArtRenderer {
     }
 }
 
-function drawPixelText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, scale = 1, color = '#FFFFFF'): void {
+function drawPixelText(ctx: CanvasRenderingContext2D, text: string, _x: number, _y: number, scale = 1, color = '#FFFFFF'): void {
     const numbers: { [key: string]: PixelData } = {
         '0': [
             [1,1,1],

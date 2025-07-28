@@ -17,7 +17,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     public spriteKey: string;
     private chargeSpeed: number;
     private normalSpeed: number;
-    private isCharging: boolean;
     private playerInRange: Player | null;
     private detectRangeWidth: number;
     private detectRangeHeight: number;
@@ -51,7 +50,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.spriteKey = 'enemies/armor_knight';
         this.animState = 'idle';
         
-        this.isCharging = false;
         this.playerInRange = null;
         
         this.stompBounceVelocity = ArmorKnight.DEFAULT_STOMP_BOUNCE_VELOCITY;
@@ -71,13 +69,11 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     
     protected updateAI(_deltaTime: number): void {
         if (this.state === 'dead') {
-            this.isCharging = false;
             this.moveSpeed = this.normalSpeed;
             return;
         }
         
         if (this.state === 'hurt') {
-            this.isCharging = false;
             this.moveSpeed = this.normalSpeed;
             this.vx = 0;
             if (this.stateTimer <= 0) {
@@ -103,7 +99,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         
         if (player && this.isPlayerInRange(player)) {
             this.playerInRange = player;
-            this.isCharging = true;
             this.moveSpeed = this.chargeSpeed;
             this.animState = 'charge';
             if (this.entityAnimationManager) {
@@ -116,7 +111,6 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
                 this.facingRight = this.direction === 1;
             }
         } else {
-            this.isCharging = false;
             this.moveSpeed = this.normalSpeed;
             this.animState = 'move';
             if (this.entityAnimationManager) {

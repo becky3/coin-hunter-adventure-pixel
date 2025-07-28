@@ -180,7 +180,6 @@ export class EntityManager {
         this.player = new Player(spawnX, spawnY);
         this.player.setInputManager(this.inputSystem);
         this.player.setMusicSystem(this.musicSystem);
-        this.player.setAssetLoader(this.assetLoader);
         this.player.setEventBus(this.eventBus);
         
         this.eventBus.emit('player:created', { player: this.player });

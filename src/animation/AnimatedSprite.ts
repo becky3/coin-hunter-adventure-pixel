@@ -11,7 +11,6 @@ interface AnimationStateConfig {
 export class AnimatedSprite {
     private states: AnimationStateConfig;
     private currentState: string;
-    private entityType: string;
 
     constructor(entityType: string, _states: AnimationStateConfig) {
         throw new Error(`[AnimatedSprite] Legacy fallback is not allowed. Entity '${entityType}' must implement getAnimationDefinitions() and getPaletteDefinition() methods. Fallback has been disabled per project requirements.`);

@@ -1,11 +1,9 @@
-import { ServiceLocator } from '../services/ServiceLocator';
 import { Logger } from '../utils/Logger';
 
 /**
  * Debug dialog for spawning enemies
  */
 export class EnemySpawnDialog {
-    private serviceLocator: ServiceLocator;
     private dialogElement?: HTMLDivElement;
     private isOpen: boolean = false;
     
@@ -19,8 +17,7 @@ export class EnemySpawnDialog {
         'lavaBubble'
     ];
     
-    constructor(serviceLocator: ServiceLocator) {
-        this.serviceLocator = serviceLocator;
+    constructor() {
     }
     
     init(): void {

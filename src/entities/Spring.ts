@@ -17,7 +17,6 @@ export class Spring extends Entity implements EntityInitializer {
     private baseBounceMultiplier: number;
     private compression: number;
     public triggered: boolean;
-    private animationSpeed: number;
     declare animationTime: number;
     public physicsSystem: PhysicsSystem | null;
     private cooldownFrames: number;
@@ -47,7 +46,6 @@ export class Spring extends Entity implements EntityInitializer {
         this.baseBounceMultiplier = 3.5;
         this.compression = 0;
         this.triggered = false;
-        this.animationSpeed = springConfig.properties.expansionSpeed;
         
         this.animationTime = 0;
         this.physicsSystem = null;

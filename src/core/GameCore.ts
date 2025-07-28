@@ -93,7 +93,7 @@ export class GameCore {
         
         (window as Window & { PerformanceMonitor?: typeof PerformanceMonitor }).PerformanceMonitor = PerformanceMonitor;
         
-        this.debugOverlay = new DebugOverlay(this._serviceLocator);
+        this.debugOverlay = new DebugOverlay();
         await this.debugOverlay.init();
         const debugOverlayEndTime = performance.now();
         recordPhase('Debug overlay init', debugOverlayStartTime, debugOverlayEndTime);
