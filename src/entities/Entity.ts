@@ -20,7 +20,7 @@ export interface Vector2D {
 }
 
 export interface CollisionInfo {
-    other: Entity;
+    other: Entity | null;
     side: string;
 }
 

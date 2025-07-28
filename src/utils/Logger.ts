@@ -5,7 +5,7 @@
  */
 export class Logger {
     private static isProduction = typeof process !== 'undefined' && process.env?.NODE_ENV === 'production';
-    private static debugEnabled = !this.isProduction || (window as Window & { debugMode?: boolean }).debugMode;
+    private static debugEnabled = !this.isProduction || ((window as Window & { debugMode?: boolean }).debugMode === true);
     private static includeTimestamp = true;
 
     private static getTimestamp(): string {

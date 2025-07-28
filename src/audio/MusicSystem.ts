@@ -18,9 +18,8 @@ interface EnvelopeSettings {
 }
 
 interface NoteInfo {
-    note?: string;
-    freq?: number;
-    time?: number;
+    freq: number;
+    time: number;
     duration: number;
 }
 
@@ -314,7 +313,8 @@ export class MusicSystem {
             if (jumpConfig.frequency.end) {
                 setTimeout(() => {
                     if (!this.isInitialized || this.isMuted) return;
-                    this.playSoundEffect(jumpConfig.frequency.end || 880, 0.08, 'sine', 0.15);
+                    const endFreq = jumpConfig.frequency?.end || 880;
+                    this.playSoundEffect(endFreq, 0.08, 'sine', 0.15);
                 }, 20);
             }
         } else {
@@ -344,7 +344,7 @@ export class MusicSystem {
         
         notes.forEach(({ freq, time, duration }) => {
             setTimeout(() => {
-                if (!this.isInitialized || this.isMuted || !this.audioContext || freq === undefined) return;
+                if (!this.isInitialized || this.isMuted || !this.audioContext) return;
                 this.playSoundEffect(freq, duration, 'sine', 0.5);
             }, time * MS_PER_SEC);
         });

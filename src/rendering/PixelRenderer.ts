@@ -125,11 +125,12 @@ export class PixelRenderer {
                     this.assetLoader.loadSprite(...sprite.split('/') as [string, string]);
                     return;
                 }
-                finalSprite = loadedSprite.imageData || loadedSprite.canvas;
-                if (!finalSprite) {
+                const spriteData = loadedSprite.imageData || loadedSprite.canvas;
+                if (!spriteData) {
                     Logger.warn(`[PixelRenderer] Loaded sprite '${sprite}' has no imageData or canvas`);
                     return;
                 }
+                finalSprite = spriteData;
             } else {
                 Logger.error('[PixelRenderer] No asset loader available to load sprite');
                 return;

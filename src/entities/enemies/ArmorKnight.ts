@@ -57,6 +57,11 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.stompBounceVelocity = ArmorKnight.DEFAULT_STOMP_BOUNCE_VELOCITY;
         
         this.detectRange = config.ai.detectRange;
+        
+        if (config.ai.detectRangeWidth === undefined || config.ai.detectRangeHeight === undefined) {
+            throw new Error('ArmorKnight requires detectRangeWidth and detectRangeHeight in config');
+        }
+        
         this.detectRangeWidth = config.ai.detectRangeWidth;
         this.detectRangeHeight = config.ai.detectRangeHeight;
         this.attackRange = config.ai.attackRange;

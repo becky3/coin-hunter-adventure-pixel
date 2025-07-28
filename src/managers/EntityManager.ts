@@ -170,6 +170,13 @@ export class EntityManager {
     createPlayer(spawnX: number, spawnY: number): Player {
         Logger.log(`[EntityManager] Creating player at (${spawnX}, ${spawnY})`);
         
+        if (!this.musicSystem) {
+            throw new Error('MusicSystem is required to create player');
+        }
+        if (!this.assetLoader) {
+            throw new Error('AssetLoader is required to create player');
+        }
+        
         this.player = new Player(spawnX, spawnY);
         this.player.setInputManager(this.inputSystem);
         this.player.setMusicSystem(this.musicSystem);
