@@ -25,20 +25,13 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     
-    // Type Checking - 段階的に厳格化
-    "strict": false,
-    "noImplicitAny": true,  // Phase 1: 暗黙的なany型を禁止
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
+    // Type Checking
+    "strict": true,
     
     // Additional Checks
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noImplicitReturns": true,  // Phase 1: すべてのコードパスでの返却を強制
+    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     
     // Skip Libraries
