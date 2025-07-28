@@ -9,10 +9,10 @@ let instance: PixelFont | null = null;
  * PixelFont implementation
  */
 export class PixelFont {
-    private fontData: FontData;
-    public charWidth: number;
-    public charHeight: number;
-    public defaultSpacing: number;
+    private fontData: FontData = {};
+    public charWidth: number = 5;
+    public charHeight: number = 7;
+    public defaultSpacing: number = 1;
 
     constructor() {
 
@@ -440,9 +440,6 @@ export class PixelFont {
             ]
         };
 
-        this.charWidth = 5;
-        this.charHeight = 7;
-        this.defaultSpacing = 1;
 
         instance = this as PixelFont;
     }
