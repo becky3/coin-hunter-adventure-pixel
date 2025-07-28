@@ -183,7 +183,8 @@ export class GameCore {
             Logger.log('[Performance] After MusicSystem.init():', performance.now().toFixed(2) + 'ms', '(took', (performance.now() - musicInitStartTime).toFixed(2) + 'ms)');
             Logger.log('GameCore: MusicSystem initialized');
         } catch (error) {
-            Logger.log('[Performance] MusicSystem init error:', error.message, 'at', performance.now().toFixed(2) + 'ms');
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            Logger.log('[Performance] MusicSystem init error:', errorMessage, 'at', performance.now().toFixed(2) + 'ms');
             Logger.warn('GameCore: MusicSystem initialization failed, continuing without audio:', error);
         }
     }

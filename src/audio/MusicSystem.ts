@@ -140,7 +140,7 @@ export class MusicSystem {
             const endTime = performance.now();
             Logger.log('[Performance] MusicSystem.init() failed:', endTime.toFixed(2) + 'ms', '(took', (endTime - startTime).toFixed(2) + 'ms)');
             Logger.log('[Performance] Error details:', error);
-            if (error.name === 'NotAllowedError') {
+            if (error instanceof Error && error.name === 'NotAllowedError') {
                 Logger.log('音楽システムはユーザー操作後に開始されます');
             } else {
                 Logger.warn('音楽システムの初期化エラー:', error);

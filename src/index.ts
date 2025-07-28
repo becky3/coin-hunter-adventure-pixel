@@ -83,7 +83,8 @@ async function startGame() {
             if (ctx) {
                 ctx.fillStyle = 'red';
                 ctx.font = '20px Arial';
-                ctx.fillText('Error: ' + error.message, 10, 30);
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                ctx.fillText('Error: ' + errorMessage, 10, 30);
             }
         }
     }
