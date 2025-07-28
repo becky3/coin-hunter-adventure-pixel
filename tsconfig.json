@@ -32,8 +32,8 @@
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
-    "noImplicitThis": false,
-    "alwaysStrict": false,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
     
     // Additional Checks
     "noUnusedLocals": false,
