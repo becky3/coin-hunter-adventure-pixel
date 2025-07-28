@@ -131,7 +131,7 @@ export class PhysicsSystem {
         this.frameCount = 0;
     }
     
-    setTileMap(tileMap: number[][], tileSize = 16): void {
+    setTileMap(tileMap: number[][] | null, tileSize = 16): void {
         this.tileMap = tileMap;
         this.tileSize = tileSize;
     }

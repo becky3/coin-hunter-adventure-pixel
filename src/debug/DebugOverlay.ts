@@ -163,7 +163,7 @@ export class DebugOverlay {
 
     private setupEventListeners(): void {
         const game = (window as Window & { game?: { stateManager?: { addEventListener?: (event: string, callback: (event: StateEvent) => void) => void; currentState?: { name: string } } } }).game;
-        if (game?.stateManager) {
+        if (game?.stateManager?.addEventListener) {
             game.stateManager.addEventListener('stateChange', (event: StateEvent) => {
                 const stateData = event.data as { to?: string } | undefined;
                 this.updateStat('state', stateData?.to || 'unknown');

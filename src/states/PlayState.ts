@@ -257,6 +257,10 @@ export class PlayState implements GameState {
         
         const levelData = await this.gameController.initializeLevel(levelName);
         
+        if (!levelData) {
+            throw new Error(`Failed to load level: ${levelName}`);
+        }
+        
         if (!levelData.stageType) {
             throw new Error(`Stage ${levelName} is missing required stageType property`);
         }

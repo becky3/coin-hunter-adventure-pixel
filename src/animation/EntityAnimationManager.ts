@@ -88,6 +88,10 @@ export class EntityAnimationManager {
             
             const sprite = await assetLoader.loadSprite(category, name);
             
+            if (!sprite.width || !sprite.height || !sprite.data) {
+                throw new Error(`Sprite ${path} is missing required properties (width, height, or data)`);
+            }
+            
             return {
                 width: sprite.width,
                 height: sprite.height,

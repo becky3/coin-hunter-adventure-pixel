@@ -41,7 +41,7 @@ interface PlayerState {
  */
 export class Player extends Entity {
     private playerConfig: PlayerConfig;
-    private animationConfig: { [key: string]: CharacterAnimationConfig } | null;
+    private animationConfig: { [key: string]: CharacterAnimationConfig };
     private speed: number;
     public jumpPower: number;
     private spriteKey: string | null;

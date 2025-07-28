@@ -187,6 +187,10 @@ export class LevelLoader {
     getNextStageId(): string | null {
         if (!this.hasNextStage()) return null;
         
+        if (!this.stages || !this.currentStageId) {
+            throw new Error('getNextStageId called but stages or currentStageId is not set');
+        }
+        
         const currentIndex = this.stages.findIndex(s => s.id === this.currentStageId);
         if (currentIndex >= 0 && currentIndex < this.stages.length - 1) {
             return this.stages[currentIndex + 1].id;

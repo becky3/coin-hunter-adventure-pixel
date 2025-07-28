@@ -172,6 +172,14 @@ export class EntityManager {
         
         this.player = new Player(spawnX, spawnY);
         this.player.setInputManager(this.inputSystem);
+        
+        if (!this.musicSystem) {
+            throw new Error('MusicSystem is required to create player');
+        }
+        if (!this.assetLoader) {
+            throw new Error('AssetLoader is required to create player');
+        }
+        
         this.player.setMusicSystem(this.musicSystem);
         this.player.setAssetLoader(this.assetLoader);
         this.player.setEventBus(this.eventBus);
