@@ -136,7 +136,7 @@ class PaletteSystem {
             throw new Error(`Invalid palette index: ${paletteIndex}`);
         }
         const color = paletteColors[colorIndex];
-        if (!color) {
+        if (color === undefined) {
             throw new Error(`Invalid color index: ${colorIndex} in palette ${paletteIndex}`);
         }
         return color;
