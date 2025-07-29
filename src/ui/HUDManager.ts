@@ -41,6 +41,7 @@ export class HUDManager {
         };
 
         this.setupEventListeners();
+        this.generatePauseBackground();
     }
 
     private setupEventListeners(): void {
@@ -94,7 +95,6 @@ export class HUDManager {
     }
     
     initialize(): void {
-        this.generatePauseBackground();
     }
     
     cleanup(): void {
