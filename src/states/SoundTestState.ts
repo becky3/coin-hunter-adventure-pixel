@@ -149,6 +149,7 @@ export class SoundTestState implements GameState {
     
     private handleHorizontalNavigation(direction: 'left' | 'right'): void {
         const currentItem = this.menuItems[this.selectedRow];
+        if (!currentItem) return;
         
         if (currentItem.type === 'quit' || !currentItem.items || currentItem.currentIndex === undefined) {
             return;

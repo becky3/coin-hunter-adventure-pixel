@@ -289,14 +289,23 @@ export class PhysicsSystem {
         const startRow = Math.floor(bounds.top / this.tileSize);
         const endRow = Math.floor(bounds.bottom / this.tileSize);
         const clampedStartCol = Math.max(0, startCol);
-        const clampedEndCol = Math.min(this.tileMap[0].length - 1, endCol);
+        const firstRow = this.tileMap[0];
+        if (!firstRow) {
+            throw new Error('TileMap is empty');
+        }
+        const clampedEndCol = Math.min(firstRow.length - 1, endCol);
         const clampedStartRow = Math.max(0, startRow);
         const clampedEndRow = Math.min(this.tileMap.length - 1, endRow);
         
         
         for (let row = clampedStartRow; row <= clampedEndRow; row++) {
             for (let col = clampedStartCol; col <= clampedEndCol; col++) {
-                if (this.tileMap[row][col] === 1) {
+                const tileRow = this.tileMap[row];
+                if (!tileRow) {
+                    throw new Error(`Invalid tile row: ${row}`);
+                }
+                const tile = tileRow[col];
+                if (tile === 1) {
                     const tileBounds: Bounds = {
                         left: col * this.tileSize,
                         top: row * this.tileSize,
@@ -349,11 +358,13 @@ export class PhysicsSystem {
         
         for (let i = 0; i < entities.length; i++) {
             const entityA = entities[i];
+            if (!entityA) continue;
             if (!entityA.active || !entityA.collidable) continue;
             const collisionLayers = entityA.physicsLayer ? this.collisionMatrix[entityA.physicsLayer] || [] : [];
             
             for (let j = i + 1; j < entities.length; j++) {
                 const entityB = entities[j];
+                if (!entityB) continue;
                 if (!entityB.active || !entityB.collidable) continue;
                 
                 
@@ -516,10 +527,11 @@ export class PhysicsSystem {
             const row = Math.floor(testY / this.tileSize);
             const col = Math.floor(centerX / this.tileSize);
             
-            if (row >= 0 && row < this.tileMap.length && 
-                col >= 0 && col < this.tileMap[row].length && 
-                this.tileMap[row][col] === 1) {
-                entity.grounded = true;
+            if (row >= 0 && row < this.tileMap.length && col >= 0) {
+                const tileRow = this.tileMap[row];
+                if (tileRow && col < tileRow.length && tileRow[col] === 1) {
+                    entity.grounded = true;
+                }
             }
         }
     }
@@ -533,9 +545,11 @@ export class PhysicsSystem {
         const col = Math.floor(x / this.tileSize);
         const row = Math.floor(y / this.tileSize);
         
-        if (row >= 0 && row < this.tileMap.length &&
-            col >= 0 && col < this.tileMap[row].length) {
-            return this.tileMap[row][col] === 1;
+        if (row >= 0 && row < this.tileMap.length && col >= 0) {
+            const tileRow = this.tileMap[row];
+            if (tileRow && col < tileRow.length) {
+                return tileRow[col] === 1;
+            }
         }
         
         return false;

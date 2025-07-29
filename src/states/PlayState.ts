@@ -494,10 +494,13 @@ export class PlayState implements GameState {
         const endRow = Math.ceil((camera.y + camera.height) / TILE_SIZE);
         
         for (let row = startRow; row < endRow && row < tileMap.length; row++) {
-            for (let col = startCol; col < endCol && col < tileMap[row].length; col++) {
-                const tile = tileMap[row][col];
+            const tileRow = tileMap[row];
+            if (!tileRow) continue;
+            
+            for (let col = startCol; col < endCol && col < tileRow.length; col++) {
+                const tile = tileRow[col];
                 
-                if (tile > 0) {
+                if (tile !== undefined && tile > 0) {
                     this.tileRenderer.renderTile(
                         renderer,
                         tile,

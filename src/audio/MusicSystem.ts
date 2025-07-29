@@ -697,8 +697,10 @@ export class MusicSystem {
                 let currentTime = repeatStartTime;
                 
                 pattern.notes.forEach((note, index) => {
-                    const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
-                    const time = pattern.times ? repeatStartTime + pattern.times[index] * beatLength : currentTime;
+                    const durationValue = pattern.durations?.[index];
+                    const duration = durationValue !== undefined ? durationValue * beatLength : beatLength;
+                    const timeValue = pattern.times?.[index];
+                    const time = timeValue !== undefined ? repeatStartTime + timeValue * beatLength : currentTime;
                     
                     this.playNoteWithEnvelope(
                         this.getNoteFrequency(note),
@@ -717,8 +719,10 @@ export class MusicSystem {
                 let currentTime = repeatStartTime;
                 
                 pattern.chords.forEach((chord, index) => {
-                    const duration = pattern.durations ? pattern.durations[index] * beatLength : beatLength;
-                    const time = pattern.times ? repeatStartTime + pattern.times[index] * beatLength : currentTime;
+                    const durationValue = pattern.durations?.[index];
+                    const duration = durationValue !== undefined ? durationValue * beatLength : beatLength;
+                    const timeValue = pattern.times?.[index];
+                    const time = timeValue !== undefined ? repeatStartTime + timeValue * beatLength : currentTime;
                     
                     this.playChord(
                         chord,

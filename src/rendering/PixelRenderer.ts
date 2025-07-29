@@ -286,11 +286,14 @@ export class PixelRenderer {
         for (let y = startY; y < Math.min(endY, tilemap.length); y++) {
             if (y < 0) continue;
             
-            for (let x = startX; x < Math.min(endX, tilemap[y].length); x++) {
+            const row = tilemap[y];
+            if (!row) continue;
+            
+            for (let x = startX; x < Math.min(endX, row.length); x++) {
                 if (x < 0) continue;
                 
-                const tileId = tilemap[y][x];
-                if (tileId === 0) continue;
+                const tileId = row[x];
+                if (tileId === undefined || tileId === 0) continue;
                 
                 const sprite = getTileSprite(tileId);
                 if (sprite) {

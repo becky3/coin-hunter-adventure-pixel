@@ -127,6 +127,7 @@ export class ShieldBreakEffect {
     update(deltaTime: number): boolean {
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const particle = this.particles[i];
+            if (!particle) continue;
             
             particle.x += particle.vx * deltaTime * 0.06;
             particle.y += particle.vy * deltaTime * 0.06;
