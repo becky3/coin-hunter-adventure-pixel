@@ -234,7 +234,7 @@ export class LevelLoader {
     getBackgroundColor(levelData: StageData): string {
         const colorIndex = levelData.backgroundColor;
         const color = paletteSystem.masterPalette[colorIndex];
-        if (!color) {
+        if (color === undefined) {
             throw new Error(`Invalid background color index: ${colorIndex}. Color not found in master palette.`);
         }
         return color;

@@ -63,8 +63,9 @@ class PixelArtSprite {
     private _drawPixels(ctx: CanvasRenderingContext2D, flipped = false): void {
         this.pixelData.forEach((row, y) => {
             row.forEach((pixel, x) => {
-                if (pixel > 0 && this.colors[pixel]) {
-                    ctx.fillStyle = this.colors[pixel] as string;
+                const color = this.colors[pixel];
+                if (color !== null && color !== undefined) {
+                    ctx.fillStyle = color;
                     const drawX = flipped ? (this.width - 1 - x) : x;
                     ctx.fillRect(drawX, y, 1, 1);
                 }

@@ -455,7 +455,7 @@ export class PixelFont {
     ): void {
         if (!color) {
             const defaultColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.primaryText];
-            if (!defaultColor) {
+            if (defaultColor === undefined) {
                 throw new Error('Primary text color not found in master palette');
             }
             color = defaultColor;
@@ -559,7 +559,7 @@ export class PixelFont {
         spacing: number | null = null
     ): void {
         const color = palette[colorIndex];
-        if (!color) {
+        if (color === undefined) {
             throw new Error(`Color not found at palette index ${colorIndex}`);
         }
         this.drawText(ctx, text, x, y, scale, color, spacing);
@@ -577,14 +577,14 @@ export class PixelFont {
     ): void {
         if (!color) {
             const primaryTextColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.primaryText];
-            if (!primaryTextColor) {
+            if (primaryTextColor === undefined) {
                 throw new Error('Primary text color not found in master palette');
             }
             color = primaryTextColor;
         }
         if (!shadowColor) {
             const backgroundColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.background];
-            if (!backgroundColor) {
+            if (backgroundColor === undefined) {
                 throw new Error('Background color not found in master palette');
             }
             shadowColor = backgroundColor;

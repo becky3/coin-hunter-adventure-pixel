@@ -113,10 +113,23 @@ class PaletteSystem {
     createStagePalette(config: PaletteConfig): StagePalette {
         return {
             background: config.background.map(palette => 
-                palette.map(colorIndex => this.masterPalette[colorIndex] || '#000000')
+                palette.map(colorIndex => {
+                    const color = this.masterPalette[colorIndex];
+                    if (color === undefined) {
+                        throw new Error(`Invalid color index in palette config: ${colorIndex}`);
+                    }
+                    return color;
+                })
             ),
             sprite: config.sprite.map(palette => 
-                palette.map(colorIndex => colorIndex === 0 ? null : this.masterPalette[colorIndex] || '#000000')
+                palette.map(colorIndex => {
+                    if (colorIndex === 0) return null;
+                    const color = this.masterPalette[colorIndex];
+                    if (color === undefined) {
+                        throw new Error(`Invalid color index in sprite palette config: ${colorIndex}`);
+                    }
+                    return color;
+                })
             )
         };
     }
@@ -129,10 +142,10 @@ class PaletteSystem {
         if (!this.currentStagePalette) return '#000000';
         
         const palette = this.currentStagePalette[type];
-        if (!palette || !palette[paletteIndex]) return '#000000';
+        if (!palette || palette[paletteIndex] === undefined) return '#000000';
         
         const paletteColors = palette[paletteIndex];
-        if (!paletteColors) {
+        if (paletteColors === undefined) {
             throw new Error(`Invalid palette index: ${paletteIndex}`);
         }
         const color = paletteColors[colorIndex];

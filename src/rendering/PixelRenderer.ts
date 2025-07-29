@@ -202,7 +202,7 @@ export class PixelRenderer {
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
         const color = paletteSystem.masterPalette[colorIndex];
-        if (!color) {
+        if (color === undefined) {
             throw new Error(`Invalid color index: ${colorIndex}. Color not found in master palette.`);
         }
         this.ctx.fillStyle = color;
@@ -235,7 +235,7 @@ export class PixelRenderer {
         this.ctx.save();
         this.ctx.globalAlpha = alpha;
         const color = paletteSystem.masterPalette[colorIndex];
-        if (!color) {
+        if (color === undefined) {
             throw new Error(`Invalid color index: ${colorIndex}. Color not found in master palette.`);
         }
         this.ctx.fillStyle = color;
