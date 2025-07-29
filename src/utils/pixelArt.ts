@@ -174,18 +174,6 @@ class PixelArtRenderer {
         }
     }
 
-    drawStageDependentSprite(name: string, x: number, y: number, flipped = false, paletteIndex: number = 0): void {
-        const pixelData = this.stageDependentSprites.get(name);
-        if (!pixelData) return;
-
-        const colors: ColorMap = {};
-        for (let i = 0; i < 4; i++) {
-            colors[i] = paletteSystem.getColor('sprite', paletteIndex, i);
-        }
-
-        const sprite = new PixelArtSprite(pixelData, colors);
-        sprite.draw(this.ctx, x, y, flipped);
-    }
 
     drawStageDependentAnimation(name: string, x: number, y: number, currentTime: number, flipped = false, paletteIndex: number = 0): void {
         const animData = this.stageDependentAnimations.get(name);
