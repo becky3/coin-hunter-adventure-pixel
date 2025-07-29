@@ -198,8 +198,8 @@ export class EntityAnimationManager {
                 
                 if (colorIndex === 0) continue;
                 
-                const masterIndex = colorIndex !== undefined ? palette.colors[colorIndex] : undefined;
-                if (masterIndex === null) continue;
+                const masterIndex = palette.colors[colorIndex];
+                if (masterIndex === undefined || masterIndex === null) continue;
                 
                 const color = MasterPalette.getColor(masterIndex);
                 
