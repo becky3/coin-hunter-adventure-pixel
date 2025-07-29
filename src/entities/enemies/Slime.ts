@@ -49,7 +49,7 @@ export class Slime extends Enemy implements EntityInitializer {
         this.setAnimation('idle');
     }
     
-    protected updateAI(_deltaTime: number): void {
+    protected override updateAI(_deltaTime: number): void {
         if (this.state === 'dead' || this.state === 'hurt') {
             return;
         }
@@ -70,7 +70,7 @@ export class Slime extends Enemy implements EntityInitializer {
     }
 
 
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
@@ -93,7 +93,7 @@ export class Slime extends Enemy implements EntityInitializer {
     /**
      * Get animation definitions for slime
      */
-    protected getAnimationDefinitions(): AnimationDefinition[] {
+    protected override getAnimationDefinitions(): AnimationDefinition[] {
         return [
             {
                 id: 'idle',
@@ -119,7 +119,7 @@ export class Slime extends Enemy implements EntityInitializer {
     /**
      * Get palette definition for slime
      */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
+    protected override getPaletteDefinition(): EntityPaletteDefinition {
         return {
             default: {
                 colors: [
@@ -132,7 +132,7 @@ export class Slime extends Enemy implements EntityInitializer {
         };
     }
     
-    protected getSpritePaletteIndex(): number {
+    protected override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.ENEMY_BASIC;
     }
 }

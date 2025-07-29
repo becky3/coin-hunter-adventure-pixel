@@ -196,7 +196,7 @@ export class Player extends Entity {
         Logger.log('  - Variable jump enabled:', this.canVariableJump);
     }
     
-    update(deltaTime: number): void {
+    override update(deltaTime: number): void {
         super.update(deltaTime);
         
         if (this._isDead) return;
@@ -500,7 +500,7 @@ export class Player extends Entity {
         }
     }
     
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         this.flipX = this._facing === 'left';
         
         if (this._isJumping && renderer.debug) {
@@ -591,7 +591,7 @@ export class Player extends Entity {
         };
     }
     
-    onCollision(collisionInfo?: CollisionInfo): void {
+    override onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo || !collisionInfo.other) {
             Logger.warn('[Player] onCollision called with invalid collisionInfo:', collisionInfo);
             return;
@@ -744,7 +744,7 @@ export class Player extends Entity {
         };
     }
     
-    protected getSpritePaletteIndex(): number {
+    protected override getSpritePaletteIndex(): number {
         return this.hasPowerGlove ? SpritePaletteIndex.CHARACTER_POWERGLOVE : SpritePaletteIndex.CHARACTER;
     }
 }

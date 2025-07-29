@@ -89,7 +89,7 @@ export class Spider extends Enemy implements EntityInitializer {
         this.setAnimation('idle');
     }
     
-    protected updateAI(deltaTime: number): void {
+    protected override updateAI(deltaTime: number): void {
         if (this.state === 'dead' || this.state === 'hurt') {
             return;
         }
@@ -274,14 +274,14 @@ export class Spider extends Enemy implements EntityInitializer {
         return this.physicsSystem.isPointInTile(tileX * 16, tileY * 16);
     }
     
-    onCollisionWithWall(): void {
+    override onCollisionWithWall(): void {
         if (this._spiderState === 'crawling') {
             this.direction *= -1;
             this.facingRight = !this.facingRight;
         }
     }
     
-    update(deltaTime: number): void {
+    override update(deltaTime: number): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0) {
@@ -297,7 +297,7 @@ export class Spider extends Enemy implements EntityInitializer {
         this.onUpdate(deltaTime);
     }
     
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
@@ -342,7 +342,7 @@ export class Spider extends Enemy implements EntityInitializer {
     /**
      * Get animation definitions for spider
      */
-    protected getAnimationDefinitions(): AnimationDefinition[] {
+    protected override getAnimationDefinitions(): AnimationDefinition[] {
         return [
             {
                 id: 'idle',
@@ -368,7 +368,7 @@ export class Spider extends Enemy implements EntityInitializer {
     /**
      * Get palette definition for spider
      */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
+    protected override getPaletteDefinition(): EntityPaletteDefinition {
         return {
             default: {
                 colors: [
@@ -381,7 +381,7 @@ export class Spider extends Enemy implements EntityInitializer {
         };
     }
     
-    protected getSpritePaletteIndex(): number {
+    protected override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.ENEMY_SPECIAL;
     }
 }

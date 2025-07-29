@@ -53,9 +53,7 @@ export class PowerUpManager<T = unknown> {
                 effect.onStack(this.target, existingPowerUp.stacks);
             }
             
-            if (config.duration && existingPowerUp.remainingTime !== undefined) {
-                existingPowerUp.remainingTime = config.duration;
-            }
+            existingPowerUp.remainingTime = config.duration;
 
             Logger.log(`Power-up ${type} stacked to ${existingPowerUp.stacks}`);
             return true;
@@ -100,7 +98,7 @@ export class PowerUpManager<T = unknown> {
         this.activePowerUps.forEach((powerUp, type) => {
             const effect = this.effectHandlers.get(type);
             
-            if (powerUp.remainingTime !== undefined && !powerUp.config.permanent) {
+            if (powerUp.remainingTime !== Infinity) {
                 powerUp.remainingTime -= deltaTime * 1000;
 
                 if (powerUp.remainingTime <= 0) {

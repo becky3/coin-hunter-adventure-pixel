@@ -40,7 +40,7 @@ export class PowerGlove extends PowerUpItem {
     protected createPowerUpConfig(): PowerUpConfig {
         return {
             type: PowerUpType.POWER_GLOVE,
-            permanent: true,
+            duration: Infinity,
             stackable: false,
             effectProperties: {
                 bulletSpeed: 5,

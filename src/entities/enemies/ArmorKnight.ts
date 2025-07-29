@@ -67,7 +67,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         this.setAnimation('idle');
     }
     
-    protected updateAI(_deltaTime: number): void {
+    protected override updateAI(_deltaTime: number): void {
         if (this.state === 'dead') {
             this.moveSpeed = this.normalSpeed;
             return;
@@ -161,7 +161,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     /**
      * Override collision with player - cannot be defeated by jumping
      */
-    onCollisionWithPlayer(player: Player): void {
+    override onCollisionWithPlayer(player: Player): void {
         if (this.state === 'dead' || player.invulnerable) return;
         
         super.onCollisionWithPlayer(player);
@@ -170,20 +170,20 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     /**
      * ArmorKnight cannot be defeated by stomping
      */
-    canBeStomped(): boolean {
+    override canBeStomped(): boolean {
         return false;
     }
 
     /**
      * Override take damage - only vulnerable to special attacks
      */
-    takeDamage(amount: number, source?: string): void {
+    override takeDamage(amount: number, source?: string): void {
         if (source === 'projectile' || source === 'powerup') {
             super.takeDamage(amount);
         }
     }
 
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
@@ -206,7 +206,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     /**
      * Get animation definitions for armor knight
      */
-    protected getAnimationDefinitions(): AnimationDefinition[] {
+    protected override getAnimationDefinitions(): AnimationDefinition[] {
         return [
             {
                 id: 'idle',
@@ -232,7 +232,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     /**
      * Get palette definition for armor knight
      */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
+    protected override getPaletteDefinition(): EntityPaletteDefinition {
         return {
             default: {
                 colors: [

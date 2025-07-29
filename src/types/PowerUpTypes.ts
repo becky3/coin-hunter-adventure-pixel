@@ -18,8 +18,7 @@ export enum PowerUpType {
  */
 export interface PowerUpConfig {
     type: PowerUpType;
-    duration?: number;
-    permanent?: boolean;
+    duration: number;
     stackable?: boolean;
     maxStacks?: number;
     effectProperties?: Record<string, unknown>;
@@ -30,8 +29,8 @@ export interface PowerUpConfig {
  */
 export interface ActivePowerUp {
     type: PowerUpType;
-    remainingTime?: number;
-    stacks?: number;
+    remainingTime: number;
+    stacks: number;
     config: PowerUpConfig;
 }
 

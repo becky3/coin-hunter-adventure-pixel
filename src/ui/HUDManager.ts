@@ -28,7 +28,7 @@ export class HUDManager {
     private _message: string | null = null;
     private _messageTimer: number = 0;
     private patternTileCache: Map<string, HTMLCanvasElement> = new Map();
-    private pauseBackgroundCanvas?: HTMLCanvasElement;
+    private pauseBackgroundCanvas!: HTMLCanvasElement;
 
     constructor(_game: GameServices) {
         this.eventBus = _game.eventBus || new EventBus();
@@ -41,6 +41,7 @@ export class HUDManager {
         };
 
         this.setupEventListeners();
+        this.generatePauseBackground();
     }
 
     private setupEventListeners(): void {
@@ -94,12 +95,10 @@ export class HUDManager {
     }
     
     initialize(): void {
-        this.generatePauseBackground();
     }
     
     cleanup(): void {
         this.patternTileCache.clear();
-        this.pauseBackgroundCanvas = undefined;
     }
     
     

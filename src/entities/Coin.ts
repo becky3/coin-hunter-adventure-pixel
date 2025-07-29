@@ -58,7 +58,7 @@ export class Coin extends Entity implements EntityInitializer {
         this.setAnimation('idle');
     }
 
-    onUpdate(deltaTime: number): void {
+    override onUpdate(deltaTime: number): void {
         if (this.collected) return;
         
         this.floatOffset += this.floatSpeed * deltaTime * FLOAT_SPEED_MULTIPLIER;
@@ -67,7 +67,7 @@ export class Coin extends Entity implements EntityInitializer {
         this.animationTime += deltaTime * 1000;
     }
 
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
         super.render(renderer);
@@ -87,7 +87,7 @@ export class Coin extends Entity implements EntityInitializer {
         return this.scoreValue;
     }
 
-    onCollision(collisionInfo?: CollisionInfo): void {
+    override onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo || !collisionInfo.other) {
             Logger.warn('[Coin] onCollision called with invalid collisionInfo:', collisionInfo);
             return;
@@ -98,7 +98,7 @@ export class Coin extends Entity implements EntityInitializer {
         }
     }
 
-    reset(x: number, y: number): void {
+    override reset(x: number, y: number): void {
         super.reset(x, y);
         this.collected = false;
         this.baseY = y;
@@ -143,7 +143,7 @@ export class Coin extends Entity implements EntityInitializer {
         };
     }
     
-    protected getSpritePaletteIndex(): number {
+    protected override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.ITEMS;
     }
 }

@@ -20,7 +20,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     protected floatAmplitude: number;
     protected baseY: number;
     declare animationTime: number;
-    protected musicSystem?: MusicSystem;
+    protected musicSystem!: MusicSystem;
 
     constructor(x: number, y: number, config: BaseEntityConfig, powerUpType: PowerUpType, floatSpeed: number = 0.03, floatAmplitude: number = 0.15) {
         super(x, y, config);
@@ -61,7 +61,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
         return `powerups/${this.powerUpType.toLowerCase()}`;
     }
 
-    onUpdate(deltaTime: number): void {
+    override onUpdate(deltaTime: number): void {
         if (this.collected) return;
         
         this.floatOffset += this.floatSpeed * deltaTime * 0.1;
@@ -70,7 +70,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
         this.animationTime += deltaTime * 1000;
     }
 
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.visible || this.collected) return;
         
         super.render(renderer);
@@ -104,7 +104,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
         }
     }
 
-    onCollision(collisionInfo?: CollisionInfo): void {
+    override onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo || !collisionInfo.other) {
             Logger.warn('[PowerUpItem] onCollision called with invalid collisionInfo');
             return;
@@ -115,7 +115,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
         }
     }
 
-    reset(x: number, y: number): void {
+    override reset(x: number, y: number): void {
         super.reset(x, y);
         this.collected = false;
         this.baseY = y;
@@ -136,6 +136,10 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
      */
     initializeInManager(manager: EntityManager): void {
         manager.addItem(this);
-        this.musicSystem = manager.getMusicSystem();
+        const musicSystem = manager.getMusicSystem();
+        if (!musicSystem) {
+            throw new Error('[PowerUpItem] MusicSystem not available in EntityManager');
+        }
+        this.musicSystem = musicSystem;
     }
 }

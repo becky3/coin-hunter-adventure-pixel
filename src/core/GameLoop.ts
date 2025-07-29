@@ -9,7 +9,7 @@ export class GameLoop {
     private _lastTime: number = 0;
     private readonly targetFPS: number = 60;
     private readonly frameTime: number = 1000 / this.targetFPS;
-    private animationFrameId?: number;
+    private animationFrameId: number = 0;
 
     start(updateCallback: (deltaTime: number) => void): void {
         if (this._running) {
@@ -50,7 +50,7 @@ export class GameLoop {
         this._running = false;
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
-            this.animationFrameId = undefined;
+            this.animationFrameId = 0;
         }
     }
 
