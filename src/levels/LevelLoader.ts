@@ -189,7 +189,11 @@ export class LevelLoader {
         
         const currentIndex = this.stages.findIndex(s => s.id === this.currentStageId);
         if (currentIndex >= 0 && currentIndex < this.stages.length - 1) {
-            return this.stages[currentIndex + 1].id;
+            const nextStage = this.stages[currentIndex + 1];
+            if (!nextStage) {
+                throw new Error(`Invalid stage index: ${currentIndex + 1}`);
+            }
+            return nextStage.id;
         }
         return null;
     }
@@ -230,7 +234,7 @@ export class LevelLoader {
     getBackgroundColor(levelData: StageData): string {
         const colorIndex = levelData.backgroundColor;
         const color = paletteSystem.masterPalette[colorIndex];
-        if (!color) {
+        if (color === undefined) {
             throw new Error(`Invalid background color index: ${colorIndex}. Color not found in master palette.`);
         }
         return color;

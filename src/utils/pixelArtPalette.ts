@@ -113,10 +113,23 @@ class PaletteSystem {
     createStagePalette(config: PaletteConfig): StagePalette {
         return {
             background: config.background.map(palette => 
-                palette.map(colorIndex => this.masterPalette[colorIndex] || '#000000')
+                palette.map(colorIndex => {
+                    const color = this.masterPalette[colorIndex];
+                    if (color === undefined) {
+                        throw new Error(`Invalid color index in palette config: ${colorIndex}`);
+                    }
+                    return color;
+                })
             ),
             sprite: config.sprite.map(palette => 
-                palette.map(colorIndex => colorIndex === 0 ? null : this.masterPalette[colorIndex] || '#000000')
+                palette.map(colorIndex => {
+                    if (colorIndex === 0) return null;
+                    const color = this.masterPalette[colorIndex];
+                    if (color === undefined) {
+                        throw new Error(`Invalid color index in sprite palette config: ${colorIndex}`);
+                    }
+                    return color;
+                })
             )
         };
     }
@@ -126,12 +139,24 @@ class PaletteSystem {
     }
 
     getColor(type: 'background' | 'sprite', paletteIndex: number, colorIndex: number): ColorHex {
-        if (!this.currentStagePalette) return '#000000';
+        if (!this.currentStagePalette) {
+            throw new Error('Stage palette not set');
+        }
         
         const palette = this.currentStagePalette[type];
-        if (!palette || !palette[paletteIndex]) return '#000000';
+        if (!palette) {
+            throw new Error(`Invalid palette type: ${type}`);
+        }
         
-        return palette[paletteIndex][colorIndex];
+        const paletteColors = palette[paletteIndex];
+        if (paletteColors === undefined) {
+            throw new Error(`Invalid palette index: ${paletteIndex}`);
+        }
+        const color = paletteColors[colorIndex];
+        if (color === undefined) {
+            throw new Error(`Invalid color index: ${colorIndex} in palette ${paletteIndex}`);
+        }
+        return color;
     }
 
     async loadSpriteData(category: string, name: string): Promise<number[][]> {
@@ -147,6 +172,9 @@ class PaletteSystem {
             
             categorySprites.forEach((sprite, key) => {
                 const spriteName = key.split('/')[1];
+                if (spriteName === undefined) {
+                    throw new Error(`Invalid sprite key format: ${key}`);
+                }
                 allSprites[spriteName] = sprite.data;
             });
         }

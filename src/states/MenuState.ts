@@ -285,6 +285,9 @@ export class MenuState implements GameState {
     
     private executeOption(): void {
         const option = this.options[this.selectedOption];
+        if (!option) {
+            throw new Error(`Invalid menu option at index: ${this.selectedOption}`);
+        }
         
         switch (option.action) {
         case 'start':

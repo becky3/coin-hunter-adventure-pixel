@@ -62,7 +62,11 @@ export class AssetLoader {
     
     setStageType(stageType: StageType): void {
         this.currentStageType = stageType;
-        paletteSystem.setStagePalette(paletteSystem.createStagePalette(STAGE_PALETTES[stageType]));
+        const paletteConfig = STAGE_PALETTES[stageType];
+        if (!paletteConfig) {
+            throw new Error(`Stage palette not found for stage type: ${stageType}`);
+        }
+        paletteSystem.setStagePalette(paletteSystem.createStagePalette(paletteConfig));
         Logger.log(`[AssetLoader] Stage type set to: ${stageType}`);
         
         if (this.pixelRenderer && this.pixelRenderer.setStageType) {

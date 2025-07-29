@@ -315,7 +315,11 @@ export class DebugOverlay {
     
     private updateStageDisplay(): void {
         if (this.stageSelectElement) {
-            this.stageSelectElement.textContent = this.stageList[this.selectedStageIndex];
+            const stageName = this.stageList[this.selectedStageIndex];
+            if (!stageName) {
+                throw new Error(`Invalid stage index: ${this.selectedStageIndex}`);
+            }
+            this.stageSelectElement.textContent = stageName;
         }
     }
     
@@ -324,7 +328,11 @@ export class DebugOverlay {
         const currentState = game?.stateManager?.currentState;
         
         if (currentState && currentState.name === 'menu') {
-            return this.stageList[this.selectedStageIndex];
+            const stageName = this.stageList[this.selectedStageIndex];
+            if (!stageName) {
+                throw new Error(`Invalid stage index: ${this.selectedStageIndex}`);
+            }
+            return stageName;
         }
         
         return null;

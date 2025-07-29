@@ -196,7 +196,7 @@ export class EntityAnimationManager {
                 if (!row) continue;
                 const colorIndex = row[px];
                 
-                if (colorIndex === 0) continue;
+                if (colorIndex === 0 || colorIndex === undefined) continue;
                 
                 const masterIndex = palette.colors[colorIndex];
                 if (masterIndex === undefined || masterIndex === null) continue;

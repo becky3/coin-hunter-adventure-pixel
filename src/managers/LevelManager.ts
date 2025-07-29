@@ -144,9 +144,18 @@ export class LevelManager {
         const tileX = Math.floor(worldX / TILE_SIZE);
         const tileY = Math.floor(worldY / TILE_SIZE);
         
-        if (tileY >= 0 && tileY < this.tileMap.length &&
-            tileX >= 0 && tileX < this.tileMap[tileY].length) {
-            return this.tileMap[tileY][tileX];
+        if (tileY >= 0 && tileY < this.tileMap.length) {
+            const row = this.tileMap[tileY];
+            if (!row) {
+                throw new Error(`Invalid tile row at Y: ${tileY}`);
+            }
+            if (tileX >= 0 && tileX < row.length) {
+                const tile = row[tileX];
+                if (tile === undefined) {
+                    throw new Error(`Invalid tile at position (${tileX}, ${tileY})`);
+                }
+                return tile;
+            }
         }
         return 0;
     }
@@ -161,8 +170,13 @@ export class LevelManager {
         const match = this.currentLevel.match(/^stage(\d+)-(\d+)$/);
         if (!match) return null;
         
-        const stageNum = parseInt(match[1]);
-        const areaNum = parseInt(match[2]);
+        const stageNumStr = match[1];
+        const areaNumStr = match[2];
+        if (!stageNumStr || !areaNumStr) {
+            throw new Error(`Invalid stage format: ${this.currentLevel}`);
+        }
+        const stageNum = parseInt(stageNumStr);
+        const areaNum = parseInt(areaNumStr);
         
         if (this.levelData && this.levelData.name) {
             Logger.log(`Level data has name: ${this.levelData.name}`);

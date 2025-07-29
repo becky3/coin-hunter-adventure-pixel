@@ -114,7 +114,7 @@ export class HUDManager {
         
         ctx.imageSmoothingEnabled = false;
         const blackColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.background];
-        if (!blackColor) {
+        if (blackColor === undefined) {
             throw new Error(`Invalid UI background color index: ${UI_PALETTE_INDICES.background}`);
         }
         ctx.fillStyle = blackColor;
@@ -224,7 +224,7 @@ export class HUDManager {
 
     private drawPatternTile(renderer: PixelRenderer, x: number, y: number, pattern: number[][], colorIndex: number): void {
         const color = paletteSystem.masterPalette[colorIndex];
-        if (!color) {
+        if (color === undefined) {
             throw new Error(`Invalid color index: ${colorIndex}. Color not found in master palette.`);
         }
         const cacheKey = `${JSON.stringify(pattern)}_${color}`;

@@ -96,6 +96,9 @@ export class SystemManager implements ISystemManager {
 
         for (let i = this.sortedSystemsCache.length - 1; i >= 0; i--) {
             const system = this.sortedSystemsCache[i];
+            if (!system) {
+                throw new Error(`Invalid system at index: ${i}`);
+            }
             system.destroy?.();
         }
         
