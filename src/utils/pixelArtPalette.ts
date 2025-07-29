@@ -139,10 +139,14 @@ class PaletteSystem {
     }
 
     getColor(type: 'background' | 'sprite', paletteIndex: number, colorIndex: number): ColorHex {
-        if (!this.currentStagePalette) return '#000000';
+        if (!this.currentStagePalette) {
+            throw new Error('Stage palette not set');
+        }
         
         const palette = this.currentStagePalette[type];
-        if (!palette || palette[paletteIndex] === undefined) return '#000000';
+        if (!palette) {
+            throw new Error(`Invalid palette type: ${type}`);
+        }
         
         const paletteColors = palette[paletteIndex];
         if (paletteColors === undefined) {
@@ -168,7 +172,7 @@ class PaletteSystem {
             
             categorySprites.forEach((sprite, key) => {
                 const spriteName = key.split('/')[1];
-                if (!spriteName) {
+                if (spriteName === undefined) {
                     throw new Error(`Invalid sprite key format: ${key}`);
                 }
                 allSprites[spriteName] = sprite.data;
