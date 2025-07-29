@@ -65,6 +65,7 @@ async function runTest() {
             if (!entityManager) return null;
             
             const platforms = entityManager.getPlatforms();
+            // x=320の位置には1つのFallingFloorのみ存在するため、x座標のみで特定可能
             const floor = platforms.find(p => 
                 p.constructor.name === 'FallingFloor' && 
                 Math.abs(p.x - 320) < 5
@@ -95,7 +96,7 @@ async function runTest() {
         
         // より高い位置の落ちる床を選択（Y=8の位置）
         const targetFloor = fallingFloors.find(f => f.y === 128) || fallingFloors[4];  // Y=8*16=128
-        const originalY = targetFloor.y;
+        const initialFloorY = targetFloor.y;  // 床の初期Y座標を記録（落下チェック用）
         console.log('Target floor position:', targetFloor.x, targetFloor.y);
         
         // プレイヤーはスポーン位置(20,6)から自動的に落下する
@@ -200,7 +201,7 @@ async function runTest() {
             if (!entityManager) return null;
             
             const platforms = entityManager.getPlatforms();
-            // ターゲットの床を座標で特定（x=320, y=128）
+            // ターゲットの床を座標で特定（x=320の位置には1つのFallingFloorのみ存在）
             const floor = platforms.find(p => 
                 p.constructor.name === 'FallingFloor' && 
                 Math.abs(p.x - 320) < 5
@@ -219,6 +220,7 @@ async function runTest() {
         t.assert(floorFalling.state === 'falling', 'Floor should be falling');
         t.assert(floorFalling.gravity === true, 'Floor should have gravity enabled');
         t.assert(floorFalling.solid === false, 'Floor should not be solid when falling');
+        t.assert(floorFalling.y > initialFloorY, `Floor should have fallen from its initial position (y=${initialFloorY})`);
         
         // プレイヤーも落下することを確認
         await t.wait(500);
