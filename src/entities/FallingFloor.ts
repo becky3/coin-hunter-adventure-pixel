@@ -14,16 +14,11 @@ export class FallingFloor extends Entity implements EntityInitializer {
     private state: 'stable' | 'shaking' | 'falling';
     private stateTimer: number;
     
-    private originalX: number;
-    private originalY: number;
-    
-    
     private shakeAmplitude: number;
     private shakeFrequency: number;
     private shakeOffset: number;
     
     public physicsSystem: PhysicsSystem | null;
-    private entityManager: EntityManager | null;
     
     /**
      * Factory method to create a FallingFloor instance
@@ -45,9 +40,6 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.state = 'stable';
         this.stateTimer = 0;
         
-        this.originalX = x;
-        this.originalY = y;
-        
         this.gravity = false;
         this.physicsEnabled = true;
         this.solid = config.physics.solid;
@@ -60,7 +52,6 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.shakeOffset = 0;
         
         this.physicsSystem = null;
-        this.entityManager = null;
         
         this.setAnimation('normal');
     }
@@ -176,9 +167,6 @@ export class FallingFloor extends Entity implements EntityInitializer {
     reset(x: number, y: number): void {
         super.reset(x, y);
         
-        this.originalX = x;
-        this.originalY = y;
-        
         this.state = 'stable';
         this.stateTimer = 0;
         this.shakeOffset = 0;
@@ -200,7 +188,6 @@ export class FallingFloor extends Entity implements EntityInitializer {
      * Initialize this falling floor in the EntityManager
      */
     initializeInManager(manager: EntityManager): void {
-        this.entityManager = manager;
         this.physicsSystem = manager.getPhysicsSystem();
         manager.addPlatform(this);
     }

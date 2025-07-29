@@ -17,18 +17,14 @@ export interface EventCoordinatorConfig {
 export class EventCoordinator {
     private eventBus: EventBus;
     private entityManager: EntityManager;
-    private levelManager: LevelManager;
     private onStageClear: () => void;
-    private onGameOver: () => void;
     
     private listeners: Array<{ event: string; handler: (data: unknown) => void }> = [];
     
     constructor(config: EventCoordinatorConfig) {
         this.eventBus = config.eventBus;
         this.entityManager = config.entityManager;
-        this.levelManager = config.levelManager;
         this.onStageClear = config.onStageClear;
-        this.onGameOver = config.onGameOver;
         
         this.setupEventListeners();
     }

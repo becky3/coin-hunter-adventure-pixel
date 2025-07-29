@@ -8,7 +8,6 @@ export class ShieldEffectVisual {
     private player: Player;
     private blinkTimer: number = 0;
     private showShield: boolean = true;
-    private isBreaking: boolean = false;
     private blinkSpeed: number = 0.2;
 
     constructor(player: Player) {
@@ -16,7 +15,6 @@ export class ShieldEffectVisual {
     }
 
     setBreaking(breaking: boolean): void {
-        this.isBreaking = breaking;
         this.blinkSpeed = breaking ? 0.1 : 0.2;
     }
 

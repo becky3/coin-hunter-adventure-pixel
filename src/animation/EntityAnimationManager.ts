@@ -19,7 +19,6 @@ export class EntityAnimationManager {
     private palette: EntityPaletteDefinition;
     private currentState: string = 'idle';
     private currentVariant: string = 'default';
-    private lastUpdateTime: number = 0;
     private animationDefinitions: AnimationDefinition[] = [];
     private spritesLoaded: boolean = false;
     private loadingPromise: Promise<void> | null = null;

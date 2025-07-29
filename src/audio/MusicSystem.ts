@@ -37,7 +37,6 @@ export class MusicSystem {
     private audioContext: AudioContext | null;
     private masterGain: GainNode | null;
     private _isInitialized: boolean;
-    private listeners: Map<string, Array<(data: unknown) => void>>;
 
     private currentBGM: BGMType;
 
@@ -53,15 +52,11 @@ export class MusicSystem {
     private currentMusicConfig: MusicConfig | null;
     private patternLoopTimeout: NodeJS.Timeout | null;
     
-    private skipAudioContext: boolean;
-    
-    
     constructor() {
 
         this.audioContext = null;
         this.masterGain = null;
         this._isInitialized = false;
-        this.listeners = new Map();
 
         this.currentBGM = null;
 
@@ -76,7 +71,6 @@ export class MusicSystem {
         
         this.currentMusicConfig = null;
         this.patternLoopTimeout = null;
-        this.skipAudioContext = false;
     }
     
     get isInitialized(): boolean {
@@ -95,7 +89,6 @@ export class MusicSystem {
         
         if (options.skipAudioContext) {
             Logger.log('MusicSystem: Skipping AudioContext initialization');
-            this.skipAudioContext = true;
             this._isInitialized = true;
             return true;
         }

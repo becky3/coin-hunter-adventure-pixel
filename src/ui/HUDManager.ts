@@ -190,14 +190,6 @@ export class HUDManager {
         renderer.drawTextCentered('PRESS Q TO QUIT', GAME_RESOLUTION.WIDTH / 2, GAME_RESOLUTION.HEIGHT / 2 + 16, UI_PALETTE_INDICES.primaryText);
     }
 
-    private renderHorizontalBorder(renderer: PixelRenderer, y: number): void {
-        const blackPattern = this.createSolidPattern(1);
-        const blackColor = UI_PALETTE_INDICES.background;
-        
-        for (let x = 0; x < GAME_RESOLUTION.WIDTH; x += 8) {
-            this.drawPatternTile(renderer, x, y - 2, blackPattern, blackColor);
-        }
-    }
 
     private renderBoxBorder(renderer: PixelRenderer, x: number, y: number, width: number, height: number): void {
         const blackPattern = this.createSolidPattern(1);

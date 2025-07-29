@@ -1,6 +1,5 @@
 
 
-import { ServiceLocator } from '../services/ServiceLocator';
 import { GAME_CONSTANTS } from '../config/GameConstants';
 import { PlayState } from '../states/PlayState';
 import { URLParams } from '../utils/urlParams';
@@ -14,7 +13,6 @@ import { LevelLoader } from '../levels/LevelLoader';
  * DebugOverlay implementation
  */
 export class DebugOverlay {
-    private serviceLocator: ServiceLocator;
     private debugElement?: HTMLDivElement;
     private statsElements: Map<string, HTMLElement> = new Map();
     
@@ -30,8 +28,7 @@ export class DebugOverlay {
     private performanceMonitor: PerformanceMonitor;
     private showPerformanceDetails: boolean = false;
     
-    constructor(serviceLocator: ServiceLocator) {
-        this.serviceLocator = serviceLocator;
+    constructor() {
         this.performanceMonitor = PerformanceMonitor.getInstance();
     }
 
@@ -44,7 +41,7 @@ export class DebugOverlay {
             this.debugElement.style.display = 'block';
         }
         
-        this.enemySpawnDialog = new EnemySpawnDialog(this.serviceLocator);
+        this.enemySpawnDialog = new EnemySpawnDialog();
         this.enemySpawnDialog.init();
         
         (window as Window & { debugOverlay?: DebugOverlay }).debugOverlay = this;

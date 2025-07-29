@@ -70,7 +70,6 @@ export class PerformanceMonitor {
     private static instance: PerformanceMonitor | null = null;
     private metrics: PerformanceMetrics[] = [];
     private maxMetricsHistory = 60;
-    private lastFrameTime = 0;
     private lastRealFrameTime = 0;
     private frameCount = 0;
     private fpsUpdateInterval = 1000;
@@ -345,7 +344,7 @@ export class PerformanceMonitor {
         }
     }
     
-    private trackPixelMetrics(type: string, x: number, y: number, width: number, height: number): void {
+    private trackPixelMetrics(_type: string, x: number, y: number, width: number, height: number): void {
         if (!this.renderer) return;
         
         const scale = this.renderer.scale;
@@ -380,7 +379,6 @@ export class PerformanceMonitor {
         this.resetCanvasOperations();
         this.resetPixelMetrics();
         this.resetLayerMetrics();
-        this.lastFrameTime = performance.now();
     }
     
     startLayer(layer: keyof typeof this.currentLayerMetrics): void {

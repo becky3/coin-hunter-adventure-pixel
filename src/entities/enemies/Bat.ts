@@ -16,16 +16,12 @@ export class Bat extends Enemy implements EntityInitializer {
     public spriteKey: string;
     private batState: BatState;
     private detectionRange: number;
-    private waveSpeed: number;
-    private waveAmplitude: number;
-    private initialY: number;
     private flyTime: number;
     private baseSpeed: number;
     private loggedNoPlayer?: boolean;
     private lastLogTime?: number;
     private lastUpdateCheck?: boolean;
     declare friction: number;
-    private originalPhysicsEnabled: boolean = true;
     private initialX: number;
     private patrolRange: number;
     public readonly oneCycleDuration: number;
@@ -61,9 +57,6 @@ export class Bat extends Enemy implements EntityInitializer {
         this.batState = 'hanging';
         
         this.detectionRange = batConfig.ai.detectRange;
-        this.waveSpeed = 2;
-        this.waveAmplitude = 20;
-        this.initialY = y;
         this.initialX = x;
         this.flyTime = 0;
         this.baseSpeed = 60;
