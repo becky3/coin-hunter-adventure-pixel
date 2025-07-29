@@ -33,6 +33,7 @@ export class GameCore {
     private _serviceLocator: ServiceLocator;
     private gameLoop: GameLoop;
     private debugOverlay?: DebugOverlay;
+    public renderer?: PixelRenderer;
     
     constructor() {
         this._serviceLocator = ServiceLocator.getInstance();
@@ -93,8 +94,12 @@ export class GameCore {
         
         (window as Window & { PerformanceMonitor?: typeof PerformanceMonitor }).PerformanceMonitor = PerformanceMonitor;
         
+        const urlParams = new URLParams();
+        const isDebugMode = urlParams.isDebugMode();
+        renderer.setDebugMode(isDebugMode);
+        
         this.debugOverlay = new DebugOverlay();
-        await this.debugOverlay.init();
+        await this.debugOverlay.init(isDebugMode);
         const debugOverlayEndTime = performance.now();
         recordPhase('Debug overlay init', debugOverlayStartTime, debugOverlayEndTime);
 
@@ -222,6 +227,8 @@ export class GameCore {
         
         const systemManager = this._serviceLocator.get<SystemManager>(ServiceNames.SYSTEM_MANAGER);
         const stateManager = this._serviceLocator.get<GameStateManager>(ServiceNames.GAME_STATE_MANAGER);
+        
+        this.renderer = this._serviceLocator.get<PixelRenderer>(ServiceNames.RENDERER);
 
         const performanceMonitor = PerformanceMonitor.getInstance();
         

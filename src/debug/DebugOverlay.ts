@@ -8,6 +8,7 @@ import type { StateEvent } from '../states/GameStateManager';
 import { EnemySpawnDialog } from './EnemySpawnDialog';
 import { PerformanceMonitor } from '../performance/PerformanceMonitor';
 import { LevelLoader } from '../levels/LevelLoader';
+import type { PixelRenderer } from '../rendering/PixelRenderer';
 
 /**
  * DebugOverlay implementation
@@ -27,18 +28,19 @@ export class DebugOverlay {
     private enemySpawnDialog?: EnemySpawnDialog;
     private performanceMonitor: PerformanceMonitor;
     private showPerformanceDetails: boolean = false;
+    private renderer?: PixelRenderer;
     
     constructor() {
         this.performanceMonitor = PerformanceMonitor.getInstance();
     }
 
-    async init(): Promise<void> {
+    async init(isDebugMode: boolean = false): Promise<void> {
         await this.loadStageList();
         this.createDebugUI();
         this.setupEventListeners();
         
         if (this.debugElement) {
-            this.debugElement.style.display = 'block';
+            this.debugElement.style.display = isDebugMode ? 'block' : 'none';
         }
         
         this.enemySpawnDialog = new EnemySpawnDialog();
@@ -47,6 +49,11 @@ export class DebugOverlay {
         (window as Window & { debugOverlay?: DebugOverlay }).debugOverlay = this;
         
         this.lastFPSUpdate = performance.now();
+        
+        const game = (window as Window & { game?: { renderer?: PixelRenderer } }).game;
+        if (game?.renderer) {
+            this.renderer = game.renderer;
+        }
         
         Logger.log('DebugOverlay', `Initialized with stage: ${this.stageList[this.selectedStageIndex]} (index: ${this.selectedStageIndex})`);
     }
@@ -297,8 +304,22 @@ export class DebugOverlay {
 
     private toggleVisibility(): void {
         if (this.debugElement) {
-            this.debugElement.style.display = 
-                this.debugElement.style.display === 'none' ? 'block' : 'none';
+            const isVisible = this.debugElement.style.display !== 'none';
+            const newVisibility = !isVisible;
+            
+            this.debugElement.style.display = newVisibility ? 'block' : 'none';
+            
+            if (!this.renderer) {
+                const game = (window as Window & { game?: { renderer?: PixelRenderer } }).game;
+                if (game?.renderer) {
+                    this.renderer = game.renderer;
+                }
+            }
+            
+            if (this.renderer) {
+                this.renderer.setDebugMode(newVisibility);
+                Logger.log('DebugOverlay', `Debug mode: ${newVisibility ? 'ON' : 'OFF'}`);
+            }
         }
     }
     
