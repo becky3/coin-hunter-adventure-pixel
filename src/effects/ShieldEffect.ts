@@ -30,7 +30,7 @@ export class ShieldEffectVisual {
         if (!this.showShield) return;
         
         if (!renderer.pixelArtRenderer) {
-            throw new Error('[ShieldEffect] pixelArtRenderer is not available');
+            throw new Error('[ShieldEffect] pixelArtRenderer is not available. Ensure that the renderer is properly initialized and that pixelArtRenderer is defined.');
         }
         
         const leftX = this.player.x - 10;
@@ -54,7 +54,8 @@ export class ShieldEffectVisual {
                 0
             );
         } catch (error) {
-            throw new Error('[ShieldEffect] Failed to draw shield sprites: ' + error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            throw new Error(`[ShieldEffect] Failed to draw shield sprites: ${errorMessage}`);
         }
     }
 }
