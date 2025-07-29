@@ -115,6 +115,9 @@ export class HUDManager {
         
         ctx.imageSmoothingEnabled = false;
         const blackColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.background];
+        if (!blackColor) {
+            throw new Error(`Invalid UI background color index: ${UI_PALETTE_INDICES.background}`);
+        }
         ctx.fillStyle = blackColor;
         ctx.fillRect(0, 0, menuWidth, menuHeight);
     }
@@ -250,7 +253,8 @@ export class HUDManager {
             for (let py = 0; py < tileSize; py++) {
                 for (let px = 0; px < tileSize; px++) {
                     const idx = (py * tileSize + px) * 4;
-                    if (pattern[py][px] === 1) {
+                    const row = pattern[py];
+                    if (row && row[px] === 1) {
                         data[idx] = r;
                         data[idx + 1] = g;
                         data[idx + 2] = b;

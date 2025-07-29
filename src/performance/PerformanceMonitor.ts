@@ -529,6 +529,9 @@ export class PerformanceMonitor {
         if (!this.enabled || !this.showOverlay || this.metrics.length === 0) return;
 
         const latest = this.metrics[this.metrics.length - 1];
+        if (!latest) {
+            return;
+        }
         const x = 5;
         let y = 35;
         const lineHeight = 10;
@@ -579,6 +582,9 @@ export class PerformanceMonitor {
         for (let i = 1; i < this.metrics.length; i++) {
             const prev = this.metrics[i - 1];
             const curr = this.metrics[i];
+            if (!prev || !curr) {
+                continue;
+            }
             
             const x1 = x + (i - 1) * step;
             const x2 = x + i * step;
@@ -603,7 +609,9 @@ export class PerformanceMonitor {
     }
 
     getLatestMetrics(): PerformanceMetrics | null {
-        return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] : null;
+        if (this.metrics.length === 0) return null;
+        const latest = this.metrics[this.metrics.length - 1];
+        return latest !== undefined ? latest : null;
     }
 
     getAverageMetrics(): PerformanceMetrics | null {

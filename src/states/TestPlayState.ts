@@ -50,16 +50,24 @@ export class TestPlayState implements GameState {
         for (let y = 0; y < 15; y++) {
             this.tileMap[y] = [];
             for (let x = 0; x < 16; x++) {
-
-                this.tileMap[y][x] = (y >= 13) ? 1 : 0;
+                const row = this.tileMap[y];
+                if (row) {
+                    row[x] = (y >= 13) ? 1 : 0;
+                }
             }
         }
 
-        this.tileMap[10][3] = 1;
-        this.tileMap[10][4] = 1;
-        this.tileMap[8][6] = 1;
-        this.tileMap[8][7] = 1;
-        this.tileMap[8][8] = 1;
+        const row10 = this.tileMap[10];
+        const row8 = this.tileMap[8];
+        if (row10) {
+            row10[3] = 1;
+            row10[4] = 1;
+        }
+        if (row8) {
+            row8[6] = 1;
+            row8[7] = 1;
+            row8[8] = 1;
+        }
     }
     
     update(): void {
@@ -89,9 +97,9 @@ export class TestPlayState implements GameState {
         const tileY = Math.floor(nextY / TILE_SIZE);
         const tileX = Math.floor((this.player.x + this.player.width/2) / TILE_SIZE);
         
-        if (tileY >= 0 && tileY < this.tileMap.length && 
-            tileX >= 0 && tileX < this.tileMap[0].length) {
-            if (this.tileMap[tileY][tileX] === 1) {
+        if (tileY >= 0 && tileY < this.tileMap.length && tileX >= 0) {
+            const tileRow = this.tileMap[tileY];
+            if (tileRow && tileX < tileRow.length && tileRow[tileX] === 1) {
                 this.player.y = (tileY * TILE_SIZE) - this.player.height;
                 this.player.vy = 0;
                 this.player.grounded = true;
@@ -109,8 +117,11 @@ export class TestPlayState implements GameState {
         renderer.clear(0, 0);
 
         for (let y = 0; y < this.tileMap.length; y++) {
-            for (let x = 0; x < this.tileMap[y].length; x++) {
-                if (this.tileMap[y][x] === 1) {
+            const tileRow = this.tileMap[y];
+            if (!tileRow) continue;
+            
+            for (let x = 0; x < tileRow.length; x++) {
+                if (tileRow[x] === 1) {
                     renderer.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, 0x61);
                 }
             }

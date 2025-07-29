@@ -84,6 +84,9 @@ export class EntityAnimationManager {
             
             const category = parts.slice(0, -1).join('/');
             const name = parts[parts.length - 1];
+            if (!name) {
+                throw new Error(`Invalid sprite path: ${path}`);
+            }
             
             const sprite = await assetLoader.loadSprite(category, name);
             
@@ -189,11 +192,13 @@ export class EntityAnimationManager {
     ): void {
         for (let py = 0; py < sprite.height; py++) {
             for (let px = 0; px < sprite.width; px++) {
-                const colorIndex = sprite.data[py][px];
+                const row = sprite.data[py];
+                if (!row) continue;
+                const colorIndex = row[px];
                 
                 if (colorIndex === 0) continue;
                 
-                const masterIndex = palette.colors[colorIndex];
+                const masterIndex = colorIndex !== undefined ? palette.colors[colorIndex] : undefined;
                 if (masterIndex === null) continue;
                 
                 const color = MasterPalette.getColor(masterIndex);

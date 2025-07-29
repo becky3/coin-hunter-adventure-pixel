@@ -35,6 +35,7 @@
     "noFallthroughCasesInSwitch": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
+    "noUncheckedIndexedAccess": true,
     
     // Skip Libraries
     "skipLibCheck": true,
