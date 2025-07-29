@@ -54,7 +54,7 @@ export class Spring extends Entity implements EntityInitializer {
         this.setAnimation('normal');
     }
 
-    onUpdate(deltaTime: number): void {
+    override onUpdate(deltaTime: number): void {
         if (this.cooldownFrames > 0) {
             this.cooldownFrames--;
         }
@@ -103,7 +103,7 @@ export class Spring extends Entity implements EntityInitializer {
         // TODO: Play sound effect
     }
 
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
         const compression = this.compression * 0.3;
@@ -117,7 +117,7 @@ export class Spring extends Entity implements EntityInitializer {
         renderer.ctx.restore();
     }
 
-    onCollision(collisionInfo?: CollisionInfo): boolean {
+    override onCollision(collisionInfo?: CollisionInfo): boolean {
         if (!collisionInfo) {
             Logger.warn('[Spring] onCollision called with no collisionInfo');
             return false;
@@ -142,7 +142,7 @@ export class Spring extends Entity implements EntityInitializer {
         return false;
     }
 
-    reset(x: number, y: number): void {
+    override reset(x: number, y: number): void {
         super.reset(x, y);
         this.compression = 0;
         this.triggered = false;
@@ -161,7 +161,7 @@ export class Spring extends Entity implements EntityInitializer {
     /**
      * Get animation definitions for spring
      */
-    protected getAnimationDefinitions(): AnimationDefinition[] {
+    protected override getAnimationDefinitions(): AnimationDefinition[] {
         return [
             {
                 id: 'normal',
@@ -181,7 +181,7 @@ export class Spring extends Entity implements EntityInitializer {
     /**
      * Get palette definition for spring
      */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
+    protected override getPaletteDefinition(): EntityPaletteDefinition {
         return {
             default: {
                 colors: [
@@ -194,7 +194,7 @@ export class Spring extends Entity implements EntityInitializer {
         };
     }
     
-    protected getSpritePaletteIndex(): number {
+    protected override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.TERRAIN_OBJECTS;
     }
 }

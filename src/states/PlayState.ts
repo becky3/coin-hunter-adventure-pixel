@@ -601,7 +601,7 @@ export class PlayState implements GameState {
         case 'POWER_GLOVE':
             return {
                 type: PowerUpType.POWER_GLOVE,
-                permanent: true,
+                duration: Infinity,
                 stackable: false,
                 effectProperties: {
                     bulletSpeed: 5,
@@ -612,7 +612,7 @@ export class PlayState implements GameState {
         case 'SHIELD_STONE':
             return {
                 type: PowerUpType.SHIELD_STONE,
-                permanent: true,
+                duration: Infinity,
                 stackable: false,
                 effectProperties: {
                     charges: 1
@@ -622,14 +622,14 @@ export class PlayState implements GameState {
         case 'WING_BOOTS':
             return {
                 type: PowerUpType.WING_BOOTS,
-                permanent: true,
+                duration: Infinity,
                 stackable: false
             };
                 
         case 'HEAVY_BOOTS':
             return {
                 type: PowerUpType.HEAVY_BOOTS,
-                permanent: true,
+                duration: Infinity,
                 stackable: false
             };
                 

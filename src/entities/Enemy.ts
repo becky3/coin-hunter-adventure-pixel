@@ -59,7 +59,7 @@ export class Enemy extends Entity {
     }
     
 
-    update(deltaTime: number): void {
+    override update(deltaTime: number): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0) {
@@ -193,7 +193,7 @@ export class Enemy extends Entity {
         this.facingRight = !this.facingRight;
     }
 
-    onCollision(collisionInfo?: CollisionInfo): void {
+    override onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo || !collisionInfo.other) return;
         
         Logger.log('[Enemy] onCollision called');
@@ -208,7 +208,7 @@ export class Enemy extends Entity {
     }
 
 
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
@@ -218,7 +218,7 @@ export class Enemy extends Entity {
         super.render(renderer);
     }
 
-    renderDebug(renderer: PixelRenderer): void {
+    override renderDebug(renderer: PixelRenderer): void {
         super.renderDebug(renderer);
         
         const barWidth = 20;

@@ -36,6 +36,8 @@
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
     
     // Skip Libraries
     "skipLibCheck": true,

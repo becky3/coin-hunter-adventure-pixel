@@ -38,16 +38,16 @@ export class GoalFlag extends Entity implements EntityInitializer {
         this.setAnimation('idle');
     }
 
-    onUpdate(_deltaTime: number): void {
+    override onUpdate(_deltaTime: number): void {
     }
 
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
         super.render(renderer);
     }
 
-    onCollision(collisionInfo?: CollisionInfo): boolean {
+    override onCollision(collisionInfo?: CollisionInfo): boolean {
         if (!collisionInfo || !collisionInfo.other) return false;
         
         if (collisionInfo.other.constructor.name === 'Player' && !this.cleared) {
@@ -64,7 +64,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
         this.cleared = true;
     }
 
-    reset(x: number, y: number): void {
+    override reset(x: number, y: number): void {
         super.reset(x, y);
         this.cleared = false;
     }
@@ -79,7 +79,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
     /**
      * Get animation definitions for goal flag
      */
-    protected getAnimationDefinitions(): AnimationDefinition[] {
+    protected override getAnimationDefinitions(): AnimationDefinition[] {
         return [
             {
                 id: 'idle',
@@ -93,7 +93,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
     /**
      * Get palette definition for goal flag
      */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
+    protected override getPaletteDefinition(): EntityPaletteDefinition {
         return {
             default: {
                 colors: [

@@ -40,7 +40,7 @@ export class ShieldStone extends PowerUpItem {
     protected createPowerUpConfig(): PowerUpConfig {
         return {
             type: PowerUpType.SHIELD_STONE,
-            permanent: true,
+            duration: Infinity,
             stackable: false,
             effectProperties: {
                 charges: 1

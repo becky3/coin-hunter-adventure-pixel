@@ -56,7 +56,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
         this.setAnimation('normal');
     }
     
-    onUpdate(deltaTime: number): void {
+    override onUpdate(deltaTime: number): void {
         switch (this.state) {
         case 'stable':
             break;
@@ -131,7 +131,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
     }
     
     
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
         if (this.state === 'shaking') {
@@ -146,7 +146,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
         }
     }
     
-    onCollision(collisionInfo?: CollisionInfo): boolean {
+    override onCollision(collisionInfo?: CollisionInfo): boolean {
         Logger.log(`[FallingFloor] onCollision called at (${this.x}, ${this.y}), state=${this.state}`);
         
         if (!collisionInfo || this.state !== 'stable') {
@@ -164,7 +164,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
         return false;
     }
     
-    reset(x: number, y: number): void {
+    override reset(x: number, y: number): void {
         super.reset(x, y);
         
         this.state = 'stable';
@@ -195,7 +195,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
     /**
      * Get animation definitions for falling floor
      */
-    protected getAnimationDefinitions(): AnimationDefinition[] {
+    protected override getAnimationDefinitions(): AnimationDefinition[] {
         return [
             {
                 id: 'normal',
@@ -224,7 +224,7 @@ export class FallingFloor extends Entity implements EntityInitializer {
     /**
      * Get palette definition for falling floor
      */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
+    protected override getPaletteDefinition(): EntityPaletteDefinition {
         return {
             default: {
                 colors: [

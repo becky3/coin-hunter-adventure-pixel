@@ -53,7 +53,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         this.setAnimation('idle');
     }
 
-    onUpdate(deltaTime: number): void {
+    override onUpdate(deltaTime: number): void {
         this.lifeTime += deltaTime * 1000;
         this.animationTime += deltaTime * 1000;
         
@@ -76,13 +76,13 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         }
     }
 
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.visible) return;
         
         super.render(renderer);
     }
 
-    onCollision(collisionInfo?: CollisionInfo): void {
+    override onCollision(collisionInfo?: CollisionInfo): void {
         if (!collisionInfo) {
             Logger.warn('[EnergyBullet] onCollision called with no collisionInfo');
             return;
@@ -108,7 +108,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         }
     }
 
-    destroy(): void {
+    override destroy(): void {
         if (this.destroyed) return;
         
         this.destroyed = true;
@@ -133,7 +133,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     /**
      * Get animation definitions for energy bullet
      */
-    protected getAnimationDefinitions(): AnimationDefinition[] {
+    protected override getAnimationDefinitions(): AnimationDefinition[] {
         return [
             {
                 id: 'idle',
@@ -147,7 +147,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     /**
      * Get palette definition for energy bullet
      */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
+    protected override getPaletteDefinition(): EntityPaletteDefinition {
         return {
             default: {
                 colors: [

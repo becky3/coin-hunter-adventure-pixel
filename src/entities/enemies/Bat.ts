@@ -75,7 +75,7 @@ export class Bat extends Enemy implements EntityInitializer {
         this.setAnimation('hang');
     }
     
-    protected updateAI(deltaTime: number): void {
+    protected override updateAI(deltaTime: number): void {
         if (this.state === 'dead' || this.state === 'hurt') {
             return;
         }
@@ -175,14 +175,14 @@ export class Bat extends Enemy implements EntityInitializer {
         return null;
     }
 
-    onCollisionWithWall(): void {
+    override onCollisionWithWall(): void {
         if (this.batState === 'flying') {
             this.direction *= -1;
             this.facingRight = !this.facingRight;
         }
     }
 
-    update(deltaTime: number): void {
+    override update(deltaTime: number): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0) {
@@ -200,7 +200,7 @@ export class Bat extends Enemy implements EntityInitializer {
     }
     
     
-    render(renderer: PixelRenderer): void {
+    override render(renderer: PixelRenderer): void {
         if (!this.active) return;
         
         if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
@@ -233,7 +233,7 @@ export class Bat extends Enemy implements EntityInitializer {
     /**
      * Get animation definitions for bat
      */
-    protected getAnimationDefinitions(): AnimationDefinition[] {
+    protected override getAnimationDefinitions(): AnimationDefinition[] {
         return [
             {
                 id: 'hang',
@@ -253,7 +253,7 @@ export class Bat extends Enemy implements EntityInitializer {
     /**
      * Get palette definition for bat
      */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
+    protected override getPaletteDefinition(): EntityPaletteDefinition {
         return {
             default: {
                 colors: [

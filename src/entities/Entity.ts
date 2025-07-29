@@ -69,7 +69,7 @@ export abstract class Entity {
     public sprite: string | SpriteData | HTMLCanvasElement | ImageData | null;
     public spriteScale: number;
     
-    protected entityAnimationManager?: EntityAnimationManager;
+    protected entityAnimationManager!: EntityAnimationManager;
     
     protected eventBus: EventBus | null = null;
 
@@ -134,8 +134,7 @@ export abstract class Entity {
                 });
             }
         } catch (error) {
-            console.error(`[Entity] Failed to create EntityAnimationManager for ${this.constructor.name}:`, error);
-            this.entityAnimationManager = undefined;
+            throw new Error(`[Entity] Failed to create EntityAnimationManager for ${this.constructor.name}: ${error}`);
         }
     }
     
