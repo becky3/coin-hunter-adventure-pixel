@@ -50,10 +50,7 @@ export class DebugOverlay {
         
         this.lastFPSUpdate = performance.now();
         
-        const game = (window as Window & { game?: { renderer?: PixelRenderer } }).game;
-        if (game?.renderer) {
-            this.renderer = game.renderer;
-        }
+        this.getRendererFromWindow();
         
         Logger.log('DebugOverlay', `Initialized with stage: ${this.stageList[this.selectedStageIndex]} (index: ${this.selectedStageIndex})`);
     }
@@ -302,6 +299,16 @@ export class DebugOverlay {
         }
     }
 
+    private getRendererFromWindow(): PixelRenderer | undefined {
+        if (!this.renderer) {
+            const game = (window as Window & { game?: { renderer?: PixelRenderer } }).game;
+            if (game?.renderer) {
+                this.renderer = game.renderer;
+            }
+        }
+        return this.renderer;
+    }
+
     private toggleVisibility(): void {
         if (this.debugElement) {
             const isVisible = this.debugElement.style.display !== 'none';
@@ -309,15 +316,9 @@ export class DebugOverlay {
             
             this.debugElement.style.display = newVisibility ? 'block' : 'none';
             
-            if (!this.renderer) {
-                const game = (window as Window & { game?: { renderer?: PixelRenderer } }).game;
-                if (game?.renderer) {
-                    this.renderer = game.renderer;
-                }
-            }
-            
-            if (this.renderer) {
-                this.renderer.setDebugMode(newVisibility);
+            const renderer = this.getRendererFromWindow();
+            if (renderer) {
+                renderer.setDebugMode(newVisibility);
                 Logger.log('DebugOverlay', `Debug mode: ${newVisibility ? 'ON' : 'OFF'}`);
             }
         }
