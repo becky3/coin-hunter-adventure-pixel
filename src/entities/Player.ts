@@ -567,6 +567,7 @@ export class Player extends Entity {
     
     renderEffects(renderer: PixelRenderer): void {
         if (this.shieldVisual) {
+            Logger.log('[Player] Rendering shield visual');
             this.shieldVisual.render(renderer);
         }
     }
