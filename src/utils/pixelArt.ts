@@ -1,4 +1,3 @@
-import { paletteSystem } from './pixelArtPalette';
 
 type PixelData = number[][];
 type ColorMap = { [key: number]: string | null };
@@ -175,19 +174,6 @@ class PixelArtRenderer {
     }
 
 
-    drawStageDependentAnimation(name: string, x: number, y: number, currentTime: number, flipped = false, paletteIndex: number = 0): void {
-        const animData = this.stageDependentAnimations.get(name);
-        if (!animData) return;
-
-        const colors: ColorMap = {};
-        for (let i = 0; i < 4; i++) {
-            colors[i] = paletteSystem.getColor('sprite', paletteIndex, i);
-        }
-
-        const animation = new PixelArtAnimation(animData.frames, colors, animData.frameDuration);
-        animation.update(currentTime);
-        animation.draw(this.ctx, x, y, flipped);
-    }
 
     clear(): void {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
