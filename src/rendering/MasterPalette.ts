@@ -56,7 +56,11 @@ export class MasterPalette {
         if (!(index in this.colors)) {
             throw new Error(`[MasterPalette] Invalid color index 0x${index.toString(16).toUpperCase()}. Valid indices are: ${Object.keys(this.colors).map(k => '0x' + parseInt(k).toString(16).toUpperCase()).join(', ')}`);
         }
-        return this.colors[index];
+        const color = this.colors[index];
+        if (!color) {
+            throw new Error(`[MasterPalette] Color not found for index 0x${index.toString(16).toUpperCase()}`);
+        }
+        return color;
     }
 
     /**

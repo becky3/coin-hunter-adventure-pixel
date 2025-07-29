@@ -131,7 +131,15 @@ class PaletteSystem {
         const palette = this.currentStagePalette[type];
         if (!palette || !palette[paletteIndex]) return '#000000';
         
-        return palette[paletteIndex][colorIndex];
+        const paletteColors = palette[paletteIndex];
+        if (!paletteColors) {
+            throw new Error(`Invalid palette index: ${paletteIndex}`);
+        }
+        const color = paletteColors[colorIndex];
+        if (!color) {
+            throw new Error(`Invalid color index: ${colorIndex} in palette ${paletteIndex}`);
+        }
+        return color;
     }
 
     async loadSpriteData(category: string, name: string): Promise<number[][]> {
@@ -147,6 +155,9 @@ class PaletteSystem {
             
             categorySprites.forEach((sprite, key) => {
                 const spriteName = key.split('/')[1];
+                if (!spriteName) {
+                    throw new Error(`Invalid sprite key format: ${key}`);
+                }
                 allSprites[spriteName] = sprite.data;
             });
         }

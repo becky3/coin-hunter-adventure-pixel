@@ -487,11 +487,18 @@ export class PixelFont {
         color: string
     ): void {
         const charData = this.fontData[char];
+        if (!charData) {
+            throw new Error(`Character not found in font data: ${char}`);
+        }
         ctx.fillStyle = color;
 
         for (let row = 0; row < charData.length; row++) {
-            for (let col = 0; col < charData[row].length; col++) {
-                if (charData[row][col] === 1) {
+            const rowData = charData[row];
+            if (!rowData) {
+                throw new Error(`Invalid row data at index ${row} for character: ${char}`);
+            }
+            for (let col = 0; col < rowData.length; col++) {
+                if (rowData[col] === 1) {
                     ctx.fillRect(
                         x + col * scale,
                         y + row * scale,

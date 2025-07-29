@@ -75,7 +75,8 @@ export class GameController {
             const spawn = this.levelManager.getPlayerSpawn();
             
             const tileMap = this.levelManager.getTileMap();
-            if (tileMap && tileMap[spawn.y] && tileMap[spawn.y][spawn.x] === 1) {
+            const tileRow = tileMap ? tileMap[spawn.y] : undefined;
+            if (tileRow && tileRow[spawn.x] === 1) {
                 Logger.error(`[GameController] エラー: プレイヤーのスポーン位置(${spawn.x}, ${spawn.y})が地面の中です！`);
                 Logger.error(`[GameController] ステージ: ${levelName}`);
                 Logger.error('[GameController] 注意: スポーン座標はプレイヤーの左下（足元）の位置です');

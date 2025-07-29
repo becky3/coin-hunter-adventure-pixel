@@ -174,6 +174,9 @@ export class SoundTestState implements GameState {
     
     private handleAction(): void {
         const currentItem = this.menuItems[this.selectedRow];
+        if (!currentItem) {
+            throw new Error(`Invalid menu item at index: ${this.selectedRow}`);
+        }
         
         if (currentItem.type === 'quit') {
             if (this.game.musicSystem) {
@@ -187,7 +190,12 @@ export class SoundTestState implements GameState {
             return;
         }
         
-        const selectedName = currentItem.items[currentItem.currentIndex || 0].toLowerCase();
+        const selectedItemIndex = currentItem.currentIndex || 0;
+        const selectedItem = currentItem.items[selectedItemIndex];
+        if (!selectedItem) {
+            throw new Error(`Invalid item at index ${selectedItemIndex} for menu item type: ${currentItem.type}`);
+        }
+        const selectedName = selectedItem.toLowerCase();
         
         if (currentItem.type === 'bgm') {
             if (this.currentPlayingBGM === selectedName) {
@@ -233,10 +241,16 @@ export class SoundTestState implements GameState {
             if (item.type === 'bgm' && item.items && item.currentIndex !== undefined) {
                 renderer.drawText('BGM:', SoundTestState.UI_LAYOUT.BGM_LABEL_X, y, color);
                 const bgmName = item.items[item.currentIndex];
+                if (!bgmName) {
+                    throw new Error(`Invalid BGM item at index ${item.currentIndex}`);
+                }
                 renderer.drawText(bgmName, SoundTestState.UI_LAYOUT.BGM_VALUE_X, y, color);
             } else if (item.type === 'se' && item.items && item.currentIndex !== undefined) {
                 renderer.drawText('SE:', SoundTestState.UI_LAYOUT.SE_LABEL_X, y, color);
                 const seName = item.items[item.currentIndex];
+                if (!seName) {
+                    throw new Error(`Invalid SE item at index ${item.currentIndex}`);
+                }
                 renderer.drawText(seName, SoundTestState.UI_LAYOUT.SE_VALUE_X, y, color);
             } else if (item.type === 'quit') {
                 renderer.drawText('QUIT', SoundTestState.UI_LAYOUT.QUIT_X, y, color);

@@ -104,7 +104,11 @@ class PixelArtAnimation {
     }
 
     draw(ctx: CanvasRenderingContext2D, x: number, y: number, flipped = false, scale = 1): void {
-        this.frames[this.currentFrame].draw(ctx, x, y, flipped, scale);
+        const frame = this.frames[this.currentFrame];
+        if (!frame) {
+            throw new Error(`Invalid frame index: ${this.currentFrame}`);
+        }
+        frame.draw(ctx, x, y, flipped, scale);
     }
 
     reset(): void {

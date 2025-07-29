@@ -100,6 +100,8 @@ npm run test:claude
 **自動チェック**: コミット時に以下が自動実行されます
 
 - Lintチェック（コメントルール含む）
+- TypeScript型チェック（厳格モード）
+- ビルドチェック
 
 ### TypeScript型チェック
 
@@ -114,7 +116,10 @@ npm run typecheck:safe
 grep "TS2339" typecheck-output.log
 ```
 
-**注意**: `npm run typecheck 2>&1`のようなリダイレクトは使用しないでください。
+**注意**: 
+- `npm run typecheck 2>&1`のようなリダイレクトは使用しないでください
+- pre-commitフックで型チェックが実行されます（エラーがある場合コミットは失敗します）
+- すべての型エラーは解決済みです（2025-07-29時点）
 
 ### GitHub Copilotレビューへの対応
 
