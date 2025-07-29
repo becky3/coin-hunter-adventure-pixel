@@ -27,33 +27,34 @@ export class ShieldEffectVisual {
     }
 
     render(renderer: PixelRenderer): void {
-        if (!this.showShield || !renderer.pixelArtRenderer) return;
+        if (!this.showShield) return;
         
-        const leftSprite = renderer.pixelArtRenderer.sprites.get('effects/shield_left');
-        const rightSprite = renderer.pixelArtRenderer.sprites.get('effects/shield_right');
-        
-        if (!leftSprite || !rightSprite) return;
+        if (!renderer.pixelArtRenderer) {
+            throw new Error('[ShieldEffect] pixelArtRenderer is not available');
+        }
         
         const leftX = this.player.x - 10;
         const rightX = this.player.x + this.player.width + 2;
         const shieldY = this.player.y + this.player.height - 32;
         
-        const leftScreenPos = renderer.worldToScreen(leftX, shieldY);
-        leftSprite.draw(
-            renderer.ctx,
-            leftScreenPos.x,
-            leftScreenPos.y,
-            false,
-            renderer.scale
-        );
-        
-        const rightScreenPos = renderer.worldToScreen(rightX, shieldY);
-        rightSprite.draw(
-            renderer.ctx,
-            rightScreenPos.x,
-            rightScreenPos.y,
-            false,
-            renderer.scale
-        );
+        try {
+            renderer.drawSprite(
+                'effects/shield_left',
+                leftX,
+                shieldY,
+                false,
+                0
+            );
+            
+            renderer.drawSprite(
+                'effects/shield_right',
+                rightX,
+                shieldY,
+                false,
+                0
+            );
+        } catch (error) {
+            throw new Error('[ShieldEffect] Failed to draw shield sprites: ' + error);
+        }
     }
 }

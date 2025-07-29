@@ -29,6 +29,7 @@ export class ShieldEffect implements PowerUpEffect<Player> {
         
         Logger.log('[ShieldEffect] Created ShieldEffectVisual:', this.shieldVisual);
         target.setShieldVisual(this.shieldVisual);
+        Logger.log('[ShieldEffect] Shield visual set on player');
         
         target.takeDamage = (): boolean => {
             if (this.shieldActive) {
