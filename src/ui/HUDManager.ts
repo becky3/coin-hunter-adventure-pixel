@@ -1,7 +1,8 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { EventBus } from '../services/EventBus';
-import { UI_PALETTE_INDICES, paletteSystem } from '../utils/pixelArtPalette';
+import { UI_PALETTE_INDICES } from '../utils/pixelArtPalette';
+import { MasterPalette } from '../rendering/MasterPalette';
 
 
 export interface HUDData {
@@ -113,10 +114,7 @@ export class HUDManager {
         if (!ctx) return;
         
         ctx.imageSmoothingEnabled = false;
-        const blackColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.background];
-        if (blackColor === undefined) {
-            throw new Error(`Invalid UI background color index: ${UI_PALETTE_INDICES.background}`);
-        }
+        const blackColor = MasterPalette.getColor(UI_PALETTE_INDICES.background);
         ctx.fillStyle = blackColor;
         ctx.fillRect(0, 0, menuWidth, menuHeight);
     }
@@ -223,10 +221,7 @@ export class HUDManager {
     }
 
     private drawPatternTile(renderer: PixelRenderer, x: number, y: number, pattern: number[][], colorIndex: number): void {
-        const color = paletteSystem.masterPalette[colorIndex];
-        if (color === undefined) {
-            throw new Error(`Invalid color index: ${colorIndex}. Color not found in master palette.`);
-        }
+        const color = MasterPalette.getColor(colorIndex);
         const cacheKey = `${JSON.stringify(pattern)}_${color}`;
         let tileCanvas = this.patternTileCache.get(cacheKey);
         

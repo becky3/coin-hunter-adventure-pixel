@@ -1,5 +1,6 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
-import { GameState, GameStateManager } from './GameStateManager';
+import { GameStateManager } from './GameStateManager';
+import { BaseUIState } from './BaseUIState';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputSystem, InputEvent } from '../core/InputSystem';
 import { URLParams } from '../utils/urlParams';
@@ -22,9 +23,8 @@ interface Game {
 /**
  * Game state for menu mode
  */
-export class MenuState implements GameState {
+export class MenuState extends BaseUIState {
     public name = 'menu';
-    private game: Game;
     private selectedOption: number;
     private options: MenuOption[];
     private logoY: number;
@@ -33,12 +33,11 @@ export class MenuState implements GameState {
     private showHowTo: boolean;
     private showCredits: boolean;
     private titleAnimTimer: number;
-    private inputListeners: Array<() => void>;
     private _firstUpdateLogged: boolean = false;
     
 
     constructor(game: Game) {
-        this.game = game;
+        super(game);
         this.selectedOption = 0;
         this.options = [
             { text: 'START GAME', action: 'start' },
@@ -136,22 +135,9 @@ export class MenuState implements GameState {
             })
         );
         
-        this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
-                if (event.action === 'mute') {
-                    if (this.game.musicSystem) {
-                        this.game.musicSystem.toggleMute();
-                        this.game.musicSystem.playSEFromPattern('button');
-                    }
-                }
-            })
-        );
+        this.setupMuteListener();
     }
     
-    private removeInputListeners(): void {
-        this.inputListeners.forEach(removeListener => removeListener());
-        this.inputListeners = [];
-    }
     
     update(deltaTime: number): void {
         this.titleAnimTimer += deltaTime;

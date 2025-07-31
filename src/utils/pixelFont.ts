@@ -1,5 +1,6 @@
 
-import { UI_PALETTE_INDICES, paletteSystem } from './pixelArtPalette';
+import { UI_PALETTE_INDICES } from './pixelArtPalette';
+import { MasterPalette } from '../rendering/MasterPalette';
 
 export type FontData = { [key: string]: number[][] };
 
@@ -454,11 +455,7 @@ export class PixelFont {
         spacing: number | null = null
     ): void {
         if (!color) {
-            const defaultColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.primaryText];
-            if (defaultColor === undefined) {
-                throw new Error('Primary text color not found in master palette');
-            }
-            color = defaultColor;
+            color = MasterPalette.getColor(UI_PALETTE_INDICES.primaryText);
         }
 
         const savedSmoothing = ctx.imageSmoothingEnabled;
@@ -576,18 +573,10 @@ export class PixelFont {
         shadowOffset: number = 1
     ): void {
         if (!color) {
-            const primaryTextColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.primaryText];
-            if (primaryTextColor === undefined) {
-                throw new Error('Primary text color not found in master palette');
-            }
-            color = primaryTextColor;
+            color = MasterPalette.getColor(UI_PALETTE_INDICES.primaryText);
         }
         if (!shadowColor) {
-            const backgroundColor = paletteSystem.masterPalette[UI_PALETTE_INDICES.background];
-            if (backgroundColor === undefined) {
-                throw new Error('Background color not found in master palette');
-            }
-            shadowColor = backgroundColor;
+            shadowColor = MasterPalette.getColor(UI_PALETTE_INDICES.background);
         }
 
         this.drawText(ctx, text, x + shadowOffset * scale, y + shadowOffset * scale, scale, shadowColor);

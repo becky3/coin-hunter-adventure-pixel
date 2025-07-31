@@ -46,10 +46,14 @@
     "jscpd": "^4.0.5",
     "node-fetch": "^3.3.2",
     "puppeteer": "^24.10.2",
+    "simple-git-hooks": "^2.13.1",
     "typescript": "^5.8.3",
     "vite": "^4.4.0"
   },
   "dependencies": {
     "playwright": "^1.53.1"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npm run lint && npm run typecheck && npm run jscpd:check"
   }
 }

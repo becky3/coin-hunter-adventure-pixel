@@ -1,5 +1,6 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
-import { GameState, GameStateManager } from './GameStateManager';
+import { GameStateManager } from './GameStateManager';
+import { BaseUIState } from './BaseUIState';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputSystem, InputEvent } from '../core/InputSystem';
 import { MusicSystem } from '../audio/MusicSystem';
@@ -22,12 +23,10 @@ interface MenuItem {
 /**
  * Game state for sound test mode
  */
-export class SoundTestState implements GameState {
+export class SoundTestState extends BaseUIState {
     public name = 'soundtest';
-    private game: Game;
     private selectedRow: number;
     private menuItems: MenuItem[];
-    private inputListeners: Array<() => void>;
     private currentPlayingBGM: string | null;
     
     private static readonly SE_MAP: { [key: string]: string } = {
@@ -61,7 +60,7 @@ export class SoundTestState implements GameState {
     };
     
     constructor(game: Game) {
-        this.game = game;
+        super(game);
         this.selectedRow = 0;
         this.menuItems = [
             {
@@ -117,16 +116,7 @@ export class SoundTestState implements GameState {
             })
         );
         
-        this.inputListeners.push(
-            this.game.inputSystem.on('keyPress', (event: InputEvent) => {
-                if (event.action === 'mute') {
-                    if (this.game.musicSystem) {
-                        this.game.musicSystem.toggleMute();
-                        this.game.musicSystem.playSEFromPattern('button');
-                    }
-                }
-            })
-        );
+        this.setupMuteListener();
     }
     
     private handleVerticalNavigation(direction: 'up' | 'down'): void {
@@ -214,10 +204,6 @@ export class SoundTestState implements GameState {
         }
     }
     
-    private removeInputListeners(): void {
-        this.inputListeners.forEach(removeListener => removeListener());
-        this.inputListeners = [];
-    }
     
     update(_deltaTime: number): void {
     }

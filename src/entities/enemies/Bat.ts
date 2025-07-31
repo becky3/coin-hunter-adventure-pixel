@@ -183,20 +183,7 @@ export class Bat extends Enemy implements EntityInitializer {
     }
 
     override update(deltaTime: number): void {
-        if (!this.active) return;
-        
-        if (this.invincibleTime > 0) {
-            this.invincibleTime -= deltaTime * 1000;
-        }
-        
-        if (this.stateTimer > 0) {
-            this.stateTimer -= deltaTime * 1000;
-        }
-        
-        this.updateAI(deltaTime);
-        
-        this.updateAnimation(deltaTime);
-        this.onUpdate(deltaTime);
+        super.update(deltaTime);
     }
     
     
