@@ -3,8 +3,8 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputSystem, InputEvent } from '../core/InputSystem';
 import { MusicSystem } from '../audio/MusicSystem';
 
-interface Game {
-    renderer?: PixelRenderer;
+export interface Game {
+    renderer: PixelRenderer;
     inputSystem: InputSystem;
     musicSystem?: MusicSystem;
     stateManager: GameStateManager;

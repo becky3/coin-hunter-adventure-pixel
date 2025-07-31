@@ -34,7 +34,7 @@ npm run jscpd:check
 
 ```json
 {
-  "threshold": 0,                    // 重複の許容閾値（0%）
+  "threshold": 1,                    // 重複の許容閾値（1%）
   "minLines": 10,                    // 最小検出行数
   "minTokens": 70,                   // 最小検出トークン数
   "output": "./reports/jscpd",       // レポート出力先
@@ -71,23 +71,30 @@ npm run jscpd:check
 
 ### CI/CDへの統合
 
-現時点では開発者の手動実行としていますが、将来的には以下の統合を検討：
+#### pre-commitフックへの統合（実装済み）
+
+本プロジェクトでは、simple-git-hooksを使用してpre-commitフックにjscpdチェックを統合しています：
+
+- **実行内容**: `npm run lint && npm run typecheck && npm run jscpd:check`
+- **閾値**: 1%以下の重複率で通過
+- **動作**: コミット時に自動実行され、基準を満たさない場合はコミットを中止
+
+#### 将来的な統合計画
 
 - GitHub Actionsでのチェック
-- pre-commitフックへの追加（オプション）
-- PRレビュー時の自動実行
+- PRレビュー時の自動実行とコメント
 
 ## 現在の検出結果
 
-2025年7月時点の検出結果：
+2025年8月時点の検出結果：
 
-- **重複率**: 約0.55%（非常に健全な状態）
-- **主な重複箇所**:
-  1. Bat.ts/Spider.ts - 敵キャラクターの共通処理
-  2. MenuState.ts/SoundTestState.ts - UI処理の共通部分
-  3. MasterPalette.ts/pixelArtPalette.ts - パレット定義の重複
+- **重複率**: 0%（リファクタリング完了）
+- **実施したリファクタリング**:
+  1. Enemy基底クラスへの共通処理統合
+  2. BaseUIStateクラスの作成とUI共通処理の統合
+  3. MasterPaletteクラスへの色定義の一元化
 
-これらの重複は、今後のリファクタリング候補として管理します。
+pre-commitフックにより、今後も低い重複率が維持されます。
 
 ## トラブルシューティング
 

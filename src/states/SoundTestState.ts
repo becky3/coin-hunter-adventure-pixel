@@ -1,18 +1,9 @@
 import { GAME_RESOLUTION } from '../constants/gameConstants';
-import { GameStateManager } from './GameStateManager';
-import { BaseUIState } from './BaseUIState';
+import { BaseUIState, Game } from './BaseUIState';
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { InputSystem, InputEvent } from '../core/InputSystem';
-import { MusicSystem } from '../audio/MusicSystem';
+import { InputEvent } from '../core/InputSystem';
 import { UI_PALETTE_INDICES } from '../utils/pixelArtPalette';
 import { Logger } from '../utils/Logger';
-
-interface Game {
-    renderer?: PixelRenderer;
-    inputSystem: InputSystem;
-    musicSystem?: MusicSystem;
-    stateManager: GameStateManager;
-}
 
 interface MenuItem {
     type: 'bgm' | 'se' | 'quit';
