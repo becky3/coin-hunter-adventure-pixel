@@ -1,0 +1,24 @@
+{
+  "threshold": 0,
+  "reporters": ["html", "console"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/tests/**",
+    "**/old_project_achive/**",
+    "**/*.config.js",
+    "**/*.config.ts",
+    "**/bundledData.ts",
+    "**/spriteData.ts",
+    "**/pixelFont.ts"
+  ],
+  "format": ["typescript", "javascript"],
+  "absolute": true,
+  "minLines": 10,
+  "minTokens": 70,
+  "output": "./reports/jscpd",
+  "silent": false,
+  "exitCode": 0
+}

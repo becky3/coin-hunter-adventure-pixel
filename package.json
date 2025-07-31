@@ -19,7 +19,9 @@
     "typecheck:safe": "./scripts/typecheck.sh",
     "check:deps": "npx depcheck",
     "test:claude": "./scripts/claude-test.sh",
-    "test:before-push": "npm run lint && node tests/e2e/run-tests-parallel.cjs"
+    "test:before-push": "npm run lint && node tests/e2e/run-tests-parallel.cjs",
+    "jscpd": "jscpd",
+    "jscpd:check": "jscpd --exitCode 1"
   },
   "keywords": [
     "game",
@@ -41,6 +43,7 @@
     "eslint-plugin-local-rules": "^3.0.2",
     "glob": "^11.0.3",
     "jest": "^29.7.0",
+    "jscpd": "^4.0.5",
     "node-fetch": "^3.3.2",
     "puppeteer": "^24.10.2",
     "typescript": "^5.8.3",

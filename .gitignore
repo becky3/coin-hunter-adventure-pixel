@@ -48,3 +48,6 @@ Thumbs.db
 # TypeScript
 typecheck-results.txt
 typecheck-output.log
+
+# jscpd reports
+reports/
