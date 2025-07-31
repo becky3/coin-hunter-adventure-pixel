@@ -73,11 +73,16 @@ npm run jscpd:check
 
 #### pre-commitフックへの統合（実装済み）
 
-本プロジェクトでは、simple-git-hooksを使用してpre-commitフックにjscpdチェックを統合しています：
+本プロジェクトでは、既存のpre-commitフックにjscpdチェックを統合しています：
 
-- **実行内容**: `npm run lint && npm run typecheck && npm run jscpd:check`
+- **実行内容**: 
+  1. Lintチェック
+  2. TypeScriptの型チェック
+  3. 重複コードチェック（jscpd）
+  4. ビルドチェック
 - **閾値**: 1%以下の重複率で通過
 - **動作**: コミット時に自動実行され、基準を満たさない場合はコミットを中止
+- **セットアップ**: `bash scripts/setup-hooks.sh`で設定
 
 #### 将来的な統合計画
 
