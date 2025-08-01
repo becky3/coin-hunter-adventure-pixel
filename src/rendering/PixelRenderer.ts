@@ -200,7 +200,11 @@ export class PixelRenderer {
         this.ctx.fillRect(drawX, drawY, this.scale, this.scale);
     }
     
-    drawRect(x: number, y: number, width: number, height: number, colorIndex: number, fill: boolean = true): void {
+    drawRect(x: number, y: number, width: number, height: number, colorIndex: number | null, fill: boolean = true): void {
+        if (colorIndex === null) {
+            throw new Error('[PixelRenderer] Color index cannot be null for drawRect');
+        }
+        
         const drawX = Math.floor((x - this.cameraX) * this.scale);
         const drawY = Math.floor((y - this.cameraY) * this.scale);
         
@@ -215,7 +219,11 @@ export class PixelRenderer {
         }
     }
     
-    drawText(text: string, x: number, y: number, colorIndex: number = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
+    drawText(text: string, x: number, y: number, colorIndex: number | null = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
+        if (colorIndex === null) {
+            throw new Error('[PixelRenderer] Color index cannot be null for drawText');
+        }
+        
         const snappedX = Math.floor(x / FONT.GRID) * FONT.GRID;
         const snappedY = Math.floor(y / FONT.GRID) * FONT.GRID;
         
@@ -243,7 +251,7 @@ export class PixelRenderer {
         this.ctx.restore();
     }
     
-    drawTextCentered(text: string, centerX: number, y: number, colorIndex: number = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
+    drawTextCentered(text: string, centerX: number, y: number, colorIndex: number | null = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
         const textWidth = text.length * FONT.GRID;
         const x = centerX - Math.floor(textWidth / 2);
         this.drawText(text, x, y, colorIndex, alpha, suppressWarning);

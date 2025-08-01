@@ -124,33 +124,27 @@ export class TestPlayState implements GameState {
             for (let x = 0; x < tileRow.length; x++) {
                 if (tileRow[x] === 1) {
                     const tileColor = TEST_TILE_PALETTE.default.colors[1];
-                    if (tileColor !== null) {
-                        renderer.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, tileColor);
-                    }
+                    renderer.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, tileColor);
                 }
             }
         }
 
         if (this.player) {
             const playerColor = TEST_TILE_PALETTE.default.colors[2];
-            if (playerColor !== null) {
-                renderer.drawRect(
-                    Math.floor(this.player.x),
-                    Math.floor(this.player.y),
-                    this.player.width,
-                    this.player.height,
-                    playerColor
-                );
-            }
+            renderer.drawRect(
+                Math.floor(this.player.x),
+                Math.floor(this.player.y),
+                this.player.width,
+                this.player.height,
+                playerColor
+            );
         }
 
         const titleColor = TEST_TILE_PALETTE.default.colors[2];
         const infoColor = TEST_TILE_PALETTE.default.colors[3];
         
-        if (titleColor !== null) {
-            renderer.drawText('TEST MODE', 8, 8, titleColor);
-        }
-        if (this.player && infoColor !== null) {
+        renderer.drawText('TEST MODE', 8, 8, titleColor);
+        if (this.player) {
             renderer.drawText(`X:${Math.floor(this.player.x)} Y:${Math.floor(this.player.y)}`, 8, 24, infoColor);
             renderer.drawText(`GROUNDED:${this.player.grounded}`, 8, 40, infoColor);
         }

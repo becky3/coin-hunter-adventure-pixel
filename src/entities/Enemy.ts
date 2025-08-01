@@ -240,14 +240,10 @@ export class Enemy extends Entity {
         const borderColor = ENEMY_HP_PALETTE.default.colors[1];
         const hpColor = ENEMY_HP_PALETTE.default.colors[2];
         
-        if (borderColor !== null) {
-            renderer.drawRect(barX, barY, barWidth, barHeight, borderColor);
-        }
+        renderer.drawRect(barX, barY, barWidth, barHeight, borderColor);
         
         const hpWidth = (this.health / this.maxHealth) * barWidth;
-        if (hpColor !== null) {
-            renderer.drawRect(barX, barY, hpWidth, barHeight, hpColor);
-        }
+        renderer.drawRect(barX, barY, hpWidth, barHeight, hpColor);
     }
     
     /**
