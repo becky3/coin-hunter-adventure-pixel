@@ -73,17 +73,27 @@ export class Enemy extends Entity {
             }
         }
         
-        if (this.stateTimer > 0) {
+        if (this.stateTimer > 0 && this.shouldUpdateStateTimer()) {
             this.stateTimer -= deltaTime * 1000;
         }
         
         this.updateAI(deltaTime);
+        
+        this.updateAnimation(deltaTime);
+        this.onUpdate(deltaTime);
         
         super.update(deltaTime);
     }
 
     protected updateAI(_deltaTime: number): void {
 
+    }
+
+    /**
+     * Override this method to control state timer updates
+     */
+    protected shouldUpdateStateTimer(): boolean {
+        return true;
     }
 
     takeDamage(amount: number): void {

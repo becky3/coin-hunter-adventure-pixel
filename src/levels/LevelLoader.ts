@@ -1,6 +1,6 @@
 import { bundledStageData } from '../data/bundledData';
 import { Logger } from '../utils/Logger';
-import { paletteSystem } from '../utils/pixelArtPalette';
+import { MasterPalette } from '../rendering/MasterPalette';
 import { StageType } from '../assets/AssetLoader';
 
 interface StageInfo {
@@ -233,10 +233,6 @@ export class LevelLoader {
     
     getBackgroundColor(levelData: StageData): string {
         const colorIndex = levelData.backgroundColor;
-        const color = paletteSystem.masterPalette[colorIndex];
-        if (color === undefined) {
-            throw new Error(`Invalid background color index: ${colorIndex}. Color not found in master palette.`);
-        }
-        return color;
+        return MasterPalette.getColor(colorIndex);
     }
 }

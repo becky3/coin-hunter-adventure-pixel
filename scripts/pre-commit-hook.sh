@@ -24,7 +24,18 @@ fi
 
 echo "✅ TypeScript check passed"
 
-# 3. Build check
+# 3. Duplicate code check
+echo "Running duplicate code check..."
+npm run jscpd:check
+
+if [ $? -ne 0 ]; then
+    echo "❌ Duplicate code detected. Please refactor duplicate code before committing."
+    exit 1
+fi
+
+echo "✅ Duplicate code check passed"
+
+# 4. Build check
 echo "Running build check..."
 npm run build
 

@@ -282,30 +282,15 @@ export class Spider extends Enemy implements EntityInitializer {
     }
     
     override update(deltaTime: number): void {
-        if (!this.active) return;
-        
-        if (this.invincibleTime > 0) {
-            this.invincibleTime -= deltaTime * 1000;
-        }
-        
-        if (this.stateTimer > 0 && this._spiderState !== 'waiting') {
-            this.stateTimer -= deltaTime * 1000;
-        }
-        
-        this.updateAI(deltaTime);
-        this.updateAnimation(deltaTime);
-        this.onUpdate(deltaTime);
+        super.update(deltaTime);
+    }
+    
+    protected override shouldUpdateStateTimer(): boolean {
+        return this._spiderState !== 'waiting';
     }
     
     override render(renderer: PixelRenderer): void {
-        if (!this.active) return;
-        
-        if (this.invincibleTime > 0 && Math.floor(this.invincibleTime / 100) % 2 === 0) {
-            return;
-        }
-        
         this.flipX = this.direction === -1;
-        
         super.render(renderer);
     }
     
