@@ -13,11 +13,6 @@ import { MasterPalette } from './MasterPalette';
 
 
 /**
- * Default color index for text rendering (white)
- */
-const DEFAULT_TEXT_COLOR_INDEX = 0x03;
-
-/**
  * PixelRenderer
  */
 export class PixelRenderer {
@@ -224,7 +219,7 @@ export class PixelRenderer {
         }
     }
     
-    drawText(text: string, x: number, y: number, colorIndex: number | null = DEFAULT_TEXT_COLOR_INDEX, alpha: number = 1, suppressWarning: boolean = false): void {
+    drawText(text: string, x: number, y: number, colorIndex: number | null, alpha: number = 1, suppressWarning: boolean = false): void {
         if (colorIndex === null) {
             throw new Error('[PixelRenderer] Color index cannot be null for drawText');
         }
@@ -256,7 +251,7 @@ export class PixelRenderer {
         this.ctx.restore();
     }
     
-    drawTextCentered(text: string, centerX: number, y: number, colorIndex: number | null = DEFAULT_TEXT_COLOR_INDEX, alpha: number = 1, suppressWarning: boolean = false): void {
+    drawTextCentered(text: string, centerX: number, y: number, colorIndex: number | null, alpha: number = 1, suppressWarning: boolean = false): void {
         const textWidth = text.length * FONT.GRID;
         const x = centerX - Math.floor(textWidth / 2);
         this.drawText(text, x, y, colorIndex, alpha, suppressWarning);
