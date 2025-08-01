@@ -184,8 +184,7 @@ export class MenuState extends BaseUIState {
         this.options.forEach((option, index) => {
             const y = startY + index * lineHeight;
             const isSelected = index === this.selectedOption;
-            const prevAlpha = renderer.ctx.globalAlpha;
-            renderer.ctx.globalAlpha = this.optionsAlpha;
+            renderer.setAlpha(this.optionsAlpha);
             
             const colorIndex = isSelected ? UI_PALETTE_INDICES.highlight : UI_PALETTE_INDICES.primaryText;
             renderer.drawTextCentered(option.text, centerX, y, colorIndex);
@@ -195,15 +194,14 @@ export class MenuState extends BaseUIState {
                 renderer.drawText('>', cursorX, y, UI_PALETTE_INDICES.highlight);
             }
             
-            renderer.ctx.globalAlpha = prevAlpha;
+            renderer.resetAlpha();
         });
-        const prevAlpha = renderer.ctx.globalAlpha;
-        renderer.ctx.globalAlpha = this.optionsAlpha;
+        renderer.setAlpha(this.optionsAlpha);
         
         renderer.drawTextCentered('ARROWS:SELECT', centerX, 200, UI_PALETTE_INDICES.secondaryText);
         renderer.drawTextCentered('ENTER/SPACE:OK', centerX, 208, UI_PALETTE_INDICES.secondaryText);
         
-        renderer.ctx.globalAlpha = prevAlpha;
+        renderer.resetAlpha();
     }
 
     private renderHowToPlay(renderer: PixelRenderer): void {

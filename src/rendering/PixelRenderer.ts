@@ -31,6 +31,7 @@ export class PixelRenderer {
     public debug: boolean;
     public pixelArtRenderer?: PixelArtRenderer;
     public assetLoader?: AssetLoader;
+    private alphaStack: number[];
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
@@ -60,6 +61,7 @@ export class PixelRenderer {
         this.stageDependentSpriteCache = new Map();
         this.currentStageType = '';
         this.debug = false;
+        this.alphaStack = [];
     }
     
     clear(backgroundPaletteIndex: number = 0, colorIndex: number = 0): void {
@@ -373,5 +375,108 @@ export class PixelRenderer {
     fillRect(x: number, y: number, width: number, height: number, color: string): void {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(x, y, width, height);
+    }
+
+    /**
+     * Set global alpha (transparency) for subsequent drawing operations
+     * @param alpha Alpha value between 0 (transparent) and 1 (opaque)
+     */
+    setAlpha(alpha: number): void {
+        this.alphaStack.push(this.ctx.globalAlpha);
+        this.ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+    }
+
+    /**
+     * Reset global alpha to previous value
+     */
+    resetAlpha(): void {
+        const previousAlpha = this.alphaStack.pop();
+        if (previousAlpha !== undefined) {
+            this.ctx.globalAlpha = previousAlpha;
+        } else {
+            this.ctx.globalAlpha = 1;
+        }
+    }
+
+    /**
+     * Create a new canvas element with specified dimensions
+     * @param width Canvas width in pixels
+     * @param height Canvas height in pixels
+     * @returns Created canvas element
+     */
+    createCanvas(width: number, height: number): HTMLCanvasElement {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.imageSmoothingEnabled = false;
+            const extCtx = ctx as CanvasRenderingContext2D & { 
+                mozImageSmoothingEnabled?: boolean;
+                webkitImageSmoothingEnabled?: boolean;
+                msImageSmoothingEnabled?: boolean;
+            };
+            extCtx.mozImageSmoothingEnabled = false;
+            extCtx.webkitImageSmoothingEnabled = false;
+            extCtx.msImageSmoothingEnabled = false;
+        }
+        return canvas;
+    }
+
+    /**
+     * Create and fill a canvas with a solid color
+     * @param width Canvas width
+     * @param height Canvas height
+     * @param colorIndex Master palette color index
+     * @returns Created canvas element
+     */
+    createSolidColorCanvas(width: number, height: number, colorIndex: number): HTMLCanvasElement {
+        const canvas = this.createCanvas(width, height);
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            const color = MasterPalette.getColor(colorIndex);
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, width, height);
+        }
+        return canvas;
+    }
+
+    /**
+     * Create ImageData from a pattern and color
+     * @param pattern 2D array of pixel values (1 = colored, 0 = transparent)
+     * @param colorIndex Master palette color index
+     * @returns ImageData object
+     */
+    createImageDataFromPattern(pattern: number[][], colorIndex: number): ImageData {
+        const height = pattern.length;
+        const width = pattern[0]?.length || 0;
+        const imageData = new ImageData(width, height);
+        const data = imageData.data;
+        const color = MasterPalette.getColor(colorIndex);
+        
+        let r = 0, g = 0, b = 0;
+        if (color && color.startsWith('#')) {
+            const hex = color.slice(1);
+            r = parseInt(hex.substr(0, 2), 16);
+            g = parseInt(hex.substr(2, 2), 16);
+            b = parseInt(hex.substr(4, 2), 16);
+        }
+        
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const idx = (y * width + x) * 4;
+                const row = pattern[y];
+                if (row && row[x] === 1) {
+                    data[idx] = r;
+                    data[idx + 1] = g;
+                    data[idx + 2] = b;
+                    data[idx + 3] = 255;
+                } else {
+                    data[idx + 3] = 0;
+                }
+            }
+        }
+        
+        return imageData;
     }
 }

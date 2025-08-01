@@ -107,16 +107,8 @@ export class HUDManager {
         const menuWidth = 200;
         const menuHeight = 100;
         
-        this.pauseBackgroundCanvas = document.createElement('canvas');
-        this.pauseBackgroundCanvas.width = menuWidth;
-        this.pauseBackgroundCanvas.height = menuHeight;
-        const ctx = this.pauseBackgroundCanvas.getContext('2d');
-        if (!ctx) return;
-        
-        ctx.imageSmoothingEnabled = false;
-        const blackColor = MasterPalette.getColor(UI_PALETTE_INDICES.background);
-        ctx.fillStyle = blackColor;
-        ctx.fillRect(0, 0, menuWidth, menuHeight);
+        const renderer = new PixelRenderer(document.createElement('canvas'));
+        this.pauseBackgroundCanvas = renderer.createSolidColorCanvas(menuWidth, menuHeight, UI_PALETTE_INDICES.background);
     }
     
     showPauseOverlay(): void {
@@ -226,40 +218,12 @@ export class HUDManager {
         let tileCanvas = this.patternTileCache.get(cacheKey);
         
         if (!tileCanvas) {
-            const tileSize = 8;
-            tileCanvas = document.createElement('canvas');
-            tileCanvas.width = tileSize;
-            tileCanvas.height = tileSize;
+            const imageData = renderer.createImageDataFromPattern(pattern, colorIndex);
+            tileCanvas = renderer.createCanvas(imageData.width, imageData.height);
             const ctx = tileCanvas.getContext('2d');
-            if (!ctx) return;
-            
-            const imageData = new ImageData(tileSize, tileSize);
-            const data = imageData.data;
-
-            let r = 0, g = 0, b = 0;
-            if (color && color.startsWith('#')) {
-                const hex = color.slice(1);
-                r = parseInt(hex.substr(0, 2), 16);
-                g = parseInt(hex.substr(2, 2), 16);
-                b = parseInt(hex.substr(4, 2), 16);
+            if (ctx) {
+                ctx.putImageData(imageData, 0, 0);
             }
-            
-            for (let py = 0; py < tileSize; py++) {
-                for (let px = 0; px < tileSize; px++) {
-                    const idx = (py * tileSize + px) * 4;
-                    const row = pattern[py];
-                    if (row && row[px] === 1) {
-                        data[idx] = r;
-                        data[idx + 1] = g;
-                        data[idx + 2] = b;
-                        data[idx + 3] = 255;
-                    } else {
-                        data[idx + 3] = 0;
-                    }
-                }
-            }
-            
-            ctx.putImageData(imageData, 0, 0);
             this.patternTileCache.set(cacheKey, tileCanvas);
         }
         

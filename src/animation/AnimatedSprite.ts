@@ -1,4 +1,5 @@
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { DEBUG_PALETTE } from '../rendering/CommonPalettes';
 
 interface AnimationStateConfig {
     [stateName: string]: string;
@@ -28,7 +29,10 @@ export class AnimatedSprite {
 
     render(renderer: PixelRenderer, x: number, y: number, flipX: boolean = false): void {
         const screenPos = renderer.worldToScreen(x, y);
-        renderer.drawRect(screenPos.x, screenPos.y, 16, 16, 0x21);
+        const debugColorIndex = DEBUG_PALETTE.default.colors[2];
+        if (debugColorIndex !== null) {
+            renderer.drawRect(screenPos.x, screenPos.y, 16, 16, debugColorIndex);
+        }
         
         if (!flipX) {
             void 0;
