@@ -13,6 +13,11 @@ import { MasterPalette } from './MasterPalette';
 
 
 /**
+ * Default color index for text rendering (white)
+ */
+const DEFAULT_TEXT_COLOR_INDEX = 0x03;
+
+/**
  * PixelRenderer
  */
 export class PixelRenderer {
@@ -219,7 +224,7 @@ export class PixelRenderer {
         }
     }
     
-    drawText(text: string, x: number, y: number, colorIndex: number | null = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
+    drawText(text: string, x: number, y: number, colorIndex: number | null = DEFAULT_TEXT_COLOR_INDEX, alpha: number = 1, suppressWarning: boolean = false): void {
         if (colorIndex === null) {
             throw new Error('[PixelRenderer] Color index cannot be null for drawText');
         }
@@ -251,7 +256,7 @@ export class PixelRenderer {
         this.ctx.restore();
     }
     
-    drawTextCentered(text: string, centerX: number, y: number, colorIndex: number | null = 0x03, alpha: number = 1, suppressWarning: boolean = false): void {
+    drawTextCentered(text: string, centerX: number, y: number, colorIndex: number | null = DEFAULT_TEXT_COLOR_INDEX, alpha: number = 1, suppressWarning: boolean = false): void {
         const textWidth = text.length * FONT.GRID;
         const x = centerX - Math.floor(textWidth / 2);
         this.drawText(text, x, y, colorIndex, alpha, suppressWarning);
@@ -465,9 +470,9 @@ export class PixelRenderer {
         let r = 0, g = 0, b = 0;
         if (color && color.startsWith('#')) {
             const hex = color.slice(1);
-            r = parseInt(hex.substr(0, 2), 16);
-            g = parseInt(hex.substr(2, 2), 16);
-            b = parseInt(hex.substr(4, 2), 16);
+            r = parseInt(hex.slice(0, 2), 16);
+            g = parseInt(hex.slice(2, 4), 16);
+            b = parseInt(hex.slice(4, 6), 16);
         }
         
         for (let y = 0; y < height; y++) {
