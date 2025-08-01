@@ -32,6 +32,9 @@ Coin Hunter Adventure Pixelは、HTML5 Canvas APIを使用したブラウザベ�
 - **GameCore**: ゲーム全体の制御とシステム管理
 - **GameStateManager**: ゲーム状態の管理（メニュー、プレイ、サウンドテスト、ゲームオーバー）
 - **PixelRenderer**: 8ビットスタイルの描画システム
+  - 透明度制御API（setAlpha/resetAlpha）
+  - Canvas要素作成・管理機能
+  - 統一された描画インターフェース（Canvas API直接使用の禁止）
 - **PhysicsSystem**: 物理演算（重力、衝突判定）
   - PhysicsLayer enumによる衝突グループ管理
   - Entity基底クラスにphysicsLayerプロパティを必須化
@@ -39,6 +42,7 @@ Coin Hunter Adventure Pixelは、HTML5 Canvas APIを使用したブラウザベ�
 - **InputSystem**: キーボード入力の統合管理
 - **EntityAnimationManager**: エンティティベースのアニメーション管理
 - **MasterPalette**: 52色のマスターパレット定義
+- **CommonPalettes**: デバッグ・UI用の共通パレット定義
 
 #### マネージャーシステム
 - **EntityManager**: エンティティ（プレイヤー、敵、アイテム）の統合管理

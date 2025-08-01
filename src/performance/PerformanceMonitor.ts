@@ -1,5 +1,6 @@
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
+import { PERFORMANCE_PALETTE } from '../rendering/CommonPalettes';
 
 interface PerformanceMetrics {
     fps: number;
@@ -538,41 +539,45 @@ export class PerformanceMonitor {
         const bgWidth = 200;
         const bgHeight = 150;
 
-        renderer.drawRect(x - 2, y - 2, bgWidth, bgHeight, 0x00, true);
+        const bgColor = PERFORMANCE_PALETTE.default.colors[1];
+        renderer.drawRect(x - 2, y - 2, bgWidth, bgHeight, bgColor, true);
 
-        renderer.drawText(`FPS: ${latest.fps.toFixed(1)}`, x, y, 0x62, 1, true);
+        const textColor = PERFORMANCE_PALETTE.default.colors[2];
+        renderer.drawText(`FPS: ${latest.fps.toFixed(1)}`, x, y, textColor, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`FRAME TIME: ${latest.frameTime.toFixed(2)}MS`, x, y, 0x62, 1, true);
+        renderer.drawText(`FRAME TIME: ${latest.frameTime.toFixed(2)}MS`, x, y, textColor, 1, true);
         y += lineHeight;
         
         if (latest.memoryUsed > 0) {
-            renderer.drawText(`MEMORY: ${latest.memoryUsed.toFixed(1)}MB`, x, y, 0x62, 1, true);
+            renderer.drawText(`MEMORY: ${latest.memoryUsed.toFixed(1)}MB`, x, y, textColor, 1, true);
             y += lineHeight;
         }
 
         y += lineHeight;
-        renderer.drawText('DRAW CALLS:', x, y, 0x62, 1, true);
+        renderer.drawText('DRAW CALLS:', x, y, textColor, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`  SPRITES: ${latest.drawCalls.drawSprite}`, x, y, 0x62, 1, true);
+        renderer.drawText(`  SPRITES: ${latest.drawCalls.drawSprite}`, x, y, textColor, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`  RECTS: ${latest.drawCalls.drawRect}`, x, y, 0x62, 1, true);
+        renderer.drawText(`  RECTS: ${latest.drawCalls.drawRect}`, x, y, textColor, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`  TEXT: ${latest.drawCalls.drawText}`, x, y, 0x62, 1, true);
+        renderer.drawText(`  TEXT: ${latest.drawCalls.drawText}`, x, y, textColor, 1, true);
         y += lineHeight;
         
-        renderer.drawText(`  TOTAL: ${latest.drawCalls.total}`, x, y, 0x62, 1, true);
+        renderer.drawText(`  TOTAL: ${latest.drawCalls.total}`, x, y, textColor, 1, true);
         y += lineHeight;
 
         this.renderGraph(renderer, x, y + 10, 190, 40);
     }
 
     private renderGraph(renderer: PixelRenderer, x: number, y: number, width: number, height: number): void {
-        renderer.drawRect(x, y, width, height, 0x00, true);
-        renderer.drawRect(x, y, width, height, 0x62, false);
+        const bgColor = PERFORMANCE_PALETTE.default.colors[1];
+        const borderColor = PERFORMANCE_PALETTE.default.colors[2];
+        renderer.drawRect(x, y, width, height, bgColor, true);
+        renderer.drawRect(x, y, width, height, borderColor, false);
 
         if (this.metrics.length < 2) return;
 
@@ -595,8 +600,9 @@ export class PerformanceMonitor {
             renderer.drawLine(x1, y1, x2, y2, color, 1);
         }
 
-        renderer.drawText('60', x - 20, y - 4, 0x62, 1, true);
-        renderer.drawText('0', x - 15, y + height - 4, 0x62, 1, true);
+        const graphTextColor = PERFORMANCE_PALETTE.default.colors[2];
+        renderer.drawText('60', x - 20, y - 4, graphTextColor, 1, true);
+        renderer.drawText('0', x - 15, y + height - 4, graphTextColor, 1, true);
     }
 
     toggle(): void {

@@ -5,6 +5,7 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
 import type { BaseEntityConfig } from '../config/ResourceConfig';
 import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import { ENEMY_HP_PALETTE } from '../rendering/CommonPalettes';
 export type EnemyState = 'idle' | 'walk' | 'hurt' | 'dead';
 
 /**
@@ -236,10 +237,13 @@ export class Enemy extends Entity {
         const barX = this.x + (this.width - barWidth) / 2;
         const barY = this.y - 8;
         
-        renderer.drawRect(barX, barY, barWidth, barHeight, 0x00);
+        const borderColor = ENEMY_HP_PALETTE.default.colors[1];
+        const hpColor = ENEMY_HP_PALETTE.default.colors[2];
+        
+        renderer.drawRect(barX, barY, barWidth, barHeight, borderColor);
         
         const hpWidth = (this.health / this.maxHealth) * barWidth;
-        renderer.drawRect(barX, barY, hpWidth, barHeight, 0x31);
+        renderer.drawRect(barX, barY, hpWidth, barHeight, hpColor);
     }
     
     /**
