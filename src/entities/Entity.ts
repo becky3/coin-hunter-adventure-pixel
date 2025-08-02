@@ -187,11 +187,9 @@ export abstract class Entity {
     
     /**
      * Returns the sprite palette index for this entity
-     * Override in subclasses to use different palettes
+     * Must be implemented in derived classes
      */
-    protected getSpritePaletteIndex(): number {
-        return 0;
-    }
+    protected abstract getSpritePaletteIndex(): number;
 
 
     renderDebug(renderer: PixelRenderer): void {

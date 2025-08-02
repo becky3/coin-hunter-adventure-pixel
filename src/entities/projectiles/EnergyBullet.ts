@@ -4,6 +4,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PowerGloveConfig } from '../../config/PowerGloveConfig';
+import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
 import type { AnimationDefinition } from '../../types/animationTypes';
 import type { BaseEntityConfig } from '../../config/ResourceConfig';
 import { PhysicsLayer } from '../../physics/PhysicsSystem';
@@ -144,4 +145,10 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         ];
     }
     
+    /**
+     * Returns the sprite palette index for energy bullet
+     */
+    protected override getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.EFFECTS;
+    }
 }

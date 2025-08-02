@@ -26,11 +26,15 @@ parent: 開発ガイド
 ```typescript
 // エンティティ内での使用例
 protected initializeAnimations(): void {
-    const animationDefs = this.getAnimationDefinitions();
-    const paletteDef = this.getPaletteDefinition();
+    const paletteIndex = this.getSpritePaletteIndex();
+    this.entityAnimationManager = new EntityAnimationManager(paletteIndex);
     
-    this.entityAnimationManager = new EntityAnimationManager(paletteDef);
-    this.entityAnimationManager.initialize(animationDefs);
+    const animations = this.getAnimationDefinitions();
+    if (animations.length > 0) {
+        this.entityAnimationManager.initialize(animations).catch(error => {
+            console.error(`[Entity] Failed to initialize animations for ${this.constructor.name}:`, error);
+        });
+    }
 }
 ```
 
@@ -87,18 +91,9 @@ protected getAnimationDefinitions(): AnimationDefinition[] {
     ];
 }
 
-// パレット定義
-protected getPaletteDefinition(): EntityPaletteDefinition {
-    return {
-        default: {
-            colors: [null, 0x60, 0x62, 0x00]  // 透明, 緑1, 緑2, 黒
-        },
-        variants: {
-            powerup: {
-                colors: [null, 0x41, 0x43, 0x00]  // パワーアップ時の色
-            }
-        }
-    };
+// スプライトパレットインデックスを返す
+protected getSpritePaletteIndex(): number {
+    return SpritePaletteIndex.ENEMY_BASIC;  // 基本的な敵のパレット
 }
 ```
 
@@ -138,12 +133,8 @@ export class Slime extends Enemy {
         ];
     }
     
-    protected getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [null, 0x60, 0x62, 0x00]
-            }
-        };
+    protected getSpritePaletteIndex(): number {
+        // 適切なスプライトパレットインデックスを返す
     }
 }
 ```
@@ -195,9 +186,8 @@ this.entityAnimationManager.update(deltaTime);
 
 ### エンティティが表示されない
 
-1. `getAnimationDefinitions()`と`getPaletteDefinition()`が実装されているか確認
-2. スプライトファイルのパスが正しいか確認
-3. `super.render(renderer)`を呼び出しているか確認
+1. スプライトファイルのパスが正しいか確認
+2. `super.render(renderer)`を呼び出しているか確認
 
 ### アニメーションが動かない
 
@@ -240,6 +230,6 @@ node tests/e2e/test-all-sprites-visual.cjs
 
 1. AnimatedSpriteの使用を削除
 2. `getAnimationDefinitions()`メソッドを実装
-3. `getPaletteDefinition()`メソッドを実装
+3. `getSpritePaletteIndex()`メソッドを実装
 4. `render()`メソッドで`super.render(renderer)`を呼び出す
 5. アニメーション状態の変更は`entityAnimationManager.setState()`を使用

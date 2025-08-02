@@ -6,6 +6,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { MusicSystem } from '../../audio/MusicSystem';
+import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
 import type { BaseEntityConfig } from '../../config/ResourceConfig';
 
 /**
@@ -141,5 +142,12 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
             throw new Error('[PowerUpItem] MusicSystem not available in EntityManager');
         }
         this.musicSystem = musicSystem;
+    }
+    
+    /**
+     * Returns the sprite palette index for power-up items
+     */
+    protected getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.POWERUPS;
     }
 }
