@@ -82,7 +82,7 @@ export class IntermissionState implements GameState {
             this.playerSprite = spriteKey;
             Logger.log('[IntermissionState] Using already loaded player sprite:', this.playerSprite);
 
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await Promise.resolve();
         } else {
 
             try {
@@ -97,9 +97,6 @@ export class IntermissionState implements GameState {
     }
     
     update(deltaTime: number): void {
-        if (this.timer === undefined) {
-            this.timer = 0;
-        }
         this.timer += deltaTime * 1000;
         
 
@@ -154,18 +151,22 @@ export class IntermissionState implements GameState {
     private renderLivesDisplay(renderer: PixelRenderer, centerX: number, centerY: number): void {
         const lives = this.params.lives;
         
-
+        const spriteWidth = 16;
+        const charWidth = 8;
+        const spacing = 8;
+        const totalWidth = spriteWidth + spacing + charWidth + spacing + charWidth;
+        const startX = centerX - totalWidth / 2;
+        
         if (this.playerSprite) {
-            const spriteX = centerX - 40;
-            const spriteY = centerY - 8;
+            const spriteX = startX;
+            const spriteY = centerY - 16;
             renderer.drawSprite(this.playerSprite, spriteX, spriteY);
         }
         
-
         const xText = 'X';
-        renderer.drawText(xText, centerX - 20, centerY, 0x30);
+        renderer.drawText(xText, startX + spriteWidth + spacing, centerY, 0x30);
         
         const livesText = lives.toString();
-        renderer.drawText(livesText, centerX, centerY, 0x30);
+        renderer.drawText(livesText, startX + spriteWidth + spacing + charWidth + spacing, centerY, 0x30);
     }
 }

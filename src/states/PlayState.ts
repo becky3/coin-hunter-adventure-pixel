@@ -1,6 +1,6 @@
 import { GameState, GameStateManager } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { GameStates } from '../types/GameStateTypes';
+import { GameStates, PlayStateParams } from '../types/GameStateTypes';
 import { InputSystem, InputEvent } from '../core/InputSystem';
 import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
@@ -238,7 +238,7 @@ export class PlayState implements GameState {
         }
     }
 
-    async enter(params: { level?: string; enableProgression?: boolean; playerState?: { score?: number; lives?: number; powerUps?: string[]; isSmall?: boolean }; isRespawn?: boolean } = {}): Promise<void> {
+    async enter(params: PlayStateParams = {}): Promise<void> {
         const enterStartTime = performance.now();
         Logger.log('[PlayState] enter() called with params:', params);
         Logger.log('[PlayState] Starting initialization...');
@@ -713,8 +713,14 @@ export class PlayState implements GameState {
             const levelData = this.levelManager.getLevelData();
             const score = this.hudManager.getHUDData().score;
             
-            if (!currentLevel || !levelData || !levelData.stageType) {
-                throw new Error('[PlayState] Cannot transition to IntermissionState: missing level data or stageType');
+            if (!currentLevel) {
+                throw new Error('[PlayState] Cannot transition to IntermissionState: missing currentLevel');
+            }
+            if (!levelData) {
+                throw new Error('[PlayState] Cannot transition to IntermissionState: missing levelData');
+            }
+            if (!levelData.stageType) {
+                throw new Error('[PlayState] Cannot transition to IntermissionState: missing stageType in levelData');
             }
             
             Logger.log('[PlayState] Transitioning to IntermissionState for respawn');

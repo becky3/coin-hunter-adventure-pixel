@@ -20,3 +20,18 @@ export type GameStateKey = typeof GameStates[keyof typeof GameStates];
 export function isValidGameState(state: string): state is GameStateKey {
     return Object.values(GameStates).includes(state as GameStateKey);
 }
+
+/**
+ * Parameters for PlayState.enter() method
+ */
+export interface PlayStateParams {
+    level?: string;
+    enableProgression?: boolean;
+    playerState?: {
+        score?: number;
+        lives?: number;
+        powerUps?: string[];
+        isSmall?: boolean;
+    };
+    isRespawn?: boolean;
+}
