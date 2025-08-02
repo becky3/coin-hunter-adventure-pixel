@@ -124,14 +124,14 @@ export class TestPlayState implements GameState {
             
             for (let x = 0; x < tileRow.length; x++) {
                 if (tileRow[x] === 1) {
-                    const tileColor = TEST_TILE_PALETTE.default.colors[1];
+                    const tileColor = TEST_TILE_PALETTE.colors[1];
                     renderer.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, tileColor);
                 }
             }
         }
 
         if (this.player) {
-            const playerColor = TEST_TILE_PALETTE.default.colors[2];
+            const playerColor = TEST_TILE_PALETTE.colors[2];
             renderer.drawRect(
                 Math.floor(this.player.x),
                 Math.floor(this.player.y),
@@ -141,8 +141,8 @@ export class TestPlayState implements GameState {
             );
         }
 
-        const titleColor = TEST_TILE_PALETTE.default.colors[2];
-        const infoColor = TEST_TILE_PALETTE.default.colors[3];
+        const titleColor = TEST_TILE_PALETTE.colors[2];
+        const infoColor = TEST_TILE_PALETTE.colors[3];
         
         renderer.drawText('TEST MODE', 8, 8, titleColor);
         if (this.player) {

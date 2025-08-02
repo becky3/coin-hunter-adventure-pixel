@@ -539,10 +539,10 @@ export class PerformanceMonitor {
         const bgWidth = 200;
         const bgHeight = 150;
 
-        const bgColor = PERFORMANCE_PALETTE.default.colors[1];
+        const bgColor = PERFORMANCE_PALETTE.colors[1];
         renderer.drawRect(x - 2, y - 2, bgWidth, bgHeight, bgColor, true);
 
-        const textColor = PERFORMANCE_PALETTE.default.colors[2];
+        const textColor = PERFORMANCE_PALETTE.colors[2];
         renderer.drawText(`FPS: ${latest.fps.toFixed(1)}`, x, y, textColor, 1, true);
         y += lineHeight;
         
@@ -574,8 +574,8 @@ export class PerformanceMonitor {
     }
 
     private renderGraph(renderer: PixelRenderer, x: number, y: number, width: number, height: number): void {
-        const bgColor = PERFORMANCE_PALETTE.default.colors[1];
-        const borderColor = PERFORMANCE_PALETTE.default.colors[2];
+        const bgColor = PERFORMANCE_PALETTE.colors[1];
+        const borderColor = PERFORMANCE_PALETTE.colors[2];
         renderer.drawRect(x, y, width, height, bgColor, true);
         renderer.drawRect(x, y, width, height, borderColor, false);
 
@@ -600,7 +600,7 @@ export class PerformanceMonitor {
             renderer.drawLine(x1, y1, x2, y2, color, 1);
         }
 
-        const graphTextColor = PERFORMANCE_PALETTE.default.colors[2];
+        const graphTextColor = PERFORMANCE_PALETTE.colors[2];
         renderer.drawText('60', x - 20, y - 4, graphTextColor, 1, true);
         renderer.drawText('0', x - 15, y + height - 4, graphTextColor, 1, true);
     }

@@ -4,14 +4,14 @@ import { Player } from './Player';
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
 import type { BaseEntityConfig } from '../config/ResourceConfig';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import type { AnimationDefinition } from '../types/animationTypes';
 import { ENEMY_HP_PALETTE } from '../rendering/CommonPalettes';
 export type EnemyState = 'idle' | 'walk' | 'hurt' | 'dead';
 
 /**
  * Base enemy entity class
  */
-export class Enemy extends Entity {
+export abstract class Enemy extends Entity {
     public maxHealth: number;
     public health: number;
     public damage: number;
@@ -237,8 +237,8 @@ export class Enemy extends Entity {
         const barX = this.x + (this.width - barWidth) / 2;
         const barY = this.y - 8;
         
-        const borderColor = ENEMY_HP_PALETTE.default.colors[1];
-        const hpColor = ENEMY_HP_PALETTE.default.colors[2];
+        const borderColor = ENEMY_HP_PALETTE.colors[1];
+        const hpColor = ENEMY_HP_PALETTE.colors[2];
         
         renderer.drawRect(barX, barY, barWidth, barHeight, borderColor);
         
@@ -254,20 +254,4 @@ export class Enemy extends Entity {
         return [];
     }
     
-    /**
-     * Get palette definition for enemy
-     * Override in derived classes for specific enemy palettes
-     */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x00,
-                    0x10,
-                    0x30
-                ]
-            }
-        };
-    }
 }

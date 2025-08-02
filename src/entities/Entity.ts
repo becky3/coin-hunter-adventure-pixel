@@ -1,5 +1,5 @@
 import type { PixelRenderer } from '../rendering/PixelRenderer';
-import type { AnimationDefinition, EntityPaletteDefinition, SpriteData } from '../types/animationTypes';
+import type { AnimationDefinition, SpriteData } from '../types/animationTypes';
 import { EntityAnimationManager } from '../animation/EntityAnimationManager';
 import { EventBus } from '../services/EventBus';
 import { PhysicsLayer, stringToPhysicsLayer } from '../physics/PhysicsSystem';
@@ -124,8 +124,8 @@ export abstract class Entity {
      */
     protected initializeAnimations(): void {
         try {
-            const palette = this.getPaletteDefinition();
-            this.entityAnimationManager = new EntityAnimationManager(palette);
+            const paletteIndex = this.getSpritePaletteIndex();
+            this.entityAnimationManager = new EntityAnimationManager(paletteIndex);
             
             const animations = this.getAnimationDefinitions();
             if (animations.length > 0) {
@@ -144,11 +144,6 @@ export abstract class Entity {
      */
     protected abstract getAnimationDefinitions(): AnimationDefinition[];
     
-    /**
-     * Get palette definition for this entity
-     * Override in derived classes
-     */
-    protected abstract getPaletteDefinition(): EntityPaletteDefinition;
 
     update(deltaTime: number): void {
         if (!this.active) return;
@@ -182,7 +177,7 @@ export abstract class Entity {
                 this.getSpritePaletteIndex()
             );
         } else {
-            throw new Error(`[Entity] ${this.constructor.name} has no way to render - neither entityAnimationManager nor sprite is available. Ensure that getAnimationDefinitions() and getPaletteDefinition() methods are implemented if required.`);
+            throw new Error(`[Entity] ${this.constructor.name} has no way to render - neither entityAnimationManager nor sprite is available. Ensure that getAnimationDefinitions() method is implemented if required.`);
         }
         
         if (renderer.debug) {
@@ -192,11 +187,9 @@ export abstract class Entity {
     
     /**
      * Returns the sprite palette index for this entity
-     * Override in subclasses to use different palettes
+     * Must be implemented in derived classes
      */
-    protected getSpritePaletteIndex(): number {
-        return 0;
-    }
+    protected abstract getSpritePaletteIndex(): number;
 
 
     renderDebug(renderer: PixelRenderer): void {
@@ -300,11 +293,11 @@ export abstract class Entity {
     }
     
     /**
-     * Set the palette variant (e.g., 'powerGlove')
+     * Set the palette index
      */
-    setPaletteVariant(variant: string): void {
+    setPaletteIndex(paletteIndex: number): void {
         if (this.entityAnimationManager) {
-            this.entityAnimationManager.setPaletteVariant(variant);
+            this.entityAnimationManager.setPaletteIndex(paletteIndex);
         }
     }
     

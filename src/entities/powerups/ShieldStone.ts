@@ -2,7 +2,8 @@ import { PowerUpItem } from './PowerUpItem';
 import { PowerUpType, PowerUpConfig } from '../../types/PowerUpTypes';
 import { Logger } from '../../utils/Logger';
 import { ResourceLoader } from '../../config/ResourceLoader';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import type { AnimationDefinition } from '../../types/animationTypes';
+import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
 
 /**
  * Shield Stone power-up that grants damage immunity for one hit
@@ -66,19 +67,8 @@ export class ShieldStone extends PowerUpItem {
         ];
     }
     
-    /**
-     * Get palette definition for shield stone
-     */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x01,
-                    0x40,
-                    0x41
-                ]
-            }
-        };
+    
+    protected override getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.POWERUPS;
     }
 }

@@ -86,22 +86,22 @@ const imageData = renderer.createImageDataFromPattern(pattern, colorIndex);
 
 ### エンティティパレット
 
-各エンティティは`getPaletteDefinition()`メソッドで4色パレットを定義：
+各エンティティは`getSpritePaletteIndex()`メソッドでスプライトパレットインデックスを返します：
 
 ```typescript
-protected getPaletteDefinition(): EntityPaletteDefinition {
-    return {
-        default: {
-            colors: [
-                null,    // 0: 透明
-                0x00,    // 1: 黒
-                0x62,    // 2: 明るい緑
-                0x31     // 3: 赤
-            ]
-        }
-    };
+protected getSpritePaletteIndex(): number {
+    return SpritePaletteIndex.ENEMY_BASIC;  // 0-12の範囲
 }
 ```
+
+利用可能なスプライトパレットインデックス：
+- `SpritePaletteIndex.CHARACTER` (0): プレイヤーキャラクター
+- `SpritePaletteIndex.ENEMY_BASIC` (1): 基本的な敵
+- `SpritePaletteIndex.ENEMY_SPECIAL` (2): 特殊な敵
+- `SpritePaletteIndex.ITEMS` (3): アイテム
+- `SpritePaletteIndex.TERRAIN_OBJECTS` (6): 地形オブジェクト
+- `SpritePaletteIndex.POWERUPS` (11): パワーアップアイテム
+- など
 
 ### 共通パレット
 

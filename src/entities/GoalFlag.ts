@@ -4,7 +4,8 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import type { AnimationDefinition } from '../types/animationTypes';
+import { SpritePaletteIndex } from '../utils/pixelArtPalette';
 
 /**
  * GoalFlag implementation
@@ -90,19 +91,8 @@ export class GoalFlag extends Entity implements EntityInitializer {
         ];
     }
     
-    /**
-     * Get palette definition for goal flag
-     */
-    protected override getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x51,
-                    0x03,
-                    0x31
-                ]
-            }
-        };
+    
+    protected override getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.TERRAIN_OBJECTS;
     }
 }

@@ -7,7 +7,7 @@ import { Logger } from '../utils/Logger';
 import { InputSystem } from '../core/InputSystem';
 import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import type { AnimationDefinition } from '../types/animationTypes';
 import { SpritePaletteIndex } from '../utils/pixelArtPalette';
 
 /**
@@ -178,21 +178,6 @@ export class Spring extends Entity implements EntityInitializer {
         ];
     }
     
-    /**
-     * Get palette definition for spring
-     */
-    protected override getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x42,
-                    0x41,
-                    0x40
-                ]
-            }
-        };
-    }
     
     protected override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.TERRAIN_OBJECTS;

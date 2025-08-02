@@ -16,13 +16,6 @@ export interface FourColorPalette {
     colors: [null, MasterPaletteIndex, MasterPaletteIndex, MasterPaletteIndex];
 }
 
-/**
- * Entity palette definition
- */
-export interface EntityPaletteDefinition {
-    default: FourColorPalette;
-    variants?: Record<string, FourColorPalette>;
-}
 
 /**
  * Animation definition for a single animation

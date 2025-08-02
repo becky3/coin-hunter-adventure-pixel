@@ -5,7 +5,8 @@ import { Logger } from '../../utils/Logger';
 import { Entity } from '../Entity';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import type { AnimationDefinition } from '../../types/animationTypes';
+import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
 
 type BatState = 'hanging' | 'flying';
 
@@ -237,19 +238,8 @@ export class Bat extends Enemy implements EntityInitializer {
         ];
     }
     
-    /**
-     * Get palette definition for bat
-     */
-    protected override getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x90,
-                    0x91,
-                    0x21
-                ]
-            }
-        };
+    
+    protected override getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.ENEMY_SPECIAL;
     }
 }

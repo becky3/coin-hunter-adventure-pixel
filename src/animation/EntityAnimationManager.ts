@@ -1,12 +1,9 @@
 import type { PixelRenderer } from '../rendering/PixelRenderer';
 import type { 
     AnimationDefinition, 
-    EntityPaletteDefinition, 
     ProcessedAnimation, 
-    SpriteData,
-    FourColorPalette
+    SpriteData
 } from '../types/animationTypes';
-import { MasterPalette } from '../rendering/MasterPalette';
 import { ServiceLocator } from '../services/ServiceLocator';
 import { ServiceNames } from '../services/ServiceNames';
 import type { AssetLoader } from '../assets/AssetLoader';
@@ -16,15 +13,14 @@ import type { AssetLoader } from '../assets/AssetLoader';
  */
 export class EntityAnimationManager {
     private animations: Map<string, ProcessedAnimation> = new Map();
-    private palette: EntityPaletteDefinition;
+    private paletteIndex: number;
     private currentState: string = 'idle';
-    private currentVariant: string = 'default';
     private animationDefinitions: AnimationDefinition[] = [];
     private spritesLoaded: boolean = false;
     private loadingPromise: Promise<void> | null = null;
 
-    constructor(palette: EntityPaletteDefinition) {
-        this.palette = palette;
+    constructor(paletteIndex: number) {
+        this.paletteIndex = paletteIndex;
     }
 
     /**
@@ -120,12 +116,10 @@ export class EntityAnimationManager {
     }
 
     /**
-     * Set the palette variant (e.g., 'powerGlove')
+     * Set the palette index
      */
-    setPaletteVariant(variant: string): void {
-        if (variant === 'default' || (this.palette.variants && variant in this.palette.variants)) {
-            this.currentVariant = variant;
-        }
+    setPaletteIndex(paletteIndex: number): void {
+        this.paletteIndex = paletteIndex;
     }
 
     /**
@@ -165,49 +159,10 @@ export class EntityAnimationManager {
         const frame = animation.frames[animation.currentFrame];
         if (!frame) return;
 
-        const activePalette = this.getActivePalette();
-        this.renderSpriteWithPalette(renderer, frame, x, y, activePalette, flipX);
+        renderer.drawSprite(frame, x, y, flipX, this.paletteIndex);
     }
 
-    /**
-     * Get the currently active palette
-     */
-    private getActivePalette(): FourColorPalette {
-        if (this.currentVariant === 'default') {
-            return this.palette.default;
-        }
-        return this.palette.variants?.[this.currentVariant] || this.palette.default;
-    }
 
-    /**
-     * Render a sprite with the given palette
-     */
-    private renderSpriteWithPalette(
-        renderer: PixelRenderer, 
-        sprite: SpriteData, 
-        x: number, 
-        y: number, 
-        palette: FourColorPalette,
-        flipX: boolean
-    ): void {
-        for (let py = 0; py < sprite.height; py++) {
-            for (let px = 0; px < sprite.width; px++) {
-                const row = sprite.data[py];
-                if (!row) continue;
-                const colorIndex = row[px];
-                
-                if (colorIndex === 0 || colorIndex === undefined) continue;
-                
-                const masterIndex = palette.colors[colorIndex];
-                if (masterIndex === undefined || masterIndex === null) continue;
-                
-                const color = MasterPalette.getColor(masterIndex);
-                
-                const drawX = flipX ? x + sprite.width - px - 1 : x + px;
-                renderer.drawPixel(drawX, y + py, color);
-            }
-        }
-    }
 
     /**
      * Get current animation state

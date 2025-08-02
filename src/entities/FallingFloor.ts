@@ -5,7 +5,8 @@ import { EntityInitializer } from '../interfaces/EntityInitializer';
 import { EntityManager } from '../managers/EntityManager';
 import { Logger } from '../utils/Logger';
 import { ResourceLoader } from '../config/ResourceLoader';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import type { AnimationDefinition } from '../types/animationTypes';
+import { SpritePaletteIndex } from '../utils/pixelArtPalette';
 
 /**
  * Falling floor platform that collapses when the player steps on it
@@ -221,19 +222,8 @@ export class FallingFloor extends Entity implements EntityInitializer {
         ];
     }
     
-    /**
-     * Get palette definition for falling floor
-     */
-    protected override getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x50,
-                    0x51,
-                    0x01
-                ]
-            }
-        };
+    
+    protected override getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.TERRAIN_OBJECTS;
     }
 }

@@ -6,7 +6,7 @@ import { Entity } from '../Entity';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PhysicsSystem } from '../../physics/PhysicsSystem';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import type { AnimationDefinition } from '../../types/animationTypes';
 import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
 
 type SpiderState = 'crawling' | 'descending' | 'ascending' | 'waiting';
@@ -350,21 +350,6 @@ export class Spider extends Enemy implements EntityInitializer {
         ];
     }
     
-    /**
-     * Get palette definition for spider
-     */
-    protected override getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x01,
-                    0x31,
-                    0x50
-                ]
-            }
-        };
-    }
     
     protected override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.ENEMY_SPECIAL;
