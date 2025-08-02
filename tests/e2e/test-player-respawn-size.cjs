@@ -158,11 +158,35 @@ async function runTest() {
             console.log('✅ Player respawned near spawn position');
         }
         
-        // Verify player is large after respawn
-        t.assert(!afterRespawn.player.isSmall, 'Player should be large after respawn (Issue #106 fix verification)');
-        
-        t.assert(afterRespawn.player.width === initialSize.width && afterRespawn.player.height === initialSize.height, 
-            `Player size after respawn. Expected: ${initialSize.width}x${initialSize.height}, Got: ${afterRespawn.player.width}x${afterRespawn.player.height}`);
+        // Wait for respawn if player is null (IntermissionState)
+        if (!afterRespawn.player) {
+            console.log('Player is null, waiting for respawn...');
+            await t.wait(2500); // Wait for IntermissionState to complete
+            
+            // Check again after wait
+            const afterWait = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                const player = state?.player || state?.entityManager?.getPlayer?.();
+                return {
+                    player: player ? {
+                        width: player.width,
+                        height: player.height,
+                        isSmall: player.isSmall
+                    } : null
+                };
+            });
+            
+            t.assert(afterWait.player, 'Player should exist after respawn');
+            t.assert(!afterWait.player.isSmall, 'Player should be large after respawn (Issue #106 fix verification)');
+            t.assert(afterWait.player.width === initialSize.width && afterWait.player.height === initialSize.height, 
+                `Player size after respawn. Expected: ${initialSize.width}x${initialSize.height}, Got: ${afterWait.player.width}x${afterWait.player.height}`);
+        } else {
+            // Verify player is large after respawn
+            t.assert(!afterRespawn.player.isSmall, 'Player should be large after respawn (Issue #106 fix verification)');
+            
+            t.assert(afterRespawn.player.width === initialSize.width && afterRespawn.player.height === initialSize.height, 
+                `Player size after respawn. Expected: ${initialSize.width}x${initialSize.height}, Got: ${afterRespawn.player.width}x${afterRespawn.player.height}`);
+        }
         
         console.log('✅ Player respawned with correct large size');
         
@@ -182,7 +206,7 @@ async function runTest() {
             return player ? { isSmall: player.isSmall } : null;
         });
         
-        if (!smallAgain.isSmall) {
+        if (!smallAgain || !smallAgain.isSmall) {
             console.log('Player did not become small, retrying...');
             await t.movePlayer('left', 300);
             await t.wait(200);

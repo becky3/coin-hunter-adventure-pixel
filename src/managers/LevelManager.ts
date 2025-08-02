@@ -207,6 +207,26 @@ export class LevelManager {
         this.timeLimit = 300;
     }
     
+    async reloadCurrentLevel(): Promise<LevelData | null> {
+        if (!this.currentLevel) {
+            Logger.warn('[LevelManager] No current level to reload');
+            return null;
+        }
+        
+        Logger.log(`[LevelManager] Reloading current level: ${this.currentLevel}`);
+        
+        const levelToReload = this.currentLevel;
+        
+        this.tileMap = [];
+        this.levelData = null;
+        this.levelWidth = 0;
+        this.levelHeight = 0;
+        
+        await this.loadLevel(levelToReload);
+        
+        return this.levelData;
+    }
+    
     renderTileMap(_renderer: unknown): void {
     }
     

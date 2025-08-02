@@ -16,6 +16,7 @@ import { GameStateManager } from '../states/GameStateManager';
 import { MenuState } from '../states/MenuState';
 import { PlayState } from '../states/PlayState';
 import { SoundTestState } from '../states/SoundTestState';
+import { IntermissionState } from '../states/IntermissionState';
 import { Logger } from '../utils/Logger';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { URLParams } from '../utils/urlParams';
@@ -203,6 +204,7 @@ export class GameCore {
         stateManager.registerState(new MenuState(gameProxy));
         stateManager.registerState(new PlayState(gameProxy));
         stateManager.registerState(new SoundTestState(gameProxy));
+        stateManager.registerState(new IntermissionState(gameProxy));
     }
 
     private createGameProxy(): {
@@ -256,8 +258,13 @@ export class GameCore {
             if (!stageId) {
                 throw new Error('No stage ID specified in URL parameters (use ?s=stage-name)');
             }
-            Logger.log('GameCore: Skipping title, starting directly with stage:', stageId);
-            stateManager.setState(GameStates.PLAY, { level: stageId });
+            Logger.log('GameCore: Skipping title, starting with intermission for stage:', stageId);
+            stateManager.setState(GameStates.INTERMISSION, { 
+                type: 'start',
+                level: stageId,
+                lives: 3,
+                score: 0
+            });
         } else {
             Logger.log('[Performance] Setting initial state to menu:', performance.now().toFixed(2) + 'ms');
             stateManager.setState(GameStates.MENU);

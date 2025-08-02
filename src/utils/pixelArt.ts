@@ -1,4 +1,6 @@
 
+import { Logger } from './Logger';
+
 type PixelData = number[][];
 type ColorMap = { [key: number]: string | null };
 
@@ -152,6 +154,7 @@ class PixelArtRenderer {
 
     addStageDependentSprite(name: string, pixelData: PixelData): void {
         this.stageDependentSprites.set(name, pixelData);
+        Logger.log(`[PixelArtRenderer] Added stage-dependent sprite: ${name}, total sprites: ${this.stageDependentSprites.size}`);
     }
 
     addStageDependentAnimation(name: string, frames: PixelData[], frameDuration = 100): void {

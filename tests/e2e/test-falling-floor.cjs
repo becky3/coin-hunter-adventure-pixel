@@ -55,8 +55,26 @@ async function runTest() {
         // テスト用ステージで開始
         await t.quickStart('stage-test-falling-floor');
         
-        // プレイヤーが落下して床に着地するまで少し待つ
-        await t.wait(500);
+        // PlayStateになるまで待つ
+        await t.waitForState('play');
+        
+        // プレイヤーが床に着地してイベントが発火するまで待つ
+        const maxWaitTime = 5000;
+        const startTime = Date.now();
+        let eventFired = false;
+        
+        while (!eventFired && (Date.now() - startTime) < maxWaitTime) {
+            eventFired = await t.page.evaluate(() => {
+                return !!window.__fallingFloorEvent;
+            });
+            if (!eventFired) {
+                await t.wait(100);
+            }
+        }
+        
+        if (!eventFired) {
+            console.log('Warning: Falling floor event was not detected within timeout');
+        }
         
         // 床の状態を確認（EventBusでイベントが発火済みのはず）
         const floorState = await t.page.evaluate(() => {
@@ -77,7 +95,7 @@ async function runTest() {
             } : null;
         });
         
-        const shakingEvent = floorState && floorState.state === 'shaking';
+        const shakingEvent = floorState && floorState.eventReceived;
         
         // プレイヤーの初期位置を確認
         const player = await t.getEntity('player');

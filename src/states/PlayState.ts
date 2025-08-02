@@ -1,6 +1,6 @@
 import { GameState, GameStateManager } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
-import { GameStates } from '../types/GameStateTypes';
+import { GameStates, PlayStateParams } from '../types/GameStateTypes';
 import { InputSystem, InputEvent } from '../core/InputSystem';
 import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
@@ -238,20 +238,43 @@ export class PlayState implements GameState {
         }
     }
 
-    async enter(params: { level?: string; enableProgression?: boolean; playerState?: { score?: number; lives?: number; powerUps?: string[]; isSmall?: boolean } } = {}): Promise<void> {
+    async enter(params: PlayStateParams = {}): Promise<void> {
         const enterStartTime = performance.now();
         Logger.log('[PlayState] enter() called with params:', params);
         Logger.log('[PlayState] Starting initialization...');
 
         this.resetGameState();
+        
+        if (params.playerState?.lives !== undefined) {
+            this.lives = params.playerState.lives;
+        }
 
-        await this.preloadSprites();
+        try {
+            await this.preloadSprites();
+            Logger.log('[PlayState] preloadSprites completed');
+        } catch (error) {
+            Logger.error('[PlayState] Failed to preload sprites:', error);
+            throw error;
+        }
+        
+        if (this.game.renderer?.pixelArtRenderer) {
+            const criticalSprites = ['environment/tree1', 'environment/cloud1', 'environment/cloud2'];
+            for (const sprite of criticalSprites) {
+                if (!this.game.renderer.pixelArtRenderer.stageDependentSprites.has(sprite)) {
+                    Logger.error(`[PlayState] Critical sprite ${sprite} not found in renderer after preload`);
+                }
+            }
+        }
 
         const levelName = params.level;
         if (!levelName) {
             throw new Error('No level specified in PlayState parameters');
         }
         
+        Logger.log(`[PlayState] isRespawn parameter: ${params.isRespawn}`);
+        Logger.log(`[PlayState] Current level in LevelManager: ${this.levelManager.getCurrentLevel()}`);
+        
+        Logger.log(`[PlayState] Initializing level: ${levelName}, isRespawn: ${params.isRespawn}`);
         const levelData = await this.gameController.initializeLevel(levelName);
         
         if (!levelData) {
@@ -421,6 +444,12 @@ export class PlayState implements GameState {
     }
 
     exit(): void {
+        Logger.log(`[PlayState] exit() called, isHandlingDeath: ${this.isHandlingDeath}`);
+        
+        const wasHandlingDeath = this.isHandlingDeath;
+        const currentLevel = wasHandlingDeath ? this.levelManager.getCurrentLevel() : null;
+        Logger.log(`[PlayState] Current level before reset: ${currentLevel}`);
+        
         this.resetGameState();
 
         if (this.stageClearTimer) {
@@ -440,9 +469,15 @@ export class PlayState implements GameState {
         }
 
         this.entityManager.clear();
-        this.levelManager.reset();
         this.cameraController.reset();
         this.hudManager.reset();
+        
+        if (!wasHandlingDeath) {
+            Logger.log('[PlayState] Resetting level manager (not handling death)');
+            this.levelManager.reset();
+        } else {
+            Logger.log('[PlayState] Skipping level manager reset (was handling death)');
+        }
     }
 
     private setupInputListeners(): void {
@@ -574,8 +609,11 @@ export class PlayState implements GameState {
                     isSmall: player.getIsSmall()
                 } : null;
                 
-                this.game.stateManager.setState(GameStates.PLAY, { 
+                this.game.stateManager.setState(GameStates.INTERMISSION, { 
+                    type: 'start',
                     level: nextLevel,
+                    lives: this.lives,
+                    score: this.hudManager.getHUDData().score,
                     playerState 
                 });
             } else {
@@ -667,13 +705,36 @@ export class PlayState implements GameState {
             Logger.log('[PlayState] No lives left, triggering game over');
             this.gameOver();
         } else {
-            const spawn = this.levelManager.getPlayerSpawn();
-            Logger.log(`[PlayState] Respawning player at: ${spawn.x}, ${spawn.y}`);
-            player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
+            if (this.game.musicSystem) {
+                this.game.musicSystem.stopBGM();
+            }
             
-            setTimeout(() => {
-                this.isHandlingDeath = false;
-            }, 100);
+            const currentLevel = this.levelManager.getCurrentLevel();
+            const levelData = this.levelManager.getLevelData();
+            const score = this.hudManager.getHUDData().score;
+            
+            if (!currentLevel) {
+                throw new Error('[PlayState] Cannot transition to IntermissionState: missing currentLevel');
+            }
+            if (!levelData) {
+                throw new Error('[PlayState] Cannot transition to IntermissionState: missing levelData');
+            }
+            if (!levelData.stageType) {
+                throw new Error('[PlayState] Cannot transition to IntermissionState: missing stageType in levelData');
+            }
+            
+            Logger.log('[PlayState] Transitioning to IntermissionState for respawn');
+            this.game.stateManager.setState(GameStates.INTERMISSION, {
+                type: 'death',
+                level: currentLevel,
+                stageType: levelData.stageType,
+                lives: this.lives,
+                score: score,
+                playerState: {
+                    powerUps: [],
+                    isSmall: false
+                }
+            });
         }
     }
 

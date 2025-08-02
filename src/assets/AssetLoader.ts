@@ -43,6 +43,7 @@ export class AssetLoader {
     public renderer?: PixelArtRenderer;
     private pixelRenderer?: PixelRenderer;
     private currentStageType: StageType = 'grassland';
+    private currentStageData: { level: string; stageType: StageType } | null = null;
 
     constructor() {
         this.spriteLoader = new SpriteLoader();
@@ -172,6 +173,7 @@ export class AssetLoader {
     
     private async _loadSpriteInternal(category: string, name: string): Promise<LoadedAsset> {
         const startTime = performance.now();
+        Logger.log(`[AssetLoader] Loading sprite ${category}/${name}, renderer exists: ${!!this.renderer}`);
         const spriteData = await this.spriteLoader.loadSprite(category, name);
         
         if (!spriteData || !spriteData.data) {
@@ -186,6 +188,10 @@ export class AssetLoader {
             
             const endTime = performance.now();
             Logger.log(`[AssetLoader] Loaded sprite ${spriteKey} in ${(endTime - startTime).toFixed(2)}ms`);
+            
+            if (!this.renderer.stageDependentSprites.has(spriteKey)) {
+                Logger.error(`[AssetLoader] Failed to add sprite ${spriteKey} to stageDependentSprites`);
+            }
         } else {
             Logger.warn(`[AssetLoader] Renderer not available when loading sprite ${spriteKey}`);
         }
@@ -248,5 +254,39 @@ export class AssetLoader {
         this.loadingPromises.clear();
         this.loadedCount = 0;
         this.totalAssets = 0;
+    }
+    
+    async loadStageData(levelName: string): Promise<{ stageType: StageType }> {
+        if (this.currentStageData && this.currentStageData.level === levelName) {
+            Logger.log(`[AssetLoader] Stage data for ${levelName} already loaded`);
+            return { stageType: this.currentStageData.stageType };
+        }
+        
+        try {
+            const response = await fetch(`/src/levels/data/${levelName}.json`);
+            if (!response.ok) {
+                throw new Error(`Failed to load stage data: ${response.status}`);
+            }
+            const stageData = await response.json();
+            
+            if (!stageData.stageType) {
+                throw new Error(`Stage ${levelName} is missing stageType property`);
+            }
+            
+            this.currentStageData = { 
+                level: levelName, 
+                stageType: stageData.stageType as StageType 
+            };
+            Logger.log(`[AssetLoader] Stage data for ${levelName} loaded: stageType=${this.currentStageData.stageType}`);
+            
+            return { stageType: this.currentStageData.stageType };
+        } catch (error) {
+            Logger.error(`[AssetLoader] Failed to load stage data for ${levelName}:`, error);
+            throw error;
+        }
+    }
+    
+    getCurrentStageType(): StageType | null {
+        return this.currentStageData ? this.currentStageData.stageType : null;
     }
 }

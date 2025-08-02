@@ -19,6 +19,12 @@ async function runTest() {
         // Use quickStart for simplified initialization
         await t.quickStart('0-5');
         
+        // quickStartはIntermissionStateを経由するため、PlayStateになるまで待つ
+        await t.waitForState('play');
+        
+        // プレイヤーが作成されるまで待つ
+        await t.wait(500);
+        
         console.log('\n=== Testing PowerUp Features ===');
         
         // === PART 1: Shield PowerUp System ===
@@ -222,6 +228,37 @@ async function runTest() {
         
         // === PART 4: PowerUp Manager Integration ===
         console.log('\n--- Part 4: PowerUp Manager Integration ---');
+        
+        // プレイヤーが落下死した場合、IntermissionStateからPlayStateに戻るまで待つ
+        const currentState = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            return state ? state.name : null;
+        });
+        
+        if (currentState === 'intermission') {
+            console.log('IntermissionState detected, waiting for PlayState...');
+            await t.waitForState('play');
+            
+            // プレイヤーが実際に存在し、操作可能になるまで待つ
+            let playerReady = false;
+            const maxWaitTime = 5000;
+            const startTime = Date.now();
+            
+            while (!playerReady && (Date.now() - startTime) < maxWaitTime) {
+                playerReady = await t.page.evaluate(() => {
+                    const state = window.game?.stateManager?.currentState;
+                    const player = state?.player;
+                    return player && player.powerUpManager && player.x !== undefined;
+                });
+                if (!playerReady) {
+                    await t.wait(100);
+                }
+            }
+            
+            if (!playerReady) {
+                throw new Error('Player not ready after respawn');
+            }
+        }
         
         // Check PowerUpManager state
         const powerUpManagerState = await t.page.evaluate(() => {

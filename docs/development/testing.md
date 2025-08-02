@@ -126,6 +126,8 @@ module.exports = runTest;
 await t.quickStart('1-1');  // ステージ1-1で開始
 ```
 
+**注意**: quickStartは`skip_title=true`パラメータを使用するため、IntermissionStateを経由してからPlayStateに遷移します。テストではこの遷移を考慮する必要があります。
+
 ### getEntity(type, options)
 任意のエンティティを取得（2025-07-22追加）
 ```javascript
@@ -160,6 +162,7 @@ const slime = await t.getEntity('Slime', { single: true });
 | test-falling-floor.cjs | 落ちる床ギミック（振動→落下） | ~15秒 |
 | test-fall-damage.cjs | 落下ダメージテスト | ~27秒 |
 | test-stage-validation.cjs | ステージデータのバリデーション | ~2秒 |
+| test-death-and-respawn.cjs | プレイヤー死亡時のステージリセット・IntermissionState確認 | ~15秒 |
 | その他多数 | 各種機能テスト | - |
 
 ### 手動実行専用テスト
@@ -195,6 +198,27 @@ const slime = await t.getEntity('Slime', { single: true });
 ### Claudeでのテスト実行
 ```bash
 npm run test:claude  # タイムアウト10分で実行
+```
+
+### IntermissionState関連の問題
+
+#### プレイヤーがnullになる
+quickStartやプレイヤー死亡後、IntermissionState中はプレイヤーが存在しません。以下のように対処します：
+
+```javascript
+// IntermissionStateからPlayStateへの遷移を待つ
+await t.waitForState('play');
+
+// プレイヤーの準備ができるまで待つ
+const player = await t.waitForEntity('player');
+```
+
+#### タイムアウトエラー
+IntermissionStateは2秒間表示されるため、死亡後のイベントを待つ場合はタイムアウトを延長する必要があります：
+
+```javascript
+// player:respawnedイベントを待つ（タイムアウト10秒）
+await t.waitForEvent('player:respawned', 10000);
 ```
 
 **注意**: `test:claude`コマンドは以下の機能を含みます：
