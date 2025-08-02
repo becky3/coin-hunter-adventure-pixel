@@ -5,7 +5,8 @@ export const GameStates = {
     MENU: 'menu',
     PLAY: 'play',
     SOUND_TEST: 'soundtest',
-    TEST_PLAY: 'testplay'
+    TEST_PLAY: 'testplay',
+    INTERMISSION: 'intermission'
 } as const;
 
 /**

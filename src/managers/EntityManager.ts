@@ -412,6 +412,25 @@ export class EntityManager {
         this.eventBus.emit('entities:cleared');
     }
     
+    async resetToInitialState(levelManager: { getEntities: () => Array<{ type: string; x: number; y: number }> }): Promise<void> {
+        Logger.log('[EntityManager] Resetting to initial state');
+        
+        this.enemies = [];
+        this.items = [];
+        this.platforms = [];
+        this.projectiles = [];
+        
+        this.physicsSystem.clearCollisionPairs();
+        
+        const entities = levelManager.getEntities();
+        if (entities.length > 0) {
+            this.createEntitiesFromConfig(entities);
+            Logger.log(`[EntityManager] Re-created ${entities.length} entities from level data`);
+        }
+        
+        this.eventBus.emit('entities:reset');
+    }
+    
     /**
      * Dynamically spawn an enemy at the specified tile coordinates
      */

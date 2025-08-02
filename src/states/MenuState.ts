@@ -279,14 +279,14 @@ export class MenuState extends BaseUIState {
                 
                 const selectedStage = debugSelectedStage || stageId;
                 
-                if (selectedStage) {
-                    Logger.log('MenuState', `Starting stage: ${selectedStage} (source: ${debugSelectedStage ? 'debug overlay' : 'URL parameter'}`);
-                    this.game.stateManager.setState(GameStates.PLAY, { 
-                        level: selectedStage
-                    });
-                } else {
-                    this.game.stateManager.setState(GameStates.PLAY);
-                }
+                const level = selectedStage || '1-1';
+                Logger.log('MenuState', `Starting stage: ${level} (source: ${debugSelectedStage ? 'debug overlay' : selectedStage ? 'URL parameter' : 'default'}`);
+                this.game.stateManager.setState(GameStates.INTERMISSION, { 
+                    type: 'start',
+                    level: level,
+                    lives: 3,
+                    score: 0
+                });
             } catch (error) {
                 Logger.error('MenuState', 'Error transitioning to play state:', error);
             }

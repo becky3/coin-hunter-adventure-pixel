@@ -160,6 +160,7 @@ const slime = await t.getEntity('Slime', { single: true });
 | test-falling-floor.cjs | 落ちる床ギミック（振動→落下） | ~15秒 |
 | test-fall-damage.cjs | 落下ダメージテスト | ~27秒 |
 | test-stage-validation.cjs | ステージデータのバリデーション | ~2秒 |
+| test-death-and-respawn.cjs | プレイヤー死亡時のステージリセット確認 | ~15秒 |
 | その他多数 | 各種機能テスト | - |
 
 ### 手動実行専用テスト

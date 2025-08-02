@@ -238,12 +238,16 @@ export class PlayState implements GameState {
         }
     }
 
-    async enter(params: { level?: string; enableProgression?: boolean; playerState?: { score?: number; lives?: number; powerUps?: string[]; isSmall?: boolean } } = {}): Promise<void> {
+    async enter(params: { level?: string; enableProgression?: boolean; playerState?: { score?: number; lives?: number; powerUps?: string[]; isSmall?: boolean }; isRespawn?: boolean } = {}): Promise<void> {
         const enterStartTime = performance.now();
         Logger.log('[PlayState] enter() called with params:', params);
         Logger.log('[PlayState] Starting initialization...');
 
         this.resetGameState();
+        
+        if (params.playerState?.lives !== undefined) {
+            this.lives = params.playerState.lives;
+        }
 
         await this.preloadSprites();
 
@@ -252,7 +256,31 @@ export class PlayState implements GameState {
             throw new Error('No level specified in PlayState parameters');
         }
         
-        const levelData = await this.gameController.initializeLevel(levelName);
+        let levelData;
+        if (params.isRespawn) {
+            Logger.log('[PlayState] Respawning - reloading current level');
+            levelData = await this.levelManager.reloadCurrentLevel();
+            if (levelData) {
+                await this.entityManager.resetToInitialState(this.levelManager);
+                
+                const spawn = this.levelManager.getPlayerSpawn();
+                this.entityManager.createPlayer(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
+                
+                const levelLoader = this.levelManager.getLevelLoader();
+                if (levelLoader) {
+                    const goalPosition = levelLoader.getGoalPosition(levelData as unknown as StageData);
+                    if (goalPosition) {
+                        this.entityManager.createEntity({
+                            type: 'goal',
+                            x: goalPosition.x,
+                            y: goalPosition.y
+                        });
+                    }
+                }
+            }
+        } else {
+            levelData = await this.gameController.initializeLevel(levelName);
+        }
         
         if (!levelData) {
             throw new Error(`Failed to load level: ${levelName}`);
@@ -667,13 +695,24 @@ export class PlayState implements GameState {
             Logger.log('[PlayState] No lives left, triggering game over');
             this.gameOver();
         } else {
-            const spawn = this.levelManager.getPlayerSpawn();
-            Logger.log(`[PlayState] Respawning player at: ${spawn.x}, ${spawn.y}`);
-            player.respawn(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
+            if (this.game.musicSystem) {
+                this.game.musicSystem.stopBGM();
+            }
             
-            setTimeout(() => {
-                this.isHandlingDeath = false;
-            }, 100);
+            const currentLevel = this.levelManager.getCurrentLevel();
+            const score = this.hudManager.getHUDData().score;
+            
+            Logger.log('[PlayState] Transitioning to IntermissionState for respawn');
+            this.game.stateManager.setState(GameStates.INTERMISSION, {
+                type: 'death',
+                level: currentLevel,
+                lives: this.lives,
+                score: score,
+                playerState: {
+                    powerUps: [],
+                    isSmall: false
+                }
+            });
         }
     }
 
