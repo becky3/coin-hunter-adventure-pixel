@@ -19,6 +19,7 @@ import { SoundTestState } from '../states/SoundTestState';
 import { Logger } from '../utils/Logger';
 import { ResourceLoader } from '../config/ResourceLoader';
 import { URLParams } from '../utils/urlParams';
+import { GameStates } from '../types/GameStateTypes';
 
 import { InputSystemAdapter } from '../systems/adapters/InputSystemAdapter';
 import { StateSystemAdapter } from '../systems/adapters/StateSystemAdapter';
@@ -256,10 +257,10 @@ export class GameCore {
                 throw new Error('No stage ID specified in URL parameters (use ?s=stage-name)');
             }
             Logger.log('GameCore: Skipping title, starting directly with stage:', stageId);
-            stateManager.setState('play', { level: stageId });
+            stateManager.setState(GameStates.PLAY, { level: stageId });
         } else {
             Logger.log('[Performance] Setting initial state to menu:', performance.now().toFixed(2) + 'ms');
-            stateManager.setState('menu');
+            stateManager.setState(GameStates.MENU);
             Logger.log('GameCore: Initial state set to menu');
         }
     }

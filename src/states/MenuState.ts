@@ -5,6 +5,7 @@ import { InputEvent } from '../core/InputSystem';
 import { URLParams } from '../utils/urlParams';
 import { Logger } from '../utils/Logger';
 import { UI_PALETTE_INDICES } from '../utils/pixelArtPalette';
+import { GameStates } from '../types/GameStateTypes';
 
 interface MenuOption {
     text: string;
@@ -15,7 +16,7 @@ interface MenuOption {
  * Game state for menu mode
  */
 export class MenuState extends BaseUIState {
-    public name = 'menu';
+    public name = GameStates.MENU;
     private selectedOption: number;
     private options: MenuOption[];
     private logoY: number;
@@ -280,11 +281,11 @@ export class MenuState extends BaseUIState {
                 
                 if (selectedStage) {
                     Logger.log('MenuState', `Starting stage: ${selectedStage} (source: ${debugSelectedStage ? 'debug overlay' : 'URL parameter'}`);
-                    this.game.stateManager.setState('play', { 
+                    this.game.stateManager.setState(GameStates.PLAY, { 
                         level: selectedStage
                     });
                 } else {
-                    this.game.stateManager.setState('play');
+                    this.game.stateManager.setState(GameStates.PLAY);
                 }
             } catch (error) {
                 Logger.error('MenuState', 'Error transitioning to play state:', error);
@@ -309,7 +310,7 @@ export class MenuState extends BaseUIState {
             if (this.game.musicSystem) {
                 this.game.musicSystem.playSEFromPattern('button');
             }
-            this.game.stateManager.setState('soundtest');
+            this.game.stateManager.setState(GameStates.SOUND_TEST);
             break;
         }
     }

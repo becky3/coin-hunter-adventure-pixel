@@ -4,6 +4,7 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { InputEvent } from '../core/InputSystem';
 import { UI_PALETTE_INDICES } from '../utils/pixelArtPalette';
 import { Logger } from '../utils/Logger';
+import { GameStates } from '../types/GameStateTypes';
 
 interface MenuItem {
     type: 'bgm' | 'se' | 'quit';
@@ -15,7 +16,7 @@ interface MenuItem {
  * Game state for sound test mode
  */
 export class SoundTestState extends BaseUIState {
-    public name = 'soundtest';
+    public name = GameStates.SOUND_TEST;
     private selectedRow: number;
     private menuItems: MenuItem[];
     private currentPlayingBGM: string | null;
@@ -163,7 +164,7 @@ export class SoundTestState extends BaseUIState {
             if (this.game.musicSystem) {
                 this.game.musicSystem.playSEFromPattern('button');
             }
-            this.game.stateManager.setState('menu');
+            this.game.stateManager.setState(GameStates.MENU);
             return;
         }
         

@@ -42,6 +42,23 @@ parent: はじめに
 2. 保存すると自動的にブラウザがリロード
 3. 変更が反映されることを確認
 
+### コード例：ステート管理
+
+ゲームステートの切り替えは型安全に行います：
+
+```typescript
+// src/types/GameStateTypes.tsで定義された定数を使用
+import { GameStates } from '../types/GameStateTypes';
+
+// メニューステートに遷移
+this.game.stateManager.setState(GameStates.MENU);
+
+// プレイステートに遷移（パラメータ付き）
+this.game.stateManager.setState(GameStates.PLAY, { level: 'stage1' });
+```
+
+文字列リテラルではなく定数を使用することで、IDE補完とタイプチェックが有効になります。
+
 ## 次のステップ
 
 - [開発ガイドライン](../development/guidelines.md) - コーディング規約やベストプラクティス

@@ -4,6 +4,7 @@ import { PixelRenderer } from '../rendering/PixelRenderer';
 import { Logger } from '../utils/Logger';
 import { InputSystem } from '../core/InputSystem';
 import { TEST_TILE_PALETTE } from '../rendering/CommonPalettes';
+import { GameStates } from '../types/GameStateTypes';
 
 interface TestPlayer {
     x: number;
@@ -23,7 +24,7 @@ interface Game {
  * Game state for testplay mode
  */
 export class TestPlayState implements GameState {
-    public name = 'testplay';
+    public name = GameStates.TEST_PLAY;
     private game: Game;
     private player: TestPlayer | null;
     private tileMap: number[][];
