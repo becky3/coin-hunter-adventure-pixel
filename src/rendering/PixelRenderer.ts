@@ -70,7 +70,10 @@ export class PixelRenderer {
         
         if (backgroundPaletteIndex >= 0) {
             const color = paletteSystem.getColor('background', backgroundPaletteIndex, colorIndex);
-            this.ctx.fillStyle = color || '#000000';
+            if (!color) {
+                throw new Error(`[PixelRenderer] Invalid color for background palette index ${backgroundPaletteIndex}, color index ${colorIndex}`);
+            }
+            this.ctx.fillStyle = color;
             this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
         } else {
             this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -125,27 +128,22 @@ export class PixelRenderer {
             else if (this.assetLoader) {
                 const loadedSprite = this.assetLoader.loadedAssets.get(sprite);
                 if (!loadedSprite) {
-                    Logger.warn(`[PixelRenderer] Sprite '${sprite}' not loaded, attempting to load now`);
-                    this.assetLoader.loadSprite(...sprite.split('/') as [string, string]);
-                    return;
+                    throw new Error(`[PixelRenderer] Sprite '${sprite}' not loaded`);
                 }
                 const spriteData = loadedSprite.imageData || loadedSprite.canvas;
                 if (!spriteData) {
-                    Logger.warn(`[PixelRenderer] Loaded sprite '${sprite}' has no imageData or canvas`);
-                    return;
+                    throw new Error(`[PixelRenderer] Loaded sprite '${sprite}' has no imageData or canvas`);
                 }
                 finalSprite = spriteData;
             } else {
-                Logger.error('[PixelRenderer] No asset loader available to load sprite');
-                return;
+                throw new Error('[PixelRenderer] No asset loader available to load sprite');
             }
         } else {
             finalSprite = sprite;
         }
 
         if (!finalSprite) {
-            Logger.error(`[PixelRenderer] Sprite not found: ${sprite}`);
-            return;
+            throw new Error(`[PixelRenderer] Sprite not found: ${sprite}`);
         }
 
         const spriteWidth = 'width' in finalSprite ? finalSprite.width : 0;
@@ -179,6 +177,10 @@ export class PixelRenderer {
                 0, 0, spriteWidth, spriteHeight,
                 drawX, drawY, spriteWidth * this.scale, spriteHeight * this.scale
             );
+        } else if ('data' in finalSprite && Array.isArray(finalSprite.data)) {
+            this._renderSpriteData(finalSprite as SpriteData, drawX, drawY, paletteIndex, flipX);
+        } else {
+            throw new Error(`[PixelRenderer] Unknown sprite type: ${typeof finalSprite}`);
         }
         
         this.ctx.restore();
@@ -355,6 +357,30 @@ export class PixelRenderer {
         tempCtx.putImageData(imageData, 0, 0);
         
         return tempCanvas;
+    }
+    
+    private _renderSpriteData(sprite: SpriteData, drawX: number, drawY: number, paletteIndex: number, flipX: boolean): void {
+        for (let py = 0; py < sprite.height; py++) {
+            for (let px = 0; px < sprite.width; px++) {
+                const row = sprite.data[py];
+                if (!row) continue;
+                const colorIndex = row[px];
+                
+                if (colorIndex === 0 || colorIndex === undefined) continue;
+                
+                const color = paletteSystem.getColor('sprite', paletteIndex, colorIndex);
+                if (!color) {
+                    throw new Error(`[PixelRenderer] No color found for sprite palette ${paletteIndex}, color index ${colorIndex}`);
+                }
+                
+                const actualX = flipX ? sprite.width - px - 1 : px;
+                const pixelX = drawX + actualX * this.scale;
+                const pixelY = drawY + py * this.scale;
+                
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect(pixelX, pixelY, this.scale, this.scale);
+            }
+        }
     }
     
     setDebugMode(enabled: boolean): void {

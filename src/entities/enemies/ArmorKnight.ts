@@ -5,7 +5,8 @@ import { ResourceLoader } from '../../config/ResourceLoader';
 import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import type { AnimationDefinition } from '../../types/animationTypes';
+import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
 
 /**
  * Heavily armored enemy that cannot be defeated by jumping
@@ -229,19 +230,8 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
         ];
     }
     
-    /**
-     * Get palette definition for armor knight
-     */
-    protected override getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x01,
-                    0x42,
-                    0x43
-                ]
-            }
-        };
+    
+    protected override getSpritePaletteIndex(): number {
+        return SpritePaletteIndex.ENEMY_SPECIAL;
     }
 }

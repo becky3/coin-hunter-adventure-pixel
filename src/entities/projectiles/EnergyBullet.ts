@@ -4,7 +4,7 @@ import { Logger } from '../../utils/Logger';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
 import { PowerGloveConfig } from '../../config/PowerGloveConfig';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import type { AnimationDefinition } from '../../types/animationTypes';
 import type { BaseEntityConfig } from '../../config/ResourceConfig';
 import { PhysicsLayer } from '../../physics/PhysicsSystem';
 
@@ -144,19 +144,4 @@ export class EnergyBullet extends Entity implements EntityInitializer {
         ];
     }
     
-    /**
-     * Get palette definition for energy bullet
-     */
-    protected override getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x01,
-                    0x52,
-                    0x51
-                ]
-            }
-        };
-    }
 }

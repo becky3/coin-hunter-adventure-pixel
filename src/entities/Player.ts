@@ -1,5 +1,5 @@
 import { Entity, CollisionInfo } from './Entity';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../types/animationTypes';
+import type { AnimationDefinition } from '../types/animationTypes';
 import { InputSystem } from '../core/InputSystem';
 import { MusicSystem } from '../audio/MusicSystem.js';
 import { PixelRenderer } from '../rendering/PixelRenderer';
@@ -536,11 +536,9 @@ export class Player extends Entity {
             const actualState = this.isSmall ? `${this._animState}_small` : this._animState;
             this.entityAnimationManager.setState(actualState);
             
-            if (this.hasPowerGlove) {
-                this.entityAnimationManager.setPaletteVariant('powerGlove');
-            } else {
-                this.entityAnimationManager.setPaletteVariant('default');
-            }
+            this.entityAnimationManager.setPaletteIndex(
+                this.hasPowerGlove ? SpritePaletteIndex.CHARACTER_POWERGLOVE : SpritePaletteIndex.CHARACTER
+            );
             
             this.entityAnimationManager.render(renderer, this.x, this.y, this.flipX);
         }
@@ -635,7 +633,9 @@ export class Player extends Entity {
         this.updateAnimationState();
         
         if (this.entityAnimationManager) {
-            this.entityAnimationManager.setPaletteVariant(hasGlove ? 'powerGlove' : 'default');
+            this.entityAnimationManager.setPaletteIndex(
+                hasGlove ? SpritePaletteIndex.CHARACTER_POWERGLOVE : SpritePaletteIndex.CHARACTER
+            );
         }
     }
     
@@ -719,31 +719,6 @@ export class Player extends Entity {
         ];
     }
     
-    /**
-     * Get palette definition for player
-     */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x11,
-                    0x43,
-                    0x01
-                ]
-            },
-            variants: {
-                powerGlove: {
-                    colors: [
-                        null,
-                        0x41,
-                        0x43,
-                        0x01
-                    ]
-                }
-            }
-        };
-    }
     
     protected override getSpritePaletteIndex(): number {
         return this.hasPowerGlove ? SpritePaletteIndex.CHARACTER_POWERGLOVE : SpritePaletteIndex.CHARACTER;

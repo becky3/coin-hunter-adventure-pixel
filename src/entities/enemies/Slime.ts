@@ -3,7 +3,7 @@ import { PixelRenderer } from '../../rendering/PixelRenderer';
 import { ResourceLoader } from '../../config/ResourceLoader';
 import { EntityInitializer } from '../../interfaces/EntityInitializer';
 import { EntityManager } from '../../managers/EntityManager';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import type { AnimationDefinition } from '../../types/animationTypes';
 import { SpritePaletteIndex } from '../../utils/pixelArtPalette';
 
 /**
@@ -116,21 +116,6 @@ export class Slime extends Enemy implements EntityInitializer {
         ];
     }
     
-    /**
-     * Get palette definition for slime
-     */
-    protected override getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x60,
-                    0x62,
-                    0x00
-                ]
-            }
-        };
-    }
     
     protected override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.ENEMY_BASIC;

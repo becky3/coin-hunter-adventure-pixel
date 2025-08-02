@@ -2,7 +2,7 @@ import { PowerUpItem } from './PowerUpItem';
 import { PowerUpType, PowerUpConfig } from '../../types/PowerUpTypes';
 import { Logger } from '../../utils/Logger';
 import { ResourceLoader } from '../../config/ResourceLoader';
-import type { AnimationDefinition, EntityPaletteDefinition } from '../../types/animationTypes';
+import type { AnimationDefinition } from '../../types/animationTypes';
 
 /**
  * Power Glove power-up that grants ranged attack ability
@@ -67,19 +67,4 @@ export class PowerGlove extends PowerUpItem {
         ];
     }
     
-    /**
-     * Get palette definition for power glove
-     */
-    protected getPaletteDefinition(): EntityPaletteDefinition {
-        return {
-            default: {
-                colors: [
-                    null,
-                    0x01,
-                    0x52,
-                    0x51
-                ]
-            }
-        };
-    }
 }
