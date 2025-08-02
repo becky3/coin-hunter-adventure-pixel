@@ -66,6 +66,26 @@ async function runTest() {
                         }
                     };
                     
+                    // Check for IntermissionState and wait for PlayState
+                    let intermissionCheckInterval;
+                    intermissionCheckInterval = setInterval(() => {
+                        const state = window.game?.stateManager?.currentState;
+                        if (state?.name === 'intermission' && deathDetected) {
+                            console.log('[Test] IntermissionState detected after death');
+                            clearInterval(intermissionCheckInterval);
+                            // Wait for PlayState after IntermissionState
+                            setTimeout(() => {
+                                const playState = window.game?.stateManager?.currentState;
+                                if (playState?.name === 'play' && !resolved) {
+                                    console.log('[Test] PlayState resumed after IntermissionState');
+                                    resolved = true;
+                                    if (gameOverInterval) clearInterval(gameOverInterval);
+                                    resolve({ result: 'respawned' });
+                                }
+                            }, 2500); // Wait for IntermissionState to complete
+                        }
+                    }, 100);
+                    
                     const checkGameOver = () => {
                         const state = window.game?.stateManager?.currentState;
                         if (state?.gameState === 'gameover' && !resolved && deathDetected) {
@@ -85,17 +105,18 @@ async function runTest() {
                     const downEvent = new KeyboardEvent('keydown', { code: 'ArrowRight', key: 'ArrowRight' });
                     window.dispatchEvent(downEvent);
                     
-                    // Timeout after 5 seconds
+                    // Timeout after 10 seconds (to account for IntermissionState)
                     setTimeout(() => {
                         const upEvent = new KeyboardEvent('keyup', { code: 'ArrowRight', key: 'ArrowRight' });
                         window.dispatchEvent(upEvent);
                         clearInterval(gameOverInterval);
+                        clearInterval(intermissionCheckInterval);
                         if (!resolved) {
                             window.removeEventListener('player:died', handleDeath);
                             window.removeEventListener('player:respawned', handleRespawn);
                             resolve({ result: 'timeout' });
                         }
-                    }, 5000);
+                    }, 10000);
                 });
             });
             

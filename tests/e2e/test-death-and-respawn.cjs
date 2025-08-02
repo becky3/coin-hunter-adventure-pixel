@@ -3,7 +3,7 @@ const testConfig = require('./utils/testConfig.cjs');
 
 async function runTest() {
     const test = new GameTestHelpers({
-        headless: false, // デバッグのため一時的にオフ
+        headless: testConfig.headless,
         verbose: true,
         timeout: 30000
     });

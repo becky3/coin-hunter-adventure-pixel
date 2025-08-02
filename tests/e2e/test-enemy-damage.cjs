@@ -217,6 +217,25 @@ async function runTest() {
         
         console.log('Player after second damage:', afterSecondDamage);
         
+        // Wait for IntermissionState to complete and return to PlayState
+        const currentStateName = await t.page.evaluate(() => {
+            const state = window.game?.stateManager?.currentState;
+            return state ? state.name : null;
+        });
+        console.log('Current state after damage:', currentStateName);
+        
+        if (currentStateName === 'intermission') {
+            console.log('Waiting for IntermissionState to complete...');
+            await t.wait(2500); // IntermissionStateの2秒 + 余裕
+            
+            // Verify we're back in PlayState
+            const stateAfterWait = await t.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                return state ? state.name : null;
+            });
+            console.log('State after wait:', stateAfterWait);
+        }
+        
         // Check lives decreased
         const livesAfterSecondDamage = await t.page.evaluate(() => {
             const state = window.game?.stateManager?.currentState;

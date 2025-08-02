@@ -482,7 +482,15 @@ class GameTestHelpers extends TestFramework {
         await this.waitForGameInitialization();
         
         if (config.skipTitle) {
-            // skip_titleの場合は直接play状態になる
+            // skip_titleの場合はIntermissionStateを経由してからplay状態になる
+            const currentState = await this.page.evaluate(() => {
+                const state = window.game?.stateManager?.currentState;
+                return state ? state.name : null;
+            });
+            if (currentState === 'intermission') {
+                console.log('IntermissionState detected, waiting for transition to PlayState...');
+                await this.wait(2500); // IntermissionStateの2秒 + 余裕
+            }
             await this.assertState('play');
             
             if (config.ensureFocus) {

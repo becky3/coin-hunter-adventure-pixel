@@ -181,11 +181,20 @@ async function runTest() {
         // Check if player died (which means they fell)
         const playerState = await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
-            const player = state.player;
+            const player = state.player || state.entityManager?.getPlayer?.();
+            if (!player) {
+                return {
+                    x: 0,
+                    y: 0,
+                    lives: state.lives || 0,
+                    playerExists: false
+                };
+            }
             return {
                 x: player.x,
                 y: player.y,
-                lives: state.lives
+                lives: state.lives || 0,
+                playerExists: true
             };
         });
         
@@ -219,12 +228,22 @@ async function runTest() {
         
         const twoTileHoleState = await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
-            const player = state.player;
+            const player = state.player || state.entityManager?.getPlayer?.();
+            if (!player) {
+                return {
+                    x: 0,
+                    y: 0,
+                    grounded: false,
+                    fell: false,
+                    playerExists: false
+                };
+            }
             return {
                 x: player.x,
                 y: player.y,
                 grounded: player.grounded,
-                fell: player.y > 170
+                fell: player.y > 170,
+                playerExists: true
             };
         });
         
@@ -255,7 +274,19 @@ async function runTest() {
         
         const edgeState = await t.page.evaluate(() => {
             const state = window.game.stateManager.currentState;
-            const player = state.player;
+            const player = state.player || state.entityManager?.getPlayer?.();
+            if (!player) {
+                return {
+                    x: 0,
+                    y: 0,
+                    grounded: false,
+                    leftEdge: 0,
+                    rightEdge: 0,
+                    centerX: 0,
+                    width: 0,
+                    playerExists: false
+                };
+            }
             const leftEdge = player.x;
             const rightEdge = player.x + player.width;
             const centerX = player.x + player.width / 2;
@@ -267,7 +298,8 @@ async function runTest() {
                 leftEdge: leftEdge,
                 rightEdge: rightEdge,
                 centerX: centerX,
-                width: player.width
+                width: player.width,
+                playerExists: true
             };
         });
         

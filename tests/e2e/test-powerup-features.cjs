@@ -19,6 +19,12 @@ async function runTest() {
         // Use quickStart for simplified initialization
         await t.quickStart('0-5');
         
+        // quickStartはIntermissionStateを経由するため、PlayStateになるまで待つ
+        await t.waitForState('play');
+        
+        // プレイヤーが作成されるまで待つ
+        await t.wait(500);
+        
         console.log('\n=== Testing PowerUp Features ===');
         
         // === PART 1: Shield PowerUp System ===
