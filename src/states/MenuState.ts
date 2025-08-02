@@ -279,8 +279,9 @@ export class MenuState extends BaseUIState {
                 
                 const selectedStage = debugSelectedStage || stageId;
                 
-                const level = selectedStage || '1-1';
+                const level = selectedStage || 'stage1-1';
                 Logger.log('MenuState', `Starting stage: ${level} (source: ${debugSelectedStage ? 'debug overlay' : selectedStage ? 'URL parameter' : 'default'}`);
+                
                 this.game.stateManager.setState(GameStates.INTERMISSION, { 
                     type: 'start',
                     level: level,

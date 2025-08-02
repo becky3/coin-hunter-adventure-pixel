@@ -106,6 +106,7 @@ export class PixelRenderer {
                 if (!cachedSprite) {
                     const pixelData = this.pixelArtRenderer.stageDependentSprites.get(sprite);
                     if (!pixelData) {
+                        Logger.error(`[PixelRenderer] Sprite '${sprite}' not found. Available sprites: ${Array.from(this.pixelArtRenderer.stageDependentSprites.keys()).join(', ')}`);
                         throw new Error(`[PixelRenderer] Sprite '${sprite}' not loaded`);
                     }
                     

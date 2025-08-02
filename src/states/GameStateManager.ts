@@ -1,9 +1,10 @@
 import { PixelRenderer } from '../rendering/PixelRenderer';
 import { GameStateKey } from '../types/GameStateTypes';
+import { Logger } from '../utils/Logger';
 
 export interface GameState {
     name?: GameStateKey;
-    enter?(params?: StateChangeParams): void;
+    enter?(params?: StateChangeParams): void | Promise<void>;
     exit?(): void;
     update?(deltaTime: number): void;
     render?(renderer: PixelRenderer): void;
@@ -58,6 +59,7 @@ export class GameStateManager {
     private maxHistory: number;
     private recording: boolean;
     private listeners: Map<string, EventListener[]>;
+    private _enteringPromise: Promise<void> | null = null;
 
     constructor() {
         this.states = new Map();
@@ -94,7 +96,15 @@ export class GameStateManager {
         this._currentState = state;
         this._currentStateName = name;
         if (this._currentState.enter) {
-            this._currentState.enter(params);
+    
+            const enterResult = this._currentState.enter(params);
+            if (enterResult && typeof enterResult === 'object' && 'then' in enterResult) {
+                this._enteringPromise = enterResult;
+                enterResult.finally(() => {
+                    this._enteringPromise = null;
+                    Logger.log(`[GameStateManager] _enteringPromise cleared for state: ${name}`);
+                });
+            }
         }
         this.recordEvent('stateChange', { from: this.previousState?.name, to: name, params });
     }
@@ -104,12 +114,20 @@ export class GameStateManager {
     }
     
     update(deltaTime: number): void {
+
+        if (this._enteringPromise) {
+            return;
+        }
         if (this._currentState && this._currentState.update) {
             this._currentState.update(deltaTime);
         }
     }
     
     render(renderer: PixelRenderer): void {
+
+        if (this._enteringPromise) {
+            return;
+        }
         if (this._currentState && this._currentState.render) {
             this._currentState.render(renderer);
         }

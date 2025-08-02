@@ -249,38 +249,33 @@ export class PlayState implements GameState {
             this.lives = params.playerState.lives;
         }
 
-        await this.preloadSprites();
+        try {
+            await this.preloadSprites();
+            Logger.log('[PlayState] preloadSprites completed');
+        } catch (error) {
+            Logger.error('[PlayState] Failed to preload sprites:', error);
+            throw error;
+        }
+        
+        if (this.game.renderer?.pixelArtRenderer) {
+            const criticalSprites = ['environment/tree1', 'environment/cloud1', 'environment/cloud2'];
+            for (const sprite of criticalSprites) {
+                if (!this.game.renderer.pixelArtRenderer.stageDependentSprites.has(sprite)) {
+                    Logger.error(`[PlayState] Critical sprite ${sprite} not found in renderer after preload`);
+                }
+            }
+        }
 
         const levelName = params.level;
         if (!levelName) {
             throw new Error('No level specified in PlayState parameters');
         }
         
-        let levelData;
-        if (params.isRespawn) {
-            Logger.log('[PlayState] Respawning - reloading current level');
-            levelData = await this.levelManager.reloadCurrentLevel();
-            if (levelData) {
-                await this.entityManager.resetToInitialState(this.levelManager);
-                
-                const spawn = this.levelManager.getPlayerSpawn();
-                this.entityManager.createPlayer(spawn.x * TILE_SIZE, spawn.y * TILE_SIZE);
-                
-                const levelLoader = this.levelManager.getLevelLoader();
-                if (levelLoader) {
-                    const goalPosition = levelLoader.getGoalPosition(levelData as unknown as StageData);
-                    if (goalPosition) {
-                        this.entityManager.createEntity({
-                            type: 'goal',
-                            x: goalPosition.x,
-                            y: goalPosition.y
-                        });
-                    }
-                }
-            }
-        } else {
-            levelData = await this.gameController.initializeLevel(levelName);
-        }
+        Logger.log(`[PlayState] isRespawn parameter: ${params.isRespawn}`);
+        Logger.log(`[PlayState] Current level in LevelManager: ${this.levelManager.getCurrentLevel()}`);
+        
+        Logger.log(`[PlayState] Initializing level: ${levelName}, isRespawn: ${params.isRespawn}`);
+        const levelData = await this.gameController.initializeLevel(levelName);
         
         if (!levelData) {
             throw new Error(`Failed to load level: ${levelName}`);
@@ -449,6 +444,12 @@ export class PlayState implements GameState {
     }
 
     exit(): void {
+        Logger.log(`[PlayState] exit() called, isHandlingDeath: ${this.isHandlingDeath}`);
+        
+        const wasHandlingDeath = this.isHandlingDeath;
+        const currentLevel = wasHandlingDeath ? this.levelManager.getCurrentLevel() : null;
+        Logger.log(`[PlayState] Current level before reset: ${currentLevel}`);
+        
         this.resetGameState();
 
         if (this.stageClearTimer) {
@@ -468,9 +469,15 @@ export class PlayState implements GameState {
         }
 
         this.entityManager.clear();
-        this.levelManager.reset();
         this.cameraController.reset();
         this.hudManager.reset();
+        
+        if (!wasHandlingDeath) {
+            Logger.log('[PlayState] Resetting level manager (not handling death)');
+            this.levelManager.reset();
+        } else {
+            Logger.log('[PlayState] Skipping level manager reset (was handling death)');
+        }
     }
 
     private setupInputListeners(): void {
@@ -602,8 +609,11 @@ export class PlayState implements GameState {
                     isSmall: player.getIsSmall()
                 } : null;
                 
-                this.game.stateManager.setState(GameStates.PLAY, { 
+                this.game.stateManager.setState(GameStates.INTERMISSION, { 
+                    type: 'start',
                     level: nextLevel,
+                    lives: this.lives,
+                    score: this.hudManager.getHUDData().score,
                     playerState 
                 });
             } else {
@@ -700,12 +710,18 @@ export class PlayState implements GameState {
             }
             
             const currentLevel = this.levelManager.getCurrentLevel();
+            const levelData = this.levelManager.getLevelData();
             const score = this.hudManager.getHUDData().score;
+            
+            if (!currentLevel || !levelData || !levelData.stageType) {
+                throw new Error('[PlayState] Cannot transition to IntermissionState: missing level data or stageType');
+            }
             
             Logger.log('[PlayState] Transitioning to IntermissionState for respawn');
             this.game.stateManager.setState(GameStates.INTERMISSION, {
                 type: 'death',
                 level: currentLevel,
+                stageType: levelData.stageType,
                 lives: this.lives,
                 score: score,
                 playerState: {
