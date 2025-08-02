@@ -58,6 +58,7 @@ private position: Vector2D;
 - ベンダー固有プロパティも適切に型定義する
 - **配列・オブジェクトアクセス時は必ず存在チェックを行う**
 - **存在しない場合はエラーをスローする（フォールバック値は使用しない）**
+- **文字列リテラルよりもconst assertionを使用した定数を推奨**
 
 #### 型安全性のベストプラクティス
 ```typescript
@@ -69,6 +70,18 @@ const extCtx = this.ctx as CanvasRenderingContext2D & {
     vendorProperty?: boolean;
 };
 extCtx.vendorProperty = false;
+
+// ✅ 良い例：const assertionを使用した型安全な定数
+export const GameStates = {
+    MENU: 'menu',
+    PLAY: 'play',
+    SOUND_TEST: 'soundtest'
+} as const;
+
+type GameStateKey = typeof GameStates[keyof typeof GameStates];
+
+// 型安全な使用
+stateManager.setState(GameStates.MENU);
 ```
 
 ### コメントのルール
@@ -114,6 +127,11 @@ export class Player {
 #### System vs Manager
 - **System**: 低レベルの処理（例：InputSystem、RenderSystem）
 - **Manager**: ライフサイクル管理（例：GameStateManager、AssetManager）
+
+### ステート管理
+- **GameStateTypes**を使用した型安全なステート管理
+- 文字列リテラルではなく定数を使用
+- IDE補完とコンパイル時チェックの活用
 
 #### EventBusパターン
 - モジュール間の疎結合な通信に使用

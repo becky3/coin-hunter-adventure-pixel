@@ -30,7 +30,9 @@ Coin Hunter Adventure Pixelは、HTML5 Canvas APIを使用したブラウザベ�
 
 #### コアシステム
 - **GameCore**: ゲーム全体の制御とシステム管理
-- **GameStateManager**: ゲーム状態の管理（メニュー、プレイ、サウンドテスト、ゲームオーバー）
+- **GameStateManager**: ゲーム状態の管理（メニュー、プレイ、サウンドテスト、テストプレイ）
+  - const assertionによる型安全なステート定義（GameStates定数）
+  - 文字列リテラルではなく定数を使用したステート管理
 - **PixelRenderer**: 8ビットスタイルの描画システム
   - 透明度制御API（setAlpha/resetAlpha）
   - Canvas要素作成・管理機能
@@ -74,6 +76,7 @@ src/
 ├── services/      # サービス（EventBus、ServiceLocator）
 ├── states/        # ゲーム状態
 ├── types/         # 型定義
+│   └── GameStateTypes.ts  # ゲームステートの型定義
 ├── ui/            # UI関連
 └── utils/         # ユーティリティ
 ```
@@ -126,6 +129,9 @@ src/
 - GameServicesインターフェースによる依存性の型定義
 - EventBusコールバックの型安全性
 - 明示的な型定義によるコード品質向上
+- GameStateTypesによるステート管理の型安全性
+  - const assertionを使用したリテラル型の活用
+  - IDE補完とコンパイル時チェックの強化
 
 ## 開発のポイント
 
