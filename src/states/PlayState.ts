@@ -1,5 +1,6 @@
 import { GameState, GameStateManager } from './GameStateManager';
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { GameStates } from '../types/GameStateTypes';
 import { InputSystem, InputEvent } from '../core/InputSystem';
 import { EntityManager } from '../managers/EntityManager';
 import { LevelManager } from '../managers/LevelManager';
@@ -42,7 +43,7 @@ declare global {
  * Game state for play mode
  */
 export class PlayState implements GameState {
-    public name = 'play';
+    public name = GameStates.PLAY;
     private game: Game;
     private eventBus: EventBus;
 
@@ -543,7 +544,7 @@ export class PlayState implements GameState {
         this.hudManager.showMessage('GAME OVER', 999999);
         
         setTimeout(() => {
-            this.game.stateManager.setState('menu');
+            this.game.stateManager.setState(GameStates.MENU);
         }, 2000);
     }
 
@@ -573,7 +574,7 @@ export class PlayState implements GameState {
                     isSmall: player.getIsSmall()
                 } : null;
                 
-                this.game.stateManager.setState('play', { 
+                this.game.stateManager.setState(GameStates.PLAY, { 
                     level: nextLevel,
                     playerState 
                 });
@@ -592,7 +593,7 @@ export class PlayState implements GameState {
         this.hudManager.showMessage('CONGRATULATIONS!\nGAME COMPLETE!', 999999);
         
         setTimeout(() => {
-            this.game.stateManager.setState('menu');
+            this.game.stateManager.setState(GameStates.MENU);
         }, 5000);
     }
 

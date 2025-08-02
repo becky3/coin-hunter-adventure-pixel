@@ -1,7 +1,8 @@
 import { PixelRenderer } from '../rendering/PixelRenderer';
+import { GameStateKey } from '../types/GameStateTypes';
 
 export interface GameState {
-    name?: string;
+    name?: GameStateKey;
     enter?(params?: StateChangeParams): void;
     exit?(): void;
     update?(deltaTime: number): void;
@@ -15,7 +16,7 @@ export interface StateChangeParams {
 export interface GameSnapshot {
     timestamp: number;
     frame: number;
-    currentState: string | undefined;
+    currentState: GameStateKey | undefined;
     player: {
         x: number;
         y: number;
@@ -49,9 +50,9 @@ type EventListener = (event: StateEvent) => void;
  * Game state for gamemanager mode
  */
 export class GameStateManager {
-    private states: Map<string, GameState>;
+    private states: Map<GameStateKey, GameState>;
     private _currentState: GameState | null;
-    private _currentStateName?: string;
+    private _currentStateName?: GameStateKey;
     private previousState: GameState | null;
     private stateHistory: GameSnapshot[];
     private maxHistory: number;
@@ -75,7 +76,7 @@ export class GameStateManager {
         this.states.set(state.name, state);
     }
     
-    changeState(name: string, params: StateChangeParams = {}): void {
+    changeState(name: GameStateKey, params: StateChangeParams = {}): void {
         if (!this.states.has(name)) {
             throw new Error(`State "${name}" not found`);
         }
@@ -98,7 +99,7 @@ export class GameStateManager {
         this.recordEvent('stateChange', { from: this.previousState?.name, to: name, params });
     }
     
-    setState(name: string, params: StateChangeParams = {}): void {
+    setState(name: GameStateKey, params: StateChangeParams = {}): void {
         this.changeState(name, params);
     }
     
@@ -238,7 +239,7 @@ export class GameStateManager {
         return this._currentState;
     }
     
-    get currentStateName(): string | undefined {
+    get currentStateName(): GameStateKey | undefined {
         return this._currentStateName;
     }
     
