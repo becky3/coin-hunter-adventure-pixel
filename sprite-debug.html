@@ -88,6 +88,8 @@
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
             background: #111;
+            width: auto;
+            height: auto;
         }
         
         .sprite-name {
@@ -131,8 +133,8 @@
     </div>
 
     <script type="module">
-        import { spriteDataMap } from './dist/assets/sprites/spriteData.js';
-        import { PaletteSystem, STAGE_PALETTES, SpritePaletteIndex } from './dist/utils/pixelArtPalette.js';
+        import { spriteDataMap } from './src/assets/sprites/spriteData.ts';
+        import { PaletteSystem, STAGE_PALETTES, SpritePaletteIndex } from './src/utils/pixelArtPalette.ts';
         
         const paletteSystem = new PaletteSystem();
         let currentStage = 'grassland';
@@ -190,9 +192,11 @@
             const ctx = canvas.getContext('2d');
             const width = spriteData.width || spriteData.data[0].length;
             const height = spriteData.height || spriteData.data.length;
+            const scale = 3; // ゲーム内と同じ3倍表示
             
-            canvas.width = width;
-            canvas.height = height;
+            canvas.width = width * scale;
+            canvas.height = height * scale;
+            ctx.imageSmoothingEnabled = false;
             
             const imageData = ctx.createImageData(width, height);
             const data = imageData.data;
@@ -227,7 +231,15 @@
                 }
             }
             
-            ctx.putImageData(imageData, 0, 0);
+            // 一時的なCanvasに元サイズで描画
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.putImageData(imageData, 0, 0);
+            
+            // メインCanvasに3倍に拡大して描画
+            ctx.drawImage(tempCanvas, 0, 0, width, height, 0, 0, width * scale, height * scale);
         }
         
         function createSpriteElement(name, spriteData, paletteIndex) {
