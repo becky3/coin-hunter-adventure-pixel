@@ -157,6 +157,13 @@
                          'jump1', 'jump2', 'jump_small1', 'jump_small2'],
                 paletteIndex: SpritePaletteIndex.CHARACTER
             },
+            'player (POWER)': {
+                sprites: ['idle', 'idle_small', 'walk1', 'walk2', 'walk3', 'walk4', 
+                         'walk_small1', 'walk_small2', 'walk_small3', 'walk_small4',
+                         'jump1', 'jump2', 'jump_small1', 'jump_small2'],
+                paletteIndex: SpritePaletteIndex.CHARACTER_POWERGLOVE,
+                spritePrefix: 'player/'
+            },
             'enemies': {
                 sprites: ['slime_idle1', 'slime_idle2', 'bird_fly1', 'bird_fly2',
                          'bat_hang', 'bat_fly1', 'bat_fly2', 
@@ -294,7 +301,9 @@
                 grid.className = 'sprites-grid';
                 
                 categoryData.sprites.forEach(spriteName => {
-                    const key = `${categoryName}/${spriteName}`;
+                    // spritePrefix がある場合はそれを使用、なければデフォルトのカテゴリ名を使用
+                    const prefix = categoryData.spritePrefix || categoryName.split(' ')[0];
+                    const key = `${prefix}/${spriteName}`;
                     const spriteData = spriteDataMap[key];
                     
                     if (spriteData) {
