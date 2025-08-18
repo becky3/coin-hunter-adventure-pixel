@@ -69,25 +69,35 @@
         
         .sprites-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 20px;
         }
         
         .sprite-item {
-            background: #000;
-            border: 1px solid #666;
-            padding: 5px;
             text-align: center;
             position: relative;
         }
         
+        .sprite-frame {
+            background: #000;
+            border: 1px solid #666;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
         .sprite-item canvas {
             display: block;
-            margin: 0 auto 5px;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
-            background: #111;
+            max-width: 100%;
+            max-height: 100%;
             width: auto;
             height: auto;
         }
@@ -97,6 +107,7 @@
             color: #aaa;
             word-break: break-all;
             line-height: 1.2;
+            margin-top: 5px;
         }
         
         .loading {
@@ -246,14 +257,19 @@
             const div = document.createElement('div');
             div.className = 'sprite-item';
             
+            const frame = document.createElement('div');
+            frame.className = 'sprite-frame';
+            
             const canvas = document.createElement('canvas');
             drawSprite(canvas, spriteData, paletteIndex);
+            
+            frame.appendChild(canvas);
             
             const label = document.createElement('div');
             label.className = 'sprite-name';
             label.textContent = name;
             
-            div.appendChild(canvas);
+            div.appendChild(frame);
             div.appendChild(label);
             
             return div;
