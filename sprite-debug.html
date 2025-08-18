@@ -162,14 +162,19 @@
                          'walk_small1', 'walk_small2', 'walk_small3', 'walk_small4',
                          'jump1', 'jump2', 'jump_small1', 'jump_small2'],
                 paletteIndex: SpritePaletteIndex.CHARACTER_POWERGLOVE,
-                spritePrefix: 'player/'
+                spritePrefix: 'player'
             },
-            'enemies': {
-                sprites: ['slime_idle1', 'slime_idle2', 'bird_fly1', 'bird_fly2',
-                         'bat_hang', 'bat_fly1', 'bat_fly2', 
+            'enemies (BASIC)': {
+                sprites: ['slime_idle1', 'slime_idle2', 'bird_fly1', 'bird_fly2'],
+                paletteIndex: SpritePaletteIndex.ENEMY_BASIC,
+                spritePrefix: 'enemies'
+            },
+            'enemies (SPECIAL)': {
+                sprites: ['bat_hang', 'bat_fly1', 'bat_fly2', 
                          'spider/spider_idle', 'spider/spider_walk1', 'spider/spider_walk2', 'spider/spider_thread',
                          'armor_knight_idle', 'armor_knight_move'],
-                paletteIndex: SpritePaletteIndex.ENEMY_BASIC
+                paletteIndex: SpritePaletteIndex.ENEMY_SPECIAL,
+                spritePrefix: 'enemies'
             },
             'items': {
                 sprites: ['coin_spin1', 'coin_spin2', 'coin_spin3', 'coin_spin4'],
@@ -302,7 +307,7 @@
                 
                 categoryData.sprites.forEach(spriteName => {
                     // spritePrefix がある場合はそれを使用、なければデフォルトのカテゴリ名を使用
-                    const prefix = categoryData.spritePrefix || categoryName.split(' ')[0];
+                    const prefix = categoryData.spritePrefix || categoryName.split(' ')[0].toLowerCase();
                     const key = `${prefix}/${spriteName}`;
                     const spriteData = spriteDataMap[key];
                     
