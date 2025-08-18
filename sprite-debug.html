@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Debug - All Patterns</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #222;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #0f0;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            padding: 15px;
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        
+        .controls label {
+            display: block;
+            margin-bottom: 5px;
+            color: #0f0;
+        }
+        
+        .controls select {
+            width: 150px;
+            padding: 5px;
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            font-family: monospace;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-right: 220px;
+        }
+        
+        .category {
+            margin-bottom: 40px;
+            background: #333;
+            padding: 15px;
+            border: 1px solid #555;
+            border-radius: 5px;
+        }
+        
+        .category h2 {
+            color: #0f0;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 5px;
+        }
+        
+        .sprites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+        }
+        
+        .sprite-item {
+            background: #000;
+            border: 1px solid #666;
+            padding: 5px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .sprite-item canvas {
+            display: block;
+            margin: 0 auto 5px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            background: #111;
+        }
+        
+        .sprite-name {
+            font-size: 10px;
+            color: #aaa;
+            word-break: break-all;
+            line-height: 1.2;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #ff0;
+            font-size: 24px;
+            padding: 50px;
+        }
+        
+        .error {
+            color: #f00;
+            background: #400;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #f00;
+        }
+    </style>
+</head>
+<body>
+    <h1>SPRITE DEBUG - ALL PATTERNS</h1>
+    
+    <div class="controls">
+        <label for="stageSelect">STAGE PALETTE:</label>
+        <select id="stageSelect">
+            <option value="grassland">GRASSLAND</option>
+            <option value="cave">CAVE</option>
+        </select>
+    </div>
+    
+    <div class="container">
+        <div id="loading" class="loading">LOADING SPRITES...</div>
+        <div id="content" style="display: none;"></div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script type="module">
+        import { spriteDataMap } from './dist/assets/sprites/spriteData.js';
+        import { PaletteSystem, STAGE_PALETTES, SpritePaletteIndex } from './dist/utils/pixelArtPalette.js';
+        
+        const paletteSystem = new PaletteSystem();
+        let currentStage = 'grassland';
+        
+        const categories = {
+            'player': {
+                sprites: ['idle', 'idle_small', 'walk1', 'walk2', 'walk3', 'walk4', 
+                         'walk_small1', 'walk_small2', 'walk_small3', 'walk_small4',
+                         'jump1', 'jump2', 'jump_small1', 'jump_small2'],
+                paletteIndex: SpritePaletteIndex.CHARACTER
+            },
+            'enemies': {
+                sprites: ['slime_idle1', 'slime_idle2', 'bird_fly1', 'bird_fly2',
+                         'bat_hang', 'bat_fly1', 'bat_fly2', 
+                         'spider/spider_idle', 'spider/spider_walk1', 'spider/spider_walk2', 'spider/spider_thread',
+                         'armor_knight_idle', 'armor_knight_move'],
+                paletteIndex: SpritePaletteIndex.ENEMY_BASIC
+            },
+            'items': {
+                sprites: ['coin_spin1', 'coin_spin2', 'coin_spin3', 'coin_spin4'],
+                paletteIndex: SpritePaletteIndex.ITEMS
+            },
+            'terrain': {
+                sprites: ['spring', 'goal_flag', 'cloud_large', 'cloud_small', 'ground_tile',
+                         'falling_floor_normal', 'falling_floor_crack1', 'falling_floor_crack2', 'falling_floor_broken'],
+                paletteIndex: SpritePaletteIndex.TERRAIN_OBJECTS
+            },
+            'environment': {
+                sprites: ['cloud1', 'cloud2', 'tree1'],
+                paletteIndex: SpritePaletteIndex.ENVIRONMENT_NATURE
+            },
+            'tiles': {
+                sprites: ['ground', 'grass_ground', 'spike'],
+                paletteIndex: SpritePaletteIndex.TILES_GROUND
+            },
+            'ui': {
+                sprites: ['heart', 'heart_empty'],
+                paletteIndex: SpritePaletteIndex.UI_ELEMENTS
+            },
+            'powerups': {
+                sprites: ['shield_stone', 'power_glove'],
+                paletteIndex: SpritePaletteIndex.POWERUPS
+            },
+            'projectiles': {
+                sprites: ['energy_bullet'],
+                paletteIndex: SpritePaletteIndex.EFFECTS
+            },
+            'effects': {
+                sprites: ['shield_left', 'shield_right'],
+                paletteIndex: SpritePaletteIndex.EFFECTS
+            }
+        };
+        
+        function drawSprite(canvas, spriteData, paletteIndex) {
+            const ctx = canvas.getContext('2d');
+            const width = spriteData.width || spriteData.data[0].length;
+            const height = spriteData.height || spriteData.data.length;
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const pixelIndex = (y * width + x) * 4;
+                    const colorIndex = spriteData.data[y][x];
+                    
+                    if (colorIndex === 0) {
+                        data[pixelIndex] = 0;
+                        data[pixelIndex + 1] = 0;
+                        data[pixelIndex + 2] = 0;
+                        data[pixelIndex + 3] = 0;
+                    } else {
+                        try {
+                            const color = paletteSystem.getColor('sprite', paletteIndex, colorIndex);
+                            if (color) {
+                                const hex = color.replace('#', '');
+                                data[pixelIndex] = parseInt(hex.substr(0, 2), 16);
+                                data[pixelIndex + 1] = parseInt(hex.substr(2, 2), 16);
+                                data[pixelIndex + 2] = parseInt(hex.substr(4, 2), 16);
+                                data[pixelIndex + 3] = 255;
+                            }
+                        } catch (e) {
+                            data[pixelIndex] = 255;
+                            data[pixelIndex + 1] = 0;
+                            data[pixelIndex + 2] = 255;
+                            data[pixelIndex + 3] = 255;
+                        }
+                    }
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+        }
+        
+        function createSpriteElement(name, spriteData, paletteIndex) {
+            const div = document.createElement('div');
+            div.className = 'sprite-item';
+            
+            const canvas = document.createElement('canvas');
+            drawSprite(canvas, spriteData, paletteIndex);
+            
+            const label = document.createElement('div');
+            label.className = 'sprite-name';
+            label.textContent = name;
+            
+            div.appendChild(canvas);
+            div.appendChild(label);
+            
+            return div;
+        }
+        
+        function renderAllSprites() {
+            const content = document.getElementById('content');
+            content.innerHTML = '';
+            
+            const stagePalette = paletteSystem.createStagePalette(STAGE_PALETTES[currentStage]);
+            paletteSystem.setStagePalette(stagePalette);
+            
+            Object.entries(categories).forEach(([categoryName, categoryData]) => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+                
+                const title = document.createElement('h2');
+                title.textContent = categoryName.toUpperCase();
+                categoryDiv.appendChild(title);
+                
+                const grid = document.createElement('div');
+                grid.className = 'sprites-grid';
+                
+                categoryData.sprites.forEach(spriteName => {
+                    const key = `${categoryName}/${spriteName}`;
+                    const spriteData = spriteDataMap[key];
+                    
+                    if (spriteData) {
+                        const element = createSpriteElement(spriteName, spriteData, categoryData.paletteIndex);
+                        grid.appendChild(element);
+                    }
+                });
+                
+                categoryDiv.appendChild(grid);
+                content.appendChild(categoryDiv);
+            });
+        }
+        
+        function init() {
+            try {
+                renderAllSprites();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                
+                document.getElementById('stageSelect').addEventListener('change', (e) => {
+                    currentStage = e.target.value;
+                    renderAllSprites();
+                });
+                
+            } catch (error) {
+                console.error('Error initializing sprite debug:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = `ERROR: ${error.message}`;
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>
