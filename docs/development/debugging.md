@@ -138,3 +138,70 @@ DebugOverlayが有効な状態で**O**キーを押すと、敵スポーンダイ
 
 1. DebugOverlayが表示されている状態でDキーを押す
 2. ステージリストが`stages.json`に正しく定義されているか確認
+
+## スプライトデバッグページ
+
+### 概要
+
+`sprite-debug.html`は、ゲーム内の全スプライトパターンとパレット情報を一覧表示するデバッグツールです。
+
+### アクセス方法
+
+開発サーバー起動後、以下のURLにアクセス：
+
+```
+http://localhost:3000/sprite-debug.html
+```
+
+### 主な機能
+
+#### 1. 全スプライトパターンの表示
+- **カテゴリ別表示**: player, enemies, items, terrain, environment, tiles, ui, powerups, projectiles, effects
+- **3倍拡大表示**: ゲーム内と同じスケールで表示
+- **固定サイズ枠**: 90x90pxの枠内に収めて見やすく配置
+
+#### 2. ステージパレット切り替え
+- 右上のドロップダウンで以下のパレットを切り替え可能：
+  - GRASSLAND（草原ステージ）
+  - CAVE（洞窟ステージ）
+
+#### 3. パレット情報の表示
+- **パレットインデックス**: 各スプライトの下に「P0」「P1」などの形式で表示
+- **カラーパレット**: 使用している4色をカラーボックスで可視化
+- **詳細情報**: カラーボックスにホバーするとインデックスとカラーコードを表示
+
+#### 4. 特殊な表示
+- **PLAYER (POWER)**: パワーアップ状態のプレイヤーを別パレットで表示
+- **敵キャラクター分類**:
+  - enemies/slime, enemies/bird: ENEMY_BASIC パレット
+  - enemies/bat, enemies/spider, enemies/armor_knight: ENEMY_SPECIAL パレット
+
+### 技術的な実装
+
+#### パレット情報の取得
+実際のエンティティクラスから直接パレット情報を取得：
+
+```javascript
+// ResourceLoaderを初期化
+const resourceLoader = ResourceLoader.getInstance();
+await resourceLoader.initialize();
+await resourceLoader.preloadEntityConfigs();
+
+// エンティティインスタンスからパレット取得
+const player = new Player(0, 0);
+const paletteIndex = player.getSpritePaletteIndex();
+```
+
+#### エンティティクラスが存在しないスプライト
+以下のスプライトはエンティティクラスが存在しないため、直接パレットインデックスを指定：
+- **environment**: 背景装飾用（cloud, tree）
+- **tiles**: タイル描画用（ground, spike）
+- **ui**: UI要素（heart）
+- **effects**: エフェクト表示用（shield）
+
+### 使用例
+
+1. 新しいスプライトを追加した際の色確認
+2. ステージごとのパレット変化の確認
+3. パレット設定のデバッグ
+4. スプライトアセットの一覧確認
