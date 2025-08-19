@@ -189,7 +189,7 @@ export abstract class Entity {
      * Returns the sprite palette index for this entity
      * Must be implemented in derived classes
      */
-    protected abstract getSpritePaletteIndex(): number;
+    public abstract getSpritePaletteIndex(): number;
 
 
     renderDebug(renderer: PixelRenderer): void {

@@ -176,6 +176,42 @@ npm run dev
 - 座標は整数値に丸める
 - PixelRenderer経由で描画
 
+## パレット管理
+
+### エンティティのパレット定義
+各エンティティクラスは`getSpritePaletteIndex()`メソッドでパレットインデックスを返す必要があります：
+
+```typescript
+// Entity.tsで抽象メソッドとして定義
+public abstract getSpritePaletteIndex(): number;
+
+// 各エンティティクラスで実装
+public override getSpritePaletteIndex(): number {
+    return SpritePaletteIndex.CHARACTER;
+}
+```
+
+### パレット情報の取得方法
+エンティティからパレット情報を取得する際は、ResourceLoaderの初期化が必要：
+
+```typescript
+// ResourceLoaderを初期化
+const resourceLoader = ResourceLoader.getInstance();
+await resourceLoader.initialize();
+await resourceLoader.preloadEntityConfigs();
+
+// エンティティインスタンスからパレット取得
+const entity = new Player(0, 0);
+const paletteIndex = entity.getSpritePaletteIndex();
+```
+
+### デバッグツール
+`sprite-debug.html`で全スプライトとパレット情報を確認可能：
+- URL: `http://localhost:3000/sprite-debug.html`
+- 全スプライトパターンの表示
+- ステージごとのパレット切り替え
+- パレットインデックスと色の可視化
+
 ## パフォーマンス
 - 不要な再描画を避ける
 - オブジェクトプールを使用

@@ -128,7 +128,7 @@ export class Coin extends Entity implements EntityInitializer {
     }
     
     
-    protected override getSpritePaletteIndex(): number {
+    public override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.ITEMS;
     }
 }

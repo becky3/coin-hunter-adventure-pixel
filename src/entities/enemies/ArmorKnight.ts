@@ -231,7 +231,7 @@ export class ArmorKnight extends Enemy implements EntityInitializer {
     }
     
     
-    protected override getSpritePaletteIndex(): number {
+    public override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.ENEMY_SPECIAL;
     }
 }

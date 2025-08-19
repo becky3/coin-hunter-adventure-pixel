@@ -147,7 +147,7 @@ export abstract class PowerUpItem extends Entity implements EntityInitializer {
     /**
      * Returns the sprite palette index for power-up items
      */
-    protected getSpritePaletteIndex(): number {
+    public getSpritePaletteIndex(): number {
         return SpritePaletteIndex.POWERUPS;
     }
 }

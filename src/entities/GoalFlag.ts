@@ -92,7 +92,7 @@ export class GoalFlag extends Entity implements EntityInitializer {
     }
     
     
-    protected override getSpritePaletteIndex(): number {
+    public override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.TERRAIN_OBJECTS;
     }
 }

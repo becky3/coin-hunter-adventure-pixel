@@ -68,7 +68,7 @@ export class ShieldStone extends PowerUpItem {
     }
     
     
-    protected override getSpritePaletteIndex(): number {
+    public override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.POWERUPS;
     }
 }
