@@ -148,7 +148,7 @@ export class EnergyBullet extends Entity implements EntityInitializer {
     /**
      * Returns the sprite palette index for energy bullet
      */
-    protected override getSpritePaletteIndex(): number {
+    public override getSpritePaletteIndex(): number {
         return SpritePaletteIndex.EFFECTS;
     }
 }

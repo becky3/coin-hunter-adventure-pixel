@@ -110,6 +110,44 @@
             margin-top: 5px;
         }
         
+        .palette-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 3px;
+            font-size: 9px;
+            color: #888;
+        }
+        
+        .palette-colors {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .palette-color {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #444;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .palette-color:hover::after {
+            content: attr(data-index);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #0f0;
+            padding: 2px 4px;
+            font-size: 8px;
+            white-space: nowrap;
+            border: 1px solid #0f0;
+            z-index: 1000;
+        }
+        
         .loading {
             text-align: center;
             color: #ff0;
@@ -146,70 +184,125 @@
     <script type="module">
         import { spriteDataMap } from './src/assets/sprites/spriteData.ts';
         import { PaletteSystem, STAGE_PALETTES, SpritePaletteIndex } from './src/utils/pixelArtPalette.ts';
+        import { ResourceLoader } from './src/config/ResourceLoader.ts';
+        
+        // エンティティクラスをインポート
+        import { Player } from './src/entities/Player.ts';
+        import { Slime } from './src/entities/enemies/Slime.ts';
+        import { Bat } from './src/entities/enemies/Bat.ts';
+        import { Spider } from './src/entities/enemies/Spider.ts';
+        import { ArmorKnight } from './src/entities/enemies/ArmorKnight.ts';
+        import { Coin } from './src/entities/Coin.ts';
+        import { Spring } from './src/entities/Spring.ts';
+        import { GoalFlag } from './src/entities/GoalFlag.ts';
+        import { FallingFloor } from './src/entities/FallingFloor.ts';
+        import { ShieldStone } from './src/entities/powerups/ShieldStone.ts';
+        import { PowerGlove } from './src/entities/powerups/PowerGlove.ts';
+        import { EnergyBullet } from './src/entities/projectiles/EnergyBullet.ts';
         
         const paletteSystem = new PaletteSystem();
         let currentStage = 'grassland';
         
-        const categories = {
-            'player': {
-                sprites: ['idle', 'idle_small', 'walk1', 'walk2', 'walk3', 'walk4', 
-                         'walk_small1', 'walk_small2', 'walk_small3', 'walk_small4',
-                         'jump1', 'jump2', 'jump_small1', 'jump_small2'],
-                paletteIndex: SpritePaletteIndex.CHARACTER
-            },
-            'player (POWER)': {
-                sprites: ['idle', 'idle_small', 'walk1', 'walk2', 'walk3', 'walk4', 
-                         'walk_small1', 'walk_small2', 'walk_small3', 'walk_small4',
-                         'jump1', 'jump2', 'jump_small1', 'jump_small2'],
-                paletteIndex: SpritePaletteIndex.CHARACTER_POWERGLOVE,
-                spritePrefix: 'player'
-            },
-            'enemies (BASIC)': {
-                sprites: ['slime_idle1', 'slime_idle2', 'bird_fly1', 'bird_fly2'],
-                paletteIndex: SpritePaletteIndex.ENEMY_BASIC,
-                spritePrefix: 'enemies'
-            },
-            'enemies (SPECIAL)': {
-                sprites: ['bat_hang', 'bat_fly1', 'bat_fly2', 
-                         'spider/spider_idle', 'spider/spider_walk1', 'spider/spider_walk2', 'spider/spider_thread',
-                         'armor_knight_idle', 'armor_knight_move'],
-                paletteIndex: SpritePaletteIndex.ENEMY_SPECIAL,
-                spritePrefix: 'enemies'
-            },
-            'items': {
-                sprites: ['coin_spin1', 'coin_spin2', 'coin_spin3', 'coin_spin4'],
-                paletteIndex: SpritePaletteIndex.ITEMS
-            },
-            'terrain': {
-                sprites: ['spring', 'goal_flag', 'cloud_large', 'cloud_small', 'ground_tile',
-                         'falling_floor_normal', 'falling_floor_crack1', 'falling_floor_crack2', 'falling_floor_broken'],
-                paletteIndex: SpritePaletteIndex.TERRAIN_OBJECTS
-            },
-            'environment': {
-                sprites: ['cloud1', 'cloud2', 'tree1'],
-                paletteIndex: SpritePaletteIndex.ENVIRONMENT_NATURE
-            },
-            'tiles': {
-                sprites: ['ground', 'grass_ground', 'spike'],
-                paletteIndex: SpritePaletteIndex.TILES_GROUND
-            },
-            'ui': {
-                sprites: ['heart', 'heart_empty'],
-                paletteIndex: SpritePaletteIndex.UI_ELEMENTS
-            },
-            'powerups': {
-                sprites: ['shield_stone', 'power_glove'],
-                paletteIndex: SpritePaletteIndex.POWERUPS
-            },
-            'projectiles': {
-                sprites: ['energy_bullet'],
-                paletteIndex: SpritePaletteIndex.EFFECTS
-            },
-            'effects': {
-                sprites: ['shield_left', 'shield_right'],
-                paletteIndex: SpritePaletteIndex.EFFECTS
-            }
-        };
+        // ResourceLoaderを初期化
+        async function initializeAndRender() {
+            const resourceLoader = ResourceLoader.getInstance();
+            await resourceLoader.initialize();
+            await resourceLoader.preloadEntityConfigs();
+            
+            // エンティティインスタンスを作成してパレット情報を取得
+            const tempPlayer = new Player(0, 0);
+            const tempPlayerPower = new Player(0, 0);
+            tempPlayerPower.hasPowerGlove = true;
+            const tempSlime = new Slime(0, 0);
+            const tempBat = new Bat(0, 0);
+            const tempSpider = new Spider(0, 0);
+            const tempArmorKnight = new ArmorKnight(0, 0);
+            const tempCoin = new Coin(0, 0);
+            const tempSpring = new Spring(0, 0);
+            const tempGoalFlag = new GoalFlag(0, 0);
+            const tempFallingFloor = new FallingFloor(0, 0);
+            const tempShieldStone = new ShieldStone(0, 0);
+            const tempPowerGlove = new PowerGlove(0, 0);
+            const tempEnergyBullet = new EnergyBullet(0, 0, { x: 1, y: 0 }, null);
+            
+            window.categories = {
+                'player': {
+                    sprites: ['idle', 'idle_small', 'walk1', 'walk2', 'walk3', 'walk4', 
+                             'walk_small1', 'walk_small2', 'walk_small3', 'walk_small4',
+                             'jump1', 'jump2', 'jump_small1', 'jump_small2'],
+                    paletteIndex: tempPlayer.getSpritePaletteIndex()
+                },
+                'player (POWER)': {
+                    sprites: ['idle', 'idle_small', 'walk1', 'walk2', 'walk3', 'walk4', 
+                             'walk_small1', 'walk_small2', 'walk_small3', 'walk_small4',
+                             'jump1', 'jump2', 'jump_small1', 'jump_small2'],
+                    paletteIndex: tempPlayerPower.getSpritePaletteIndex(),
+                    spritePrefix: 'player'
+                },
+                'enemies/slime': {
+                    sprites: ['slime_idle1', 'slime_idle2'],
+                    paletteIndex: tempSlime.getSpritePaletteIndex(),
+                    spritePrefix: 'enemies'
+                },
+                'enemies/bat': {
+                    sprites: ['bat_hang', 'bat_fly1', 'bat_fly2'],
+                    paletteIndex: tempBat.getSpritePaletteIndex(),
+                    spritePrefix: 'enemies'
+                },
+                'enemies/spider': {
+                    sprites: ['spider/spider_idle', 'spider/spider_walk1', 'spider/spider_walk2', 'spider/spider_thread'],
+                    paletteIndex: tempSpider.getSpritePaletteIndex(),
+                    spritePrefix: 'enemies'
+                },
+                'enemies/armor_knight': {
+                    sprites: ['armor_knight_idle', 'armor_knight_move'],
+                    paletteIndex: tempArmorKnight.getSpritePaletteIndex(),
+                    spritePrefix: 'enemies'
+                },
+                'enemies/bird': {
+                    sprites: ['bird_fly1', 'bird_fly2'],
+                    paletteIndex: SpritePaletteIndex.ENEMY_BASIC,
+                    spritePrefix: 'enemies'
+                },
+                'items': {
+                    sprites: ['coin_spin1', 'coin_spin2', 'coin_spin3', 'coin_spin4'],
+                    paletteIndex: tempCoin.getSpritePaletteIndex()
+                },
+                'terrain': {
+                    sprites: ['spring', 'goal_flag', 'cloud_large', 'cloud_small', 'ground_tile',
+                             'falling_floor_normal', 'falling_floor_crack1', 'falling_floor_crack2', 'falling_floor_broken'],
+                    paletteIndex: tempSpring.getSpritePaletteIndex()
+                },
+                'environment': {
+                    sprites: ['cloud1', 'cloud2', 'tree1'],
+                    paletteIndex: SpritePaletteIndex.ENVIRONMENT_NATURE
+                },
+                'tiles': {
+                    sprites: ['ground', 'grass_ground', 'spike'],
+                    paletteIndex: SpritePaletteIndex.TILES_GROUND
+                },
+                'ui': {
+                    sprites: ['heart', 'heart_empty'],
+                    paletteIndex: SpritePaletteIndex.UI_ELEMENTS
+                },
+                'powerups': {
+                    sprites: ['shield_stone', 'power_glove'],
+                    paletteIndex: tempShieldStone.getSpritePaletteIndex()
+                },
+                'projectiles': {
+                    sprites: ['energy_bullet'],
+                    paletteIndex: tempEnergyBullet.getSpritePaletteIndex()
+                },
+                'effects': {
+                    sprites: ['shield_left', 'shield_right'],
+                    paletteIndex: SpritePaletteIndex.EFFECTS
+                }
+            };
+            
+            renderAllSprites();
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
         
         function drawSprite(canvas, spriteData, paletteIndex) {
             const ctx = canvas.getContext('2d');
@@ -284,6 +377,39 @@
             div.appendChild(frame);
             div.appendChild(label);
             
+            // パレット情報を追加
+            const paletteInfo = document.createElement('div');
+            paletteInfo.className = 'palette-info';
+            
+            const paletteIndexLabel = document.createElement('span');
+            paletteIndexLabel.textContent = `P${paletteIndex}:`;
+            paletteInfo.appendChild(paletteIndexLabel);
+            
+            const paletteColors = document.createElement('div');
+            paletteColors.className = 'palette-colors';
+            
+            // スプライトパレットの色を表示（4色）
+            for (let i = 0; i < 4; i++) {
+                try {
+                    const color = paletteSystem.getColor('sprite', paletteIndex, i);
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'palette-color';
+                    colorDiv.style.backgroundColor = color || 'transparent';
+                    colorDiv.setAttribute('data-index', `${i}: ${color || 'transparent'}`);
+                    paletteColors.appendChild(colorDiv);
+                } catch (e) {
+                    // エラーの場合は透明
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'palette-color';
+                    colorDiv.style.backgroundColor = 'transparent';
+                    colorDiv.setAttribute('data-index', `${i}: error`);
+                    paletteColors.appendChild(colorDiv);
+                }
+            }
+            
+            paletteInfo.appendChild(paletteColors);
+            div.appendChild(paletteInfo);
+            
             return div;
         }
         
@@ -294,7 +420,7 @@
             const stagePalette = paletteSystem.createStagePalette(STAGE_PALETTES[currentStage]);
             paletteSystem.setStagePalette(stagePalette);
             
-            Object.entries(categories).forEach(([categoryName, categoryData]) => {
+            Object.entries(window.categories).forEach(([categoryName, categoryData]) => {
                 const categoryDiv = document.createElement('div');
                 categoryDiv.className = 'category';
                 
@@ -324,14 +450,17 @@
         
         function init() {
             try {
-                renderAllSprites();
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
-                
                 document.getElementById('stageSelect').addEventListener('change', (e) => {
                     currentStage = e.target.value;
                     renderAllSprites();
+                });
+                
+                // ResourceLoaderを初期化してからレンダリング
+                initializeAndRender().catch(error => {
+                    console.error('Error initializing sprite debug:', error);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('error').textContent = `ERROR: ${error.message}`;
                 });
                 
             } catch (error) {

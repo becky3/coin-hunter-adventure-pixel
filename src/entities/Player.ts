@@ -720,7 +720,7 @@ export class Player extends Entity {
     }
     
     
-    protected override getSpritePaletteIndex(): number {
+    public override getSpritePaletteIndex(): number {
         return this.hasPowerGlove ? SpritePaletteIndex.CHARACTER_POWERGLOVE : SpritePaletteIndex.CHARACTER;
     }
 }
