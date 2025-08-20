@@ -273,9 +273,15 @@
                              'falling_floor_normal', 'falling_floor_crack1', 'falling_floor_crack2', 'falling_floor_broken'],
                     paletteIndex: tempSpring.getSpritePaletteIndex()
                 },
-                'environment': {
-                    sprites: ['cloud1', 'cloud2', 'tree1'],
-                    paletteIndex: SpritePaletteIndex.ENVIRONMENT_NATURE
+                'environment/clouds': {
+                    sprites: ['cloud1', 'cloud2'],
+                    paletteIndex: SpritePaletteIndex.ENVIRONMENT_SKY,
+                    spritePrefix: 'environment'
+                },
+                'environment/nature': {
+                    sprites: ['tree1'],
+                    paletteIndex: SpritePaletteIndex.ENVIRONMENT_NATURE,
+                    spritePrefix: 'environment'
                 },
                 'tiles': {
                     sprites: ['ground', 'grass_ground', 'spike'],

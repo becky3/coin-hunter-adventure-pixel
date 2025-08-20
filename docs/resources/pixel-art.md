@@ -42,14 +42,17 @@ parent: リソース
 | カテゴリ | パレット名 | 用途 |
 |----------|-----------|------|
 | player | character | プレイヤーキャラクター（通常） |
-| player | characterPowerGlove | パワーグローブ取得時のプレイヤー |
+| player | characterPowerGlove | パワーグローブ取得時のプレイヤー（服が赤色に変化） |
 | enemies | enemy | 敵キャラクター |
 | items | items | コイン等のアイテム |
-| tiles | grassland | 地形タイル |
+| tiles | terrain | 地形タイル |
+| terrain | terrainObjects | 地形オブジェクト（ゴール旗等） |
 | environment（雲） | sky | 空・雲の要素 |
-| environment（木） | nature | 自然要素 |
+| environment（木） | nature | 自然要素（木等） |
 | ui | ui | UI要素 |
-| effects | shield | シールドエフェクト |
+| effects | effects | エフェクト全般 |
+| powerups | powerups | パワーアップアイテム |
+| projectiles | projectiles | 発射物（エネルギー弾等） |
 | debug | debug | デバッグ表示 |
 | performance | performance | パフォーマンスモニター |
 

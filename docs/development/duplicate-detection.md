@@ -53,6 +53,22 @@ npm run jscpd:check
 - **minTokens: 70** - 単純な繰り返しではなく、ロジックの重複を検出
 - **pixelFont.ts除外** - フォント定義は規則的なパターンのため除外
 
+### 重複除外の方法
+
+意図的な重複（データ定義等）がある場合は、以下の方法で除外できます：
+
+```typescript
+/* eslint-disable capitalized-comments -- jscpd directive requires lowercase */
+/* jscpd:ignore-start */
+const STAGE_PALETTES = {
+  // パレット定義...
+};
+/* jscpd:ignore-end */
+/* eslint-enable capitalized-comments */
+```
+
+**注意**: jscpdディレクティブは小文字で記述する必要があるため、ESLintの`capitalized-comments`ルールを一時的に無効化します。
+
 ## 運用方針
 
 ### 検出時の対応
@@ -68,6 +84,7 @@ npm run jscpd:check
 3. **意図的な重複**
    - パフォーマンスやモジュール独立性のための意図的な重複は許容
    - コメントで理由を明記
+   - データ定義（パレット等）の重複は`/* jscpd:ignore-start */`で除外可能
 
 ### CI/CDへの統合
 
