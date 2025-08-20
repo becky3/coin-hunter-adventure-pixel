@@ -130,6 +130,8 @@ class PaletteSystem {
     }
 }
 
+/* eslint-disable capitalized-comments -- jscpd directive requires lowercase */
+/* jscpd:ignore-start */
 const STAGE_PALETTES: Record<string, PaletteConfig> = {
     grassland: {
         background: [
@@ -169,7 +171,7 @@ const STAGE_PALETTES: Record<string, PaletteConfig> = {
             [0, 0x52, 0x53, 0x51],
             [0, 0x20, 0x70, 0x01],
             [0, 0x30, 0x31, 0x32],
-            [0, 0x01, 0x02, 0x10],
+            [0, 0x50, 0x51, 0x52],
             [0, 0x50, 0x51, 0x61],
             [0, 0x12, 0x13, 0x03],
             [0, 0x41, 0x03, 0x00],
@@ -179,6 +181,8 @@ const STAGE_PALETTES: Record<string, PaletteConfig> = {
         ]
     }
 } as const;
+/* jscpd:ignore-end */
+/* eslint-enable capitalized-comments */
 
 const paletteSystem = new PaletteSystem();
 
